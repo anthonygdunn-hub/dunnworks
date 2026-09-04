@@ -64,7 +64,7 @@ If DNS stays at Wix, the A records work but AAAA records cannot be added, exactl
 
 ## Changing the look
 
-Everything is set by the tokens at the top of assets/css/styles.css. The accent is `--accent: #f4622e`. Change that one value and the buttons, rules, counters and dot field all follow.
+Everything is set by the tokens at the top of assets/css/styles.css. The accent is `--accent: #7000ff`. Change that one value and the buttons, rules, counters and dot field all follow.
 
 ## Wording
 
