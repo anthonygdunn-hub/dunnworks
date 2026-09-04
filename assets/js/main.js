@@ -98,7 +98,7 @@
           "Budget: " + (data.get("budget") || "") + "\n\n" +
           (data.get("message") || "");
         window.location.href =
-          "mailto:hello@dunnworks.io?subject=" +
+          "mailto:info@dunnworks.io?subject=" +
           encodeURIComponent("Website enquiry from " + (data.get("name") || "the website")) +
           "&body=" + encodeURIComponent(body);
         if (status) {
@@ -127,7 +127,7 @@
         .catch(function () {
           if (status) {
             status.className = "form-status bad";
-            status.textContent = "That did not send. Email hello@dunnworks.io instead and I will pick it up.";
+            status.textContent = "That did not send. Email info@dunnworks.io instead and I will pick it up.";
           }
         })
         .finally(function () {
