@@ -17,7 +17,7 @@ robots.txt
 sitemap.xml
 assets/css/styles.css
 assets/js/main.js
-assets/img/mark.svg, favicon.svg
+assets/img/mark.svg, favicon.svg, shot-*.webp (project screenshots)
 ```
 
 ## Before it goes live
@@ -28,8 +28,8 @@ Work through this list. Everything marked placeholder is visible on the page, so
 
 1. Background paragraph. about.html has a placeholder note asking for 2 or 3 lines on your background. Write it and delete the note.
 2. Prices. £750, £1,450, £950 and £35 a month are starting points, and the extras run from £150 to £600. Change any of them, then check the same figures on index.html, services.html and contact.html.
-3. Claims to confirm. Four numbers appear as counters: 4 sites live, 2 weeks typical build, 1 working day reply, £0 monthly platform fee. The comparison table on the home page quotes £17 to £45 for platform fees and 2 to 5 MB page weight. Confirm you are happy standing behind each one.
-4. Screenshots. The four project cards use a drawn browser frame rather than a picture. Real screenshots would be stronger. Take one of each site at 1600 by 1000, save as WebP in assets/img, and replace the `<div class="mock">` block with an `<img>`.
+3. Claims to confirm. Four numbers appear as counters: 30+ sites live, 2 weeks typical build, 1 working day reply, £0 monthly platform fee. The comparison table on the home page quotes £17 to £45 for platform fees and 2 to 5 MB page weight. Confirm you are happy standing behind each one.
+4. Screenshots. The four project cards now show real home page screenshots from assets/img. Retake any of them when a site changes: capture the top of the home page, crop to roughly 2 by 1, save as WebP under 20 KB, and keep the same file name.
 5. Web3Forms key. In contact.html, replace `REPLACE-WITH-YOUR-WEB3FORMS-ACCESS-KEY` with the key from web3forms.com. Until you do, the form opens the visitor's email app instead, so the page still works.
 
 ## Putting it live on GitHub Pages
@@ -60,7 +60,7 @@ If DNS stays at Wix, the A records work but AAAA records cannot be added, exactl
 1. Add the site to Google Search Console and submit https://dunnworks.io/sitemap.xml.
 2. Create a Google Business Profile for the business and link it to the site.
 3. Send the domain through pagespeed.web.dev and keep the result.
-4. Add real screenshots as soon as you have them.
+4. Refresh the project screenshots whenever one of those sites changes.
 
 ## Changing the look
 
