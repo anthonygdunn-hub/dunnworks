@@ -22,15 +22,15 @@ assets/img/mark.svg, favicon.svg
 
 ## Before it goes live
 
+Email is info@dunnworks.io, which runs through Wix and Gmail. Phone is +44 (0)7377 599 023, shown on the contact page and in every footer.
+
 Work through this list. Everything marked placeholder is visible on the page, so nothing gets published by accident.
 
-1. Email address. The site uses hello@dunnworks.io in 5 places per page plus the JavaScript fallback. Set that mailbox up, or search and replace the address.
-2. Phone number. contact.html has a placeholder row in the details list. Replace it or delete the row.
-3. Background paragraph. about.html has a placeholder note asking for 2 or 3 lines on your background. Write it and delete the note.
-4. Prices. £750, £1,450, £950 and £35 a month are starting points, and the extras run from £150 to £600. Change any of them, then check the same figures on index.html, services.html and contact.html.
-5. Claims to confirm. Four numbers appear as counters: 4 sites live, 2 weeks typical build, 1 working day reply, £0 monthly platform fee. The comparison table on the home page quotes £17 to £45 for platform fees and 2 to 5 MB page weight. Confirm you are happy standing behind each one.
-6. Screenshots. The four project cards use a drawn browser frame rather than a picture. Real screenshots would be stronger. Take one of each site at 1600 by 1000, save as WebP in assets/img, and replace the `<div class="mock">` block with an `<img>`.
-7. Web3Forms key. In contact.html, replace `REPLACE-WITH-YOUR-WEB3FORMS-ACCESS-KEY` with the key from web3forms.com. Until you do, the form opens the visitor's email app instead, so the page still works.
+1. Background paragraph. about.html has a placeholder note asking for 2 or 3 lines on your background. Write it and delete the note.
+2. Prices. £750, £1,450, £950 and £35 a month are starting points, and the extras run from £150 to £600. Change any of them, then check the same figures on index.html, services.html and contact.html.
+3. Claims to confirm. Four numbers appear as counters: 4 sites live, 2 weeks typical build, 1 working day reply, £0 monthly platform fee. The comparison table on the home page quotes £17 to £45 for platform fees and 2 to 5 MB page weight. Confirm you are happy standing behind each one.
+4. Screenshots. The four project cards use a drawn browser frame rather than a picture. Real screenshots would be stronger. Take one of each site at 1600 by 1000, save as WebP in assets/img, and replace the `<div class="mock">` block with an `<img>`.
+5. Web3Forms key. In contact.html, replace `REPLACE-WITH-YOUR-WEB3FORMS-ACCESS-KEY` with the key from web3forms.com. Until you do, the form opens the visitor's email app instead, so the page still works.
 
 ## Putting it live on GitHub Pages
 
