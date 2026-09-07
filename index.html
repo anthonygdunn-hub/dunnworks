@@ -29,6 +29,7 @@
   "serviceType": "Website design and development"
 }
 </script>
+<script>(function(){try{var t=localStorage.getItem("dw-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -46,7 +47,6 @@
       <img class="brand-mark" src="assets/img/mark.svg" alt="" width="30" height="30">
       <span><b>Dunn</b><i>works</i></span>
     </a>
-    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
     <nav class="nav" id="nav" aria-label="Main">
       <a href="index.html" aria-current="page">Home</a>
       <a href="services.html">Services</a>
@@ -54,6 +54,14 @@
       <a href="about.html">About</a>
       <a class="btn" href="contact.html">Get a quote</a>
     </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Switch to the light theme">
+        <span class="sw" aria-hidden="true"></span>
+        <span class="lbl lbl-dark">Dark</span>
+        <span class="lbl lbl-light">Light</span>
+      </button>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    </div>
   </div>
 </header>
 
