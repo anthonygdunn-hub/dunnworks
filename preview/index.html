@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client previews | Dunnworks</title>
+<meta name="description" content="Work in progress at Dunnworks. Each preview is a site being built or rebuilt for a client, and each one opens with a passphrase.">
+<!-- Deliberately not indexed. It is linked from the footer so a client can find
+     it, but there is no reason for Google to list work in progress. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0b0a0a">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  /* Only what this page adds. Everything else comes from styles.css. */
+  .pv-card { display: flex; flex-direction: column; }
+  .pv-card .pv-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+  .pv-card h3 { margin-bottom: 10px; }
+  .pv-card .pv-meta { margin-top: 20px; display: grid; gap: 8px; }
+  .pv-card .pv-meta div { display: flex; justify-content: space-between; gap: 16px; font-size: 14px; }
+  .pv-card .pv-meta dt, .pv-card .pv-meta .k { color: var(--muted-2); font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .pv-card .pv-meta .v { color: var(--muted); text-align: right; }
+  .pv-card .btn-row { margin-top: 26px; }
+
+  .pv-state {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 6px 10px; border-radius: var(--radius); border: 1px solid var(--line); color: var(--muted);
+    white-space: nowrap;
+  }
+  .pv-state.is-open { color: var(--accent-2); border-color: var(--accent); background: var(--accent-dim); }
+  .pv-state.is-soon { opacity: 0.75; }
+
+  .pv-lock { display: inline-flex; align-items: center; gap: 8px; }
+  .pv-lock svg { width: 14px; height: 14px; flex: none; }
+
+  .pv-empty { border: 1px dashed var(--line-2); border-radius: var(--radius); padding: 34px 30px; text-align: center; color: var(--muted); }
+
+  .pv-how { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 34px; counter-reset: pv; }
+  .pv-how > div { counter-increment: pv; }
+  .pv-how > div::before {
+    content: counter(pv, decimal-leading-zero);
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; color: var(--accent-2);
+    display: block; margin-bottom: 14px;
+  }
+  .pv-how h3 { font-size: 18px; margin-bottom: 10px; }
+  .pv-how p { color: var(--muted); font-size: 15.5px; }
+  @media (max-width: 800px) { .pv-how { grid-template-columns: minmax(0, 1fr); } }
+</style>
+<script>(function(){try{var t=localStorage.getItem("dw-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <img class="brand-mark" src="../assets/img/mark.svg" alt="" width="30" height="30">
+      <span><b>Dunn</b><i>works</i></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="../index.html">Home</a>
+      <a href="../services.html">Services</a>
+      <a href="../work.html">Work</a>
+      <a href="../about.html">About</a>
+      <a class="btn" href="../contact.html">Get a quote</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Switch to the light theme">
+        <span class="sw" aria-hidden="true"></span>
+        <span class="lbl lbl-dark">Dark</span>
+        <span class="lbl lbl-light">Light</span>
+      </button>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="page-hero">
+    <div class="dots" aria-hidden="true"></div>
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>Client previews</p>
+      <h1 data-reveal data-reveal-delay="60">Work in progress, behind a passphrase</h1>
+      <p class="lead" data-reveal data-reveal-delay="120">
+        Every site here is being built or rebuilt for a client and is not live yet. Each one opens with a
+        passphrase sent to that client directly. If you are expecting one and it is not working, email
+        <a href="mailto:info@dunnworks.io">info@dunnworks.io</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+
+      <div class="grid cols-2">
+
+        <!-- ================= ONE PROJECT. Copy this whole <article> to add another. =================
+             state classes:  is-open   ready for the client to look at
+                             is-soon   listed but not built yet, link removed
+             To hide a project entirely, delete its <article> or wrap it in an HTML comment.
+        ============================================================================================ -->
+        <article class="card pv-card" data-reveal>
+          <div class="pv-top">
+            <span class="num" style="margin:0">Preview 01</span>
+            <span class="pv-state is-open">Ready</span>
+          </div>
+          <h3>Ashland Carpentry Services</h3>
+          <p>
+            A carpenter and joiner in Fleet, trading since 2016, with a nine page platform site that showed
+            almost none of the work. Rebuilt as 46 pages with location pages, guides and two working tools.
+          </p>
+          <div class="pv-meta">
+            <div><span class="k">Job</span><span class="v">Rebuild</span></div>
+            <div><span class="k">Pages</span><span class="v">46</span></div>
+            <div><span class="k">Sector</span><span class="v">Carpentry and joinery</span></div>
+            <div><span class="k">Report</span><span class="v">7 September 2026</span></div>
+            <div><span class="k">Updated</span><span class="v">7 September 2026</span></div>
+          </div>
+          <div class="btn-row">
+            <a class="btn" href="ashland/">
+              <span class="pv-lock">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+                </svg>
+                Open preview
+              </span>
+            </a>
+            <a class="btn btn--ghost" href="ashland/report/">
+              <span class="pv-lock">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+                </svg>
+                Read the report
+              </span>
+            </a>
+          </div>
+        </article>
+        <!-- ============================== END OF ONE PROJECT ============================== -->
+
+        <!-- Placeholder card. Delete it once there is a second real preview. -->
+        <article class="card pv-card" data-reveal data-reveal-delay="80" style="border-style:dashed">
+          <div class="pv-top">
+            <span class="num" style="margin:0">Preview 02</span>
+            <span class="pv-state is-soon">In build</span>
+          </div>
+          <h3>Next project</h3>
+          <p>
+            The next preview appears here as soon as there is something worth looking at. Copy the block above
+            in <code>preview/index.html</code>, change the name and the folder, and it is listed.
+          </p>
+          <div class="pv-meta">
+            <div><span class="k">Job</span><span class="v">&mdash;</span></div>
+            <div><span class="k">Pages</span><span class="v">&mdash;</span></div>
+            <div><span class="k">Sector</span><span class="v">&mdash;</span></div>
+            <div><span class="k">Updated</span><span class="v">&mdash;</span></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="border-top:1px solid var(--line)">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">How these work</p>
+        <h2>Locked properly, not just hidden</h2>
+        <p>
+          A preview is not simply an unlisted address. Each one is encrypted, so until the passphrase is
+          entered there is nothing on the page to read, even in the source.
+        </p>
+      </div>
+
+      <div class="pv-how">
+        <div data-reveal>
+          <h3>You get a link and a passphrase</h3>
+          <p>Sent separately, usually the link by email and the passphrase by text, so one intercepted message on its own opens nothing.</p>
+        </div>
+        <div data-reveal data-reveal-delay="80">
+          <h3>The page decrypts in your browser</h3>
+          <p>AES-256 with the key derived from your passphrase. Nothing is sent anywhere and no account is needed. Any modern browser will do.</p>
+        </div>
+        <div data-reveal data-reveal-delay="160">
+          <h3>Look around, then tell me what to change</h3>
+          <p>Every link, gallery and form works. Some figures are drafts, marked as such, waiting on your confirmation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="background:var(--ink-2);border-top:1px solid var(--line)">
+    <div class="wrap" style="text-align:center">
+      <h2 data-reveal>Want one of these for your own site?</h2>
+      <p class="lead" style="margin:18px auto 0" data-reveal data-reveal-delay="60">
+        Rebuilds and new builds for small businesses, hand-coded and yours to keep.
+      </p>
+      <div class="btn-row" style="justify-content:center;margin-top:30px" data-reveal data-reveal-delay="120">
+        <a class="btn" href="../contact.html">Get a quote</a>
+        <a class="btn btn--ghost" href="../work.html">See the work</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="../index.html">
+          <img class="brand-mark" src="../assets/img/mark.svg" alt="" width="30" height="30">
+          <span><b>Dunn</b><i>works</i></span>
+        </a>
+        <p class="blurb">Website design and development for small businesses. Hand-coded, fast, and yours to keep.</p>
+      </div>
+      <div>
+        <h4>Pages</h4>
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="../services.html">Services</a></li>
+          <li><a href="../work.html">Work</a></li>
+          <li><a href="../about.html">About</a></li>
+          <li><a href="../contact.html">Contact</a></li>
+          <li><a href="./" aria-current="page">Previews</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get in touch</h4>
+        <ul>
+          <li><a href="mailto:info@dunnworks.io">info@dunnworks.io</a></li>
+          <li><a href="tel:+447377599023">+44 (0)7377 599 023</a></li>
+          <li><a href="https://wa.me/447377599023?text=Hi%20Tony%2C%20I%20am%20interested%20in%20a%20website" target="_blank" rel="noopener">WhatsApp</a></li>
+          <li><a href="../contact.html">Enquiry form</a></li>
+          <li>Hampshire and Surrey, UK</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Dunnworks</span>
+      <span>dunnworks.io</span>
+    </div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/447377599023?text=Hi%20Tony%2C%20I%20am%20interested%20in%20a%20website" target="_blank" rel="noopener" aria-label="Message Dunnworks on WhatsApp"><svg viewBox="0 0 32 32" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 4C9.4 4 4 8.9 4 15c0 2.5.9 4.8 2.5 6.6L5 28l6.6-1.7c1.4.6 2.9.9 4.4.9 6.6 0 12-4.9 12-11S22.6 4 16 4z"/></svg><span>WhatsApp</span></a>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>
