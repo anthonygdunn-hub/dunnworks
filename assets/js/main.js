@@ -4,6 +4,40 @@
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ---- theme switch ----
+     Dark is the default. The inline script in each <head> applies a saved
+     choice before the first paint, so there is no flash of the wrong theme. */
+  var root = document.documentElement;
+  var THEME_KEY = "dw-theme";
+  var toggles = document.querySelectorAll("[data-theme-toggle]");
+
+  function currentTheme() {
+    return root.getAttribute("data-theme") === "light" ? "light" : "dark";
+  }
+
+  function applyTheme(theme) {
+    if (theme === "light") root.setAttribute("data-theme", "light");
+    else root.removeAttribute("data-theme");
+
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", theme === "light" ? "#ffffff" : "#101012");
+
+    Array.prototype.forEach.call(toggles, function (btn) {
+      btn.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
+      btn.setAttribute("title", theme === "light" ? "Switch to the dark theme" : "Switch to the light theme");
+    });
+  }
+
+  applyTheme(currentTheme());
+
+  Array.prototype.forEach.call(toggles, function (btn) {
+    btn.addEventListener("click", function () {
+      var next = currentTheme() === "light" ? "dark" : "light";
+      applyTheme(next);
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* private mode */ }
+    });
+  });
+
   /* ---- mobile nav ---- */
   var toggle = document.querySelector(".nav-toggle");
   var nav = document.getElementById("nav");
