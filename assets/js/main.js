@@ -16,8 +16,12 @@
   }
 
   function applyTheme(theme) {
+    root.classList.add("theme-switching");
     if (theme === "light") root.setAttribute("data-theme", "light");
     else root.removeAttribute("data-theme");
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { root.classList.remove("theme-switching"); });
+    });
 
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", theme === "light" ? "#ffffff" : "#101012");
