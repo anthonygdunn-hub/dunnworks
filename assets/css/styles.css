@@ -85,7 +85,13 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+/* Switching theme repaints most of the page at once. Transitions are held off
+   for that one frame, otherwise elements animate at different rates and some
+   background colours fail to repaint at all. */
+:root.theme-switching, :root.theme-switching *, :root.theme-switching *::before, :root.theme-switching *::after {
+  transition: none !important;
 }
 img, svg, video { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
