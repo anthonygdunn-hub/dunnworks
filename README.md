@@ -91,15 +91,36 @@ previews page reads the table on load and falls back to the markup in
 `preview/index.html` if Supabase does not answer.
 
 Passphrases live in `dw_project_secrets`, which no anonymous policy touches, so
-the anon key on the public page cannot reach them. Editing a passphrase in the
-admin changes the record you read out to a client who has lost theirs. It does
-not re-key the file, because the passphrase **is** the AES key for that file. To
-change the key on the file itself:
+the anon key on the public page cannot reach them.
+
+## Reissuing a preview passphrase
+
+A locked preview is encrypted with one AES key that never changes. The
+passphrase's only job is to unwrap that key, and the wrapper is a row in
+`dw_project_keys`. So reissuing a passphrase rewrites a few hundred bytes in the
+database rather than rebuilding a 1MB file, and takes effect immediately.
+
+In the admin, **New passphrase** makes one up and puts it live on the preview
+and its project sheet together. **Use what I typed** does the same with your own
+wording. Before writing anything it fetches the live locked page and decrypts it
+with the recovered key, so a wrong stored passphrase fails safely and changes
+nothing.
+
+Two things follow from the design:
+
+- the previous passphrase stops working, as long as Supabase is reachable
+- if Supabase is down the gate falls back to the passphrase the file was built
+  with, so an outage never locks a client out of their own preview
+
+If a passphrase has to be properly dead rather than superseded, rebuild the file:
 
 ```
 node tools/unlock.mjs --in=preview/<slug>/index.html --out=/tmp/p.html --pass="OLD"
 node tools/lock.mjs   --in=/tmp/p.html --out=preview/<slug>/index.html \
   --client="Name" --pass="NEW"
+node tools/rekey.mjs  --in=preview/<slug>/index.html --slug=<slug> --doc=site
 ```
 
-Then update the passphrase in the admin so the two match.
+`tools/rekey.mjs` swaps the gate script for the unwrapping one and prints the new
+`file_salt`, which goes into that project's `dw_project_keys` row with the wrap
+columns cleared.
