@@ -133,6 +133,23 @@
     remove: function (id) {
       return rest('dw_projects?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
     },
+    keys: function () {
+      return rest('dw_project_keys?select=*', { auth: false });
+    },
+    // Rows are seeded when a preview is locked, so this is a patch. It falls
+    // back to an insert only if the row is somehow missing.
+    setKey: function (slug, doc, patch) {
+      var q = 'dw_project_keys?slug=eq.' + encodeURIComponent(slug) + '&doc=eq.' + encodeURIComponent(doc);
+      return rest(q, { method: 'PATCH', body: patch, headers: { Prefer: 'return=representation' } })
+        .then(function (rows) {
+          if (rows && rows.length) return rows;
+          return rest('dw_project_keys', {
+            method: 'POST',
+            body: Object.assign({ slug: slug, doc: doc }, patch),
+            headers: { Prefer: 'return=representation' }
+          });
+        });
+    },
     setSecret: function (projectId, patch) {
       return rest('dw_project_secrets', {
         method: 'POST',

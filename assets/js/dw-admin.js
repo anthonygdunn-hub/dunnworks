@@ -22,6 +22,7 @@
 
   var rows = [];
   var secrets = {};
+  var keys = [];
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -126,11 +127,18 @@
         '<div><label>Pages</label><input type="number" data-f="pages" value="' + esc(r.pages) + '"></div>' +
         '<div><label class="ad-check"><input type="checkbox" data-f="published"' + (r.published ? ' checked' : '') + '><span>Show on the previews page</span></label></div>' +
 
-        '<div class="ad-wide"><label>Passphrase to read out</label>' +
+        '<div class="ad-wide"><label>Passphrase clients use</label>' +
           '<div class="ad-secret">' +
             '<input type="text" data-s="passphrase" value="' + esc(sec.passphrase) + '" placeholder="not set">' +
             '<button class="btn btn--ghost sm" type="button" data-act="copy">Copy</button>' +
           '</div>' +
+          (r.has_preview && !r.is_live
+            ? '<div class="ad-actions" style="margin-top:10px">' +
+                '<button class="btn sm" type="button" data-act="newpass">New passphrase</button>' +
+                '<button class="btn btn--ghost sm" type="button" data-act="applypass">Use what I typed</button>' +
+                '<span class="ad-note" data-pmsg role="status" aria-live="polite"></span>' +
+              '</div>'
+            : '') +
         '</div>' +
         '<div><label>Issued to</label><input type="text" data-s="issued_to" value="' + esc(sec.issued_to) + '"></div>' +
         '<div><label>Issued on</label><input type="date" data-s="issued_on" value="' + esc(sec.issued_on) + '"></div>' +
@@ -157,10 +165,11 @@
 
   function load() {
     say(globalmsg, 'Loading…');
-    Promise.all([w.DWData.listAll(), w.DWData.secrets()]).then(function (res) {
+    Promise.all([w.DWData.listAll(), w.DWData.secrets(), w.DWData.keys()]).then(function (res) {
       rows = res[0] || [];
       secrets = {};
       (res[1] || []).forEach(function (s) { secrets[s.project_id] = s; });
+      keys = res[2] || [];
       draw();
       say(globalmsg, '');
     }).catch(function (e) { say(globalmsg, fail(e), 'err'); });
@@ -208,12 +217,55 @@
       return;
     }
 
+    if (act === 'newpass' || act === 'applypass') {
+      var proj = rows.filter(function (x) { return x.id === id; })[0];
+      var field = el.querySelector('[data-s="passphrase"]');
+      var pmsg = el.querySelector('[data-pmsg]');
+      var current = (secrets[id] || {}).passphrase;
+      var next = act === 'newpass' ? w.DWKeys.make() : field.value.trim();
+
+      if (!next || next.length < 12) {
+        say(pmsg, 'Type something at least 12 characters long, or press New passphrase.', 'err');
+        return;
+      }
+      if (!w.confirm('Reissue the passphrase for ' + proj.name + '?\n\n' +
+          'The new one is ' + next + '\n\n' +
+          'Anyone still holding the old one stops getting in.')) return;
+
+      var mine = keys.filter(function (k) { return k.slug === proj.slug; });
+      var btns = el.querySelectorAll('[data-act="newpass"],[data-act="applypass"]');
+      btns.forEach(function (x) { x.disabled = true; });
+
+      w.DWKeys.reissue(proj.slug, mine, current, next, function (t) { say(pmsg, t); })
+        .then(function () {
+          return w.DWData.setSecret(id, { passphrase: next, issued_on: new Date().toISOString().slice(0, 10) });
+        })
+        .then(function () {
+          field.value = next;
+          secrets[id] = Object.assign({}, secrets[id] || {}, { project_id: id, passphrase: next });
+          return w.DWData.keys().then(function (k) { keys = k || []; });
+        })
+        .then(function () {
+          say(pmsg, 'Done. Send them this one, the old one no longer works.', 'ok');
+        })
+        .catch(function (e) { say(pmsg, 'Not reissued, ' + fail(e), 'err'); })
+        .then(function () { btns.forEach(function (x) { x.disabled = false; }); });
+      return;
+    }
+
     if (act === 'save') {
       var v = readRow(el);
       btn.disabled = true;
       say(msg, 'Saving…');
+      // The passphrase is deliberately not taken from the field here. Changing
+      // it has to go through the reissue buttons, which rewrap the file key at
+      // the same time. Saving the two separately would leave a passphrase on
+      // record that does not open the page. The stored value is sent back
+      // unchanged so the upsert has the column it needs.
+      var held = (secrets[id] || {}).passphrase;
       var work = w.DWData.update(id, v.patch);
-      if (v.secret.passphrase) {
+      if (held) {
+        v.secret.passphrase = held;
         work = work.then(function () { return w.DWData.setSecret(id, v.secret); });
       }
       work.then(function () {
