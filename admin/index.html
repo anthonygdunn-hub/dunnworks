@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | Dunnworks</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0b0a0a">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .ad-gate { max-width: 440px; margin: 0 auto; }
+  .ad-hide { display: none !important; }
+
+  .ad-row {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px 22px; margin-bottom: 14px; background: var(--ink-2, transparent);
+  }
+  .ad-top { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+  .ad-top h3 { margin: 0 0 4px; font-size: 19px; }
+  .ad-sub { color: var(--muted); font-size: 13.5px; font-family: var(--font-mono); letter-spacing: .04em; }
+  .ad-grow { flex: 1 1 240px; min-width: 0; }
+
+  .pill {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    padding: 5px 10px; border-radius: var(--radius); border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+  }
+  .pill.live  { color: #3ddc97; border-color: rgba(61,220,151,.45); background: rgba(61,220,151,.1); }
+  .pill.ready { color: var(--accent-2); border-color: var(--accent); background: var(--accent-dim); }
+  .pill.build { opacity: .75; }
+  .pill.arch  { opacity: .5; }
+
+  .ad-fields { display: grid; gap: 12px; margin-top: 16px; }
+  @media (min-width: 720px) { .ad-fields { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  .ad-fields label { display: block; font-size: 12px; font-family: var(--font-mono);
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .ad-fields input, .ad-fields select, .ad-fields textarea {
+    width: 100%; padding: 10px 12px; font: inherit; font-size: 14.5px; color: var(--ink);
+    background: var(--mock-box); border: 1px solid var(--line); border-radius: var(--radius);
+  }
+  .ad-fields input:focus, .ad-fields select:focus, .ad-fields textarea:focus {
+    outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .ad-wide { grid-column: 1 / -1; }
+
+  .ad-check { display: flex; align-items: center; gap: 10px; font-size: 14.5px; cursor: pointer; }
+  .ad-check input { width: 18px; height: 18px; accent-color: #3ddc97; flex: none; cursor: pointer; }
+
+  .ad-secret { display: flex; gap: 8px; align-items: stretch; }
+  .ad-secret input { font-family: var(--font-mono); letter-spacing: .02em; }
+  .ad-secret button { flex: none; }
+
+  .ad-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 18px; }
+  .ad-note { font-size: 13px; color: var(--muted); }
+  .ad-note.ok { color: #3ddc97; }
+  .ad-note.err { color: var(--bad); }
+
+  .btn.sm { padding: 9px 16px; font-size: 13.5px; }
+  .ad-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 26px; }
+  .ad-bar .ad-grow { text-align: right; }
+
+  .ad-group-head { display: flex; align-items: baseline; gap: 14px; margin: 34px 0 16px; }
+  .ad-group-head h2 { margin: 0; font-size: 20px; }
+  .ad-group-head span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+
+  .ad-warn {
+    border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--radius);
+    padding: 18px 20px; margin: 0 0 26px; font-size: 14.5px; color: var(--muted);
+  }
+  .ad-warn b { color: var(--ink); }
+  .ad-warn code { font-family: var(--font-mono); font-size: 13px; background: var(--mock-box);
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 2px 6px; display: inline-block; }
+  .ad-warn pre { overflow-x: auto; background: var(--mock-box); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 12px 14px; font-family: var(--font-mono); font-size: 12.5px; margin: 10px 0 0; }
+</style>
+<script>(function(){try{var t=localStorage.getItem("dw-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <img class="brand-mark" src="../assets/img/mark.svg" alt="" width="30" height="30">
+      <span><b>Dunn</b><i>works</i></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="../index.html">Home</a>
+      <a href="../preview/">Previews</a>
+      <a class="btn" href="#" id="signout" hidden>Sign out</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Switch to the light theme">
+        <span class="sw" aria-hidden="true"></span>
+        <span class="lbl lbl-dark">Dark</span>
+        <span class="lbl lbl-light">Light</span>
+      </button>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============================ sign in ============================ -->
+  <section class="section" id="gate">
+    <div class="wrap">
+      <div class="ad-gate">
+        <p class="eyebrow">Dunnworks admin</p>
+        <h1 style="font-size:clamp(28px,5vw,40px)">Sign in</h1>
+        <p class="lead" style="font-size:16px">
+          Enter the address the account is on and Supabase emails you a link. There is no password
+          to remember or lose.
+        </p>
+        <form id="signin" class="form" style="margin-top:26px">
+          <div class="field">
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email" autocomplete="email" required placeholder="info@dunnworks.io">
+          </div>
+          <button class="btn btn--wide" type="submit" id="sendbtn">Email me a link</button>
+          <p class="form-note" id="gatemsg" role="status" aria-live="polite" style="margin-top:14px"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= admin ============================= -->
+  <section class="section ad-hide" id="app">
+    <div class="wrap">
+
+      <div class="ad-bar">
+        <div>
+          <p class="eyebrow" style="margin-bottom:6px">Dunnworks admin</p>
+          <h1 style="margin:0;font-size:clamp(26px,4vw,36px)">Previews and case studies</h1>
+        </div>
+        <div class="ad-grow">
+          <p class="ad-sub" id="who"></p>
+        </div>
+      </div>
+
+      <div class="ad-warn">
+        <b>What a tick does.</b> Marking a project live moves its card into Launched on the public
+        previews page straight away. Nothing is rebuilt and nothing is pushed, the page reads this
+        database when it loads.
+        <br><br>
+        <b>What a passphrase change does.</b> It updates the record here, which is what you read out
+        to a client who has lost theirs. It does <b>not</b> re-key the locked preview, because the
+        passphrase <i>is</i> the encryption key for that file. To actually change the key on the
+        file, run this and push the result:
+        <pre>node tools/unlock.mjs --in=preview/&lt;slug&gt;/index.html --out=/tmp/p.html --pass="OLD"
+node tools/lock.mjs   --in=/tmp/p.html --out=preview/&lt;slug&gt;/index.html \
+  --client="Name" --pass="NEW"</pre>
+      </div>
+
+      <div id="groups"></div>
+
+      <div class="ad-actions" style="margin-top:30px">
+        <button class="btn btn--ghost sm" id="addbtn" type="button">Add a project</button>
+        <span class="ad-note" id="globalmsg" role="status" aria-live="polite"></span>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Dunnworks</span>
+      <span>Admin</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/js/dw-config.js"></script>
+<script src="../assets/js/dw-data.js"></script>
+<script src="../assets/js/dw-admin.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>
