@@ -33,6 +33,7 @@
   }
   .pv-state.is-open { color: var(--accent-2); border-color: var(--accent); background: var(--accent-dim); }
   .pv-state.is-soon { opacity: 0.75; }
+  .pv-state.is-live { color: #3ddc97; border-color: rgba(61,220,151,.45); background: rgba(61,220,151,.1); }
 
   .pv-lock { display: inline-flex; align-items: center; gap: 8px; }
   .pv-lock svg { width: 14px; height: 14px; flex: none; }
@@ -88,9 +89,9 @@
       <p class="eyebrow" data-reveal>Client previews</p>
       <h1 data-reveal data-reveal-delay="60">Work in progress, behind a passphrase</h1>
       <p class="lead" data-reveal data-reveal-delay="120">
-        Every site here is being built or rebuilt for a client and is not live yet. Each one opens with a
-        passphrase sent to that client directly. If you are expecting one and it is not working, email
-        <a href="mailto:info@dunnworks.io">info@dunnworks.io</a>.
+        Sites still in build sit at the top and open with a passphrase sent to that client directly. Below
+        them are the ones that have since launched, which anyone can visit. If you are expecting a
+        passphrase and it is not working, email <a href="mailto:info@dunnworks.io">info@dunnworks.io</a>.
       </p>
     </div>
   </section>
@@ -98,13 +99,14 @@
   <section class="section">
     <div class="wrap">
 
-      <div class="grid cols-2">
+      <!-- Rendered from Supabase when it answers. Everything below in
+           #pv-fallback is what shows if it does not. -->
+      <div id="pv-live"></div>
 
-        <!-- ================= ONE PROJECT. Copy this whole <article> to add another. =================
-             state classes:  is-open   ready for the client to look at
-                             is-soon   listed but not built yet, link removed
-             To hide a project entirely, delete its <article> or wrap it in an HTML comment.
-        ============================================================================================ -->
+      <div id="pv-fallback" class="grid cols-2">
+
+        <!-- These two cards are the fallback. Projects are managed at
+             /admin/ and normally come from the database. -->
         <article class="card pv-card" data-reveal>
           <div class="pv-top">
             <span class="num" style="margin:0">Preview 01</span>
@@ -141,7 +143,6 @@
             </a>
           </div>
         </article>
-        <!-- ============================== END OF ONE PROJECT ============================== -->
 
         <article class="card pv-card" data-reveal data-reveal-delay="80">
           <div class="pv-top">
@@ -178,25 +179,6 @@
                 Read the report
               </span>
             </a>
-          </div>
-        </article>
-
-        <!-- Placeholder card. Replace it with the next real preview. -->
-        <article class="card pv-card" data-reveal data-reveal-delay="160" style="border-style:dashed">
-          <div class="pv-top">
-            <span class="num" style="margin:0">Preview 03</span>
-            <span class="pv-state is-soon">In build</span>
-          </div>
-          <h3>Next project</h3>
-          <p>
-            The next preview appears here as soon as there is something worth looking at. Copy a block above
-            in <code>preview/index.html</code>, change the name and the folder, and it is listed.
-          </p>
-          <div class="pv-meta">
-            <div><span class="k">Job</span><span class="v">&mdash;</span></div>
-            <div><span class="k">Pages</span><span class="v">&mdash;</span></div>
-            <div><span class="k">Sector</span><span class="v">&mdash;</span></div>
-            <div><span class="k">Updated</span><span class="v">&mdash;</span></div>
           </div>
         </article>
 
@@ -287,6 +269,9 @@
 </footer>
 
 <a class="wa-float" href="https://wa.me/447377599023?text=Hi%20Tony%2C%20I%20am%20interested%20in%20a%20website" target="_blank" rel="noopener" aria-label="Message Dunnworks on WhatsApp"><svg viewBox="0 0 32 32" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 4C9.4 4 4 8.9 4 15c0 2.5.9 4.8 2.5 6.6L5 28l6.6-1.7c1.4.6 2.9.9 4.4.9 6.6 0 12-4.9 12-11S22.6 4 16 4z"/></svg><span>WhatsApp</span></a>
+<script src="../assets/js/dw-config.js"></script>
+<script src="../assets/js/dw-data.js"></script>
+<script src="../assets/js/dw-previews.js"></script>
 <script src="../assets/js/main.js"></script>
 </body>
 </html>
