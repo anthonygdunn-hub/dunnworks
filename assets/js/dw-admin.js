@@ -50,21 +50,48 @@
     load();
   }
 
+  function configured() {
+    if (w.DWData && w.DWData.ready) return true;
+    say(gatemsg, 'The Supabase key is missing from assets/js/dw-config.js, so sign in cannot run yet.', 'err');
+    return false;
+  }
+
   d.getElementById('signin').addEventListener('submit', function (ev) {
     ev.preventDefault();
-    if (!w.DWData || !w.DWData.ready) {
-      say(gatemsg, 'The Supabase key is missing from assets/js/dw-config.js, so sign in cannot run yet.', 'err');
+    if (!configured()) return;
+    var btn = d.getElementById('signbtn');
+    var email = d.getElementById('email').value.trim();
+    var pass = d.getElementById('password').value;
+    if (!pass) {
+      say(gatemsg, 'Type your password, or use the link below if you have not set one.', 'err');
       return;
     }
+    btn.disabled = true;
+    say(gatemsg, 'Signing in…');
+    w.DWData.signInWithPassword(email, pass).then(function (u) {
+      showApp(u || { email: email });
+    }).catch(function (e) {
+      var m = (e && e.message) || '';
+      say(gatemsg, /invalid login/i.test(m) ? 'That address and password do not match.' : fail(e), 'err');
+      btn.disabled = false;
+    });
+  });
+
+  d.getElementById('sendbtn').addEventListener('click', function () {
+    if (!configured()) return;
     var btn = d.getElementById('sendbtn');
     var email = d.getElementById('email').value.trim();
+    if (!email) { say(gatemsg, 'Put the address in first.', 'err'); return; }
     btn.disabled = true;
     say(gatemsg, 'Sending…');
     var back = w.location.origin + w.location.pathname;
     w.DWData.sendMagicLink(email, back).then(function () {
       say(gatemsg, 'Sent. Open the link in the email on this device and this page takes over from there.', 'ok');
     }).catch(function (e) {
-      say(gatemsg, fail(e), 'err');
+      var m = (e && e.message) || '';
+      say(gatemsg, /rate limit/i.test(m)
+        ? 'Supabase will only send two of these an hour and that is used up. Wait, or sign in with the password.'
+        : fail(e), 'err');
     }).then(function () { btn.disabled = false; });
   });
 

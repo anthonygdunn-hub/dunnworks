@@ -36,6 +36,24 @@
     });
   }
 
+  // Supabase's own email server allows two messages an hour, which is not a
+  // sign in method you can rely on. A password is the everyday way in and the
+  // link is the fallback.
+  function signInWithPassword(email, password) {
+    return fetch(C.url + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': C.anonKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    }).then(function (r) {
+      return r.json().then(function (j) {
+        if (!r.ok) throw new Error(j.msg || j.error_description || j.message || ('HTTP ' + r.status));
+        store.set({ access_token: j.access_token, refresh_token: j.refresh_token,
+                    expires_at: Math.floor(Date.now() / 1000) + (j.expires_in || 3600) });
+        return j.user || null;
+      });
+    });
+  }
+
   // Supabase returns the session in the URL fragment, which never leaves the
   // browser. Take it, keep it, and clean the address bar.
   function captureFromHash() {
@@ -157,6 +175,7 @@
         headers: { Prefer: 'resolution=merge-duplicates,return=representation' }
       });
     },
+    signInWithPassword: signInWithPassword,
     sendMagicLink: sendMagicLink,
     captureFromHash: captureFromHash,
     whoami: whoami,
