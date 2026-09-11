@@ -14,6 +14,9 @@
 <link rel="stylesheet" href="../assets/css/styles.css">
 <style>
   .ad-gate { max-width: 440px; margin: 0 auto; }
+  .linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--accent-2);
+    text-decoration: underline; cursor: pointer; }
+  .linkish:hover { color: var(--ink); }
   .ad-hide { display: none !important; }
 
   .ad-row {
@@ -114,15 +117,23 @@
         <p class="eyebrow">Dunnworks admin</p>
         <h1 style="font-size:clamp(28px,5vw,40px)">Sign in</h1>
         <p class="lead" style="font-size:16px">
-          Enter the address the account is on and Supabase emails you a link. There is no password
-          to remember or lose.
+          Only info@dunnworks.io gets in. Everything else the database refuses, whatever it is
+          signed in as.
         </p>
         <form id="signin" class="form" style="margin-top:26px">
           <div class="field">
             <label for="email">Email address</label>
             <input id="email" name="email" type="email" autocomplete="email" required placeholder="info@dunnworks.io">
           </div>
-          <button class="btn btn--wide" type="submit" id="sendbtn">Email me a link</button>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password">
+          </div>
+          <button class="btn btn--wide" type="submit" id="signbtn">Sign in</button>
+          <p class="form-note" style="margin-top:18px">
+            Forgotten it? <button type="button" id="sendbtn" class="linkish">Email me a link instead</button>.
+            Supabase's own mail server allows two of those an hour, so use the password when you have it.
+          </p>
           <p class="form-note" id="gatemsg" role="status" aria-live="polite" style="margin-top:14px"></p>
         </form>
       </div>
