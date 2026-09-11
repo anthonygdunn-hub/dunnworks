@@ -69,3 +69,37 @@ Everything is set by the tokens at the top of assets/css/styles.css. The accent 
 ## Wording
 
 Copy is written in first person singular, since Dunnworks is one person and that converts better than a team voice. If you would rather use "we", search for " I " and rewrite the affected sentences, mainly on the about and contact pages.
+
+## The admin at /admin/
+
+`/admin/` signs you in with a link emailed by Supabase, then lists every preview
+and case study from the `dw_projects` table in project `acdpgarasgfhvupzsbxf`.
+It is `noindex` and there is no link to it from anywhere on the site.
+
+Set up once:
+
+1. Run `supabase/dunnworks-schema.sql` in the SQL editor of that project.
+2. Paste the project's anon key into `assets/js/dw-config.js`.
+3. Go to `/admin/`, enter `info@dunnworks.io` and open the link it sends.
+
+Sign in is gated on that one address, set in `dw_is_owner()` in the schema. Any
+other address gets a session but the database refuses every read and write.
+
+The tick marked **This one is live** moves the project from In progress to
+Launched on `/preview/`, straight away, with nothing to rebuild or push. The
+previews page reads the table on load and falls back to the markup in
+`preview/index.html` if Supabase does not answer.
+
+Passphrases live in `dw_project_secrets`, which no anonymous policy touches, so
+the anon key on the public page cannot reach them. Editing a passphrase in the
+admin changes the record you read out to a client who has lost theirs. It does
+not re-key the file, because the passphrase **is** the AES key for that file. To
+change the key on the file itself:
+
+```
+node tools/unlock.mjs --in=preview/<slug>/index.html --out=/tmp/p.html --pass="OLD"
+node tools/lock.mjs   --in=/tmp/p.html --out=preview/<slug>/index.html \
+  --client="Name" --pass="NEW"
+```
+
+Then update the passphrase in the admin so the two match.
