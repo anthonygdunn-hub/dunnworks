@@ -144,17 +144,20 @@
       </div>
 
       <div class="ad-warn">
-        <b>What a tick does.</b> Marking a project live moves its card into Launched on the public
-        previews page straight away. Nothing is rebuilt and nothing is pushed, the page reads this
-        database when it loads.
+        <b>The tick.</b> Marking a project live moves its card into Launched on the public previews
+        page straight away. Nothing is rebuilt and nothing is pushed, the page reads this database
+        when it loads.
         <br><br>
-        <b>What a passphrase change does.</b> It updates the record here, which is what you read out
-        to a client who has lost theirs. It does <b>not</b> re-key the locked preview, because the
-        passphrase <i>is</i> the encryption key for that file. To actually change the key on the
-        file, run this and push the result:
-        <pre>node tools/unlock.mjs --in=preview/&lt;slug&gt;/index.html --out=/tmp/p.html --pass="OLD"
-node tools/lock.mjs   --in=/tmp/p.html --out=preview/&lt;slug&gt;/index.html \
-  --client="Name" --pass="NEW"</pre>
+        <b>Reissuing a passphrase.</b> <b>New passphrase</b> makes one up and puts it live on the
+        preview and its project sheet together. <b>Use what I typed</b> does the same with your own
+        wording. Either way the old passphrase stops working, so send the new one on before you
+        close this page. It checks the key against the live file first, so a failure changes
+        nothing.
+        <br><br>
+        The one gap worth knowing: if Supabase is ever down, the preview falls back to the
+        passphrase it was originally built with, so a client is never locked out of their own page
+        by an outage. If you need a passphrase properly dead rather than superseded, say so and the
+        file gets rebuilt.
       </div>
 
       <div id="groups"></div>
@@ -173,13 +176,14 @@ node tools/lock.mjs   --in=/tmp/p.html --out=preview/&lt;slug&gt;/index.html \
   <div class="wrap">
     <div class="footer-bottom">
       <span>&copy; <span data-year>2026</span> Dunnworks</span>
-      <span>Admin</span>
+      <span><a href="../preview/">Previews</a></span>
     </div>
   </div>
 </footer>
 
 <script src="../assets/js/dw-config.js"></script>
 <script src="../assets/js/dw-data.js"></script>
+<script src="../assets/js/dw-keys.js"></script>
 <script src="../assets/js/dw-admin.js"></script>
 <script src="../assets/js/main.js"></script>
 </body>
