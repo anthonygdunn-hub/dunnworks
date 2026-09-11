@@ -11,6 +11,6 @@
  */
 window.DW = {
   url: 'https://acdpgarasgfhvupzsbxf.supabase.co',
-  anonKey: '',            // <-- paste it here
+  anonKey: 'sb_publishable_OWTVpDyadL1lITnCp4gfAQ_EZxVHldY',            // <-- paste it here
   owner: 'info@dunnworks.io'
 };
