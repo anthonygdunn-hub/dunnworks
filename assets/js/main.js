@@ -116,27 +116,30 @@
   /* ---- enquiry form ----
      Posts to Web3Forms. Add your access key to the hidden input in contact.html.
      With no key set, the form falls back to opening the visitor's email client. */
-  /* ---- hero showreel: cycle the client sites behind the headline ---- */
+  /* ---- hero showreel: cycle the four client sites in the frame ---- */
   var reel = document.getElementById("hero-showreel");
-  if (reel && window.innerWidth > 760 && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+  if (reel) {
     var panes = [].slice.call(reel.querySelectorAll(".hero-shot"));
-    /* the first pane ships with the page, the rest wait until it has finished loading */
+    var urlOut = document.getElementById("hero-url");
+    /* the first capture ships with the page, the rest wait until it has loaded */
     var fetchRest = function () {
       [].forEach.call(reel.querySelectorAll("img[data-src]"), function (img) {
         img.src = img.getAttribute("data-src");
         img.removeAttribute("data-src");
       });
     };
-    if (document.readyState === "complete") { window.setTimeout(fetchRest, 400); }
-    else { window.addEventListener("load", function () { window.setTimeout(fetchRest, 400); }); }
-    if (panes.length > 1) {
+    if (document.readyState === "complete") { window.setTimeout(fetchRest, 300); }
+    else { window.addEventListener("load", function () { window.setTimeout(fetchRest, 300); }); }
+
+    if (panes.length > 1 && !reduced) {
       var at = 0;
       window.setInterval(function () {
         if (document.hidden) return;
         panes[at].classList.remove("is-live");
         at = (at + 1) % panes.length;
         panes[at].classList.add("is-live");
-      }, 7500);
+        if (urlOut) urlOut.textContent = panes[at].getAttribute("data-url") || "";
+      }, 7000);
     }
   }
 
