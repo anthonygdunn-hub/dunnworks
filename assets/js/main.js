@@ -143,6 +143,51 @@
     }
   }
 
+  /* ---- how it works: the rail walks itself, and hovering takes it over ---- */
+  var flow = document.querySelector(".flow");
+  if (flow) {
+    var fsteps = [].slice.call(flow.querySelectorAll(".flow-step"));
+    var setStep = function (i) {
+      fsteps.forEach(function (el, n) {
+        var on = n === i;
+        el.classList.toggle("is-on", on);
+        el.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      /* the fill stops at the middle of the live node */
+      flow.style.setProperty("--flow-fill", ((i + 0.5) / fsteps.length * 100).toFixed(2) + "%");
+    };
+
+    var idx = 0, timer = null, held = false;
+    var tick = function () {
+      if (document.hidden || held) return;
+      idx = (idx + 1) % fsteps.length;
+      setStep(idx);
+    };
+    var start = function () { if (!timer && !reduced) timer = window.setInterval(tick, 3600); };
+    var stop = function () { if (timer) { window.clearInterval(timer); timer = null; } };
+
+    fsteps.forEach(function (el, n) {
+      var take = function () { held = true; idx = n; setStep(n); };
+      el.addEventListener("mouseenter", take);
+      el.addEventListener("focus", take);
+      el.addEventListener("click", take);
+      el.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); take(); }
+      });
+    });
+    flow.addEventListener("mouseleave", function () { held = false; });
+    flow.addEventListener("focusout", function (e) {
+      if (!flow.contains(e.relatedTarget)) held = false;
+    });
+
+    setStep(0);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) start(); else stop(); });
+      }, { threshold: 0.3 }).observe(flow);
+    } else { start(); }
+  }
+
   /* ---- case study clips: run only while on screen, so nothing animates out of sight ---- */
   var shots = [].slice.call(document.querySelectorAll(".shot"));
   if (shots.length) {
