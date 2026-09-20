@@ -116,20 +116,42 @@
   /* ---- enquiry form ----
      Posts to Web3Forms. Add your access key to the hidden input in contact.html.
      With no key set, the form falls back to opening the visitor's email client. */
-  /* ---- case study clips: play only while on screen, and never if motion is reduced ---- */
-  var clips = [].slice.call(document.querySelectorAll("video.mock-shot"));
-  if (clips.length) {
-    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      clips.forEach(function (v) { v.removeAttribute("autoplay"); v.pause(); v.controls = true; });
-    } else if ("IntersectionObserver" in window) {
-      var vio = new IntersectionObserver(function (entries) {
+  /* ---- hero showreel: cycle the client sites behind the headline ---- */
+  var reel = document.getElementById("hero-showreel");
+  if (reel && window.innerWidth > 760 && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+    var panes = [].slice.call(reel.querySelectorAll(".hero-shot"));
+    /* the first pane ships with the page, the rest wait until it has finished loading */
+    var fetchRest = function () {
+      [].forEach.call(reel.querySelectorAll("img[data-src]"), function (img) {
+        img.src = img.getAttribute("data-src");
+        img.removeAttribute("data-src");
+      });
+    };
+    if (document.readyState === "complete") { window.setTimeout(fetchRest, 400); }
+    else { window.addEventListener("load", function () { window.setTimeout(fetchRest, 400); }); }
+    if (panes.length > 1) {
+      var at = 0;
+      window.setInterval(function () {
+        if (document.hidden) return;
+        panes[at].classList.remove("is-live");
+        at = (at + 1) % panes.length;
+        panes[at].classList.add("is-live");
+      }, 7500);
+    }
+  }
+
+  /* ---- case study clips: run only while on screen, so nothing animates out of sight ---- */
+  var shots = [].slice.call(document.querySelectorAll(".shot"));
+  if (shots.length) {
+    if (!("IntersectionObserver" in window)) {
+      shots.forEach(function (el) { el.classList.add("is-playing"); });
+    } else {
+      var sio = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
-          if (e.isIntersecting) { var q = e.target.play(); if (q && q.catch) q.catch(function () {}); }
-          else { e.target.pause(); }
+          e.target.classList.toggle("is-playing", e.isIntersecting);
         });
-      }, { threshold: 0.2 });
-      clips.forEach(function (v) { vio.observe(v); });
+      }, { threshold: 0.15 });
+      shots.forEach(function (el) { sio.observe(el); });
     }
   }
 
