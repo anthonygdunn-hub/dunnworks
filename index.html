@@ -3,13 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dunnworks | Website design and development for small businesses</title>
+<title>Website Design Hampshire & Surrey | Dunnworks</title>
 <meta name="description" content="Dunnworks builds and rebuilds websites for small businesses in Hampshire, Surrey and beyond. Hand-coded, fast, and yours to keep. Sites from £750.">
 <link rel="canonical" href="https://dunnworks.io/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Dunnworks | Website design and development for small businesses">
+<meta property="og:title" content="Website Design Hampshire & Surrey | Dunnworks">
 <meta property="og:description" content="Hand-coded websites for small businesses. Built to load fast, read well on a phone, and bring in enquiries.">
 <meta property="og:url" content="https://dunnworks.io/">
+<meta property="og:image" content="https://dunnworks.io/assets/img/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b0a0a">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,11 +24,52 @@
   "@type": "ProfessionalService",
   "name": "Dunnworks",
   "url": "https://dunnworks.io/",
-  "description": "Website design and development for small businesses.",
+  "logo": "https://dunnworks.io/assets/img/og-image.png",
+  "image": "https://dunnworks.io/assets/img/og-image.png",
+  "description": "Hand-coded website design and development for small businesses in Hampshire and Surrey.",
   "email": "info@dunnworks.io",
   "telephone": "+447377599023",
-  "areaServed": ["Hampshire", "Surrey", "United Kingdom"],
+  "priceRange": "£750-£1450",
+  "areaServed": ["Hampshire", "Surrey", "Bordon", "Farnham", "Farnborough", "Fleet", "Aldershot", "Guildford", "United Kingdom"],
   "serviceType": "Website design and development"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long does a site take?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A one page site takes about a week. A five page business site takes 2 to 3 weeks from the day the content is agreed. The slow part is usually photos and wording, so I draft both for you if that helps." }
+    },
+    {
+      "@type": "Question",
+      "name": "Will I lose my Google ranking if you rebuild the site?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Old addresses are redirected to the new ones, the page titles and headings are carried over, and the site is submitted to Google the day it goes live. Pages usually get faster, which helps rather than hurts." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I edit the site myself?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, where it makes sense. Prices, opening hours, galleries and testimonials can sit behind a simple admin screen you log into. Most owners would rather send a message and have the change made for them, which the care plan covers." }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens to my email address?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Nothing. Email and the website are separate records on your domain. Your address keeps working through the switch, and I check it before and after the site goes live." }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I have to take the care plan?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. The site is yours at handover, with the files and the logins. The care plan exists so you do not have to think about hosting or changes. You can stop it whenever you like and keep the site." }
+    },
+    {
+      "@type": "Question",
+      "name": "Where do you work?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Hampshire and Surrey for anything face to face. Everywhere else in the UK by phone and email, which is how most of the work runs anyway." }
+    }
+  ]
 }
 </script>
 <script>(function(){try{var t=localStorage.getItem("dw-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
@@ -43,12 +86,12 @@
 
 <header class="site-header">
   <div class="wrap">
-    <a class="brand" href="index.html">
+    <a class="brand" href="/">
       <img class="brand-mark" src="assets/img/mark.svg" alt="" width="30" height="30">
       <span><b>Dunn</b><i>works</i></span>
     </a>
     <nav class="nav" id="nav" aria-label="Main">
-      <a href="index.html" aria-current="page">Home</a>
+      <a href="/" aria-current="page">Home</a>
       <a href="services.html">Services</a>
       <a href="work.html">Work</a>
       <a href="about.html">About</a>
@@ -367,6 +410,21 @@
     </div>
   </section>
 
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow">Where I work</p>
+        <h2>Website design across Hampshire and Surrey</h2>
+        <p>Based in Bordon, working face to face across the area and everywhere else in the UK by phone and email.</p>
+      </div>
+      <div class="grid cols-3" data-reveal>
+        <a class="card" href="web-design-farnham.html"><h3>Farnham</h3><p>Website design and rebuilds for Farnham businesses.</p></a>
+        <a class="card" href="web-design-fleet.html"><h3>Fleet</h3><p>Website design and rebuilds for Fleet businesses.</p></a>
+        <a class="card" href="web-design-farnborough.html"><h3>Farnborough</h3><p>Website design and rebuilds for Farnborough businesses.</p></a>
+      </div>
+    </div>
+  </section>
+
   <section class="section section--panel">
     <div class="wrap">
       <div class="section-head" data-reveal>
@@ -424,7 +482,7 @@
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <a class="brand" href="index.html">
+        <a class="brand" href="/">
           <img class="brand-mark" src="assets/img/mark.svg" alt="" width="30" height="30">
           <span><b>Dunn</b><i>works</i></span>
         </a>
@@ -433,13 +491,11 @@
       <div>
         <h4>Pages</h4>
         <ul>
-          <li><a href="index.html">Home</a></li>
+          <li><a href="/">Home</a></li>
           <li><a href="services.html">Services</a></li>
           <li><a href="work.html">Work</a></li>
           <li><a href="about.html">About</a></li>
           <li><a href="contact.html">Contact</a></li>
-          <li><a href="preview/">Previews</a></li>
-          <li><a href="admin/">Admin</a></li>
         </ul>
       </div>
       <div>
