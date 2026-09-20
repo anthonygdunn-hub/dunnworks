@@ -111,30 +111,47 @@
 <main id="main">
 
   <section class="hero">
-    <div class="hero-media" id="hero-showreel" aria-hidden="true">
-      <div class="hero-shot is-live"><div class="shot-track"><img src="assets/img/clips/clip-combustion.webp" width="987" height="2704" alt="" decoding="async" fetchpriority="high"></div></div>
-      <div class="hero-shot"><div class="shot-track"><img data-src="assets/img/clips/clip-aeroinspectors.webp" width="987" height="2704" alt="" decoding="async"></div></div>
-      <div class="hero-shot"><div class="shot-track"><img data-src="assets/img/clips/clip-tcooper.webp" width="987" height="2704" alt="" decoding="async"></div></div>
-      <div class="hero-shot"><div class="shot-track"><img data-src="assets/img/clips/clip-falkners.webp" width="987" height="2365" alt="" decoding="async"></div></div>
-    </div>
     <div class="dots" aria-hidden="true"></div>
     <div class="hero-scan" aria-hidden="true"></div>
-    <div class="wrap">
-      <p class="eyebrow" data-reveal>Hand-coded websites</p>
-      <h1 data-reveal data-reveal-delay="60">Websites that earn their place in your business</h1>
-      <p class="lead" data-reveal data-reveal-delay="140">
-        Dunnworks designs, builds and rebuilds websites for small businesses. Every site is written by hand,
-        loads in under a second, and stays yours. No page builder, no monthly licence, no lock-in.
-      </p>
-      <div class="btn-row" data-reveal data-reveal-delay="200">
-        <a class="btn" href="contact.html">Get a quote</a>
-        <a class="btn btn--ghost" href="work.html">See the work</a>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow" data-reveal>Hand-coded websites</p>
+        <h1 data-reveal data-reveal-delay="60">Websites that earn their place in your business</h1>
+        <p class="lead" data-reveal data-reveal-delay="140">
+          Dunnworks designs, builds and rebuilds websites for small businesses. Every site is written by hand,
+          loads in under a second, and stays yours. No page builder, no monthly licence, no lock-in.
+        </p>
+        <div class="btn-row" data-reveal data-reveal-delay="200">
+          <a class="btn" href="contact.html">Get a quote</a>
+          <a class="btn btn--ghost" href="work.html">See the work</a>
+        </div>
+        <div class="hero-meta" data-reveal data-reveal-delay="260">
+          <span>New builds</span>
+          <span>Rebuilds and revamps</span>
+          <span>Hosting and updates</span>
+        </div>
       </div>
-      <div class="hero-meta" data-reveal data-reveal-delay="260">
-        <span>New builds</span>
-        <span>Rebuilds and revamps</span>
-        <span>Hosting and updates</span>
-      </div>
+
+      <figure class="hero-reel" id="hero-showreel" data-reveal data-reveal-delay="180">
+        <div class="mock">
+          <div class="mock-bar"><i></i><i></i><i></i><span class="mock-url" id="hero-url">combustionconsulting.co.uk</span></div>
+          <div class="hero-stage">
+          <div class="hero-shot is-live" data-url="combustionconsulting.co.uk" style="--mock-accent:#b6ff2b">
+            <div class="shot-track"><img src="assets/img/clips/clip-combustion.webp" width="987" height="2704" alt="" decoding="async" fetchpriority="high"></div>
+          </div>
+          <div class="hero-shot" data-url="aeroinspectors.io" style="--mock-accent:#3aa0ff">
+            <div class="shot-track"><img data-src="assets/img/clips/clip-aeroinspectors.webp" width="987" height="2704" alt="" decoding="async"></div>
+          </div>
+          <div class="hero-shot" data-url="tcooperinteriors.co.uk" style="--mock-accent:#e8c27a">
+            <div class="shot-track"><img data-src="assets/img/clips/clip-tcooper.webp" width="987" height="2704" alt="" decoding="async"></div>
+          </div>
+          <div class="hero-shot" data-url="thefalknersarmsgolfsociety.co.uk" style="--mock-accent:#4fd08a">
+            <div class="shot-track"><img data-src="assets/img/clips/clip-falkners.webp" width="987" height="2365" alt="" decoding="async"></div>
+          </div>
+          </div>
+        </div>
+        <figcaption>Four of the sites, scrolling. <a href="work.html">See what each one had to do</a></figcaption>
+      </figure>
     </div>
   </section>
 
@@ -667,8 +684,6 @@
           <li><a href="about.html">About</a></li>
           <li><a href="contact.html">Contact</a></li>
         </ul>
-        <p class="locmap-rest">Everywhere else in the UK works by phone and email, which is how most of the work runs anyway.</p>
-        </div>
       </div>
       <div>
         <h4>Get in touch</h4>
@@ -679,8 +694,6 @@
           <li><a href="contact.html">Enquiry form</a></li>
           <li>Hampshire and Surrey, UK</li>
         </ul>
-        <p class="locmap-rest">Everywhere else in the UK works by phone and email, which is how most of the work runs anyway.</p>
-        </div>
       </div>
     </div>
     <div class="footer-bottom">
