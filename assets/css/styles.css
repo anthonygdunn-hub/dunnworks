@@ -491,3 +491,59 @@ td.yes { color: var(--accent-2); }
   [data-reveal] { opacity: 1; transform: none; }
   .hero-scan { display: none; }
 }
+
+/* ---------- cookie banner ---------- */
+.cc {
+  position: fixed; left: 18px; bottom: 18px; z-index: 90;
+  width: min(440px, calc(100vw - 36px));
+  max-height: calc(100vh - 36px); overflow-y: auto;
+  background: var(--ink-2); color: var(--paper);
+  border: 1px solid var(--line-2); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 34px 28px 26px;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.cc.is-open { opacity: 1; transform: none; }
+.cc-x {
+  position: absolute; top: 10px; right: 12px;
+  width: 34px; height: 34px; padding: 0;
+  background: none; border: 0; cursor: pointer;
+  color: var(--muted); font-size: 26px; line-height: 1;
+}
+.cc-x:hover { color: var(--paper); }
+.cc-text { font-size: 15.5px; line-height: 1.6; margin: 0 0 22px; padding-right: 8px; }
+.cc-text a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.cc-text a:hover { color: var(--accent-2); }
+.cc-prefs { display: grid; gap: 12px; margin: 0 0 22px; }
+.cc-prefs[hidden] { display: none; }
+.cc-opt {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius);
+  font-size: 14px; line-height: 1.5; color: var(--muted); cursor: pointer;
+}
+.cc-opt input { margin-top: 4px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.cc-opt b { display: block; color: var(--paper); font-weight: 500; }
+.cc-actions { display: grid; gap: 12px; }
+.cc-btn {
+  width: 100%; padding: 15px 18px; cursor: pointer;
+  border-radius: var(--radius); border: 2px solid var(--line-2);
+  background: transparent; color: var(--muted);
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+.cc-btn:hover { border-color: var(--paper); color: var(--paper); }
+.cc-accept { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.cc-accept:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--on-accent); }
+.cc-reject { border-color: var(--accent); color: var(--accent-2); }
+.cc-reject:hover { border-color: var(--accent-2); color: var(--accent-2); background: var(--accent-dim); }
+.cc-link {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit;
+}
+.cc-link:hover { color: var(--accent-2); }
+@media (max-width: 620px) {
+  .cc { left: 12px; right: 12px; bottom: 12px; width: auto; padding: 30px 20px 20px; }
+  body.cc-open .wa-float { display: none; }
+}
+@media print { .cc { display: none; } }
