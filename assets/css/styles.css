@@ -271,7 +271,8 @@ h3, .h3 { font-size: clamp(20px, 2.1vw, 25px); }
 
 /* ---------- hero ---------- */
 .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
-.hero .wrap { position: relative; z-index: 2; padding-block: clamp(72px, 11vw, 150px); }
+/* the reel carries the weight now, so the hero opens closer to the header */
+.hero .wrap { position: relative; z-index: 2; padding-block: clamp(36px, 4.6vw, 68px) clamp(56px, 8vw, 116px); }
 .hero h1 { max-width: 16ch; }
 .hero .lead { margin-top: 26px; }
 /* ---------- hero showreel ----------
