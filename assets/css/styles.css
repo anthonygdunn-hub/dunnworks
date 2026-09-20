@@ -483,10 +483,10 @@ h3, .h3 { font-size: clamp(20px, 2.1vw, 25px); }
 }
 
 /* ---------- coverage map: real coordinates, no library, no tiles ---------- */
-.locmap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 34px; align-items: center; }
+.locmap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 30px; align-items: center; }
 @media (max-width: 860px) { .locmap { grid-template-columns: minmax(0, 1fr); gap: 26px; } }
 
-.locmap-svg { width: 100%; height: auto; max-width: 620px; display: block; margin-inline: auto; overflow: visible; }
+.locmap-svg { width: 100%; height: auto; max-width: 640px; display: block; margin-inline: auto; overflow: visible; }
 
 .locmap-ring { fill: none; stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 3 7; opacity: 0.8; }
 .locmap-ring-label {
@@ -496,7 +496,8 @@ h3, .h3 { font-size: clamp(20px, 2.1vw, 25px); }
 .locmap-axis { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 10; }
 .locmap-spoke { stroke: var(--line-2); stroke-width: 1; opacity: 0.55; transition: stroke 0.25s var(--ease), opacity 0.25s var(--ease); }
 /* only the dot and the label are targets, never the ring, spoke or wash behind them */
-.locmap-glow, .locmap-ring, .locmap-ring-label, .locmap-axis, .locmap-spoke, .locmap-halo { pointer-events: none; }
+.locmap-leader { stroke: var(--line-2); stroke-width: 1; opacity: 0.7; }
+.locmap-glow, .locmap-ring, .locmap-ring-label, .locmap-axis, .locmap-spoke, .locmap-leader, .locmap-halo { pointer-events: none; }
 
 .locmap-hit { fill: transparent; }
 .locmap-dot { fill: var(--ink); stroke: var(--accent-2); stroke-width: 1.5; transition: r 0.25s var(--ease), fill 0.25s var(--ease); }
@@ -518,7 +519,9 @@ a.locmap-node { cursor: pointer; }
 .locmap-node:hover .locmap-dot,
 .locmap-node:focus-visible .locmap-dot { r: 7; fill: var(--accent); stroke: var(--accent); }
 .locmap-node:hover .locmap-spoke,
-.locmap-node:focus-visible .locmap-spoke { stroke: var(--accent-2); opacity: 1; }
+.locmap-node:focus-visible .locmap-spoke,
+.locmap-node:hover .locmap-leader,
+.locmap-node:focus-visible .locmap-leader { stroke: var(--accent-2); opacity: 1; }
 .locmap-node:hover .locmap-name,
 .locmap-node:focus-visible .locmap-name { fill: var(--accent-2); }
 .locmap-node:hover .locmap-mi,
@@ -531,17 +534,34 @@ a.locmap-node:focus-visible .locmap-dot { stroke: var(--accent-2); }
 a.locmap-node .locmap-name { text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
 a.locmap-node:hover .locmap-name { text-decoration-color: var(--accent-2); }
 
-.locmap-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.locmap-col { display: grid; gap: 16px; align-content: center; }
+.locmap-list {
+  list-style: none; margin: 0; padding: 0; display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  background: var(--ink); border: 1px solid var(--line); align-content: start;
+}
+@media (max-width: 1080px) and (min-width: 861px) { .locmap-list { grid-template-columns: minmax(0, 1fr); } .locmap-list li:nth-child(odd) { border-right: 0; } }
+@media (max-width: 520px) { .locmap-list { grid-template-columns: minmax(0, 1fr); } .locmap-list li:nth-child(odd) { border-right: 0; } }
 .locmap-list li {
-  background: var(--ink); padding: 13px 16px; display: flex; align-items: baseline;
-  justify-content: space-between; gap: 14px; font-size: 15px;
+  padding: 10px 15px; display: flex; align-items: baseline;
+  justify-content: space-between; gap: 14px; font-size: 14.5px;
+  border-bottom: 1px solid var(--line);
+}
+.locmap-list li:nth-child(odd) { border-right: 1px solid var(--line); }
+@media (min-width: 521px) and (max-width: 860px), (min-width: 1081px) {
+  .locmap-list li:nth-last-child(-n+2):nth-child(odd) { border-bottom: 0; }
+  .locmap-list li:last-child { border-bottom: 0; }
 }
 .locmap-list li span { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); white-space: nowrap; }
 .locmap-list a { font-weight: 500; }
+p.locmap-rest { margin: 0; color: var(--muted); font-size: 14.5px; }
 
+/* On a phone the map is the picture and the list underneath is the data, so the
+   distances come off the map rather than stacking 15 of them on top of each other. */
 @media (max-width: 620px) {
-  .locmap-mi { opacity: 1; }
-  .locmap-name { font-size: 16px; }
+  .locmap-mi { display: none; }
+  .locmap-node.is-home .locmap-mi { display: block; opacity: 1; }
+  .locmap-name { font-size: 15px; }
   .locmap-ring-label { font-size: 13px; }
 }
 
