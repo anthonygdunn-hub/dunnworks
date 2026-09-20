@@ -116,6 +116,23 @@
   /* ---- enquiry form ----
      Posts to Web3Forms. Add your access key to the hidden input in contact.html.
      With no key set, the form falls back to opening the visitor's email client. */
+  /* ---- case study clips: play only while on screen, and never if motion is reduced ---- */
+  var clips = [].slice.call(document.querySelectorAll("video.mock-shot"));
+  if (clips.length) {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      clips.forEach(function (v) { v.removeAttribute("autoplay"); v.pause(); v.controls = true; });
+    } else if ("IntersectionObserver" in window) {
+      var vio = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { var q = e.target.play(); if (q && q.catch) q.catch(function () {}); }
+          else { e.target.pause(); }
+        });
+      }, { threshold: 0.2 });
+      clips.forEach(function (v) { vio.observe(v); });
+    }
+  }
+
   var form = document.getElementById("enquiry-form");
   if (form) {
     var status = form.querySelector(".form-status");
