@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://dunnworks.io/</loc><lastmod>2026-09-03</lastmod><priority>1.0</priority></url>
-  <url><loc>https://dunnworks.io/services.html</loc><lastmod>2026-09-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://dunnworks.io/work.html</loc><lastmod>2026-09-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://dunnworks.io/about.html</loc><lastmod>2026-09-03</lastmod><priority>0.7</priority></url>
-  <url><loc>https://dunnworks.io/contact.html</loc><lastmod>2026-09-03</lastmod><priority>0.8</priority></url>
+    <url><loc>https://dunnworks.io/</loc><lastmod>2026-09-18</lastmod><priority>1.0</priority></url>
+    <url><loc>https://dunnworks.io/services.html</loc><lastmod>2026-09-18</lastmod><priority>0.9</priority></url>
+    <url><loc>https://dunnworks.io/work.html</loc><lastmod>2026-09-18</lastmod><priority>0.9</priority></url>
+    <url><loc>https://dunnworks.io/about.html</loc><lastmod>2026-09-18</lastmod><priority>0.7</priority></url>
+    <url><loc>https://dunnworks.io/contact.html</loc><lastmod>2026-09-18</lastmod><priority>0.8</priority></url>
+    <url><loc>https://dunnworks.io/web-design-farnham.html</loc><lastmod>2026-09-18</lastmod><priority>0.8</priority></url>
+    <url><loc>https://dunnworks.io/web-design-fleet.html</loc><lastmod>2026-09-18</lastmod><priority>0.8</priority></url>
+    <url><loc>https://dunnworks.io/web-design-farnborough.html</loc><lastmod>2026-09-18</lastmod><priority>0.8</priority></url>
+    <url><loc>https://dunnworks.io/how-much-does-a-small-business-website-cost.html</loc><lastmod>2026-09-18</lastmod><priority>0.7</priority></url>
+    <url><loc>https://dunnworks.io/work/combustion-consulting.html</loc><lastmod>2026-09-18</lastmod><priority>0.6</priority></url>
+    <url><loc>https://dunnworks.io/work/aeroinspectors.html</loc><lastmod>2026-09-18</lastmod><priority>0.6</priority></url>
+    <url><loc>https://dunnworks.io/work/t-cooper-interiors.html</loc><lastmod>2026-09-18</lastmod><priority>0.6</priority></url>
+    <url><loc>https://dunnworks.io/work/falkners-arms-golf-society.html</loc><lastmod>2026-09-18</lastmod><priority>0.6</priority></url>
 </urlset>
