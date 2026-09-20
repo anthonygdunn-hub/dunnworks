@@ -8,8 +8,9 @@
 /* ---------- tokens, dark ---------- */
 :root {
   --ink:        #101012;
-  --hero-scrim:      rgba(16, 16, 18, 0.94);
-  --hero-scrim-soft: rgba(16, 16, 18, 0.7);
+  --hero-scrim:      rgba(16, 16, 18, 0.93);
+  --hero-scrim-mid:  rgba(16, 16, 18, 0.72);
+  --hero-scrim-soft: rgba(16, 16, 18, 0.32);
   --ink-2:      #1a1a1a;
   --ink-3:      #232329;
   --line:       rgba(236, 232, 255, 0.11);
@@ -50,7 +51,8 @@
 :root[data-theme="light"] {
   --ink:        #ffffff;
   --hero-scrim:      rgba(255, 255, 255, 0.95);
-  --hero-scrim-soft: rgba(255, 255, 255, 0.82);
+  --hero-scrim-mid:  rgba(255, 255, 255, 0.8);
+  --hero-scrim-soft: rgba(255, 255, 255, 0.5);
   --ink-2:      #f4f2f8;
   --ink-3:      #eae6f3;
   --line:       rgba(16, 16, 26, 0.12);
@@ -284,14 +286,25 @@ h3, .h3 { font-size: clamp(20px, 2.1vw, 25px); }
   position: absolute; inset: 0; overflow: hidden;
   opacity: 0; transition: opacity 1.4s ease;
 }
-.hero-shot.is-live { opacity: 0.4; }
+.hero-shot.is-live { opacity: 0.8; }
+/* In the light theme the dark parts of a captured page would swallow dark text, so
+   the capture is lifted rather than veiled harder, which keeps the banner visible. */
+:root[data-theme="light"] .hero-shot { filter: brightness(1.42) contrast(0.62); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .hero-shot { filter: brightness(1.42) contrast(0.62); }
+}
 .hero-shot .shot-track { position: absolute; inset: 0; animation: shotTrack 30s linear infinite; }
 .hero-shot .shot-track img { position: absolute; top: 0; left: 0; width: 100%; height: auto; display: block; animation: shotPage 30s linear infinite; }
 .hero-media::after {
   content: ""; position: absolute; inset: 0;
+  /* The wash sits over the copy block rather than over half the frame, so the
+     right of the banner stays legible as a page while the words keep their ground. */
   background:
-    linear-gradient(180deg, transparent 58%, var(--hero-scrim) 100%),
-    linear-gradient(90deg, var(--hero-scrim) 0%, var(--hero-scrim) 42%, var(--hero-scrim-soft) 78%, var(--hero-scrim-soft) 100%);
+    radial-gradient(56% 46% at 28% 44%, var(--hero-scrim) 0%, var(--hero-scrim) 62%, transparent 100%),
+    linear-gradient(180deg, transparent 64%, var(--hero-scrim-mid) 100%),
+    linear-gradient(90deg,
+      var(--hero-scrim-mid) 0%, var(--hero-scrim-mid) 24%,
+      var(--hero-scrim-soft) 62%, var(--hero-scrim-soft) 100%);
 }
 @media (max-width: 760px) { .hero-media { display: none; } }
 @media (prefers-reduced-motion: reduce) { .hero-media { display: none; } }
