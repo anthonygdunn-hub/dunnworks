@@ -307,17 +307,94 @@
     </div>
   </section>
 
-  <section class="cta">
-    <div class="dots" aria-hidden="true"></div>
+  <section class="section enquire" id="enquire">
     <div class="wrap">
-      <p class="eyebrow" style="justify-content:center" data-reveal>Next step</p>
-      <h2 data-reveal>A quote takes one short call and costs you nothing</h2>
-      <p class="lead" data-reveal style="text-align:center">
-        Send the address of your current site, or a line about the business if there is nothing online yet.
-      </p>
-      <div class="btn-row" data-reveal>
-        <a class="btn" href="contact.html">Start an enquiry</a>
-        <a class="btn btn--ghost" href="work.html">See the work</a>
+      <div class="enquire-grid">
+        <div class="enquire-copy" data-reveal>
+          <p class="eyebrow">Next step</p>
+          <h2 class="split-h">Tell me what<br><em>the site has to do</em></h2>
+          <p>
+            A free 20 minute call, a written quote, and a straight answer on whether a new site would make any
+            difference to the business. If it would not, I will say so.
+          </p>
+          <div class="enquire-card">
+            <span class="enquire-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            </span>
+            <div>
+              <b><a href="mailto:info@dunnworks.io">info@dunnworks.io</a></b>
+              <span>Or call <a href="tel:+447377599023">07377 599 023</a>, Bordon, Hampshire</span>
+            </div>
+          </div>
+          <div class="enquire-card">
+            <span class="enquire-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>
+            </span>
+            <div>
+              <b>A reply within one working day</b>
+              <span>From me, not an account manager or a support queue</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="enquire-form-wrap" data-reveal data-reveal-delay="80">
+          <h3>Send an enquiry</h3>
+          <p class="enquire-hint">Only your name, email and a few lines are needed. The rest helps me quote properly.</p>
+          <form class="form" id="enquiry-form" novalidate>
+            <!-- Web3Forms public access key. Enquiries are delivered to info@dunnworks.io. -->
+            <input type="hidden" name="access_key" value="3d3ef419-f9f0-4bcf-a5a8-d61632da1742">
+            <input type="hidden" name="subject" value="New website enquiry from dunnworks.io">
+            <input type="hidden" name="from_name" value="Dunnworks website">
+            <input type="hidden" name="page" value="services.html">
+            <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+            <div class="field-row">
+              <div class="field">
+                <label for="q-name">Your name (required)</label>
+                <input id="q-name" name="name" type="text" required autocomplete="name">
+              </div>
+              <div class="field">
+                <label for="q-email">Email (required)</label>
+                <input id="q-email" name="email" type="email" required autocomplete="email">
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="q-phone">Phone</label>
+                <input id="q-phone" name="phone" type="tel" autocomplete="tel">
+              </div>
+              <div class="field">
+                <label for="q-website">Current website</label>
+                <input id="q-website" name="website" type="text" placeholder="yourbusiness.co.uk">
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="q-budget">What you have in mind</label>
+              <select id="q-budget" name="budget">
+                <option value="Not sure yet">Not sure yet</option>
+                <option value="Starter, around &pound;395">Starter, around &pound;395</option>
+                <option value="One page site, around &pound;750">One page site, around &pound;750</option>
+                <option value="Business site, around &pound;1,450">Business site, around &pound;1,450</option>
+                <option value="Rebuild of an existing site, around &pound;950">Rebuild of an existing site, around &pound;950</option>
+                <option value="Something larger, with extras">Something larger, with extras</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="q-message">What is the site not doing for you? (required)</label>
+              <textarea id="q-message" name="message" required placeholder="A few lines is plenty. What the business does, who you want to hear from, and what is going wrong now."></textarea>
+            </div>
+
+            <button class="btn btn--wide" type="submit">Send enquiry</button>
+            <p class="form-status" role="status" aria-live="polite"></p>
+            <p class="form-note">
+              Your details are used to answer your enquiry and nothing else. No list, no newsletter, no sharing
+              with anyone.
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   </section>
