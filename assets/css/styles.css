@@ -8,6 +8,8 @@
 /* ---------- tokens, dark ---------- */
 :root {
   --ink:        #101012;
+  --hero-scrim:      rgba(16, 16, 18, 0.94);
+  --hero-scrim-soft: rgba(16, 16, 18, 0.58);
   --ink-2:      #1a1a1a;
   --ink-3:      #232329;
   --line:       rgba(236, 232, 255, 0.11);
@@ -47,6 +49,8 @@
 /* ---------- tokens, light ---------- */
 :root[data-theme="light"] {
   --ink:        #ffffff;
+  --hero-scrim:      rgba(255, 255, 255, 0.95);
+  --hero-scrim-soft: rgba(255, 255, 255, 0.74);
   --ink-2:      #f4f2f8;
   --ink-3:      #eae6f3;
   --line:       rgba(16, 16, 26, 0.12);
@@ -274,6 +278,23 @@ h3, .h3 { font-size: clamp(20px, 2.1vw, 25px); }
 .hero .wrap { position: relative; z-index: 2; padding-block: clamp(72px, 11vw, 150px); }
 .hero h1 { max-width: 16ch; }
 .hero .lead { margin-top: 26px; }
+/* ---------- hero showreel ---------- */
+.hero-media { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.hero-media video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+  opacity: 0; transition: opacity 1.4s ease;
+}
+.hero-media video.is-live { opacity: 1; }
+.hero-media::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, transparent 58%, var(--hero-scrim) 100%),
+    linear-gradient(90deg, var(--hero-scrim) 0%, var(--hero-scrim) 34%, var(--hero-scrim-soft) 74%, var(--hero-scrim-soft) 100%);
+}
+@media (max-width: 760px) { .hero-media { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-media { display: none; } }
+
 .hero-scan {
   position: absolute; left: 0; right: 0; height: 1px; top: 0; z-index: 1;
   background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
