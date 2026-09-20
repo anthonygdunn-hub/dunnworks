@@ -173,4 +173,128 @@
         });
     });
   }
+  /* ---- cookie consent ----
+     The site itself only stores the theme choice, which needs no consent.
+     Anything optional (analytics, marketing) must be added as
+       <script type="text/plain" data-consent="analytics" data-src="..."></script>
+     and it is only switched on after the visitor accepts that category.
+     The choice is kept in localStorage under "dw-consent". */
+  (function () {
+    var path = window.location.pathname;
+    if (/^\/(admin|preview)(\/|$)/.test(path)) return;
+
+    var KEY = "dw-consent";
+    var VERSION = 1;
+    var POLICY = "/cookies.html";
+
+    function read() {
+      try {
+        var c = JSON.parse(localStorage.getItem(KEY) || "null");
+        return c && c.v === VERSION ? c : null;
+      } catch (e) { return null; }
+    }
+
+    function activate(c) {
+      var tags = document.querySelectorAll('script[type="text/plain"][data-consent]');
+      Array.prototype.forEach.call(tags, function (old) {
+        if (!c[old.getAttribute("data-consent")] || old.getAttribute("data-activated")) return;
+        old.setAttribute("data-activated", "1");
+        var s = document.createElement("script");
+        if (old.getAttribute("data-src")) s.src = old.getAttribute("data-src");
+        else s.text = old.text;
+        old.parentNode.insertBefore(s, old.nextSibling);
+      });
+      try { document.dispatchEvent(new CustomEvent("dw:consent", { detail: c })); } catch (e) {}
+    }
+
+    function save(analytics, marketing) {
+      var c = { v: VERSION, necessary: true, analytics: !!analytics, marketing: !!marketing, date: new Date().toISOString() };
+      try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {}
+      activate(c);
+      close();
+    }
+
+    window.dwConsent = { get: read, open: function () { open(true); } };
+
+    var box = null;
+    var lastFocus = null;
+
+    function close() {
+      if (!box) return;
+      box.classList.remove("is-open");
+      document.body.classList.remove("cc-open");
+      var b = box;
+      box = null;
+      setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 250);
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    function open(showPrefs) {
+      if (box) return;
+      lastFocus = document.activeElement;
+      var c = read() || { analytics: false, marketing: false };
+      box = document.createElement("div");
+      box.className = "cc";
+      box.setAttribute("role", "dialog");
+      box.setAttribute("aria-live", "polite");
+      box.setAttribute("aria-label", "Cookie preferences");
+      box.innerHTML =
+        '<button class="cc-x" type="button" aria-label="Close: necessary cookies only">&times;</button>' +
+        '<p class="cc-text">This site uses cookies and similar storage to remember your preferences and, only if you allow it, ' +
+        'to understand how visitors use the site. By clicking "Accept all", you consent to our use of cookies. ' +
+        '<a href="' + POLICY + '">Cookie policy</a></p>' +
+        '<div class="cc-prefs"' + (showPrefs ? "" : " hidden") + '>' +
+          '<label class="cc-opt"><input type="checkbox" checked disabled><span><b>Necessary</b>Keeps the site working and remembers your light or dark theme. Always on.</span></label>' +
+          '<label class="cc-opt"><input type="checkbox" data-cc="analytics"' + (c.analytics ? " checked" : "") + '><span><b>Analytics</b>Anonymous visit counts, so I can see which pages are useful.</span></label>' +
+          '<label class="cc-opt"><input type="checkbox" data-cc="marketing"' + (c.marketing ? " checked" : "") + '><span><b>Marketing</b>Measuring whether adverts lead to enquiries.</span></label>' +
+        '</div>' +
+        '<div class="cc-actions">' +
+          '<button class="cc-btn cc-accept" type="button">Accept all</button>' +
+          '<button class="cc-btn cc-custom" type="button">' + (showPrefs ? "Save choices" : "Customise") + '</button>' +
+          '<button class="cc-btn cc-reject" type="button">Reject all</button>' +
+        '</div>';
+      document.body.appendChild(box);
+      document.body.classList.add("cc-open");
+      requestAnimationFrame(function () { if (box) box.classList.add("is-open"); });
+
+      var prefs = box.querySelector(".cc-prefs");
+      var custom = box.querySelector(".cc-custom");
+      function val(name) { var i = box.querySelector('[data-cc="' + name + '"]'); return i && i.checked; }
+
+      box.querySelector(".cc-accept").addEventListener("click", function () { save(true, true); });
+      box.querySelector(".cc-reject").addEventListener("click", function () { save(false, false); });
+      box.querySelector(".cc-x").addEventListener("click", function () { save(false, false); });
+      custom.addEventListener("click", function () {
+        if (prefs.hidden) {
+          prefs.hidden = false;
+          custom.textContent = "Save choices";
+          var first = prefs.querySelector('[data-cc]');
+          if (first) first.focus();
+        } else {
+          save(val("analytics"), val("marketing"));
+        }
+      });
+      box.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && read()) close();
+      });
+    }
+
+    /* "Cookie settings" link in every footer */
+    var fb = document.querySelector(".footer-bottom");
+    if (fb) {
+      var link = document.createElement("button");
+      link.type = "button";
+      link.className = "cc-link";
+      link.textContent = "Cookie settings";
+      link.addEventListener("click", function () { open(true); });
+      fb.appendChild(link);
+    }
+    Array.prototype.forEach.call(document.querySelectorAll("[data-cookie-settings]"), function (el) {
+      el.addEventListener("click", function (e) { e.preventDefault(); open(true); });
+    });
+
+    var existing = read();
+    if (existing) activate(existing);
+    else open(false);
+  })();
 })();
