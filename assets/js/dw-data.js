@@ -175,6 +175,7 @@
         headers: { Prefer: 'resolution=merge-duplicates,return=representation' }
       });
     },
+    rest: rest,
     signInWithPassword: signInWithPassword,
     sendMagicLink: sendMagicLink,
     captureFromHash: captureFromHash,
