@@ -384,6 +384,16 @@
     if (existing) activate(existing);
     else open(false);
   })();
+  /* ---- sign-in tokens landing on a public page ----
+     Supabase falls back to the Site URL when a redirect is not honoured, so a
+     magic link can arrive here instead of the console. Carry the hash across
+     rather than losing it. */
+  if (window.location.hash.indexOf("access_token=") !== -1 &&
+      !/^\/console(\/|$)/.test(window.location.pathname)) {
+    window.location.replace("/console/" + window.location.hash);
+    return;
+  }
+
   /* ---- private area link in every footer ---- */
   (function () {
     if (/^\/(console|admin|preview)(\/|$)/.test(window.location.pathname)) return;
