@@ -384,4 +384,18 @@
     if (existing) activate(existing);
     else open(false);
   })();
+  /* ---- private area link in every footer ---- */
+  (function () {
+    if (/^\/(console|admin|preview)(\/|$)/.test(window.location.pathname)) return;
+    var fb = document.querySelector(".footer-bottom");
+    if (!fb) return;
+    var a = document.createElement("a");
+    a.className = "cc-link";
+    a.href = "/console/";
+    a.rel = "nofollow";
+    a.textContent = "Preview";
+    a.setAttribute("aria-label", "Private preview area");
+    a.style.textDecoration = "none";
+    fb.appendChild(a);
+  })();
 })();
