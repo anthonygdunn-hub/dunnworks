@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0b0a0a">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("dw-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<style>
+  body { padding-block: 24px 80px; }
+  .hd { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; justify-content:space-between; margin-bottom:18px; }
+  .hd h1 { font-size: clamp(24px,3.2vw,34px); }
+  .sub { color:var(--muted); font-size:14.5px; margin-top:6px; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .tabs { display:flex; flex-wrap:wrap; gap:6px; border-bottom:1px solid var(--line); margin-bottom:22px; }
+  .tab { font-family:var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+         padding:11px 16px; border:0; border-bottom:2px solid transparent; background:none;
+         color:var(--muted); cursor:pointer; }
+  .tab.is-on { color:var(--paper); border-bottom-color:var(--accent); }
+  .tab b { color:var(--muted-2); font-weight:400; margin-left:6px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(104px,1fr)); gap:9px; margin-bottom:20px; }
+  .stat { border:1px solid var(--line); border-radius:var(--radius); background:var(--ink-2); padding:13px 15px; }
+  .stat b { display:block; font-family:var(--font-display); font-size:23px; line-height:1; }
+  .stat span { font-family:var(--font-mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted-2); }
+  .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:18px; }
+  .chip { font-family:var(--font-mono); font-size:11px; letter-spacing:.07em; text-transform:uppercase;
+          padding:8px 11px; border:1px solid var(--line-2); border-radius:var(--radius);
+          background:transparent; color:var(--muted); cursor:pointer; }
+  .chip.is-on { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .bar input[type=search], .bar select { padding:9px 12px; border:1px solid var(--line-2); border-radius:var(--radius);
+          background:var(--ink-2); color:var(--paper); font:inherit; font-size:14.5px; }
+  .bar input[type=search] { flex:1 1 200px; min-width:150px; }
+  .cards { display:grid; gap:11px; }
+  .c { border:1px solid var(--line); border-radius:var(--radius); background:var(--ink-2); padding:17px 19px; }
+  .c.is-due { border-color:var(--accent); }
+  .c.is-cold { opacity:.6; }
+  .c-top { display:flex; flex-wrap:wrap; gap:10px; align-items:baseline; justify-content:space-between; }
+  .c h3 { font-size:17.5px; }
+  .tagline { font-family:var(--font-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-2); }
+  .det { color:var(--muted); font-size:14.5px; margin:8px 0 11px; }
+  .det a { color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
+  .det a:hover { color:var(--accent-2); }
+  .flag { font-family:var(--font-mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase;
+          padding:3px 7px; border-radius:var(--radius); border:1px solid var(--line-2); color:var(--muted-2); }
+  .flag.warn { border-color:var(--accent); color:var(--accent-2); }
+  .mini { font-family:var(--font-mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
+          padding:6px 10px; border:1px solid var(--line-2); border-radius:var(--radius);
+          background:transparent; color:var(--muted); cursor:pointer; text-decoration:none; display:inline-block; }
+  .mini:hover { border-color:var(--accent-2); color:var(--accent-2); }
+  .score { font-family:var(--font-display); font-size:22px; font-weight:700; }
+  .s-hot { color:#4fd08a; } .s-warm { color:var(--accent-2); } .s-cool { color:var(--muted); }
+  .edit { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:9px; margin-top:13px;
+          padding-top:13px; border-top:1px solid var(--line); }
+  .edit label { display:block; font-family:var(--font-mono); font-size:9.5px; letter-spacing:.09em;
+                text-transform:uppercase; color:var(--muted-2); margin-bottom:5px; }
+  .edit input, .edit select, .edit textarea {
+          width:100%; padding:8px 10px; border:1px solid var(--line-2); border-radius:var(--radius);
+          background:var(--ink); color:var(--paper); font:inherit; font-size:14px; }
+  .edit textarea { min-height:42px; resize:vertical; }
+  .edit .wide { grid-column:1/-1; }
+  .saved { font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#4fd08a; }
+  .gate { max-width:420px; margin:9vh auto 0; }
+  .gate .field { margin-bottom:15px; }
+  .gate label { display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:.1em;
+                text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .gate input { width:100%; padding:12px 14px; border:1px solid var(--line-2); border-radius:var(--radius);
+                background:var(--ink-2); color:var(--paper); font:inherit; }
+  .msg { font-size:14.5px; margin-top:12px; min-height:20px; }
+  .msg.bad { color:var(--bad); } .msg.ok { color:#4fd08a; }
+  @media (max-width:620px){ .c { padding:15px 16px; } }
+</style>
+</head>
+<body>
+
+<main class="wrap" id="main">
+
+  <section class="gate" id="gate-pass" hidden>
+    <h1 class="h3" style="margin-bottom:8px">Dunnworks</h1>
+    <p style="color:var(--muted); font-size:15px; margin-bottom:24px">Private area.</p>
+    <form id="passform" class="card" novalidate>
+      <div class="field">
+        <label for="pass">Passphrase</label>
+        <input id="pass" type="password" autocomplete="off" autofocus>
+      </div>
+      <button class="btn btn--wide" type="submit">Continue</button>
+      <p class="msg" id="pass-msg" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section class="gate" id="gate-auth" hidden>
+    <h1 class="h3" style="margin-bottom:8px">Console</h1>
+    <p style="color:var(--muted); font-size:15px; margin-bottom:24px">Sign in to load your data.</p>
+    <form id="signin" class="card" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="email" required placeholder="info@dunnworks.io">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password">
+      </div>
+      <button class="btn btn--wide" type="submit">Sign in</button>
+      <p class="msg" id="auth-msg" role="status" aria-live="polite"></p>
+      <p style="color:var(--muted-2); font-size:13.5px; margin-top:4px">
+        No password to hand? <button type="button" class="mini" id="magic">Email me a link</button>
+      </p>
+    </form>
+  </section>
+
+  <section id="app" hidden>
+    <div class="hd">
+      <div>
+        <h1>Console</h1>
+        <p class="sub" id="sub">Everything private, in one place.</p>
+      </div>
+      <div class="row">
+        <a class="mini" href="/admin/">Old admin</a>
+        <button class="mini" id="signout" type="button">Sign out</button>
+      </div>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab is-on" data-view="prospects">Prospects <b id="n-prospects"></b></button>
+      <button class="tab" data-view="previews">Previews <b id="n-previews"></b></button>
+      <button class="tab" data-view="jobs">Job radar <b id="n-jobs"></b></button>
+      <button class="tab" data-view="enquiries">Enquiries <b id="n-enquiries"></b></button>
+    </nav>
+
+    <div id="view"></div>
+    <p class="msg" id="app-msg" role="status" aria-live="polite"></p>
+  </section>
+
+</main>
+
+<script src="../assets/js/dw-config.js"></script>
+<script src="../assets/js/dw-data.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var PASS_HASH = 'f04124efba8ee478b28113cee6cd97ed2c252f9c79e6c42d5d9338fc8cf5b789';
+  var PASS_KEY = 'dw-console-pass';
+
+  var gatePass = document.getElementById('gate-pass');
+  var gateAuth = document.getElementById('gate-auth');
+  var app = document.getElementById('app');
+  var viewEl = document.getElementById('view');
+  var appMsg = document.getElementById('app-msg');
+
+  var D = { projects: [], keys: {}, jobs: [], enquiries: [], run: null };
+  var ui = { view: 'prospects', stage: 'all', sector: '', q: '', cat: 'all', min: 45, jstatus: 'open' };
+  var STAGES = ['not-contacted','emailed','called','replied','meeting','quoted','won','lost','parked'];
+
+  function say(el, text, cls) { el.className = 'msg' + (cls ? ' ' + cls : ''); el.textContent = text || ''; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  function today() { return new Date().toISOString().slice(0,10); }
+  function when(iso) {
+    if (!iso) return '';
+    var d = Math.floor((Date.now() - Date.parse(iso)) / 86400000);
+    if (d <= 0) return 'today';
+    if (d === 1) return 'yesterday';
+    if (d < 28) return d + ' days ago';
+    return Math.round(d / 7) + ' weeks ago';
+  }
+  function isDue(r) { return r.next_action_on && r.next_action_on <= today() && r.stage !== 'won' && r.stage !== 'lost'; }
+
+  async function sha(s) {
+    var b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(b)).map(function (x) { return x.toString(16).padStart(2,'0'); }).join('');
+  }
+
+  /* ---- gate one: passphrase ---- */
+  document.getElementById('passform').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var v = document.getElementById('pass').value.trim().toLowerCase();
+    if (await sha(v) !== PASS_HASH) { say(document.getElementById('pass-msg'), 'Not that one.', 'bad'); return; }
+    try { localStorage.setItem(PASS_KEY, PASS_HASH); } catch (err) {}
+    gatePass.hidden = true;
+    afterPass();
+  });
+
+  /* ---- gate two: supabase ---- */
+  document.getElementById('signin').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = document.getElementById('email').value.trim();
+    var pw = document.getElementById('password').value;
+    if (!pw) { say(document.getElementById('auth-msg'), 'Enter your password, or use the email link.', 'bad'); return; }
+    say(document.getElementById('auth-msg'), 'Signing in...');
+    DWData.signInWithPassword(email, pw).then(start)
+      .catch(function (err) { say(document.getElementById('auth-msg'), err.message || 'That did not work.', 'bad'); });
+  });
+
+  document.getElementById('magic').addEventListener('click', function () {
+    var email = document.getElementById('email').value.trim();
+    if (!email) { say(document.getElementById('auth-msg'), 'Put your email address in first.', 'bad'); return; }
+    DWData.sendMagicLink(email, location.href)
+      .then(function () { say(document.getElementById('auth-msg'), 'Link sent. Open it on this device.', 'ok'); })
+      .catch(function (err) { say(document.getElementById('auth-msg'), err.message || 'Could not send it.', 'bad'); });
+  });
+
+  document.getElementById('signout').addEventListener('click', function () {
+    try { localStorage.removeItem(PASS_KEY); } catch (e) {}
+    DWData.signOut().then(function () { location.reload(); });
+  });
+
+  /* ---- data ---- */
+  function load() {
+    say(appMsg, 'Loading...');
+    return Promise.all([
+      DWData.rest('dw_projects?select=*&order=name.asc'),
+      DWData.rest('dw_project_keys?select=slug,doc,passphrase,issued_on').catch(function () { return []; }),
+      DWData.rest('dw_jobs?select=*&order=score.desc,posted_at.desc').catch(function () { return []; }),
+      DWData.rest('tcooper_enquiries?select=*&order=created_at.desc').catch(function () { return []; }),
+      DWData.rest('dw_job_runs?select=*&order=started_at.desc&limit=1').catch(function () { return []; })
+    ]).then(function (out) {
+      D.projects = out[0] || [];
+      D.keys = {};
+      (out[1] || []).forEach(function (k) {
+        if (!D.keys[k.slug]) D.keys[k.slug] = {};
+        D.keys[k.slug][k.doc] = k.passphrase;
+      });
+      D.jobs = out[2] || [];
+      D.enquiries = out[3] || [];
+      D.run = (out[4] || [])[0] || null;
+      say(appMsg, '');
+      counts();
+      render();
+    }).catch(function (err) { say(appMsg, err.message, 'bad'); });
+  }
+
+  function counts() {
+    var prospects = D.projects.filter(function (p) { return p.kind === 'preview'; });
+    document.getElementById('n-prospects').textContent = prospects.length;
+    document.getElementById('n-previews').textContent = D.projects.filter(function (p) { return p.has_preview; }).length;
+    document.getElementById('n-jobs').textContent = D.jobs.filter(function (j) { return j.score >= 45 && j.status !== 'hidden'; }).length;
+    var open = D.enquiries.filter(function (e) { return e.status !== 'closed' && e.status !== 'done'; }).length;
+    document.getElementById('n-enquiries').textContent = open || D.enquiries.length;
+    document.getElementById('sub').textContent =
+      D.run ? 'Jobs last checked ' + when(D.run.started_at) + '.' : 'Everything private, in one place.';
+  }
+
+  function patch(table, id, body, el) {
+    return DWData.rest(table + '?id=eq.' + encodeURIComponent(id), {
+      method:'PATCH', body:body, headers:{ Prefer:'return=minimal' }
+    }).then(function () {
+      if (el) { el.textContent = 'Saved'; setTimeout(function () { el.textContent = ''; }, 1600); }
+    }).catch(function (err) { say(appMsg, err.message, 'bad'); });
+  }
+
+  /* ---- views ---- */
+  function render() {
+    if (ui.view === 'prospects') return viewProspects();
+    if (ui.view === 'previews') return viewPreviews();
+    if (ui.view === 'jobs') return viewJobs();
+    return viewEnquiries();
+  }
+
+  function viewProspects() {
+    var all = D.projects.filter(function (p) { return p.kind === 'preview' || p.status === 'live'; });
+    var c = { total: all.length, due: 0 };
+    STAGES.forEach(function (s) { c[s] = 0; });
+    all.forEach(function (r) { c[r.stage] = (c[r.stage] || 0) + 1; if (isDue(r)) c.due++; });
+
+    var sectors = {};
+    all.forEach(function (r) { if (r.sector) sectors[r.sector] = 1; });
+
+    var rows = all.filter(function (r) {
+      if (ui.stage === 'due') { if (!isDue(r)) return false; }
+      else if (ui.stage !== 'all' && r.stage !== ui.stage) return false;
+      if (ui.sector && r.sector !== ui.sector) return false;
+      if (ui.q) {
+        var hay = [r.name, r.sector, r.address, r.outreach_notes, r.contact_name, r.next_action].join(' ').toLowerCase();
+        if (hay.indexOf(ui.q.toLowerCase()) === -1) return false;
+      }
+      return true;
+    }).sort(function (a, b) {
+      var ad = isDue(a) ? 0 : 1, bd = isDue(b) ? 0 : 1;
+      if (ad !== bd) return ad - bd;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+
+    viewEl.innerHTML =
+      '<div class="stats">' +
+        [['Targets', c.total], ['Chase now', c.due], ['Not contacted', c['not-contacted']],
+         ['In play', c.emailed + c.called + c.replied + c.meeting + c.quoted], ['Won', c.won], ['Lost', c.lost]]
+        .map(function (s) { return '<div class="stat"><b>' + s[1] + '</b><span>' + s[0] + '</span></div>'; }).join('') +
+      '</div>' +
+      '<div class="bar">' +
+        ['all','due'].concat(STAGES).map(function (s) {
+          return '<button class="chip' + (ui.stage === s ? ' is-on' : '') + '" data-stage="' + s + '">' +
+            (s === 'all' ? 'All' : s === 'due' ? 'Chase now' : s.replace('-', ' ')) + '</button>';
+        }).join('') +
+      '</div>' +
+      '<div class="bar">' +
+        '<input type="search" id="q" placeholder="Search name, sector, town, notes" value="' + esc(ui.q) + '">' +
+        '<select id="sector"><option value="">All sectors</option>' +
+          Object.keys(sectors).sort().map(function (s) {
+            return '<option value="' + esc(s) + '"' + (ui.sector === s ? ' selected' : '') + '>' + esc(s) + '</option>';
+          }).join('') +
+        '</select>' +
+        '<span class="tagline">' + rows.length + ' of ' + all.length + '</span>' +
+      '</div>' +
+      '<div class="cards">' + rows.map(prospectCard).join('') + '</div>';
+  }
+
+  function prospectCard(r) {
+    var k = D.keys[r.slug] || {};
+    var phone = r.contact_phone ? '<a href="tel:' + esc((r.contact_phone.split('/')[0] || '').replace(/\s/g,'')) + '">' + esc(r.contact_phone) + '</a>' : '';
+    var email = r.contact_email ? '<a href="mailto:' + esc(r.contact_email) + '">' + esc(r.contact_email) + '</a>' : '<span style="color:var(--muted-2)">no email published</span>';
+    var site = r.website ? '<a href="' + esc(r.website) + '" target="_blank" rel="noopener noreferrer">their site</a>'
+             : (r.live_url ? '<a href="' + esc(r.live_url) + '" target="_blank" rel="noopener noreferrer">live site</a>' : '');
+    var det = [r.contact_name ? esc(r.contact_name) : '', phone, email, site, r.address ? esc(r.address) : ''].filter(Boolean).join(' &middot; ');
+    var eyeball = (r.contact_source || '').indexOf('directory') === 0;
+
+    return '<article class="c' + (isDue(r) ? ' is-due' : '') + (r.stage === 'lost' ? ' is-cold' : '') + '" data-table="dw_projects" data-id="' + r.id + '">' +
+      '<div class="c-top"><h3>' + esc(r.name) + '</h3><span class="tagline">' + esc(r.sector || '') +
+        (eyeball ? ' <span class="flag warn">check details</span>' : '') +
+        (isDue(r) ? ' <span class="flag warn">due</span>' : '') +
+        (r.status === 'live' ? ' <span class="flag">client</span>' : '') + '</span></div>' +
+      (det ? '<p class="det">' + det + '</p>' : '') +
+      '<div class="row">' +
+        (r.has_preview ? '<a class="mini" href="/preview/' + esc(r.slug) + '/" target="_blank" rel="noopener">Preview</a>' : '') +
+        (r.has_report ? '<a class="mini" href="/preview/' + esc(r.slug) + '/report/" target="_blank" rel="noopener">Report</a>' : '') +
+        (k.site ? '<button class="mini" data-copy="' + esc(k.site) + '">Copy site pass</button>' : '') +
+        (k.report ? '<button class="mini" data-copy="' + esc(k.report) + '">Copy report pass</button>' : '') +
+        (r.contact_email ? '<a class="mini" href="mailto:' + esc(r.contact_email) + '?subject=' + encodeURIComponent('A website concept for ' + (r.name || '')) + '">Email</a>' : '') +
+      '</div>' +
+      '<div class="edit">' +
+        '<div><label>Stage</label><select data-f="stage">' +
+          STAGES.map(function (s) { return '<option value="' + s + '"' + (r.stage === s ? ' selected' : '') + '>' + s.replace('-', ' ') + '</option>'; }).join('') +
+        '</select></div>' +
+        '<div><label>Last contact</label><input type="date" data-f="last_contact_on" value="' + esc(r.last_contact_on || '') + '"></div>' +
+        '<div><label>Next action</label><input type="text" data-f="next_action" value="' + esc(r.next_action || '') + '" placeholder="Call back"></div>' +
+        '<div><label>When</label><input type="date" data-f="next_action_on" value="' + esc(r.next_action_on || '') + '"></div>' +
+        '<div class="wide"><label>Notes</label><textarea data-f="outreach_notes" placeholder="What was said">' + esc(r.outreach_notes || '') + '</textarea></div>' +
+        '<div class="wide row" style="justify-content:flex-end"><span class="saved" data-saved></span></div>' +
+      '</div>' +
+    '</article>';
+  }
+
+  function viewPreviews() {
+    var rows = D.projects.filter(function (p) { return p.has_preview || p.has_report; })
+      .filter(function (r) {
+        if (!ui.q) return true;
+        return (r.name + ' ' + r.slug + ' ' + (r.sector || '')).toLowerCase().indexOf(ui.q.toLowerCase()) !== -1;
+      });
+
+    viewEl.innerHTML =
+      '<div class="bar"><input type="search" id="q" placeholder="Search previews" value="' + esc(ui.q) + '">' +
+      '<span class="tagline">' + rows.length + ' with a preview or report</span></div>' +
+      '<div class="cards">' + rows.map(function (r) {
+        var k = D.keys[r.slug] || {};
+        return '<article class="c">' +
+          '<div class="c-top"><h3>' + esc(r.name) + '</h3><span class="tagline">' + esc(r.status) +
+            (r.pages ? ' &middot; ' + r.pages + ' pages' : '') +
+            (r.report_on ? ' &middot; report ' + esc(r.report_on) : '') + '</span></div>' +
+          '<p class="det">/preview/' + esc(r.slug) + '/' +
+            (k.site ? ' &middot; site pass <code>' + esc(k.site) + '</code>' : '') +
+            (k.report ? ' &middot; report pass <code>' + esc(k.report) + '</code>' : '') + '</p>' +
+          '<div class="row">' +
+            (r.has_preview ? '<a class="mini" href="/preview/' + esc(r.slug) + '/" target="_blank" rel="noopener">Open preview</a>' : '') +
+            (r.has_report ? '<a class="mini" href="/preview/' + esc(r.slug) + '/report/" target="_blank" rel="noopener">Open report</a>' : '') +
+            (k.site ? '<button class="mini" data-copy="' + esc(k.site) + '">Copy site pass</button>' : '') +
+            (k.report ? '<button class="mini" data-copy="' + esc(k.report) + '">Copy report pass</button>' : '') +
+          '</div></article>';
+      }).join('') + '</div>';
+  }
+
+  function viewJobs() {
+    var rows = D.jobs.filter(function (r) {
+      if (ui.cat !== 'all' && r.category !== ui.cat) return false;
+      if (ui.jstatus === 'open' && (r.status === 'hidden' || r.status === 'rejected')) return false;
+      if (ui.jstatus !== 'open' && r.status !== ui.jstatus) return false;
+      if ((r.score || 0) < ui.min) return false;
+      if (ui.q) {
+        var hay = (r.title + ' ' + (r.company || '') + ' ' + (r.location || '') + ' ' + (r.description || '')).toLowerCase();
+        if (hay.indexOf(ui.q.toLowerCase()) === -1) return false;
+      }
+      return true;
+    });
+
+    viewEl.innerHTML =
+      '<div class="bar">' +
+        [['all','All'],['cs','Customer success'],['am','Account management'],['field-sales','Field sales'],['shipping','Shipping']]
+          .map(function (c) { return '<button class="chip' + (ui.cat === c[0] ? ' is-on' : '') + '" data-cat="' + c[0] + '">' + c[1] + '</button>'; }).join('') +
+        '<span style="flex:1 1 10px"></span>' +
+        '<button class="mini" id="refresh">Refresh now</button>' +
+      '</div>' +
+      '<div class="bar">' +
+        '<input type="search" id="q" placeholder="Search jobs" value="' + esc(ui.q) + '">' +
+        [['open','Open'],['shortlist','Shortlist'],['applied','Applied'],['hidden','Hidden']]
+          .map(function (s) { return '<button class="chip' + (ui.jstatus === s[0] ? ' is-on' : '') + '" data-jstatus="' + s[0] + '">' + s[1] + '</button>'; }).join('') +
+        '<label class="tagline" for="min">Min score</label>' +
+        '<input id="min" type="range" min="0" max="90" step="5" value="' + ui.min + '" style="width:110px">' +
+        '<span class="tagline">' + ui.min + '+ &middot; ' + rows.length + ' roles</span>' +
+      '</div>' +
+      '<div class="cards">' + rows.map(function (r) {
+        var cls = r.score >= 70 ? 's-hot' : r.score >= 50 ? 's-warm' : 's-cool';
+        return '<article class="c" data-table="dw_jobs" data-id="' + r.id + '">' +
+          '<div class="c-top"><h3><a href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">' + esc(r.title) + '</a></h3>' +
+          '<span class="score ' + cls + '">' + (r.score || 0) + '</span></div>' +
+          '<p class="det">' + esc(r.company || 'Company not named') + ' &middot; ' + esc(r.location || 'UK') +
+            (r.salary_text ? ' &middot; ' + esc(r.salary_text) : '') +
+            (r.posted_at ? ' &middot; ' + when(r.posted_at) : '') + ' &middot; ' + esc(r.source) + '</p>' +
+          ((r.score_reasons || []).length ? '<p class="det" style="margin-top:-4px"><b style="color:var(--paper);font-weight:500">Why:</b> ' +
+            (r.score_reasons || []).map(esc).join(' &middot; ') + '</p>' : '') +
+          '<div class="row">' +
+            '<button class="mini" data-jset="shortlist">Shortlist</button>' +
+            '<button class="mini" data-jset="applied">Applied</button>' +
+            '<button class="mini" data-jset="hidden">Hide</button>' +
+            '<a class="mini" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">Open ad</a>' +
+            '<span class="saved" data-saved></span>' +
+          '</div></article>';
+      }).join('') + '</div>';
+  }
+
+  function viewEnquiries() {
+    var rows = D.enquiries.filter(function (r) {
+      if (!ui.q) return true;
+      return [r.name, r.email, r.phone, r.service, r.message].join(' ').toLowerCase().indexOf(ui.q.toLowerCase()) !== -1;
+    });
+    viewEl.innerHTML =
+      '<div class="bar"><input type="search" id="q" placeholder="Search enquiries" value="' + esc(ui.q) + '">' +
+      '<span class="tagline">T Cooper Interiors &middot; ' + rows.length + '</span></div>' +
+      (rows.length ? '<div class="cards">' + rows.map(function (r) {
+        return '<article class="c">' +
+          '<div class="c-top"><h3>' + esc(r.name || 'No name') + '</h3>' +
+          '<span class="tagline">' + when(r.created_at) + (r.status ? ' &middot; ' + esc(r.status) : '') + '</span></div>' +
+          '<p class="det">' +
+            (r.email ? '<a href="mailto:' + esc(r.email) + '">' + esc(r.email) + '</a> &middot; ' : '') +
+            (r.phone ? '<a href="tel:' + esc(r.phone.replace(/\s/g,'')) + '">' + esc(r.phone) + '</a> &middot; ' : '') +
+            esc(r.service || '') + '</p>' +
+          (r.message ? '<p class="det">' + esc(r.message) + '</p>' : '') +
+        '</article>';
+      }).join('') + '</div>'
+      : '<p style="color:var(--muted)">No enquiries yet. They appear here the moment someone uses the form on tcooperinteriors.co.uk.</p>');
+  }
+
+  /* ---- events ---- */
+  document.querySelectorAll('[data-view]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-view]').forEach(function (x) { x.classList.remove('is-on'); });
+      b.classList.add('is-on');
+      ui.view = b.getAttribute('data-view'); ui.q = '';
+      render();
+    });
+  });
+
+  viewEl.addEventListener('click', function (e) {
+    var copy = e.target.closest('[data-copy]');
+    if (copy) {
+      var txt = copy.getAttribute('data-copy');
+      navigator.clipboard.writeText(txt).then(function () {
+        var was = copy.textContent; copy.textContent = 'Copied';
+        setTimeout(function () { copy.textContent = was; }, 1400);
+      }).catch(function () { say(appMsg, 'Copy failed. It is: ' + txt, 'bad'); });
+      return;
+    }
+    var chip = e.target.closest('[data-stage],[data-cat],[data-jstatus]');
+    if (chip) {
+      if (chip.hasAttribute('data-stage')) ui.stage = chip.getAttribute('data-stage');
+      if (chip.hasAttribute('data-cat')) ui.cat = chip.getAttribute('data-cat');
+      if (chip.hasAttribute('data-jstatus')) ui.jstatus = chip.getAttribute('data-jstatus');
+      render();
+      return;
+    }
+    var jset = e.target.closest('[data-jset]');
+    if (jset) {
+      var card = jset.closest('[data-id]');
+      var id = card.getAttribute('data-id');
+      var next = jset.getAttribute('data-jset');
+      var job = D.jobs.filter(function (j) { return j.id === id; })[0];
+      if (job && job.status === next) next = 'new';
+      if (job) job.status = next;
+      patch('dw_jobs', id, { status: next }, card.querySelector('[data-saved]')).then(function () { counts(); render(); });
+      return;
+    }
+    if (e.target.id === 'refresh') {
+      var btn = e.target;
+      btn.disabled = true; btn.textContent = 'Checking...';
+      say(appMsg, 'Asking Adzuna and Reed for anything new.');
+      fetch(window.DW.url + '/functions/v1/fetch-jobs', {
+        method:'POST',
+        headers:{ apikey: window.DW.anonKey,
+                  Authorization: 'Bearer ' + (JSON.parse(localStorage.getItem('dw-auth') || '{}').access_token || ''),
+                  'Content-Type':'application/json' }
+      }).then(function (r) { return r.json(); })
+        .then(function (out) {
+          if (!out.ok) throw new Error(out.error || 'the fetch failed');
+          say(appMsg, 'Found ' + out.fetched + ' ads, kept ' + out.kept + '.', 'ok');
+          return load();
+        })
+        .catch(function (err) { say(appMsg, err.message, 'bad'); })
+        .finally(function () { btn.disabled = false; btn.textContent = 'Refresh now'; });
+    }
+  });
+
+  viewEl.addEventListener('change', function (e) {
+    if (e.target.id === 'sector') { ui.sector = e.target.value; render(); return; }
+    if (e.target.id === 'min') { ui.min = Number(e.target.value); render(); return; }
+    var f = e.target.getAttribute('data-f');
+    if (!f) return;
+    var card = e.target.closest('[data-id]');
+    var body = {};
+    body[f] = e.target.value || null;
+    if (f === 'stage' && e.target.value !== 'not-contacted') {
+      var lc = card.querySelector('[data-f=last_contact_on]');
+      if (lc && !lc.value) { body.last_contact_on = today(); lc.value = today(); }
+    }
+    var row = D.projects.filter(function (p) { return p.id === card.getAttribute('data-id'); })[0];
+    if (row) Object.assign(row, body);
+    patch('dw_projects', card.getAttribute('data-id'), body, card.querySelector('[data-saved]'));
+  });
+
+  viewEl.addEventListener('input', function (e) {
+    if (e.target.id === 'q') {
+      ui.q = e.target.value.trim();
+      var pos = e.target.selectionStart;
+      render();
+      var again = document.getElementById('q');
+      if (again) { again.focus(); again.setSelectionRange(pos, pos); }
+    }
+    if (e.target.id === 'min') {
+      ui.min = Number(e.target.value);
+      render();
+      var m = document.getElementById('min'); if (m) m.focus();
+    }
+  });
+
+  /* ---- boot ---- */
+  function start() { gateAuth.hidden = true; app.hidden = false; load(); }
+
+  function afterPass() {
+    DWData.captureFromHash();
+    DWData.whoami().then(function (user) {
+      if (user && user.email) start(); else gateAuth.hidden = false;
+    }).catch(function () { gateAuth.hidden = false; });
+  }
+
+  var passed = false;
+  try { passed = localStorage.getItem(PASS_KEY) === PASS_HASH; } catch (e) {}
+  if (passed) afterPass(); else gatePass.hidden = false;
+})();
+</script>
+</body>
+</html>
