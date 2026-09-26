@@ -403,8 +403,8 @@
     a.className = "cc-link";
     a.href = "/console/";
     a.rel = "nofollow";
-    a.textContent = "Preview";
-    a.setAttribute("aria-label", "Private preview area");
+    a.textContent = "Admin login";
+    a.setAttribute("aria-label", "Admin sign in");
     a.style.textDecoration = "none";
     fb.appendChild(a);
   })();
