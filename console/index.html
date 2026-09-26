@@ -538,8 +538,11 @@
   /* ---- boot ---- */
   function start() { gateAuth.hidden = true; app.hidden = false; load(); }
 
+  /* Grab any sign-in tokens out of the URL straight away. The hash does not
+     survive a reload, so this cannot wait behind the passphrase gate. */
+  DWData.captureFromHash();
+
   function afterPass() {
-    DWData.captureFromHash();
     DWData.whoami().then(function (user) {
       if (user && user.email) start(); else gateAuth.hidden = false;
     }).catch(function () { gateAuth.hidden = false; });
