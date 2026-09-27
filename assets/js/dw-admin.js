@@ -23,6 +23,7 @@
   var rows = [];
   var secrets = {};
   var keys = [];
+  var tasks = {};
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -109,6 +110,43 @@
     return h + list.map(row).join('');
   }
 
+  // ------------------------------------------------------------- jobs
+  function fmtDate(v) {
+    if (!v) return '';
+    var p = v.split('-');
+    return p[2] + '/' + p[1];
+  }
+  function taskItem(t) {
+    var today = new Date().toISOString().slice(0, 10);
+    var late = t.due_on && !t.done && t.due_on < today;
+    return '<li class="tk' + (t.done ? ' done' : '') + '" data-tid="' + esc(t.id) + '">' +
+      '<label class="tk-main"><input type="checkbox" data-tact="toggle"' + (t.done ? ' checked' : '') + '>' +
+        '<span><b>' + esc(t.title) + '</b>' + (t.details ? '<small>' + esc(t.details) + '</small>' : '') + '</span></label>' +
+      (t.due_on ? '<span class="tk-due' + (late ? ' late' : '') + '" title="Due ' + esc(t.due_on) + '">' + (late ? 'Overdue ' : 'Due ') + fmtDate(t.due_on) + '</span>' : '') +
+      '<button class="tk-x" type="button" data-tact="del" aria-label="Delete this job">&times;</button>' +
+    '</li>';
+  }
+  function taskBlock(r) {
+    var list = tasks[r.id] || [];
+    var done = list.filter(function (t) { return t.done; }).length;
+    var pct = list.length ? Math.round(done / list.length * 100) : 0;
+    return '<div class="ad-tasks">' +
+      '<div class="tk-head"><h4>Jobs to do</h4><span>' + (list.length ? done + ' of ' + list.length + ' done' : 'None yet') + '</span></div>' +
+      (list.length ? '<div class="tk-bar"><i style="width:' + pct + '%"></i></div>' : '') +
+      '<ul class="tk-list">' + list.map(taskItem).join('') + '</ul>' +
+      '<form class="tk-add" data-tadd>' +
+        '<input type="text" name="title" placeholder="Add a job" aria-label="New job" required>' +
+        '<input type="text" name="details" placeholder="Details (optional)" aria-label="Details">' +
+        '<input type="date" name="due" aria-label="Due date">' +
+        '<button class="btn btn--ghost sm" type="submit">Add</button>' +
+      '</form>' +
+      '<span class="ad-note" data-tmsg role="status" aria-live="polite"></span>' +
+    '</div>';
+  }
+  function openCount(id) {
+    return (tasks[id] || []).filter(function (t) { return !t.done; }).length;
+  }
+
   function row(r) {
     var sec = secrets[r.id] || {};
     var pill = r.is_live ? 'live' : (r.status === 'ready' ? 'ready' : (r.status === 'archived' ? 'arch' : 'build'));
@@ -125,8 +163,10 @@
           '<h3>' + esc(r.name) + '</h3>' +
           '<p class="ad-sub">' + esc(r.slug) + (r.sector ? ' &middot; ' + esc(r.sector) : '') + '</p>' +
         '</div>' +
+        (openCount(r.id) ? '<span class="pill jobs">' + openCount(r.id) + ' to do</span>' : '') +
         '<span class="pill ' + pill + '">' + esc(label) + '</span>' +
       '</div>' +
+      taskBlock(r) +
 
       '<div class="ad-fields">' +
         '<div class="ad-wide">' +
@@ -192,11 +232,14 @@
 
   function load() {
     say(globalmsg, 'Loading…');
-    Promise.all([w.DWData.listAll(), w.DWData.secrets(), w.DWData.keys()]).then(function (res) {
+    Promise.all([w.DWData.listAll(), w.DWData.secrets(), w.DWData.keys(),
+                 w.DWData.tasks().catch(function () { return []; })]).then(function (res) {
       rows = res[0] || [];
       secrets = {};
       (res[1] || []).forEach(function (s) { secrets[s.project_id] = s; });
       keys = res[2] || [];
+      tasks = {};
+      (res[3] || []).forEach(function (t) { (tasks[t.project_id] = tasks[t.project_id] || []).push(t); });
       draw();
       say(globalmsg, '');
     }).catch(function (e) { say(globalmsg, fail(e), 'err'); });
@@ -301,6 +344,71 @@
       }).catch(function (e) { say(msg, fail(e), 'err'); })
         .then(function () { btn.disabled = false; });
     }
+  });
+
+  // jobs: tick, delete, add. These save straight away, no Save button needed.
+  function redrawTasks(el, id) {
+    var sorted = (tasks[id] || []).slice().sort(function (a, b) {
+      return (a.done - b.done) || (a.sort_order - b.sort_order) || (a.created_at < b.created_at ? -1 : 1);
+    });
+    tasks[id] = sorted;
+    var r = rows.filter(function (x) { return x.id === id; })[0];
+    var tmp = d.createElement('div'); tmp.innerHTML = taskBlock(r);
+    el.querySelector('.ad-tasks').replaceWith(tmp.firstChild);
+    var pj = el.querySelector('.pill.jobs'), n = openCount(id);
+    if (n && pj) pj.textContent = n + ' to do';
+    else if (n) el.querySelector('.ad-top .pill').insertAdjacentHTML('beforebegin', '<span class="pill jobs">' + n + ' to do</span>');
+    else if (pj) pj.remove();
+  }
+
+  groups.addEventListener('change', function (ev) {
+    var box = ev.target.closest('[data-tact="toggle"]');
+    if (!box) return;
+    var el = box.closest('.ad-row'), id = el.getAttribute('data-id');
+    var tid = box.closest('[data-tid]').getAttribute('data-tid');
+    var t = (tasks[id] || []).filter(function (x) { return x.id === tid; })[0];
+    var done = box.checked;
+    box.disabled = true;
+    w.DWData.updateTask(tid, { done: done, done_at: done ? new Date().toISOString() : null }).then(function () {
+      t.done = done; redrawTasks(el, id);
+    }).catch(function (e) {
+      box.checked = !done; box.disabled = false;
+      say(el.querySelector('[data-tmsg]'), fail(e), 'err');
+    });
+  });
+
+  groups.addEventListener('click', function (ev) {
+    var x = ev.target.closest('[data-tact="del"]');
+    if (!x) return;
+    var el = x.closest('.ad-row'), id = el.getAttribute('data-id');
+    var li = x.closest('[data-tid]'), tid = li.getAttribute('data-tid');
+    if (!w.confirm('Delete this job?')) return;
+    w.DWData.removeTask(tid).then(function () {
+      tasks[id] = (tasks[id] || []).filter(function (t) { return t.id !== tid; });
+      redrawTasks(el, id);
+    }).catch(function (e) { say(el.querySelector('[data-tmsg]'), fail(e), 'err'); });
+  });
+
+  groups.addEventListener('submit', function (ev) {
+    var f = ev.target.closest('[data-tadd]');
+    if (!f) return;
+    ev.preventDefault();
+    var el = f.closest('.ad-row'), id = el.getAttribute('data-id');
+    var title = f.elements.title.value.trim();
+    if (!title) return;
+    var list = tasks[id] || [];
+    var row = { project_id: id, title: title, details: f.elements.details.value.trim() || null,
+                due_on: f.elements.due.value || null,
+                sort_order: list.reduce(function (m, t) { return Math.max(m, t.sort_order || 0); }, 0) + 10 };
+    f.querySelector('button').disabled = true;
+    w.DWData.addTask(row).then(function (res) {
+      tasks[id] = list.concat(res || []);
+      redrawTasks(el, id);
+      var nf = el.querySelector('[data-tadd] input[name="title"]'); if (nf) nf.focus();
+    }).catch(function (e) {
+      f.querySelector('button').disabled = false;
+      say(el.querySelector('[data-tmsg]'), fail(e), 'err');
+    });
   });
 
   d.getElementById('addbtn').addEventListener('click', function () {

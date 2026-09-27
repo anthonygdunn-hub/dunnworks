@@ -175,6 +175,20 @@
         headers: { Prefer: 'resolution=merge-duplicates,return=representation' }
       });
     },
+    tasks: function () {
+      return rest('dw_project_tasks?select=*&order=done.asc,sort_order.asc,created_at.asc');
+    },
+    addTask: function (row) {
+      return rest('dw_project_tasks', { method: 'POST', body: row, headers: { Prefer: 'return=representation' } });
+    },
+    updateTask: function (id, patch) {
+      return rest('dw_project_tasks?id=eq.' + encodeURIComponent(id), {
+        method: 'PATCH', body: patch, headers: { Prefer: 'return=representation' }
+      });
+    },
+    removeTask: function (id) {
+      return rest('dw_project_tasks?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
+    },
     rest: rest,
     signInWithPassword: signInWithPassword,
     sendMagicLink: sendMagicLink,
