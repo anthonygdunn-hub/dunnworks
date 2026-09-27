@@ -129,3 +129,16 @@ node tools/rekey.mjs  --in=preview/<slug>/index.html --slug=<slug> --doc=site
 `tools/rekey.mjs` swaps the gate script for the unwrapping one and prints the new
 `file_salt`, which goes into that project's `dw_project_keys` row with the wrap
 columns cleared.
+
+### Client packs
+
+Any project with jobs owned by the client (anyone but you or Google) gets a
+**Client pack** button, and a **Client pack** drawer to edit it. The pack is
+built fresh from the jobs each time it opens (`assets/js/dw-pack.js`): key
+dates, a checklist split into before and after the first milestone, and
+anything already ticked under "already done". Sections linked to a job drop out
+once that job is done. In the pack tab, **Download PDF** opens the print dialog
+(choose Save as PDF; the file name is set for you) and **Email** opens a draft
+to the client to attach it to, and records the date sent. Pack text lives in
+`dw_project_packs` (owner only); a job's wording in the pack comes from its
+`client_title` and `client_note`.

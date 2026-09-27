@@ -108,6 +108,11 @@
   .note { font-size:13px; color:var(--muted); }
   .note.ok { color:#4fd08a; } .note.bad { color:var(--bad); }
   .flag.live { border-color:rgba(79,208,138,.5); color:#4fd08a; }
+  .pk-sec { border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:var(--radius); padding:12px; margin-top:8px; background:var(--ink); }
+  .pk-grid { display:grid; grid-template-columns:1fr 1.3fr 1.3fr; gap:8px; margin-bottom:8px; }
+  @media (max-width:760px){ .pk-grid { grid-template-columns:1fr; } }
+  .pk-sec textarea { min-height:120px; font-family:var(--font-mono); font-size:12.5px; }
+  .edit textarea[data-pk=intro] { min-height:90px; font-family:var(--font-mono); font-size:12.5px; }
   .c.fold { border-left:3px solid var(--accent); padding:0; }
   .c.fold.is-live { border-left-color:#4fd08a; }
   .c.fold.is-arch { border-left-color:var(--line-2); opacity:.75; }
@@ -232,6 +237,7 @@
 <script src="../assets/js/dw-config.js"></script>
 <script src="../assets/js/dw-data.js"></script>
 <script src="../assets/js/dw-keys.js"></script>
+<script src="../assets/js/dw-pack.js"></script>
 <script>
 (function () {
   'use strict';
@@ -248,7 +254,7 @@
   var subEl = document.getElementById('sub');
   var crumbEl = document.getElementById('crumb');
 
-  var D = { projects: [], keys: {}, jobs: [], enquiries: [], run: null, tasks: {}, secrets: {}, keyrows: [] };
+  var D = { projects: [], keys: {}, jobs: [], enquiries: [], run: null, tasks: {}, secrets: {}, keyrows: [], packs: {} };
   var ui = { openCards: {}, openTasks: {}, stage: 'all', sector: '', q: '', cat: 'all', min: 45, jstatus: 'open' };
   var STAGES = ['not-contacted','emailed','called','replied','meeting','quoted','won','lost','parked'];
   var WARM = ['replied','meeting','quoted'];
@@ -303,8 +309,11 @@
       DWData.rest('tcooper_enquiries?select=*&order=created_at.desc').catch(function () { return []; }),
       DWData.rest('dw_job_runs?select=*&order=started_at.desc&limit=1').catch(function () { return []; }),
       DWData.rest('dw_project_tasks?select=*&order=sort_order.asc,created_at.asc').catch(function () { return []; }),
-      DWData.keys().catch(function () { return []; })
+      DWData.keys().catch(function () { return []; }),
+      DWData.rest('dw_project_packs?select=*').catch(function () { return []; })
     ]).then(function (out) {
+      D.packs = {};
+      (out[7] || []).forEach(function (k) { D.packs[k.project_id] = k; });
       D.projects = out[0] || [];
       /* One passphrase per project opens both its site and its report. */
       D.keys = {};
@@ -537,6 +546,8 @@
           '<div class="half"><label>Who</label><select name="owner">' + Object.keys(OWNERS).map(function (k) {
             return '<option value="' + k + '"' + (k === own ? ' selected' : '') + '>' + OWNERS[k] + '</option>'; }).join('') + '</select></div>' +
           '<div class="wide"><label>Details</label><textarea name="details">' + esc(t.details || '') + '</textarea></div>' +
+          '<div class="wide"><label>In the client pack, reads as (optional)</label><input name="ctitle" type="text" value="' + esc(t.client_title || '') + '" placeholder="' + esc(t.title) + '"></div>' +
+          '<div class="wide"><label>Client pack note (optional, otherwise the details are used)</label><textarea name="cnote" style="min-height:42px">' + esc(t.client_note || '') + '</textarea></div>' +
           '<label class="chk2"><input type="checkbox" name="waits"' + (t.waits ? ' checked' : '') + '>Needs the waiting items above it before it can start</label>' +
           '<div class="acts"><button class="mini" type="submit">Save</button>' +
             '<button class="mini" type="button" data-tact="up" aria-label="Move up">&uarr; Up</button>' +
@@ -647,6 +658,111 @@
     '</div></details>';
   }
 
+  /* ---- client pack ---- */
+  function hasPack(r) { return !!D.packs[r.id] || (D.tasks[r.id] || []).some(DWPack.isClientJob); }
+  function packOf(r) { return (D.packs[r.id] || {}).pack || {}; }
+  function secRow(s, i, jobs) {
+    return '<div class="pk-sec" data-psec>' +
+      '<div class="pk-grid"><div><label>Kicker</label><input type="text" data-k="kicker" value="' + esc(s.kicker || '') + '" placeholder="e.g. Your business details"></div>' +
+      '<div><label>Heading</label><input type="text" data-k="title" value="' + esc(s.title || '') + '"></div>' +
+      '<div><label>Linked job (drops out once it is done)</label><select data-k="task"><option value="">None, always shown</option>' +
+        jobs.map(function (t) { return '<option value="' + esc(t.id) + '"' + (t.id === s.task ? ' selected' : '') + '>' + esc(t.client_title || t.title) + (t.done ? ' (done)' : '') + '</option>'; }).join('') + '</select></div></div>' +
+      '<label>Body (HTML: &lt;p&gt;, &lt;ul class="check"&gt;&lt;li&gt;&lt;b&gt;…&lt;/b&gt;&lt;small&gt;…&lt;/small&gt;&lt;/li&gt;, &lt;table&gt;, &lt;div class="fwd"&gt;, &lt;div class="box acc"&gt;)</label>' +
+      '<textarea data-k="html" spellcheck="false">' + esc(s.html || '') + '</textarea>' +
+      '<div class="set-actions"><label class="chk" style="margin:0"><input type="checkbox" data-k="appendix"' + (s.appendix ? ' checked' : '') + '>Appendix (goes at the back)</label>' +
+      '<label class="chk" style="margin:0"><input type="checkbox" data-k="nobreak"' + (s.nobreak ? ' checked' : '') + '>Carry on from the page before</label><span style="flex:1"></span>' +
+      '<button class="mini" type="button" data-pact="up">&uarr;</button><button class="mini" type="button" data-pact="down">&darr;</button>' +
+      '<button class="mini bad" type="button" data-pact="rm">Remove</button></div></div>';
+  }
+  function packEditor(r) {
+    var pk = packOf(r), row = D.packs[r.id] || {};
+    var jobs = (D.tasks[r.id] || []).slice().sort(function (a, b) { return a.sort_order - b.sort_order; });
+    var owners = Object.keys(pk.owners || {}).map(function (k) { return k + '=' + pk.owners[k]; }).join('; ');
+    var f = function (k, label, ph, wide) { return '<div' + (wide ? ' class="wide"' : '') + '><label>' + label + '</label><input type="text" data-pk="' + k + '" value="' + esc(pk[k] || '') + '" placeholder="' + esc(ph || '') + '"></div>'; };
+    return '<details class="set" data-pack><summary>Client pack' + (row.sent_on ? ' &middot; last sent ' + esc(dayName(row.sent_on)) + (row.sent_count > 1 ? ' (' + row.sent_count + ' times)' : '') : ' &middot; not sent yet') + '</summary><div class="edit">' +
+      '<p class="note wide">The pack is rebuilt from this project\'s jobs every time you open it: anything owned by someone other than you (or Google) is listed with its date, split into before and after the first milestone, and ticked jobs move to "already done". Sections below add the detail; one linked to a job drops out when that job is ticked.</p>' +
+      f('title', 'Title', 'What I need from you') + f('kicker', 'Cover kicker', 'Website launch') +
+      f('for', 'Prepared for', r.contact_name || r.name) + f('from', 'From', 'Tony, Dunnworks') +
+      f('lede', 'Cover line (optional, HTML)', 'Everything needed to get your new website live on …, in one place.', true) +
+      '<div class="wide"><label>Opening (HTML)</label><textarea data-pk="intro" spellcheck="false">' + esc(pk.intro || '') + '</textarea></div>' +
+      '<div class="wide"><label>Who is who, as the client reads it</label><input type="text" data-pk="owners" value="' + esc(owners) + '" placeholder="stuart=You; bil=Your brother-in-law"></div>' +
+      f('post_note', 'Note above "after launch" (optional)', '', true) +
+      f('contact', 'Send everything to', 'info@dunnworks.io · WhatsApp or call 07377 599 023', true) +
+      '<div class="wide"><label>Sections</label><div data-psecs>' + (pk.sections || []).map(function (s, i) { return secRow(s, i, jobs); }).join('') + '</div>' +
+        '<button class="mini" type="button" data-pact="add" style="margin-top:8px">+ Add a section</button></div>' +
+      '<div class="wide set-actions"><button class="mini go" type="button" data-pact="save">Save pack</button>' +
+        '<button class="mini" type="button" data-pact="open">Open pack</button>' +
+        '<span class="note" data-pkmsg role="status" aria-live="polite"></span></div>' +
+    '</div></details>';
+  }
+  function readPack(card, r) {
+    var ed = card.querySelector('[data-pack]'), pk = Object.assign({}, packOf(r));
+    ed.querySelectorAll('[data-pk]').forEach(function (i) {
+      var k = i.getAttribute('data-pk'), v = i.value.trim();
+      if (k === 'owners') {
+        var o = {}; v.split(/[;\n]/).forEach(function (pair) { var m = pair.split('='); if (m.length === 2 && m[0].trim()) o[m[0].trim()] = m[1].trim(); });
+        pk.owners = o;
+      } else if (v) pk[k] = v; else delete pk[k];
+    });
+    pk.sections = [].map.call(ed.querySelectorAll('[data-psec]'), function (el) {
+      var s = {};
+      el.querySelectorAll('[data-k]').forEach(function (i) {
+        var k = i.getAttribute('data-k');
+        if (i.type === 'checkbox') { if (i.checked) s[k] = true; } else if (i.value.trim()) s[k] = k === 'html' ? i.value : i.value.trim();
+      });
+      return s;
+    }).filter(function (s) { return s.title || s.html; });
+    return pk;
+  }
+  function savePack(r, fields) {
+    var body = Object.assign({ project_id: r.id }, fields);
+    return DWData.rest('dw_project_packs?on_conflict=project_id', { method:'POST', body: body,
+      headers:{ Prefer:'resolution=merge-duplicates,return=representation' } })
+      .then(function (out) { D.packs[r.id] = (out || [])[0] || Object.assign({}, D.packs[r.id] || {}, body); return D.packs[r.id]; });
+  }
+  function openPack(r) {
+    var row = D.packs[r.id] || {};
+    var built = DWPack.build(r, D.tasks[r.id] || [], packOf(r), D.secrets[r.id], { origin: 'https://dunnworks.io', since: row.sent_on || null });
+    var url = URL.createObjectURL(new Blob([built.html], { type: 'text/html' }));
+    var w = window.open(url, '_blank');
+    if (!w) say(appMsg, 'Your browser blocked the new tab. Allow pop-ups for this page and try again.', 'bad');
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+  }
+  /* called from the pack tab's Email button */
+  window.DWPackEmail = function (pid, msg, go) {
+    var r = D.projects.filter(function (x) { return x.id === pid; })[0];
+    if (!r) { msg('That project is no longer loaded in the console'); return; }
+    var row = D.packs[r.id] || {}, pk = packOf(r);
+    var built = DWPack.build(r, D.tasks[r.id] || [], pk, D.secrets[r.id], { origin: 'https://dunnworks.io', since: row.sent_on || null });
+    go(DWPack.email(r, pk, built, row.sent_on));
+    savePack(r, { sent_on: today(), sent_count: (row.sent_count || 0) + 1 })
+      .then(function () { msg('Email opened. Attach the PDF you downloaded. Marked as sent today', true); route(); })
+      .catch(function (err) { msg('Email opened, but not marked as sent: ' + err.message); });
+  };
+  function packAction(btn) {
+    var card = btn.closest('[data-id]'), id = card.getAttribute('data-id');
+    var r = D.projects.filter(function (x) { return x.id === id; })[0];
+    var act = btn.getAttribute('data-pact');
+    if (act === 'open') { openPack(r); return; }
+    var wrap = card.querySelector('[data-psecs]');
+    if (act === 'add') {
+      var jobs = (D.tasks[r.id] || []).slice().sort(function (a, b) { return a.sort_order - b.sort_order; });
+      wrap.insertAdjacentHTML('beforeend', secRow({}, 0, jobs));
+      return;
+    }
+    var sec = btn.closest('[data-psec]');
+    if (act === 'rm') { if (confirm('Remove this section? It goes when you save.')) sec.remove(); return; }
+    if (act === 'up' && sec.previousElementSibling) { wrap.insertBefore(sec, sec.previousElementSibling); return; }
+    if (act === 'down' && sec.nextElementSibling) { wrap.insertBefore(sec.nextElementSibling, sec); return; }
+    if (act === 'save') {
+      var m = card.querySelector('[data-pkmsg]');
+      m.className = 'note'; m.textContent = 'Saving…';
+      savePack(r, { pack: readPack(card, r) })
+        .then(function () { m.className = 'note ok'; m.textContent = 'Saved. Open pack to see it.'; })
+        .catch(function (err) { m.className = 'note bad'; m.textContent = err.message; });
+    }
+  }
+
   function projectCard(r) {
     var fold = true;
     var k = D.keys[r.slug] || {};
@@ -661,7 +777,8 @@
     var sum = [r.is_live && r.live_url ? esc(r.live_url.replace(/^https?:\/\//, '').replace(/\/$/, '')) : (r.has_preview || r.has_report ? '/preview/' + esc(r.slug) + '/' : ''),
                r.pages ? r.pages + ' pages' : '', r.stage && !r.is_live ? esc(r.stage.replace('-', ' ')) : '',
                r.next_action && !r.is_live ? 'next: ' + esc(r.next_action) + (r.next_action_on ? ' (' + esc(r.next_action_on.slice(8, 10) + '/' + r.next_action_on.slice(5, 7)) + ')' : '') : '',
-               r.report_on ? 'report ' + esc(r.report_on) : ''].filter(Boolean).join(' &middot; ');
+               r.report_on ? 'report ' + esc(r.report_on) : '',
+               (D.packs[r.id] || {}).sent_on ? 'pack sent ' + esc(dm(D.packs[r.id].sent_on)) : ''].filter(Boolean).join(' &middot; ');
     return '<article class="c' + (fold ? ' fold' + (open ? ' is-open' : '') + (r.is_live ? ' is-live' : '') + (r.status === 'archived' ? ' is-arch' : '') : '') +
         (isDue(r) ? ' is-due' : '') + (r.stage === 'lost' ? ' is-cold' : '') + '" data-table="dw_projects" data-id="' + r.id + '">' +
       (fold ? '<button class="c-head" type="button" data-cact="open" aria-expanded="' + open + '"><div>' : '') +
@@ -680,6 +797,7 @@
         (k.site ? '<button class="mini" data-copy="' + esc(k.site) + '">Copy site pass</button>' : '') +
         (k.report ? '<button class="mini" data-copy="' + esc(k.report) + '">Copy report pass</button>' : '') +
         (r.contact_email ? '<a class="mini" href="mailto:' + esc(r.contact_email) + '?subject=' + encodeURIComponent('A website concept for ' + (r.name || '')) + '">Email</a>' : '') +
+        (hasPack(r) ? '<button class="mini go" type="button" data-pact="open">Client pack</button>' : '') +
       '</div>' +
       '<div class="edit">' +
         '<div><label>Stage</label><select data-f="stage">' +
@@ -692,6 +810,7 @@
         '<div class="wide row" style="justify-content:flex-end"><span class="saved" data-saved></span></div>' +
       '</div>' +
       (isWip(r) || isClient(r) || (D.tasks[r.id] || []).length ? taskBox(r) : '') +
+      (hasPack(r) || isWip(r) ? packEditor(r) : '') +
       settings(r) +
       (fold ? '</div>' : '') +
     '</article>';
@@ -882,6 +1001,8 @@
     }
     var sb = e.target.closest('[data-sact]');
     if (sb) { settingsAction(sb); return; }
+    var pkb = e.target.closest('[data-pact]');
+    if (pkb) { packAction(pkb); return; }
     var topen = e.target.closest('[data-tact="open"]');
     if (topen) {
       var li = topen.closest('[data-tid]'), otid = li.getAttribute('data-tid');
@@ -981,7 +1102,7 @@
         .catch(function (err) { box.checked = !done; box.disabled = false; say(appMsg, err.message, 'bad'); });
       return;
     }
-    if (e.target.closest('[data-tadd]') || e.target.closest('[data-tedit]') || e.target.closest('[data-set]')) return;
+    if (e.target.closest('[data-tadd]') || e.target.closest('[data-tedit]') || e.target.closest('[data-set]') || e.target.closest('[data-pack]')) return;
     if (e.target.id === 'sector') { ui.sector = e.target.value; route(); return; }
     if (e.target.id === 'min') { ui.min = Number(e.target.value); route(); return; }
     var f = e.target.getAttribute('data-f');
@@ -1007,7 +1128,8 @@
       var et = (D.tasks[epid] || []).filter(function (x) { return x.id === etid; })[0];
       var body = { title: ef.elements.title.value.trim(), details: ef.elements.details.value.trim() || null, due_on: ef.elements.due.value || null,
                    est_hours: Number(ef.elements.est.value) || 0, phase: ef.elements.phase.value.trim() || null,
-                   owner: ef.elements.owner.value, waits: ef.elements.waits.checked };
+                   owner: ef.elements.owner.value, waits: ef.elements.waits.checked,
+                   client_title: ef.elements.ctitle.value.trim() || null, client_note: ef.elements.cnote.value.trim() || null };
       if (!body.title) return;
       DWData.rest('dw_project_tasks?id=eq.' + encodeURIComponent(etid), { method:'PATCH', body: body, headers:{ Prefer:'return=minimal' } })
         .then(function () { Object.assign(et, body); ui.openTasks[etid] = 1; redrawTasks(ecard, epid);
