@@ -369,6 +369,11 @@
     }).join('') + '</div>';
   }
 
+  function allBtn(list) {
+    var allOpen = list.length && list.every(function (r) { return ui.openCards[r.id]; });
+    return '<button class="mini" data-cact="all" type="button">' + (allOpen ? 'Close all' : 'Open all') + '</button>';
+  }
+
   /* ---- work in progress ---- */
   function viewWip() {
     var wip = D.projects.filter(isWip).sort(function (a, b) {
@@ -377,6 +382,7 @@
     var clients = D.projects.filter(isClient).sort(function (a, b) { return (a.name || '').localeCompare(b.name || ''); });
 
     viewEl.innerHTML =
+      '<div class="bar" style="justify-content:flex-end;margin-bottom:0">' + allBtn(wip.concat(clients)) + '</div>' +
       '<p class="h-sub">In play &middot; ' + wip.length + '</p>' +
       (wip.length ? '<div class="cards">' + wip.map(projectCard).join('') + '</div>'
                   : '<p style="color:var(--muted)">Nothing in play. Send a preview from the targets list to start one.</p>') +
@@ -429,6 +435,7 @@
           }).join('') +
         '</select>' +
         '<span class="tagline">' + rows.length + ' of ' + all.length + '</span>' +
+        '<span style="flex:1 1 10px"></span>' + allBtn(rows) +
       '</div>' +
       '<div class="cards">' + rows.map(projectCard).join('') + '</div>';
   }
@@ -527,7 +534,8 @@
     '</div></details>';
   }
 
-  function projectCard(r, fold) {
+  function projectCard(r) {
+    var fold = true;
     var k = D.keys[r.slug] || {};
     var phone = r.contact_phone ? '<a href="tel:' + esc((r.contact_phone.split('/')[0] || '').replace(/\s/g,'')) + '">' + esc(r.contact_phone) + '</a>' : '';
     var email = r.contact_email ? '<a href="mailto:' + esc(r.contact_email) + '">' + esc(r.contact_email) + '</a>' : '<span style="color:var(--muted-2)">no email published</span>';
@@ -537,7 +545,9 @@
     var eyeball = (r.contact_source || '').indexOf('directory') === 0;
 
     var open = !!ui.openCards[r.id];
-    var sum = ['/preview/' + esc(r.slug) + '/', r.pages ? r.pages + ' pages' : '', r.stage ? esc(r.stage.replace('-', ' ')) : '',
+    var sum = [r.is_live && r.live_url ? esc(r.live_url.replace(/^https?:\/\//, '').replace(/\/$/, '')) : (r.has_preview || r.has_report ? '/preview/' + esc(r.slug) + '/' : ''),
+               r.pages ? r.pages + ' pages' : '', r.stage && !r.is_live ? esc(r.stage.replace('-', ' ')) : '',
+               r.next_action && !r.is_live ? 'next: ' + esc(r.next_action) + (r.next_action_on ? ' (' + esc(r.next_action_on.slice(8, 10) + '/' + r.next_action_on.slice(5, 7)) + ')' : '') : '',
                r.report_on ? 'report ' + esc(r.report_on) : ''].filter(Boolean).join(' &middot; ');
     return '<article class="c' + (fold ? ' fold' + (open ? ' is-open' : '') + (r.is_live ? ' is-live' : '') + (r.status === 'archived' ? ' is-arch' : '') : '') +
         (isDue(r) ? ' is-due' : '') + (r.stage === 'lost' ? ' is-cold' : '') + '" data-table="dw_projects" data-id="' + r.id + '">' +
@@ -586,9 +596,8 @@
     viewEl.innerHTML =
       '<div class="bar"><input type="search" id="q" placeholder="Search previews" value="' + esc(ui.q) + '">' +
       '<span class="tagline">' + rows.length + ' with a preview or report</span>' +
-      '<span style="flex:1 1 10px"></span><button class="mini" data-cact="all" type="button">' +
-        (rows.length && rows.every(function (r) { return ui.openCards[r.id]; }) ? 'Close all' : 'Open all') + '</button></div>' +
-      '<div class="cards">' + rows.map(function (r) { return projectCard(r, true); }).join('') + '</div>';
+      '<span style="flex:1 1 10px"></span>' + allBtn(rows) + '</div>' +
+      '<div class="cards">' + rows.map(projectCard).join('') + '</div>';
   }
 
   /* ---- job search ---- */
