@@ -113,21 +113,34 @@
   .tk-bar { flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; }
   .tk-bar i { display:block; height:100%; background:#4fd08a; }
   .tk-head span { font-family:var(--font-mono); font-size:10px; letter-spacing:.07em; color:var(--muted-2); white-space:nowrap; }
-  .tk-list { list-style:none; margin:8px 0 0; padding:0; }
-  .tk { display:flex; align-items:flex-start; gap:9px; padding:7px 0; border-top:1px solid var(--line); }
-  .tk:first-child { border-top:0; }
-  .tk label { flex:1; display:flex; gap:9px; align-items:flex-start; cursor:pointer; min-width:0; }
-  .tk input { width:17px; height:17px; margin-top:2px; accent-color:#4fd08a; flex:none; cursor:pointer; }
-  .tk label span { font-size:14.5px; }
-  .tk label small { display:block; color:var(--muted); font-size:13px; margin-top:1px; }
-  .tk.done label span { color:var(--muted-2); text-decoration:line-through; }
+  .tk-list { list-style:none; margin:8px 0 0; padding:0; display:grid; gap:6px; }
+  .tk { border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:var(--radius); background:var(--ink); }
+  .tk.done { border-left-color:#4fd08a; opacity:.72; }
+  .tk.late { border-left-color:var(--bad); }
+  .tk-row { display:flex; align-items:center; gap:10px; padding:10px 12px; }
+  .tk-row input[type=checkbox] { width:18px; height:18px; accent-color:#4fd08a; flex:none; cursor:pointer; margin:0; }
+  .tk-open { flex:1; min-width:0; display:flex; align-items:center; gap:10px; background:none; border:0; padding:4px 0; margin:0;
+             color:var(--paper); font:inherit; font-size:14.5px; text-align:left; cursor:pointer; }
+  .tk-open .tt { flex:1; min-width:0; }
+  .tk-open .tt small { display:block; color:var(--muted-2); font-size:12.5px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tk.is-open .tk-open .tt small { display:none; }
+  .tk.done .tk-open .tt > span { color:var(--muted-2); text-decoration:line-through; }
   .tk-due { flex:none; font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted-2);
             padding:3px 7px; border:1px solid var(--line-2); border-radius:var(--radius); white-space:nowrap; }
-  .tk-due.late { color:var(--bad); border-color:var(--bad); }
-  .tk.done .tk-due { opacity:.5; }
-  .tk-x { flex:none; width:26px; height:26px; background:none; border:1px solid transparent; border-radius:var(--radius);
-          color:var(--muted-2); font-size:17px; line-height:1; cursor:pointer; }
-  .tk-x:hover { color:var(--bad); border-color:var(--line-2); }
+  .tk.late .tk-due { color:var(--bad); border-color:var(--bad); }
+  .tk-arrow { flex:none; width:18px; text-align:center; color:var(--accent-2); font-size:12px; transition:transform .2s ease; }
+  .tk.is-open .tk-arrow { transform:rotate(180deg); }
+  .tk-body { display:none; padding:2px 12px 14px 40px; }
+  .tk.is-open .tk-body { display:block; }
+  .tk-body .tk-det { color:var(--muted); font-size:14px; margin:0 0 12px; white-space:pre-line; }
+  .tk-body .tk-meta { font-family:var(--font-mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted-2); margin-bottom:12px; }
+  .tk-edit { display:grid; grid-template-columns:1fr 150px; gap:8px; }
+  .tk-edit label { display:block; font-family:var(--font-mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted-2); margin-bottom:5px; }
+  .tk-edit input, .tk-edit textarea { width:100%; padding:8px 10px; border:1px solid var(--line-2); border-radius:var(--radius); background:var(--ink-2); color:var(--paper); font:inherit; font-size:14px; }
+  .tk-edit textarea { min-height:60px; resize:vertical; }
+  .tk-edit .wide { grid-column:1/-1; }
+  .tk-edit .acts { grid-column:1/-1; display:flex; gap:8px; align-items:center; }
+  @media (max-width:620px){ .tk-body { padding-left:12px; } .tk-edit { grid-template-columns:1fr; } }
   .tk-add { display:grid; grid-template-columns:1.3fr 1.3fr 150px auto; gap:8px; margin-top:9px; }
   .tk-add input { width:100%; padding:8px 10px; border:1px solid var(--line-2); border-radius:var(--radius); background:var(--ink); color:var(--paper); font:inherit; font-size:14px; }
   .tk-add .mini { padding:8px 12px; }
@@ -199,7 +212,7 @@
   var crumbEl = document.getElementById('crumb');
 
   var D = { projects: [], keys: {}, jobs: [], enquiries: [], run: null, tasks: {}, secrets: {}, keyrows: [] };
-  var ui = { stage: 'all', sector: '', q: '', cat: 'all', min: 45, jstatus: 'open' };
+  var ui = { openTasks: {}, stage: 'all', sector: '', q: '', cat: 'all', min: 45, jstatus: 'open' };
   var STAGES = ['not-contacted','emailed','called','replied','meeting','quoted','won','lost','parked'];
   var WARM = ['replied','meeting','quoted'];
 
@@ -420,11 +433,29 @@
         '<span>' + (list.length ? done + ' of ' + list.length + ' done' : 'none yet') + '</span></div>' +
       '<ul class="tk-list">' + list.map(function (t) {
         var late = t.due_on && !t.done && t.due_on < t0;
-        return '<li class="tk' + (t.done ? ' done' : '') + '" data-tid="' + esc(t.id) + '">' +
-          '<label><input type="checkbox" data-tact="toggle"' + (t.done ? ' checked' : '') + '>' +
-          '<span>' + esc(t.title) + (t.details ? '<small>' + esc(t.details) + '</small>' : '') + '</span></label>' +
-          (t.due_on ? '<span class="tk-due' + (late ? ' late' : '') + '">' + (late ? 'late ' : '') + esc(t.due_on.slice(8, 10) + '/' + t.due_on.slice(5, 7)) + '</span>' : '') +
-          '<button class="tk-x" type="button" data-tact="del" aria-label="Delete this job">&times;</button></li>';
+        var open = !!ui.openTasks[t.id];
+        var dd = t.due_on ? t.due_on.slice(8, 10) + '/' + t.due_on.slice(5, 7) : '';
+        return '<li class="tk' + (t.done ? ' done' : '') + (late ? ' late' : '') + (open ? ' is-open' : '') + '" data-tid="' + esc(t.id) + '">' +
+          '<div class="tk-row">' +
+            '<input type="checkbox" data-tact="toggle" aria-label="Done: ' + esc(t.title) + '"' + (t.done ? ' checked' : '') + '>' +
+            '<button class="tk-open" type="button" data-tact="open" aria-expanded="' + open + '">' +
+              '<span class="tt"><span>' + esc(t.title) + '</span>' + (t.details ? '<small>' + esc(t.details) + '</small>' : '') + '</span>' +
+              (dd ? '<span class="tk-due">' + (late ? 'late ' : 'due ') + esc(dd) + '</span>' : '') +
+              '<span class="tk-arrow" aria-hidden="true">&#9662;</span>' +
+            '</button>' +
+          '</div>' +
+          '<div class="tk-body">' +
+            (t.details ? '<p class="tk-det">' + esc(t.details) + '</p>' : '') +
+            '<p class="tk-meta">' + (t.done && t.done_at ? 'Done ' + when(t.done_at) : 'Added ' + when(t.created_at)) + '</p>' +
+            '<form class="tk-edit" data-tedit>' +
+              '<div><label>Job</label><input name="title" type="text" value="' + esc(t.title) + '" required></div>' +
+              '<div><label>Due</label><input name="due" type="date" value="' + esc(t.due_on || '') + '"></div>' +
+              '<div class="wide"><label>Details</label><textarea name="details">' + esc(t.details || '') + '</textarea></div>' +
+              '<div class="acts"><button class="mini" type="submit">Save</button>' +
+                '<button class="mini" type="button" data-tact="del" style="color:var(--bad)">Delete</button>' +
+                '<span class="saved" data-tsaved></span></div>' +
+            '</form>' +
+          '</div></li>';
       }).join('') + '</ul>' +
       '<form class="tk-add" data-tadd>' +
         '<input name="title" type="text" placeholder="Add a job" aria-label="New job" required>' +
@@ -685,6 +716,14 @@
   viewEl.addEventListener('click', function (e) {
     var sb = e.target.closest('[data-sact]');
     if (sb) { settingsAction(sb); return; }
+    var topen = e.target.closest('[data-tact="open"]');
+    if (topen) {
+      var li = topen.closest('[data-tid]'), otid = li.getAttribute('data-tid');
+      var isOpen = li.classList.toggle('is-open');
+      topen.setAttribute('aria-expanded', isOpen);
+      if (isOpen) ui.openTasks[otid] = 1; else delete ui.openTasks[otid];
+      return;
+    }
     var tdel = e.target.closest('[data-tact="del"]');
     if (tdel) {
       var tcard = tdel.closest('[data-id]'), pid = tcard.getAttribute('data-id');
@@ -757,7 +796,7 @@
         .catch(function (err) { box.checked = !done; box.disabled = false; say(appMsg, err.message, 'bad'); });
       return;
     }
-    if (e.target.closest('[data-tadd]') || e.target.closest('[data-set]')) return;
+    if (e.target.closest('[data-tadd]') || e.target.closest('[data-tedit]') || e.target.closest('[data-set]')) return;
     if (e.target.id === 'sector') { ui.sector = e.target.value; route(); return; }
     if (e.target.id === 'min') { ui.min = Number(e.target.value); route(); return; }
     var f = e.target.getAttribute('data-f');
@@ -775,6 +814,20 @@
   });
 
   viewEl.addEventListener('submit', function (e) {
+    var ef = e.target.closest('[data-tedit]');
+    if (ef) {
+      e.preventDefault();
+      var ecard = ef.closest('[data-id]'), epid = ecard.getAttribute('data-id');
+      var etid = ef.closest('[data-tid]').getAttribute('data-tid');
+      var et = (D.tasks[epid] || []).filter(function (x) { return x.id === etid; })[0];
+      var body = { title: ef.elements.title.value.trim(), details: ef.elements.details.value.trim() || null, due_on: ef.elements.due.value || null };
+      if (!body.title) return;
+      DWData.rest('dw_project_tasks?id=eq.' + encodeURIComponent(etid), { method:'PATCH', body: body, headers:{ Prefer:'return=minimal' } })
+        .then(function () { Object.assign(et, body); ui.openTasks[etid] = 1; redrawTasks(ecard, epid);
+          var s2 = ecard.querySelector('[data-tid="' + etid + '"] [data-tsaved]'); if (s2) { s2.textContent = 'Saved'; setTimeout(function () { s2.textContent = ''; }, 1600); } })
+        .catch(function (err) { say(appMsg, err.message, 'bad'); });
+      return;
+    }
     var f = e.target.closest('[data-tadd]');
     if (!f) return;
     e.preventDefault();
