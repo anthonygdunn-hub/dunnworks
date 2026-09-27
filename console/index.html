@@ -51,7 +51,8 @@
   .h-sub { font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
            color:var(--muted-2); margin:26px 0 12px; }
   .h-sub:first-child { margin-top:0; }
-  .cards { display:grid; gap:11px; }
+  .cards { display:grid; grid-template-columns:minmax(0,1fr); gap:11px; }
+  .cards > * { min-width:0; }
   .c { border:1px solid var(--line); border-radius:var(--radius); background:var(--ink-2); padding:17px 19px; }
   .c.is-due { border-color:var(--accent); }
   .c.is-cold { opacity:.6; }
@@ -125,7 +126,8 @@
   .tk-bar { flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; }
   .tk-bar i { display:block; height:100%; background:#4fd08a; }
   .tk-head span { font-family:var(--font-mono); font-size:10px; letter-spacing:.07em; color:var(--muted-2); white-space:nowrap; }
-  .tk-list { list-style:none; margin:8px 0 0; padding:0; display:grid; gap:6px; }
+  .tk-list { list-style:none; margin:8px 0 0; padding:0; display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
+  .tk-list > li { min-width:0; }
   .tk { border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:var(--radius); background:var(--ink); }
   .tk.done { border-left-color:#4fd08a; opacity:.72; }
   .tk.late { border-left-color:var(--bad); }
@@ -483,7 +485,7 @@
     var day = now.getHours() >= 22 ? addDays(t0, 1) : t0, used = 0, gate = t0, left = 0, leftToLaunch = 0, launch = null, seenLaunch = false;
     list.forEach(function (t) {
       t._proj = null;
-      if (t.done) { if (t.milestone) { launch = t.done_at ? t.done_at.slice(0, 10) : t0; seenLaunch = true; } return; }
+      if (t.done) { if (t.milestone && !seenLaunch) { launch = t.done_at ? t.done_at.slice(0, 10) : t0; seenLaunch = true; } return; }
       if (t.owner && t.owner !== 'me') {
         t._proj = t.due_on && t.due_on > t0 ? t.due_on : t0;
         if (t._proj > gate) gate = t._proj;
@@ -497,7 +499,7 @@
         var take = Math.min(cap - used, h); used += take; h -= take;
       }
       t._proj = day;
-      if (t.milestone) { launch = day; seenLaunch = true; }
+      if (t.milestone && !seenLaunch) { launch = day; seenLaunch = true; }
     });
     return { list: list, launch: launch, left: left, leftToLaunch: leftToLaunch, cap: cap };
   }
