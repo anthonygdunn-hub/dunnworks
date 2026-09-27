@@ -61,7 +61,7 @@
   .det { color:var(--muted); font-size:14.5px; margin:8px 0 11px; }
   .det a { color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
   .det a:hover { color:var(--accent-2); }
-  .flag { font-family:var(--font-mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase;
+  .flag { position:static; background:transparent; font-family:var(--font-mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase;
           padding:3px 7px; border-radius:var(--radius); border:1px solid var(--line-2); color:var(--muted-2); }
   .flag.warn { border-color:var(--accent); color:var(--accent-2); }
   .mini { font-family:var(--font-mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
@@ -88,6 +88,25 @@
                 background:var(--ink-2); color:var(--paper); font:inherit; }
   .msg { font-size:14.5px; margin-top:12px; min-height:20px; }
   .msg.bad { color:var(--bad); } .msg.ok { color:#4fd08a; }
+  .set { margin-top:13px; border-top:1px solid var(--line); padding-top:11px; }
+  .set > summary { cursor:pointer; list-style:none; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.09em;
+                   text-transform:uppercase; color:var(--muted); display:inline-flex; gap:8px; align-items:center; }
+  .set > summary::-webkit-details-marker { display:none; }
+  .set > summary::before { content:'+'; display:inline-block; width:12px; color:var(--accent-2); }
+  .set[open] > summary::before { content:'–'; }
+  .set > summary:hover { color:var(--accent-2); }
+  .set .edit { border-top:0; padding-top:4px; }
+  .edit label.chk { display:flex; gap:9px; align-items:center; font-family:inherit; font-size:14px; letter-spacing:0; text-transform:none; cursor:pointer; color:var(--paper); margin:6px 0 0; }
+  .edit label.chk .note { font-size:12.5px; }
+  .edit label.chk input { width:17px; height:17px; accent-color:#4fd08a; flex:none; cursor:pointer; }
+  .pass { display:flex; gap:8px; }
+  .pass input { font-family:var(--font-mono); }
+  .set-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:4px; }
+  .mini.go { border-color:var(--accent); color:var(--accent-2); }
+  .mini.bad { color:var(--bad); }
+  .note { font-size:13px; color:var(--muted); }
+  .note.ok { color:#4fd08a; } .note.bad { color:var(--bad); }
+  .flag.live { border-color:rgba(79,208,138,.5); color:#4fd08a; }
   .tk-box { margin-top:13px; padding-top:13px; border-top:1px solid var(--line); }
   .tk-head { display:flex; align-items:center; gap:10px; }
   .tk-head b { font-family:var(--font-mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted-2); font-weight:400; }
@@ -149,7 +168,7 @@
       </div>
       <div class="row">
         <a class="mini" href="#/">All areas</a>
-        <a class="mini" href="/admin/">Old admin</a>
+        <button class="mini" id="addproj" type="button">Add a project</button>
         <button class="mini" id="signout" type="button">Sign out</button>
       </div>
     </div>
@@ -162,6 +181,7 @@
 
 <script src="../assets/js/dw-config.js"></script>
 <script src="../assets/js/dw-data.js"></script>
+<script src="../assets/js/dw-keys.js"></script>
 <script>
 (function () {
   'use strict';
@@ -178,7 +198,7 @@
   var subEl = document.getElementById('sub');
   var crumbEl = document.getElementById('crumb');
 
-  var D = { projects: [], keys: {}, jobs: [], enquiries: [], run: null, tasks: {} };
+  var D = { projects: [], keys: {}, jobs: [], enquiries: [], run: null, tasks: {}, secrets: {}, keyrows: [] };
   var ui = { stage: 'all', sector: '', q: '', cat: 'all', min: 45, jstatus: 'open' };
   var STAGES = ['not-contacted','emailed','called','replied','meeting','quoted','won','lost','parked'];
   var WARM = ['replied','meeting','quoted'];
@@ -228,15 +248,19 @@
     say(appMsg, 'Loading...');
     return Promise.all([
       DWData.rest('dw_projects?select=*&order=name.asc'),
-      DWData.rest('dw_project_secrets?select=project_id,passphrase').catch(function () { return []; }),
+      DWData.rest('dw_project_secrets?select=*').catch(function () { return []; }),
       DWData.rest('dw_jobs?select=*&order=score.desc,posted_at.desc').catch(function () { return []; }),
       DWData.rest('tcooper_enquiries?select=*&order=created_at.desc').catch(function () { return []; }),
       DWData.rest('dw_job_runs?select=*&order=started_at.desc&limit=1').catch(function () { return []; }),
-      DWData.rest('dw_project_tasks?select=*&order=done.asc,sort_order.asc,created_at.asc').catch(function () { return []; })
+      DWData.rest('dw_project_tasks?select=*&order=done.asc,sort_order.asc,created_at.asc').catch(function () { return []; }),
+      DWData.keys().catch(function () { return []; })
     ]).then(function (out) {
       D.projects = out[0] || [];
       /* One passphrase per project opens both its site and its report. */
       D.keys = {};
+      D.secrets = {};
+      (out[1] || []).forEach(function (k) { D.secrets[k.project_id] = k; });
+      D.keyrows = out[6] || [];
       var slugOf = {};
       D.projects.forEach(function (p) { slugOf[p.id] = p; });
       (out[1] || []).forEach(function (k) {
@@ -332,14 +356,7 @@
       (wip.length ? '<div class="cards">' + wip.map(projectCard).join('') + '</div>'
                   : '<p style="color:var(--muted)">Nothing in play. Send a preview from the targets list to start one.</p>') +
       '<p class="h-sub">Live sites &middot; ' + clients.length + '</p>' +
-      '<div class="cards">' + clients.map(function (r) {
-        return '<article class="c">' +
-          '<div class="c-top"><h3>' + esc(r.name) + '</h3><span class="tagline">' + esc(r.sector || '') +
-            (r.pages ? ' &middot; ' + r.pages + ' pages' : '') + '</span></div>' +
-          (r.live_url ? '<p class="det"><a href="' + esc(r.live_url) + '" target="_blank" rel="noopener noreferrer">' +
-            esc(r.live_url.replace(/^https?:\/\//, '')) + '</a></p>' : '') +
-        '</article>';
-      }).join('') + '</div>';
+      '<div class="cards">' + clients.map(projectCard).join('') + '</div>';
   }
 
   /* ---- targets ---- */
@@ -428,12 +445,51 @@
     else if (n) card.querySelector('.c-top .tagline').insertAdjacentHTML('beforeend', ' <span class="flag warn jobs">' + n + ' to do</span>');
   }
 
+  /* ---- project settings, moved over from the old /admin/ page ---- */
+  var STATUS = [['build','In build'],['ready','Ready to review'],['live','Launched'],['archived','Archived']];
+  function settings(r) {
+    var sec = D.secrets[r.id] || {};
+    var opt = function (list, v) { return list.map(function (s) {
+      return '<option value="' + s[0] + '"' + (s[0] === v ? ' selected' : '') + '>' + s[1] + '</option>'; }).join(''); };
+    var canReissue = r.has_preview && !r.is_live;
+    return '<details class="set" data-set><summary>Project settings</summary><div class="edit">' +
+      '<div class="wide"><label class="chk"><input type="checkbox" data-s="is_live"' + (r.is_live ? ' checked' : '') + '>This one is live <span class="note">(moves it to Launched on the public previews page)</span></label></div>' +
+      '<div><label>Status</label><select data-s="status">' + opt(STATUS, r.status) + '</select></div>' +
+      '<div><label>Kind</label><select data-s="kind">' + opt([['preview','Preview'],['case-study','Case study']], r.kind) + '</select></div>' +
+      '<div><label>Live address</label><input type="url" data-s="live_url" value="' + esc(r.live_url || '') + '" placeholder="https://"></div>' +
+      '<div><label>Went live on</label><input type="date" data-s="live_on" value="' + esc(r.live_on || '') + '"></div>' +
+      '<div><label>Sector</label><input type="text" data-s="sector" value="' + esc(r.sector || '') + '"></div>' +
+      '<div><label>Pages</label><input type="number" data-s="pages" value="' + esc(r.pages == null ? '' : r.pages) + '"></div>' +
+      '<div><label>Order</label><input type="number" data-s="sort_order" value="' + esc(r.sort_order == null ? '' : r.sort_order) + '"></div>' +
+      '<div><label>Website</label><input type="url" data-s="website" value="' + esc(r.website || '') + '" placeholder="Their current site"></div>' +
+      '<div><label>Contact name</label><input type="text" data-s="contact_name" value="' + esc(r.contact_name || '') + '"></div>' +
+      '<div><label>Phone</label><input type="text" data-s="contact_phone" value="' + esc(r.contact_phone || '') + '"></div>' +
+      '<div><label>Email</label><input type="email" data-s="contact_email" value="' + esc(r.contact_email || '') + '"></div>' +
+      '<div><label>Address</label><input type="text" data-s="address" value="' + esc(r.address || '') + '"></div>' +
+      '<div class="wide"><label>Blurb (shown on the public previews page)</label><textarea data-s="blurb">' + esc(r.blurb || '') + '</textarea></div>' +
+      '<div><label class="chk"><input type="checkbox" data-s="has_preview"' + (r.has_preview ? ' checked' : '') + '>Has a locked preview</label></div>' +
+      '<div><label class="chk"><input type="checkbox" data-s="has_report"' + (r.has_report ? ' checked' : '') + '>Has a report</label></div>' +
+      '<div><label class="chk"><input type="checkbox" data-s="published"' + (r.published ? ' checked' : '') + '>Show on the previews page</label></div>' +
+      '<div class="wide"><label>Passphrase clients use</label><div class="pass">' +
+        '<input type="text" data-p="passphrase" value="' + esc(sec.passphrase || '') + '" placeholder="not set">' +
+        (canReissue ? '<button class="mini go" type="button" data-sact="newpass">New passphrase</button>' +
+                      '<button class="mini" type="button" data-sact="applypass">Use what I typed</button>' : '') +
+      '</div><p class="note" data-pmsg role="status" aria-live="polite">' +
+        (canReissue ? 'Reissuing stops the old passphrase working straight away, so send the new one before you close this page.' : '') + '</p></div>' +
+      '<div><label>Issued to</label><input type="text" data-p="issued_to" value="' + esc(sec.issued_to || '') + '"></div>' +
+      '<div><label>Issued on</label><input type="date" data-p="issued_on" value="' + esc(sec.issued_on || '') + '"></div>' +
+      '<div class="wide set-actions"><button class="mini go" type="button" data-sact="save">Save settings</button>' +
+        '<button class="mini bad" type="button" data-sact="del">Delete project</button>' +
+        '<span class="note" data-smsg role="status" aria-live="polite"></span></div>' +
+    '</div></details>';
+  }
+
   function projectCard(r) {
     var k = D.keys[r.slug] || {};
     var phone = r.contact_phone ? '<a href="tel:' + esc((r.contact_phone.split('/')[0] || '').replace(/\s/g,'')) + '">' + esc(r.contact_phone) + '</a>' : '';
     var email = r.contact_email ? '<a href="mailto:' + esc(r.contact_email) + '">' + esc(r.contact_email) + '</a>' : '<span style="color:var(--muted-2)">no email published</span>';
-    var site = r.website ? '<a href="' + esc(r.website) + '" target="_blank" rel="noopener noreferrer">their site</a>'
-             : (r.live_url ? '<a href="' + esc(r.live_url) + '" target="_blank" rel="noopener noreferrer">live site</a>' : '');
+    var site = r.live_url ? '<a href="' + esc(r.live_url) + '" target="_blank" rel="noopener noreferrer">' + esc(r.live_url.replace(/^https?:\/\//, '').replace(/\/$/, '')) + '</a>'
+             : (r.website ? '<a href="' + esc(r.website) + '" target="_blank" rel="noopener noreferrer">their site</a>' : '');
     var det = [r.contact_name ? esc(r.contact_name) : '', phone, email, site, r.address ? esc(r.address) : ''].filter(Boolean).join(' &middot; ');
     var eyeball = (r.contact_source || '').indexOf('directory') === 0;
 
@@ -441,7 +497,9 @@
       '<div class="c-top"><h3>' + esc(r.name) + '</h3><span class="tagline">' + esc(r.sector || '') +
         (eyeball ? ' <span class="flag warn">check details</span>' : '') +
         (isDue(r) ? ' <span class="flag warn">due</span>' : '') +
-        (r.status === 'ready' ? ' <span class="flag">ready to send</span>' : '') +
+        (r.status === 'ready' && !r.is_live ? ' <span class="flag">ready to send</span>' : '') +
+        (r.is_live ? ' <span class="flag live">live</span>' : '') +
+        (r.status === 'archived' ? ' <span class="flag">archived</span>' : '') +
         (openJobs(r.id) ? ' <span class="flag warn jobs">' + openJobs(r.id) + ' to do</span>' : '') + '</span></div>' +
       (det ? '<p class="det">' + det + '</p>' : '') +
       '<div class="row">' +
@@ -461,7 +519,8 @@
         '<div class="wide"><label>Notes</label><textarea data-f="outreach_notes" placeholder="What was said">' + esc(r.outreach_notes || '') + '</textarea></div>' +
         '<div class="wide row" style="justify-content:flex-end"><span class="saved" data-saved></span></div>' +
       '</div>' +
-      (isWip(r) || (D.tasks[r.id] || []).length ? taskBox(r) : '') +
+      (isWip(r) || isClient(r) || (D.tasks[r.id] || []).length ? taskBox(r) : '') +
+      settings(r) +
     '</article>';
   }
 
@@ -471,27 +530,13 @@
       .filter(function (r) {
         if (!ui.q) return true;
         return (r.name + ' ' + r.slug + ' ' + (r.sector || '')).toLowerCase().indexOf(ui.q.toLowerCase()) !== -1;
-      });
+      })
+      .sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0) || (a.name || '').localeCompare(b.name || ''); });
 
     viewEl.innerHTML =
       '<div class="bar"><input type="search" id="q" placeholder="Search previews" value="' + esc(ui.q) + '">' +
       '<span class="tagline">' + rows.length + ' with a preview or report</span></div>' +
-      '<div class="cards">' + rows.map(function (r) {
-        var k = D.keys[r.slug] || {};
-        return '<article class="c">' +
-          '<div class="c-top"><h3>' + esc(r.name) + '</h3><span class="tagline">' + esc(r.status) +
-            (r.pages ? ' &middot; ' + r.pages + ' pages' : '') +
-            (r.report_on ? ' &middot; report ' + esc(r.report_on) : '') + '</span></div>' +
-          '<p class="det">/preview/' + esc(r.slug) + '/' +
-            (k.site ? ' &middot; site pass <code>' + esc(k.site) + '</code>' : '') +
-            (k.report ? ' &middot; report pass <code>' + esc(k.report) + '</code>' : '') + '</p>' +
-          '<div class="row">' +
-            (r.has_preview ? '<a class="mini" href="/preview/' + esc(r.slug) + '/" target="_blank" rel="noopener">Open preview</a>' : '') +
-            (r.has_report ? '<a class="mini" href="/preview/' + esc(r.slug) + '/report/" target="_blank" rel="noopener">Open report</a>' : '') +
-            (k.site ? '<button class="mini" data-copy="' + esc(k.site) + '">Copy site pass</button>' : '') +
-            (k.report ? '<button class="mini" data-copy="' + esc(k.report) + '">Copy report pass</button>' : '') +
-          '</div></article>';
-      }).join('') + '</div>';
+      '<div class="cards">' + rows.map(projectCard).join('') + '</div>';
   }
 
   /* ---- job search ---- */
@@ -567,7 +612,79 @@
   }
 
   /* ---- events ---- */
+  function readSettings(card) {
+    var p = {}, sec = {};
+    card.querySelectorAll('[data-s]').forEach(function (i) {
+      var k = i.getAttribute('data-s');
+      if (i.type === 'checkbox') p[k] = i.checked;
+      else if (i.type === 'number') p[k] = i.value === '' ? null : parseInt(i.value, 10);
+      else p[k] = i.value.trim() === '' ? null : i.value.trim();
+    });
+    card.querySelectorAll('[data-p]').forEach(function (i) { sec[i.getAttribute('data-p')] = i.value.trim() || null; });
+    /* the tick is what you actually use, so keep status in step with it */
+    if (p.is_live && p.status !== 'live') p.status = 'live';
+    if (!p.is_live && p.status === 'live') p.status = 'ready';
+    return { p: p, sec: sec };
+  }
+
+  function settingsAction(btn) {
+    var card = btn.closest('[data-id]'), id = card.getAttribute('data-id');
+    var r = D.projects.filter(function (x) { return x.id === id; })[0];
+    var act = btn.getAttribute('data-sact');
+    var smsg = card.querySelector('[data-smsg]'), pmsg = card.querySelector('[data-pmsg]');
+    var note = function (el, t, c) { el.className = 'note' + (c ? ' ' + c : ''); el.textContent = t || ''; };
+
+    if (act === 'del') {
+      if (!confirm('Delete ' + r.name + '? Its passphrase record and jobs go too. The preview files on the site are not touched.')) return;
+      note(smsg, 'Deleting…');
+      DWData.remove(id).then(load).catch(function (err) { note(smsg, err.message, 'bad'); });
+      return;
+    }
+
+    if (act === 'save') {
+      var v = readSettings(card);
+      btn.disabled = true; note(smsg, 'Saving…');
+      /* The passphrase itself only changes through the reissue buttons, which
+         rewrap the file key at the same time. The stored one is sent back
+         unchanged so the record keeps its required column. */
+      var held = (D.secrets[id] || {}).passphrase;
+      var work = DWData.update(id, v.p);
+      if (held) work = work.then(function () {
+        return DWData.setSecret(id, { passphrase: held, issued_to: v.sec.issued_to, issued_on: v.sec.issued_on || undefined });
+      });
+      work.then(function () { note(smsg, 'Saved.', 'ok'); return load(); })
+        .catch(function (err) { note(smsg, err.message, 'bad'); })
+        .then(function () { btn.disabled = false; });
+      return;
+    }
+
+    if (act === 'newpass' || act === 'applypass') {
+      var field = card.querySelector('[data-p="passphrase"]');
+      var current = (D.secrets[id] || {}).passphrase;
+      var next = act === 'newpass' ? DWKeys.make() : field.value.trim();
+      if (!next || next.length < 12) { note(pmsg, 'Type something at least 12 characters long, or press New passphrase.', 'bad'); return; }
+      if (next === current) { note(pmsg, 'That is already the passphrase.', 'bad'); return; }
+      if (!confirm('Reissue the passphrase for ' + r.name + '?\n\nThe new one is ' + next + '\n\nAnyone still holding the old one stops getting in.')) return;
+      var btns = card.querySelectorAll('[data-sact="newpass"],[data-sact="applypass"]');
+      btns.forEach(function (x) { x.disabled = true; });
+      var mine = D.keyrows.filter(function (k) { return k.slug === r.slug; });
+      DWKeys.reissue(r.slug, mine, current, next, function (t) { note(pmsg, t); })
+        .then(function () { return DWData.setSecret(id, { passphrase: next, issued_on: today() }); })
+        .then(function () {
+          field.value = next;
+          D.secrets[id] = Object.assign({}, D.secrets[id] || {}, { project_id: id, passphrase: next, issued_on: today() });
+          D.keys[r.slug] = { site: r.has_preview ? next : null, report: r.has_report ? next : null };
+          return DWData.keys().then(function (k) { D.keyrows = k || []; });
+        })
+        .then(function () { note(pmsg, 'Done. Send them ' + next + '. The old one no longer works.', 'ok'); })
+        .catch(function (err) { note(pmsg, 'Not reissued: ' + err.message, 'bad'); })
+        .then(function () { btns.forEach(function (x) { x.disabled = false; }); });
+    }
+  }
+
   viewEl.addEventListener('click', function (e) {
+    var sb = e.target.closest('[data-sact]');
+    if (sb) { settingsAction(sb); return; }
     var tdel = e.target.closest('[data-tact="del"]');
     if (tdel) {
       var tcard = tdel.closest('[data-id]'), pid = tcard.getAttribute('data-id');
@@ -640,7 +757,7 @@
         .catch(function (err) { box.checked = !done; box.disabled = false; say(appMsg, err.message, 'bad'); });
       return;
     }
-    if (e.target.closest('[data-tadd]')) return;
+    if (e.target.closest('[data-tadd]') || e.target.closest('[data-set]')) return;
     if (e.target.id === 'sector') { ui.sector = e.target.value; route(); return; }
     if (e.target.id === 'min') { ui.min = Number(e.target.value); route(); return; }
     var f = e.target.getAttribute('data-f');
@@ -688,6 +805,18 @@
       route();
       var m = document.getElementById('min'); if (m) m.focus();
     }
+  });
+
+  document.getElementById('addproj').addEventListener('click', function () {
+    var name = prompt('Project name');
+    if (!name) return;
+    var slug = prompt('Slug, used as /preview/<slug>/', name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+    if (!slug) return;
+    say(appMsg, 'Creating…');
+    DWData.create({ slug: slug, name: name, kind: 'preview', status: 'build', published: false, sort_order: 90 })
+      .then(function () { return load(); })
+      .then(function () { say(appMsg, name + ' added. It is under People to target until it is ready.', 'ok'); })
+      .catch(function (err) { say(appMsg, err.message, 'bad'); });
   });
 
   /* ---- boot ---- */

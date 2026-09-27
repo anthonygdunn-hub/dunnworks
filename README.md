@@ -70,28 +70,33 @@ Everything is set by the tokens at the top of assets/css/styles.css. The accent 
 
 Copy is written in first person singular, since Dunnworks is one person and that converts better than a team voice. If you would rather use "we", search for " I " and rewrite the affected sentences, mainly on the about and contact pages.
 
-## The admin at /admin/
+## The admin at /console/
 
-`/admin/` signs you in with a link emailed by Supabase, then lists every preview
-and case study from the `dw_projects` table in project `acdpgarasgfhvupzsbxf`.
-It is `noindex` and there is no link to it from anywhere on the site.
+`/console/` is the one admin. Sign in with the password for `info@dunnworks.io`
+(or have a link emailed). It is `noindex` and nothing on the site links to it.
+`/admin/` just forwards here.
+
+Areas: work in progress, previews, people to target, job search and enquiries.
+Every project card, wherever it appears, carries the same things: contact
+details, preview and report links, copy-passphrase buttons, the outreach fields
+(stage, last contact, next action, notes), its jobs to do, and a **Project
+settings** drawer with everything else in `dw_projects` plus the passphrase.
 
 Set up once:
 
-1. Run `supabase/dunnworks-schema.sql` in the SQL editor of that project.
+1. Run `supabase/dunnworks-schema.sql`, `supabase/dunnworks-keys.sql` and
+   `supabase/dunnworks-tasks.sql` in the SQL editor of project `acdpgarasgfhvupzsbxf`.
 2. Paste the project's anon key into `assets/js/dw-config.js`.
-3. Go to `/admin/`, enter `info@dunnworks.io` and open the link it sends.
 
 Sign in is gated on that one address, set in `dw_is_owner()` in the schema. Any
 other address gets a session but the database refuses every read and write.
 
-The tick marked **This one is live** moves the project from In progress to
-Launched on `/preview/`, straight away, with nothing to rebuild or push. The
-previews page reads the table on load and falls back to the markup in
-`preview/index.html` if Supabase does not answer.
+The tick marked **This one is live** in Project settings moves the project to
+Launched on `/preview/` straight away, with nothing to rebuild or push.
 
-Passphrases live in `dw_project_secrets`, which no anonymous policy touches, so
-the anon key on the public page cannot reach them.
+Passphrases live in `dw_project_secrets`, and jobs in `dw_project_tasks`. No
+anonymous policy touches either, so the anon key on the public page cannot
+reach them.
 
 ## Reissuing a preview passphrase
 
@@ -100,7 +105,7 @@ passphrase's only job is to unwrap that key, and the wrapper is a row in
 `dw_project_keys`. So reissuing a passphrase rewrites a few hundred bytes in the
 database rather than rebuilding a 1MB file, and takes effect immediately.
 
-In the admin, **New passphrase** makes one up and puts it live on the preview
+In Project settings, **New passphrase** makes one up and puts it live on the preview
 and its project sheet together. **Use what I typed** does the same with your own
 wording. Before writing anything it fetches the live locked page and decrypts it
 with the recovered key, so a wrong stored passphrase fails safely and changes
