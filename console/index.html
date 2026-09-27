@@ -107,6 +107,18 @@
   .note { font-size:13px; color:var(--muted); }
   .note.ok { color:#4fd08a; } .note.bad { color:var(--bad); }
   .flag.live { border-color:rgba(79,208,138,.5); color:#4fd08a; }
+  .c.fold { border-left:3px solid var(--accent); padding:0; }
+  .c.fold.is-live { border-left-color:#4fd08a; }
+  .c.fold.is-arch { border-left-color:var(--line-2); opacity:.75; }
+  .c-head { display:flex; align-items:center; gap:14px; width:100%; background:none; border:0; margin:0; padding:15px 19px;
+            color:inherit; font:inherit; text-align:left; cursor:pointer; }
+  .c-head:hover h3 { color:var(--accent-2); }
+  .c-head > div { flex:1; min-width:0; }
+  .c-head .c-sum { display:block; color:var(--muted); font-size:13.5px; margin-top:5px; }
+  .c-arrow { flex:none; width:18px; text-align:center; color:var(--accent-2); font-size:13px; transition:transform .2s ease; }
+  .c.fold.is-open .c-arrow { transform:rotate(180deg); }
+  .c-body { display:none; padding:0 19px 17px; }
+  .c.fold.is-open .c-body { display:block; }
   .tk-box { margin-top:13px; padding-top:13px; border-top:1px solid var(--line); }
   .tk-head { display:flex; align-items:center; gap:10px; }
   .tk-head b { font-family:var(--font-mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted-2); font-weight:400; }
@@ -212,7 +224,7 @@
   var crumbEl = document.getElementById('crumb');
 
   var D = { projects: [], keys: {}, jobs: [], enquiries: [], run: null, tasks: {}, secrets: {}, keyrows: [] };
-  var ui = { openTasks: {}, stage: 'all', sector: '', q: '', cat: 'all', min: 45, jstatus: 'open' };
+  var ui = { openCards: {}, openTasks: {}, stage: 'all', sector: '', q: '', cat: 'all', min: 45, jstatus: 'open' };
   var STAGES = ['not-contacted','emailed','called','replied','meeting','quoted','won','lost','parked'];
   var WARM = ['replied','meeting','quoted'];
 
@@ -515,7 +527,7 @@
     '</div></details>';
   }
 
-  function projectCard(r) {
+  function projectCard(r, fold) {
     var k = D.keys[r.slug] || {};
     var phone = r.contact_phone ? '<a href="tel:' + esc((r.contact_phone.split('/')[0] || '').replace(/\s/g,'')) + '">' + esc(r.contact_phone) + '</a>' : '';
     var email = r.contact_email ? '<a href="mailto:' + esc(r.contact_email) + '">' + esc(r.contact_email) + '</a>' : '<span style="color:var(--muted-2)">no email published</span>';
@@ -524,7 +536,12 @@
     var det = [r.contact_name ? esc(r.contact_name) : '', phone, email, site, r.address ? esc(r.address) : ''].filter(Boolean).join(' &middot; ');
     var eyeball = (r.contact_source || '').indexOf('directory') === 0;
 
-    return '<article class="c' + (isDue(r) ? ' is-due' : '') + (r.stage === 'lost' ? ' is-cold' : '') + '" data-table="dw_projects" data-id="' + r.id + '">' +
+    var open = !!ui.openCards[r.id];
+    var sum = ['/preview/' + esc(r.slug) + '/', r.pages ? r.pages + ' pages' : '', r.stage ? esc(r.stage.replace('-', ' ')) : '',
+               r.report_on ? 'report ' + esc(r.report_on) : ''].filter(Boolean).join(' &middot; ');
+    return '<article class="c' + (fold ? ' fold' + (open ? ' is-open' : '') + (r.is_live ? ' is-live' : '') + (r.status === 'archived' ? ' is-arch' : '') : '') +
+        (isDue(r) ? ' is-due' : '') + (r.stage === 'lost' ? ' is-cold' : '') + '" data-table="dw_projects" data-id="' + r.id + '">' +
+      (fold ? '<button class="c-head" type="button" data-cact="open" aria-expanded="' + open + '"><div>' : '') +
       '<div class="c-top"><h3>' + esc(r.name) + '</h3><span class="tagline">' + esc(r.sector || '') +
         (eyeball ? ' <span class="flag warn">check details</span>' : '') +
         (isDue(r) ? ' <span class="flag warn">due</span>' : '') +
@@ -532,6 +549,7 @@
         (r.is_live ? ' <span class="flag live">live</span>' : '') +
         (r.status === 'archived' ? ' <span class="flag">archived</span>' : '') +
         (openJobs(r.id) ? ' <span class="flag warn jobs">' + openJobs(r.id) + ' to do</span>' : '') + '</span></div>' +
+      (fold ? '<span class="c-sum">' + sum + '</span></div><span class="c-arrow" aria-hidden="true">&#9662;</span></button><div class="c-body">' : '') +
       (det ? '<p class="det">' + det + '</p>' : '') +
       '<div class="row">' +
         (r.has_preview ? '<a class="mini" href="/preview/' + esc(r.slug) + '/" target="_blank" rel="noopener">Preview</a>' : '') +
@@ -552,6 +570,7 @@
       '</div>' +
       (isWip(r) || isClient(r) || (D.tasks[r.id] || []).length ? taskBox(r) : '') +
       settings(r) +
+      (fold ? '</div>' : '') +
     '</article>';
   }
 
@@ -566,8 +585,10 @@
 
     viewEl.innerHTML =
       '<div class="bar"><input type="search" id="q" placeholder="Search previews" value="' + esc(ui.q) + '">' +
-      '<span class="tagline">' + rows.length + ' with a preview or report</span></div>' +
-      '<div class="cards">' + rows.map(projectCard).join('') + '</div>';
+      '<span class="tagline">' + rows.length + ' with a preview or report</span>' +
+      '<span style="flex:1 1 10px"></span><button class="mini" data-cact="all" type="button">' +
+        (rows.length && rows.every(function (r) { return ui.openCards[r.id]; }) ? 'Close all' : 'Open all') + '</button></div>' +
+      '<div class="cards">' + rows.map(function (r) { return projectCard(r, true); }).join('') + '</div>';
   }
 
   /* ---- job search ---- */
@@ -714,6 +735,25 @@
   }
 
   viewEl.addEventListener('click', function (e) {
+    var cact = e.target.closest('[data-cact]');
+    if (cact && cact.getAttribute('data-cact') === 'open') {
+      var art = cact.closest('[data-id]'), cid = art.getAttribute('data-id');
+      var isOpen = art.classList.toggle('is-open');
+      cact.setAttribute('aria-expanded', isOpen);
+      if (isOpen) ui.openCards[cid] = 1; else delete ui.openCards[cid];
+      return;
+    }
+    if (cact && cact.getAttribute('data-cact') === 'all') {
+      var arts = viewEl.querySelectorAll('.c.fold');
+      var anyClosed = [].some.call(arts, function (a) { return !a.classList.contains('is-open'); });
+      arts.forEach(function (a) {
+        a.classList.toggle('is-open', anyClosed);
+        a.querySelector('.c-head').setAttribute('aria-expanded', anyClosed);
+        if (anyClosed) ui.openCards[a.getAttribute('data-id')] = 1; else delete ui.openCards[a.getAttribute('data-id')];
+      });
+      cact.textContent = anyClosed ? 'Close all' : 'Open all';
+      return;
+    }
     var sb = e.target.closest('[data-sact]');
     if (sb) { settingsAction(sb); return; }
     var topen = e.target.closest('[data-tact="open"]');
