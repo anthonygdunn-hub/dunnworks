@@ -88,6 +88,31 @@
                 background:var(--ink-2); color:var(--paper); font:inherit; }
   .msg { font-size:14.5px; margin-top:12px; min-height:20px; }
   .msg.bad { color:var(--bad); } .msg.ok { color:#4fd08a; }
+  .tk-box { margin-top:13px; padding-top:13px; border-top:1px solid var(--line); }
+  .tk-head { display:flex; align-items:center; gap:10px; }
+  .tk-head b { font-family:var(--font-mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted-2); font-weight:400; }
+  .tk-bar { flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; }
+  .tk-bar i { display:block; height:100%; background:#4fd08a; }
+  .tk-head span { font-family:var(--font-mono); font-size:10px; letter-spacing:.07em; color:var(--muted-2); white-space:nowrap; }
+  .tk-list { list-style:none; margin:8px 0 0; padding:0; }
+  .tk { display:flex; align-items:flex-start; gap:9px; padding:7px 0; border-top:1px solid var(--line); }
+  .tk:first-child { border-top:0; }
+  .tk label { flex:1; display:flex; gap:9px; align-items:flex-start; cursor:pointer; min-width:0; }
+  .tk input { width:17px; height:17px; margin-top:2px; accent-color:#4fd08a; flex:none; cursor:pointer; }
+  .tk label span { font-size:14.5px; }
+  .tk label small { display:block; color:var(--muted); font-size:13px; margin-top:1px; }
+  .tk.done label span { color:var(--muted-2); text-decoration:line-through; }
+  .tk-due { flex:none; font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted-2);
+            padding:3px 7px; border:1px solid var(--line-2); border-radius:var(--radius); white-space:nowrap; }
+  .tk-due.late { color:var(--bad); border-color:var(--bad); }
+  .tk.done .tk-due { opacity:.5; }
+  .tk-x { flex:none; width:26px; height:26px; background:none; border:1px solid transparent; border-radius:var(--radius);
+          color:var(--muted-2); font-size:17px; line-height:1; cursor:pointer; }
+  .tk-x:hover { color:var(--bad); border-color:var(--line-2); }
+  .tk-add { display:grid; grid-template-columns:1.3fr 1.3fr 150px auto; gap:8px; margin-top:9px; }
+  .tk-add input { width:100%; padding:8px 10px; border:1px solid var(--line-2); border-radius:var(--radius); background:var(--ink); color:var(--paper); font:inherit; font-size:14px; }
+  .tk-add .mini { padding:8px 12px; }
+  @media (max-width:620px){ .tk-add { grid-template-columns:1fr auto; } .tk-add input[name=details] { grid-column:1/-1; order:3; } .tk-add input[name=due] { order:4; } }
   @media (max-width:620px){ .c { padding:15px 16px; } .tile { padding:20px 18px 18px; } }
 </style>
 </head>
@@ -153,7 +178,7 @@
   var subEl = document.getElementById('sub');
   var crumbEl = document.getElementById('crumb');
 
-  var D = { projects: [], keys: {}, jobs: [], enquiries: [], run: null };
+  var D = { projects: [], keys: {}, jobs: [], enquiries: [], run: null, tasks: {} };
   var ui = { stage: 'all', sector: '', q: '', cat: 'all', min: 45, jstatus: 'open' };
   var STAGES = ['not-contacted','emailed','called','replied','meeting','quoted','won','lost','parked'];
   var WARM = ['replied','meeting','quoted'];
@@ -203,17 +228,24 @@
     say(appMsg, 'Loading...');
     return Promise.all([
       DWData.rest('dw_projects?select=*&order=name.asc'),
-      DWData.rest('dw_project_keys?select=slug,doc,passphrase,issued_on').catch(function () { return []; }),
+      DWData.rest('dw_project_secrets?select=project_id,passphrase').catch(function () { return []; }),
       DWData.rest('dw_jobs?select=*&order=score.desc,posted_at.desc').catch(function () { return []; }),
       DWData.rest('tcooper_enquiries?select=*&order=created_at.desc').catch(function () { return []; }),
-      DWData.rest('dw_job_runs?select=*&order=started_at.desc&limit=1').catch(function () { return []; })
+      DWData.rest('dw_job_runs?select=*&order=started_at.desc&limit=1').catch(function () { return []; }),
+      DWData.rest('dw_project_tasks?select=*&order=done.asc,sort_order.asc,created_at.asc').catch(function () { return []; })
     ]).then(function (out) {
       D.projects = out[0] || [];
+      /* One passphrase per project opens both its site and its report. */
       D.keys = {};
+      var slugOf = {};
+      D.projects.forEach(function (p) { slugOf[p.id] = p; });
       (out[1] || []).forEach(function (k) {
-        if (!D.keys[k.slug]) D.keys[k.slug] = {};
-        D.keys[k.slug][k.doc] = k.passphrase;
+        var p = slugOf[k.project_id];
+        if (!p || !k.passphrase) return;
+        D.keys[p.slug] = { site: p.has_preview ? k.passphrase : null, report: p.has_report ? k.passphrase : null };
       });
+      D.tasks = {};
+      (out[5] || []).forEach(function (t) { (D.tasks[t.project_id] = D.tasks[t.project_id] || []).push(t); });
       D.jobs = out[2] || [];
       D.enquiries = out[3] || [];
       D.run = (out[4] || [])[0] || null;
@@ -248,7 +280,8 @@
       targets: D.projects.filter(isTarget).length,
       jobs: D.jobs.filter(function (j) { return (j.score || 0) >= 45 && j.status !== 'hidden' && j.status !== 'rejected'; }).length,
       enquiries: D.enquiries.length,
-      due: due
+      due: due,
+      todo: Object.keys(D.tasks).reduce(function (n, k) { return n + D.tasks[k].filter(function (t) { return !t.done; }).length; }, 0)
     };
   }
 
@@ -278,6 +311,7 @@
     viewEl.innerHTML = '<div class="menu">' + AREAS.map(function (a) {
       var extra = a.id === 'targets' && c.due
         ? '<span class="flag warn">' + c.due + ' to chase</span>' : '';
+      if (a.id === 'wip' && c.todo) extra = '<span class="flag warn">' + c.todo + ' jobs to do</span>';
       return '<a class="tile" href="#/' + a.id + '">' +
         '<span class="n">' + c[a.id] + '</span>' +
         '<b>' + a.name + '</b>' +
@@ -357,6 +391,43 @@
       '<div class="cards">' + rows.map(projectCard).join('') + '</div>';
   }
 
+  /* ---- jobs to do ---- */
+  function openJobs(id) { return (D.tasks[id] || []).filter(function (t) { return !t.done; }).length; }
+  function taskBox(r) {
+    var list = D.tasks[r.id] || [];
+    var done = list.length - openJobs(r.id);
+    var pct = list.length ? Math.round(done / list.length * 100) : 0;
+    var t0 = today();
+    return '<div class="tk-box" data-tasks>' +
+      '<div class="tk-head"><b>Jobs to do</b><div class="tk-bar"><i style="width:' + pct + '%"></i></div>' +
+        '<span>' + (list.length ? done + ' of ' + list.length + ' done' : 'none yet') + '</span></div>' +
+      '<ul class="tk-list">' + list.map(function (t) {
+        var late = t.due_on && !t.done && t.due_on < t0;
+        return '<li class="tk' + (t.done ? ' done' : '') + '" data-tid="' + esc(t.id) + '">' +
+          '<label><input type="checkbox" data-tact="toggle"' + (t.done ? ' checked' : '') + '>' +
+          '<span>' + esc(t.title) + (t.details ? '<small>' + esc(t.details) + '</small>' : '') + '</span></label>' +
+          (t.due_on ? '<span class="tk-due' + (late ? ' late' : '') + '">' + (late ? 'late ' : '') + esc(t.due_on.slice(8, 10) + '/' + t.due_on.slice(5, 7)) + '</span>' : '') +
+          '<button class="tk-x" type="button" data-tact="del" aria-label="Delete this job">&times;</button></li>';
+      }).join('') + '</ul>' +
+      '<form class="tk-add" data-tadd>' +
+        '<input name="title" type="text" placeholder="Add a job" aria-label="New job" required>' +
+        '<input name="details" type="text" placeholder="Details (optional)" aria-label="Details">' +
+        '<input name="due" type="date" aria-label="Due date">' +
+        '<button class="mini" type="submit">Add</button>' +
+      '</form></div>';
+  }
+  function redrawTasks(card, id) {
+    D.tasks[id] = (D.tasks[id] || []).slice().sort(function (a, b) {
+      return (a.done - b.done) || (a.sort_order - b.sort_order) || (a.created_at < b.created_at ? -1 : 1);
+    });
+    var r = D.projects.filter(function (p) { return p.id === id; })[0];
+    var tmp = document.createElement('div'); tmp.innerHTML = taskBox(r);
+    card.querySelector('[data-tasks]').replaceWith(tmp.firstChild);
+    var fl = card.querySelector('.flag.jobs'), n = openJobs(id);
+    if (fl) { if (n) fl.textContent = n + ' to do'; else fl.remove(); }
+    else if (n) card.querySelector('.c-top .tagline').insertAdjacentHTML('beforeend', ' <span class="flag warn jobs">' + n + ' to do</span>');
+  }
+
   function projectCard(r) {
     var k = D.keys[r.slug] || {};
     var phone = r.contact_phone ? '<a href="tel:' + esc((r.contact_phone.split('/')[0] || '').replace(/\s/g,'')) + '">' + esc(r.contact_phone) + '</a>' : '';
@@ -370,7 +441,8 @@
       '<div class="c-top"><h3>' + esc(r.name) + '</h3><span class="tagline">' + esc(r.sector || '') +
         (eyeball ? ' <span class="flag warn">check details</span>' : '') +
         (isDue(r) ? ' <span class="flag warn">due</span>' : '') +
-        (r.status === 'ready' ? ' <span class="flag">ready to send</span>' : '') + '</span></div>' +
+        (r.status === 'ready' ? ' <span class="flag">ready to send</span>' : '') +
+        (openJobs(r.id) ? ' <span class="flag warn jobs">' + openJobs(r.id) + ' to do</span>' : '') + '</span></div>' +
       (det ? '<p class="det">' + det + '</p>' : '') +
       '<div class="row">' +
         (r.has_preview ? '<a class="mini" href="/preview/' + esc(r.slug) + '/" target="_blank" rel="noopener">Preview</a>' : '') +
@@ -389,6 +461,7 @@
         '<div class="wide"><label>Notes</label><textarea data-f="outreach_notes" placeholder="What was said">' + esc(r.outreach_notes || '') + '</textarea></div>' +
         '<div class="wide row" style="justify-content:flex-end"><span class="saved" data-saved></span></div>' +
       '</div>' +
+      (isWip(r) || (D.tasks[r.id] || []).length ? taskBox(r) : '') +
     '</article>';
   }
 
@@ -495,6 +568,17 @@
 
   /* ---- events ---- */
   viewEl.addEventListener('click', function (e) {
+    var tdel = e.target.closest('[data-tact="del"]');
+    if (tdel) {
+      var tcard = tdel.closest('[data-id]'), pid = tcard.getAttribute('data-id');
+      var tid = tdel.closest('[data-tid]').getAttribute('data-tid');
+      if (!confirm('Delete this job?')) return;
+      DWData.rest('dw_project_tasks?id=eq.' + encodeURIComponent(tid), { method:'DELETE' }).then(function () {
+        D.tasks[pid] = (D.tasks[pid] || []).filter(function (t) { return t.id !== tid; });
+        redrawTasks(tcard, pid);
+      }).catch(function (err) { say(appMsg, err.message, 'bad'); });
+      return;
+    }
     var copy = e.target.closest('[data-copy]');
     if (copy) {
       var txt = copy.getAttribute('data-copy');
@@ -544,6 +628,19 @@
   });
 
   viewEl.addEventListener('change', function (e) {
+    if (e.target.getAttribute('data-tact') === 'toggle') {
+      var box = e.target, tcard = box.closest('[data-id]'), pid = tcard.getAttribute('data-id');
+      var tid = box.closest('[data-tid]').getAttribute('data-tid');
+      var t = (D.tasks[pid] || []).filter(function (x) { return x.id === tid; })[0];
+      var done = box.checked;
+      box.disabled = true;
+      DWData.rest('dw_project_tasks?id=eq.' + encodeURIComponent(tid), {
+        method:'PATCH', body:{ done: done, done_at: done ? new Date().toISOString() : null }, headers:{ Prefer:'return=minimal' }
+      }).then(function () { t.done = done; redrawTasks(tcard, pid); })
+        .catch(function (err) { box.checked = !done; box.disabled = false; say(appMsg, err.message, 'bad'); });
+      return;
+    }
+    if (e.target.closest('[data-tadd]')) return;
     if (e.target.id === 'sector') { ui.sector = e.target.value; route(); return; }
     if (e.target.id === 'min') { ui.min = Number(e.target.value); route(); return; }
     var f = e.target.getAttribute('data-f');
@@ -558,6 +655,24 @@
     var row = D.projects.filter(function (p) { return p.id === card.getAttribute('data-id'); })[0];
     if (row) Object.assign(row, body);
     patch('dw_projects', card.getAttribute('data-id'), body, card.querySelector('[data-saved]'));
+  });
+
+  viewEl.addEventListener('submit', function (e) {
+    var f = e.target.closest('[data-tadd]');
+    if (!f) return;
+    e.preventDefault();
+    var tcard = f.closest('[data-id]'), pid = tcard.getAttribute('data-id');
+    var title = f.elements.title.value.trim();
+    if (!title) return;
+    var list = D.tasks[pid] || [];
+    var row = { project_id: pid, title: title, details: f.elements.details.value.trim() || null, due_on: f.elements.due.value || null,
+                sort_order: list.reduce(function (m, t) { return Math.max(m, t.sort_order || 0); }, 0) + 10 };
+    f.querySelector('button').disabled = true;
+    DWData.rest('dw_project_tasks', { method:'POST', body: row, headers:{ Prefer:'return=representation' } }).then(function (out) {
+      D.tasks[pid] = list.concat(out || []);
+      redrawTasks(tcard, pid);
+      var nf = tcard.querySelector('[data-tadd] input[name=title]'); if (nf) nf.focus();
+    }).catch(function (err) { f.querySelector('button').disabled = false; say(appMsg, err.message, 'bad'); });
   });
 
   viewEl.addEventListener('input', function (e) {
