@@ -167,7 +167,7 @@
     });
 
     /* sign-off */
-    out += '<div class="sec" style="margin-top:10mm"><div class="box dark"><span class="num">Send everything to</span><p style="margin:0;font-size:11.5pt">' +
+    out += '<div class="sec" style="margin-top:10mm;break-inside:avoid"><div class="box dark"><span class="num">Send everything to</span><p style="margin:0;font-size:11.5pt">' +
       esc(pack.contact || 'info@dunnworks.io · WhatsApp or call 07377 599 023') + '</p></div>' +
       '<div class="sign">' + MARK + '<div><b>' + esc((pack.from || 'Tony, Dunnworks').split(',')[0]) + '</b><br><span class="muted">Dunnworks · dunnworks.io</span></div></div></div>';
 
