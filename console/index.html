@@ -160,6 +160,18 @@
   .tk-edit textarea { min-height:60px; resize:vertical; }
   .tk-edit .wide { grid-column:1/-1; }
   .tk-edit .acts { grid-column:1/-1; display:flex; gap:8px; align-items:center; }
+  .talk-box { margin:0 0 14px; }
+  .talk-box .thread { list-style:none; margin:0 0 10px; padding:0; display:grid; gap:6px; }
+  .talk-box .thread li { padding:8px 10px; border:1px solid var(--line); border-radius:var(--radius); background:var(--ink); }
+  .talk-box .thread li.them { border-left:3px solid var(--accent-2); }
+  .talk-box .thread b { font-size:12.5px; } .talk-box .thread time { font-family:var(--font-mono); font-size:10.5px; color:var(--muted-2); }
+  .talk-box .thread p { margin:3px 0 0; font-size:14px; white-space:pre-wrap; }
+  .tfiles { list-style:none; margin:0 0 10px; padding:0; font-size:13.5px; display:grid; gap:4px; }
+  .tfiles span { color:var(--muted-2); font-size:12px; }
+  .linkish { background:none; border:0; padding:0; color:var(--accent-2); text-decoration:underline; font:inherit; cursor:pointer; text-align:left; word-break:break-all; }
+  .treply { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; }
+  .treply textarea { min-height:44px; padding:8px 10px; border:1px solid var(--line-2); border-radius:var(--radius); background:var(--ink); color:var(--paper); font:inherit; font-size:14px; resize:vertical; }
+  .who.talk.needs { background:var(--accent); color:#fff; }
   @media (max-width:620px){ .tk-body { padding-left:12px; } .tk-edit { grid-template-columns:1fr; } }
   .plan { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin:12px 0 4px; }
   .plan div { border:1px solid var(--line); border-radius:var(--radius); padding:10px 12px; background:var(--ink); }
@@ -310,8 +322,13 @@
       DWData.rest('dw_job_runs?select=*&order=started_at.desc&limit=1').catch(function () { return []; }),
       DWData.rest('dw_project_tasks?select=*&order=sort_order.asc,created_at.asc').catch(function () { return []; }),
       DWData.keys().catch(function () { return []; }),
-      DWData.rest('dw_project_packs?select=*').catch(function () { return []; })
+      DWData.rest('dw_project_packs?select=*').catch(function () { return []; }),
+      DWData.rest('dw_task_notes?select=*&order=created_at.asc').catch(function () { return []; }),
+      DWData.rest('dw_task_files?select=*&order=created_at.asc').catch(function () { return []; })
     ]).then(function (out) {
+      D.notes = {}; D.files = {};
+      (out[8] || []).forEach(function (n) { (D.notes[n.task_id] = D.notes[n.task_id] || []).push(n); });
+      (out[9] || []).forEach(function (f) { (D.files[f.task_id] = D.files[f.task_id] || []).push(f); });
       D.packs = {};
       (out[7] || []).forEach(function (k) { D.packs[k.project_id] = k; });
       D.projects = out[0] || [];
@@ -475,6 +492,7 @@
   }
 
   /* ---- jobs to do ---- */
+  var CLIENT_PAGES = ['coastal-golf-co'];   /* projects with a page at /client/<slug>/ */
   var OWNERS = { me: 'You', stuart: 'Stuart', bil: 'Brother-in-law', google: 'Google', client: 'Client', other: 'Someone else' };
   function openJobs(id) { return (D.tasks[id] || []).filter(function (t) { return !t.done; }).length; }
   function ymd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
@@ -524,6 +542,8 @@
         '<button class="tk-open" type="button" data-tact="open" aria-expanded="' + open + '">' +
           '<span class="tt"><span>' + esc(t.title) + '</span>' + (t.details ? '<small>' + esc(t.details) + '</small>' : '') + '</span>' +
           (own !== 'me' ? '<span class="who">' + esc(OWNERS[own] || own) + '</span>' : '') +
+          (t.client_hidden ? '<span class="who" title="Not shown on the client page">private</span>' : '') +
+          talkChip(t) +
           (t._proj ? '<span class="proj" title="Projected">' + (late ? 'late · ' : '') + esc(dm(t._proj)) + '</span>' : '') +
           (t.due_on ? '<span class="tk-due" title="Target date">due ' + esc(dm(t.due_on)) + '</span>' : '') +
           '<span class="tk-arrow" aria-hidden="true">&#9662;</span>' +
@@ -538,6 +558,7 @@
             (t.due_on ? ' &middot; target ' + esc(dayName(t.due_on)) : '') +
             (late ? ' &middot; overdue' : behind ? ' &middot; running behind' : '')) +
         '</p>' +
+        talk(t) +
         '<form class="tk-edit" data-tedit>' +
           '<div class="half"><label>Job</label><input name="title" type="text" value="' + esc(t.title) + '" required></div>' +
           '<div><label>Hours</label><input name="est" type="number" min="0" step="0.25" value="' + esc(t.est_hours == null ? 1 : t.est_hours) + '"></div>' +
@@ -549,6 +570,7 @@
           '<div class="wide"><label>In the client pack, reads as (optional)</label><input name="ctitle" type="text" value="' + esc(t.client_title || '') + '" placeholder="' + esc(t.title) + '"></div>' +
           '<div class="wide"><label>Client pack note (optional, otherwise the details are used)</label><textarea name="cnote" style="min-height:42px">' + esc(t.client_note || '') + '</textarea></div>' +
           '<label class="chk2"><input type="checkbox" name="waits"' + (t.waits ? ' checked' : '') + '>Needs the waiting items above it before it can start</label>' +
+          '<label class="chk2"><input type="checkbox" name="chidden"' + (t.client_hidden ? ' checked' : '') + '>Keep off the client page (private to you)</label>' +
           '<div class="acts"><button class="mini" type="submit">Save</button>' +
             '<button class="mini" type="button" data-tact="up" aria-label="Move up">&uarr; Up</button>' +
             '<button class="mini" type="button" data-tact="down" aria-label="Move down">&darr; Down</button>' +
@@ -556,6 +578,26 @@
             '<span class="saved" data-tsaved></span></div>' +
         '</form>' +
       '</div></li>';
+  }
+
+  /* ---- client page conversation on a job ---- */
+  function stampT(iso) { var d = new Date(iso); return d.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) + ' ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }); }
+  function talkChip(t) {
+    var n = (D.notes[t.id] || []), f = (D.files[t.id] || []);
+    if (!n.length && !f.length) return '';
+    var last = n[n.length - 1], waiting = last && last.author === 'client';
+    return '<span class="who talk' + (waiting ? ' needs' : '') + '" title="' + (waiting ? 'Client is waiting for your reply' : 'Client page conversation') + '">' +
+      (n.length ? n.length + (n.length === 1 ? ' reply' : ' replies') : '') + (n.length && f.length ? ' &middot; ' : '') + (f.length ? f.length + (f.length === 1 ? ' file' : ' files') : '') + '</span>';
+  }
+  function talk(t) {
+    var n = D.notes[t.id] || [], f = D.files[t.id] || [];
+    return '<div class="talk-box">' +
+      (n.length ? '<ol class="thread">' + n.map(function (x) {
+        return '<li class="' + (x.author === 'client' ? 'them' : 'me') + '"><b>' + (x.author === 'client' ? 'Client' : 'You') + '</b> <time>' + esc(stampT(x.created_at)) + '</time><p>' + esc(x.body) + '</p></li>'; }).join('') + '</ol>' : '') +
+      (f.length ? '<ul class="tfiles">' + f.map(function (x) {
+        return '<li><button type="button" class="linkish" data-tact="file" data-path="' + esc(x.path) + '" data-name="' + esc(x.name) + '">' + esc(x.name) + '</button> <span>' + (Math.max(1, Math.round((x.size || 0) / 1024))) + ' KB &middot; ' + (x.author === 'client' ? 'client' : 'you') + ', ' + esc(stampT(x.created_at)) + '</span></li>'; }).join('') + '</ul>' : '') +
+      (t.client_hidden ? '' : '<form class="treply" data-treply><textarea name="body" rows="2" placeholder="Reply on the client page"></textarea><button class="mini" type="submit">Reply</button></form>') +
+    '</div>';
   }
 
   function taskBox(r) {
@@ -798,6 +840,7 @@
         (k.report ? '<button class="mini" data-copy="' + esc(k.report) + '">Copy report pass</button>' : '') +
         (r.contact_email ? '<a class="mini" href="mailto:' + esc(r.contact_email) + '?subject=' + encodeURIComponent('A website concept for ' + (r.name || '')) + '">Email</a>' : '') +
         (hasPack(r) ? '<button class="mini go" type="button" data-pact="open">Client pack</button>' : '') +
+        (CLIENT_PAGES.indexOf(r.slug) !== -1 ? '<a class="mini" href="/client/' + esc(r.slug) + '/" target="_blank" rel="noopener">Client page</a><button class="mini" data-copy="https://dunnworks.io/client/' + esc(r.slug) + '/">Copy client link</button>' : '') +
       '</div>' +
       '<div class="edit">' +
         '<div><label>Stage</label><select data-f="stage">' +
@@ -1030,6 +1073,14 @@
         .catch(function (err) { say(appMsg, err.message, 'bad'); });
       return;
     }
+    var tfile = e.target.closest('[data-tact="file"]');
+    if (tfile) {
+      tfile.disabled = true;
+      DWData.signFile('client-files', tfile.getAttribute('data-path'), tfile.getAttribute('data-name')).then(function (u) {
+        var a = document.createElement('a'); a.href = u; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
+      }).catch(function (err) { say(appMsg, err.message, 'bad'); }).then(function () { tfile.disabled = false; });
+      return;
+    }
     var tdel = e.target.closest('[data-tact="del"]');
     if (tdel) {
       var tcard = tdel.closest('[data-id]'), pid = tcard.getAttribute('data-id');
@@ -1120,6 +1171,17 @@
   });
 
   viewEl.addEventListener('submit', function (e) {
+    var rf = e.target.closest('[data-treply]');
+    if (rf) {
+      e.preventDefault();
+      var rcard = rf.closest('[data-id]'), rpid = rcard.getAttribute('data-id'), rtid = rf.closest('[data-tid]').getAttribute('data-tid');
+      var rb = rf.elements.body.value.trim(); if (!rb) return;
+      rf.querySelector('button').disabled = true;
+      DWData.rest('dw_task_notes', { method:'POST', body:{ task_id: rtid, project_id: rpid, author: 'me', body: rb }, headers:{ Prefer:'return=representation' } })
+        .then(function (out) { (D.notes[rtid] = D.notes[rtid] || []).push((out || [])[0]); ui.openTasks[rtid] = 1; redrawTasks(rcard, rpid); })
+        .catch(function (err) { rf.querySelector('button').disabled = false; say(appMsg, err.message, 'bad'); });
+      return;
+    }
     var ef = e.target.closest('[data-tedit]');
     if (ef) {
       e.preventDefault();
@@ -1129,7 +1191,8 @@
       var body = { title: ef.elements.title.value.trim(), details: ef.elements.details.value.trim() || null, due_on: ef.elements.due.value || null,
                    est_hours: Number(ef.elements.est.value) || 0, phase: ef.elements.phase.value.trim() || null,
                    owner: ef.elements.owner.value, waits: ef.elements.waits.checked,
-                   client_title: ef.elements.ctitle.value.trim() || null, client_note: ef.elements.cnote.value.trim() || null };
+                   client_title: ef.elements.ctitle.value.trim() || null, client_note: ef.elements.cnote.value.trim() || null,
+                   client_hidden: ef.elements.chidden.checked };
       if (!body.title) return;
       DWData.rest('dw_project_tasks?id=eq.' + encodeURIComponent(etid), { method:'PATCH', body: body, headers:{ Prefer:'return=minimal' } })
         .then(function () { Object.assign(et, body); ui.openTasks[etid] = 1; redrawTasks(ecard, epid);

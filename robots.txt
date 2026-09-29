@@ -3,5 +3,6 @@ Allow: /
 Disallow: /admin/
 Disallow: /console/
 Disallow: /preview/
+Disallow: /client/
 
 Sitemap: https://dunnworks.io/sitemap.xml

@@ -189,6 +189,20 @@
     removeTask: function (id) {
       return rest('dw_project_tasks?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
     },
+    // a short-lived download link for a private storage file (owner only)
+    signFile: function (bucket, path, name) {
+      return session().then(function () {
+        return fetch(C.url + '/storage/v1/object/sign/' + bucket + '/' + path.split('/').map(encodeURIComponent).join('/'), {
+          method: 'POST', headers: headers(true), body: JSON.stringify({ expiresIn: 600 })
+        });
+      }).then(function (r) {
+        if (!r.ok) return r.text().then(function (t) { throw new Error('HTTP ' + r.status + ' ' + t.slice(0, 200)); });
+        return r.json();
+      }).then(function (j) {
+        var u = C.url + '/storage/v1' + (j.signedURL || j.signedUrl);
+        return name ? u + '&download=' + encodeURIComponent(name) : u;
+      });
+    },
     rest: rest,
     signInWithPassword: signInWithPassword,
     sendMagicLink: sendMagicLink,
