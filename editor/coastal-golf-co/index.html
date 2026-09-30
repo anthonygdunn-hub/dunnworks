@@ -351,9 +351,13 @@ $('tw').addEventListener('click', function(){ tab(false); }); $('tv').addEventLi
 
 /* ---- start: a sign-in link lands here with a one-time token ---- */
 var q = new URLSearchParams(location.search), th = q.get('token_hash');
+function verify(type){
+  return fetch(URL0 + '/auth/v1/verify', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: type, token_hash: th }) })
+    .then(function(r){ return r.json().then(function(j){ return r.ok && j.access_token ? j : null; }); });
+}
 var start = th
-  ? fetch(URL0 + '/auth/v1/verify', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: q.get('type') || 'magiclink', token_hash: th }) })
-      .then(function(r){ return r.json().then(function(j){ if (!r.ok || !j.access_token) throw new Error('That sign-in link has expired or was already used. Ask for a new one below.'); keep(j); }); })
+  ? verify(q.get('type') || 'magiclink').then(function(j){ return j || verify('email'); })
+      .then(function(j){ if (!j) throw new Error('That sign-in link has expired or was already used. Ask for a new one below.'); keep(j); })
       .catch(function(e){ show('gate'); $('gmsg').className = 'msg bad'; $('gmsg').textContent = e.message; throw e; })
       .then(function(){ history.replaceState(null, '', location.pathname); })
   : Promise.resolve();
