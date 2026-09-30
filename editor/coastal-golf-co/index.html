@@ -217,16 +217,21 @@ function resize(file, max){
       var s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
       c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
-      c.toBlob(function(b){ b ? res(b) : rej(new Error('Could not read that photo.')); }, 'image/webp', 0.82);
+      // iPhones (Safari) can't make WebP and quietly hand back a huge PNG instead, so fall back to JPEG there
+      c.toBlob(function(b){
+        if (b && b.type === 'image/webp') return res(b);
+        c.toBlob(function(j){ j ? res(j) : rej(new Error('Could not read that photo.')); }, 'image/jpeg', 0.82);
+      }, 'image/webp', 0.8);
     };
     img.onerror = function(){ URL.revokeObjectURL(u); rej(new Error('That file isn\'t a photo this browser can read. Try a JPEG or PNG.')); };
     img.src = u;
   });
 }
 function upload(file){
-  return resize(file, 1800).then(function(blob){
-    var path = 'posts/' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8) + '.webp';
-    return api('/storage/v1/object/' + BUCKET + '/' + path, { method: 'POST', body: blob, headers: { 'Content-Type': 'image/webp', 'x-upsert': 'false', 'Cache-Control': '31536000' } })
+  return resize(file, 1600).then(function(blob){
+    var jpg = blob.type !== 'image/webp';
+    var path = 'posts/' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8) + (jpg ? '.jpg' : '.webp');
+    return api('/storage/v1/object/' + BUCKET + '/' + path, { method: 'POST', body: blob, headers: { 'Content-Type': jpg ? 'image/jpeg' : 'image/webp', 'x-upsert': 'false', 'Cache-Control': '31536000' } })
       .then(function(){ return path; });
   });
 }
