@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Editor | Coastal Golf Co</title>
+<meta name="theme-color" content="#022042">
+<link rel="icon" href="https://www.coastalgolfco.co.uk/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Mulish:wght@400;600;700;800&display=swap">
+<style>
+:root{--navy:#022042;--navy2:#01162e;--gold:#cb9a31;--gold2:#ddb04f;--bronze:#8a5a12;--cream:#f8f2e2;--card:#fffdf7;--line:#e6dcc3;--body:#3b4863;--green:#1d6b3a;--bad:#b3261e;--r:14px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--navy);font:16px/1.55 'Mulish',system-ui,-apple-system,'Segoe UI',sans-serif}
+h1,h2,h3{font-family:'Oswald',Impact,sans-serif;text-transform:uppercase;letter-spacing:.02em;margin:0;line-height:1.1}
+a{color:var(--navy)}
+button,input,select,textarea{font:inherit;color:inherit}
+.top{background:var(--navy);color:#fff;border-bottom:3px solid var(--gold)}
+.top .in{max-width:900px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top b{font:700 19px/1 'Oswald',Impact,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.top small{display:block;color:var(--gold2);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+.top button{background:none;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:14px}
+main{max-width:900px;margin:0 auto;padding:22px 16px 120px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:999px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-weight:800;cursor:pointer;text-decoration:none}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--navy2)}
+.btn.line{background:transparent;color:var(--navy)}
+.btn.bad{background:transparent;border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.sm{min-height:40px;padding:0 14px;font-size:14px}
+label{display:block;font-weight:800;font-size:14px;margin:18px 0 6px}
+label small{font-weight:600;color:var(--body)}
+input[type=text],input[type=email],input[type=date],select,textarea{width:100%;border:1px solid #cdbf9c;border-radius:10px;background:#fff;padding:12px 14px;font-size:16px}
+textarea{min-height:360px;line-height:1.6;resize:vertical}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.msg{min-height:1.4em;margin:10px 0 0;font-weight:700}
+.msg.bad{color:var(--bad)}.msg.ok{color:var(--green)}
+.gate{max-width:440px;margin:6vh auto 0}
+.gate p{color:var(--body)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.list{display:grid;gap:10px;margin-top:16px}
+.item{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;cursor:pointer;text-align:left;width:100%}
+.item:hover{border-color:var(--gold)}
+.item .th{flex:0 0 84px;height:56px;border-radius:8px;background:linear-gradient(160deg,#bfe0f3,#f3e3b8) center/cover no-repeat}
+.item b{display:block;font-size:17px}
+.item span{font-size:13.5px;color:var(--body)}
+.chip{display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;margin-right:6px}
+.chip.draft{background:#ece4cf;color:var(--body)}.chip.live{background:#d7eedd;color:var(--green)}.chip.soon{background:#f6e7c1;color:var(--bronze)}
+.empty{padding:26px;border:2px dashed var(--line);border-radius:var(--r);text-align:center;color:var(--body)}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.tools button{border:1px solid #cdbf9c;background:#fff;border-radius:8px;padding:7px 11px;font-weight:800;font-size:14px;cursor:pointer}
+.tabs{display:flex;gap:6px;margin:22px 0 8px}
+.tabs button{border:0;background:none;padding:8px 4px;margin-right:10px;font-weight:800;border-bottom:3px solid transparent;cursor:pointer}
+.tabs button[aria-selected=true]{border-color:var(--gold)}
+.cover{margin-top:6px;border:2px dashed #cdbf9c;border-radius:12px;padding:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.cover img{width:180px;max-width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;background:#eee}
+.help{font-size:14px;color:var(--body);margin:6px 0 0}
+.count{font-size:13px;color:var(--body);text-align:right}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -8px 20px rgba(1,22,46,.08);z-index:5}
+.bar .in{max-width:900px;margin:0 auto;padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.bar .st{margin-right:auto;font-size:14px;font-weight:700;color:var(--body)}
+/* preview: same look as the website's post page */
+.prev{background:var(--card);border-radius:18px;padding:28px;box-shadow:0 12px 30px rgba(1,22,46,.08)}
+.prev .pc{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;margin-bottom:18px}
+.prev h1{font-size:clamp(30px,6vw,44px)}
+.prev .sum{font-size:19px;color:var(--body);margin:10px 0 0}
+.prose p{font-size:18px;line-height:1.75;color:#28344a;margin:18px 0 0}
+.prose h2{font-size:26px;margin:30px 0 0}
+.prose blockquote{margin:26px 0;padding:4px 0 4px 20px;border-left:4px solid var(--gold);font:italic 22px/1.45 Georgia,serif;color:var(--navy)}
+.prose ul{margin:16px 0 0;padding-left:22px;font-size:18px;line-height:1.7;color:#28344a}
+.prose img{display:block;width:100%;height:auto;border-radius:12px;margin:22px 0 0}
+.prose a{color:var(--bronze);font-weight:700}
+[hidden]{display:none!important}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;z-index:9;max-width:calc(100vw - 32px)}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><div><b>Coastal Golf Co</b><small>Journal editor</small></div><button type="button" id="out" hidden>Sign out</button></div></header>
+<main id="main">
+
+<section id="v-gate" class="gate" hidden>
+  <h1 style="font-size:34px">Sign in</h1>
+  <p>Enter your email address and we'll send you a link. Tap it on this device and you're in. No password needed.</p>
+  <form id="f-gate" novalidate>
+    <label for="em">Email address</label>
+    <input id="em" type="email" autocomplete="email" inputmode="email" required>
+    <button class="btn" type="submit" style="margin-top:14px;width:100%">Email me a sign-in link</button>
+    <p class="msg" id="gmsg" role="status"></p>
+  </form>
+</section>
+
+<section id="v-list" hidden>
+  <div class="row" style="justify-content:space-between"><h1 style="font-size:32px">Your posts</h1><button class="btn gold" type="button" id="new">+ New post</button></div>
+  <p class="help">Drafts are only visible to you. Published posts appear on the website's Journal straight away (or on the date you choose).</p>
+  <div class="list" id="posts"></div>
+</section>
+
+<section id="v-edit" hidden>
+  <button class="btn line sm" type="button" id="back">‹ All posts</button>
+  <label for="t">Title</label>
+  <input id="t" type="text" maxlength="160" placeholder="e.g. Why I started Coastal Golf Co">
+  <div class="row" style="gap:14px">
+    <div style="flex:1 1 200px"><label for="tp">Topic</label><select id="tp"><option value="story">My story</option><option value="game">The game</option><option value="care">Club care</option></select></div>
+    <div style="flex:1 1 200px"><label for="dt">Date <small>(shown on the post; a future date waits until then)</small></label><input id="dt" type="date"></div>
+  </div>
+  <label for="sm">One-line summary <small>(shows under the title and when the post is shared)</small></label>
+  <input id="sm" type="text" maxlength="300">
+  <div class="count" id="smc"></div>
+  <label>Main photo</label>
+  <div class="cover">
+    <img id="cv" alt="" hidden>
+    <div style="flex:1 1 220px">
+      <div class="row"><label class="btn line sm" style="margin:0;cursor:pointer">Choose photo<input id="cvf" type="file" accept="image/*" hidden></label><button class="btn line sm" type="button" id="cvx" hidden>Remove</button></div>
+      <label for="cva" style="margin-top:10px">Describe the photo <small>(for people who can't see it)</small></label>
+      <input id="cva" type="text" maxlength="200" placeholder="e.g. A freshly regripped set of irons on the workbench">
+    </div>
+  </div>
+  <div class="tabs" role="tablist"><button type="button" role="tab" aria-selected="true" id="tw">Write</button><button type="button" role="tab" aria-selected="false" id="tv">Preview</button></div>
+  <div id="write">
+    <div class="tools" aria-label="Formatting">
+      <button type="button" data-t="h">Heading</button><button type="button" data-t="b"><b>B</b> Bold</button><button type="button" data-t="q">“ Quote</button><button type="button" data-t="l">• List</button><button type="button" data-t="a">Link</button><label class="tools-photo" style="margin:0"><span class="btn line sm" style="min-height:34px;border-width:1px;border-color:#cdbf9c;border-radius:8px;padding:0 11px;cursor:pointer">Photo</span><input id="inf" type="file" accept="image/*" hidden></label>
+    </div>
+    <textarea id="bd" aria-label="Post" placeholder="Start writing. Leave an empty line between paragraphs."></textarea>
+    <p class="help">Leave an empty line between paragraphs. Use the buttons for headings, bold, quotes, lists, links and photos, then check it in Preview.</p>
+  </div>
+  <div id="view" hidden></div>
+</section>
+
+</main>
+<div class="bar" id="bar" hidden><div class="in"><span class="st" id="st"></span>
+  <button class="btn bad sm" type="button" id="del">Delete</button>
+  <button class="btn line sm" type="button" id="unp" hidden>Unpublish</button>
+  <button class="btn line sm" type="button" id="sav">Save draft</button>
+  <button class="btn gold sm" type="button" id="pub">Publish</button>
+</div></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+'use strict';
+var URL0 = 'https://acdpgarasgfhvupzsbxf.supabase.co', KEY = 'sb_publishable_OWTVpDyadL1lITnCp4gfAQ_EZxVHldY';
+var SITE = 'https://www.coastalgolfco.co.uk/', BUCKET = 'cgc-journal', AUTH = 'cgc-editor-auth';
+var $ = function(id){ return document.getElementById(id); };
+function show(v){ ['gate','list','edit'].forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('out').hidden = v === 'gate'; window.scrollTo(0, 0); }
+function toast(t, bad){ var e = $('toast'); e.textContent = t; e.style.background = bad ? 'var(--bad)' : 'var(--navy)'; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function(){ e.hidden = true; }, 3500); }
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ---- session ---- */
+var store = { get: function(){ try { return JSON.parse(localStorage.getItem(AUTH) || 'null'); } catch(e){ return null; } },
+              set: function(t){ try { t ? localStorage.setItem(AUTH, JSON.stringify(t)) : localStorage.removeItem(AUTH); } catch(e){} } };
+function keep(j){ store.set({ access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Math.floor(Date.now()/1000) + (j.expires_in || 3600), email: (j.user && j.user.email) || (store.get() || {}).email }); }
+function session(){
+  var t = store.get(); if (!t) return Promise.resolve(null);
+  if (t.expires_at - 60 > Math.floor(Date.now()/1000)) return Promise.resolve(t);
+  return fetch(URL0 + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: t.refresh_token }) })
+    .then(function(r){ if (!r.ok) throw 0; return r.json(); }).then(function(j){ keep(j); return store.get(); })
+    .catch(function(){ store.set(null); return null; });
+}
+function api(path, opts){
+  opts = opts || {};
+  return session().then(function(t){
+    if (!t) { show('gate'); throw new Error('Please sign in again.'); }
+    var h = { apikey: KEY, Authorization: 'Bearer ' + t.access_token };
+    if (opts.json !== undefined) { h['Content-Type'] = 'application/json'; }
+    for (var k in (opts.headers || {})) h[k] = opts.headers[k];
+    return fetch(URL0 + path, { method: opts.method || 'GET', headers: h, body: opts.json !== undefined ? JSON.stringify(opts.json) : opts.body });
+  }).then(function(r){
+    if (r.status === 401) { store.set(null); show('gate'); throw new Error('Please sign in again.'); }
+    if (!r.ok) return r.text().then(function(x){ var m = x; try { var j = JSON.parse(x); m = j.message || j.msg || j.error || x; } catch(e){} throw new Error(m || ('Error ' + r.status)); });
+    return r.status === 204 ? null : r.text().then(function(x){ return x ? JSON.parse(x) : null; });
+  });
+}
+
+/* ---- sign in ---- */
+$('f-gate').addEventListener('submit', function(e){
+  e.preventDefault(); var em = $('em').value.trim(), m = $('gmsg'), b = this.querySelector('button');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { m.className = 'msg bad'; m.textContent = 'Please enter your email address.'; return; }
+  b.disabled = true; m.className = 'msg'; m.textContent = 'Sending…';
+  fetch(URL0 + '/functions/v1/cgc-editor-login', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: em }) })
+    .then(function(r){ return r.json().then(function(j){ if (!r.ok) throw new Error(j.error || 'Could not send the email.'); }); })
+    .then(function(){ m.className = 'msg ok'; m.textContent = 'Check your inbox for the sign-in link (and the junk folder, just in case). It works once and runs out in an hour.'; })
+    .catch(function(err){ m.className = 'msg bad'; m.textContent = err.message; })
+    .then(function(){ b.disabled = false; });
+});
+$('out').addEventListener('click', function(){
+  var t = store.get(); store.set(null);
+  if (t) fetch(URL0 + '/auth/v1/logout', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + t.access_token } }).catch(function(){});
+  show('gate');
+});
+
+/* ---- the website's formatting: kept identical to the site's renderer ---- */
+function inline(s){
+  return s.replace(/!\[([^\]]*)\]\((https:\/\/[^\s)]+)\)/g, function(_, a, u){ return '<img src="' + u + '" alt="' + a + '" loading="lazy">'; })
+          .replace(/\[([^\]]+)\]\(((?:https?:\/\/|mailto:|tel:|\/|#)[^\s)]*)\)/g, function(_, t, u){ var ext = /^https?:/.test(u) && u.indexOf('coastalgolfco.co.uk') < 0; return '<a href="' + u + '"' + (ext ? ' rel="noopener" target="_blank"' : '') + '>' + t + '</a>'; })
+          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
+}
+function render(md){
+  var out = [], blocks = esc(md || '').replace(/\r/g, '').split(/\n{2,}/);
+  blocks.forEach(function(b){
+    b = b.replace(/^\n+|\n+$/g, ''); if (!b) return;
+    var lines = b.split('\n');
+    if (/^##\s+/.test(b)) { out.push('<h2>' + inline(b.replace(/^##\s+/, '').replace(/\n/g, ' ')) + '</h2>'); return; }
+    if (lines.every(function(l){ return /^&gt;\s?/.test(l); })) { out.push('<blockquote>' + inline(lines.map(function(l){ return l.replace(/^&gt;\s?/, ''); }).join(' ')) + '</blockquote>'); return; }
+    if (lines.every(function(l){ return /^[-*]\s+/.test(l); })) { out.push('<ul>' + lines.map(function(l){ return '<li>' + inline(l.replace(/^[-*]\s+/, '')) + '</li>'; }).join('') + '</ul>'); return; }
+    if (/^!\[[^\]]*\]\([^)]+\)$/.test(b)) { out.push(inline(b)); return; }
+    out.push('<p>' + inline(lines.join('<br>')) + '</p>');
+  });
+  return out.join('\n');
+}
+
+/* ---- photos: resized in the browser before upload ---- */
+function resize(file, max){
+  return new Promise(function(res, rej){
+    var img = new Image(), u = URL.createObjectURL(file);
+    img.onload = function(){
+      var s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+      c.toBlob(function(b){ b ? res(b) : rej(new Error('Could not read that photo.')); }, 'image/webp', 0.82);
+    };
+    img.onerror = function(){ URL.revokeObjectURL(u); rej(new Error('That file isn\'t a photo this browser can read. Try a JPEG or PNG.')); };
+    img.src = u;
+  });
+}
+function upload(file){
+  return resize(file, 1800).then(function(blob){
+    var path = 'posts/' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8) + '.webp';
+    return api('/storage/v1/object/' + BUCKET + '/' + path, { method: 'POST', body: blob, headers: { 'Content-Type': 'image/webp', 'x-upsert': 'false', 'Cache-Control': '31536000' } })
+      .then(function(){ return path; });
+  });
+}
+function pub(path){ return path ? URL0 + '/storage/v1/object/public/' + BUCKET + '/' + path : ''; }
+
+/* ---- posts ---- */
+var posts = [], cur = null, dirty = false;
+function today(){ var d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+function slugify(t){ return (t || 'post').toLowerCase().replace(/&/g, ' and ').replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/, '') || 'post'; }
+function state(p){ if (!p.published) return ['draft', 'Draft']; if (p.published_on && p.published_on > today()) return ['soon', 'Goes live ' + fmt(p.published_on)]; return ['live', 'Published']; }
+function fmt(d){ return d ? new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : ''; }
+function loadList(){
+  show('list'); $('posts').innerHTML = '<p class="help">Loading…</p>';
+  return api('/rest/v1/cgc_posts?select=*&order=published_on.desc.nullsfirst,updated_at.desc').then(function(rows){
+    posts = rows || [];
+    $('posts').innerHTML = posts.length ? posts.map(function(p, i){ var s = state(p);
+      return '<button class="item" type="button" data-i="' + i + '"><span class="th" style="' + (p.cover_path ? 'background-image:url(' + esc(pub(p.cover_path)) + ')' : '') + '"></span><span><b>' + esc(p.title) + '</b><span><span class="chip ' + s[0] + '">' + esc(s[1]) + '</span>' + esc(fmt(p.published_on)) + '</span></span></button>'; }).join('')
+      : '<div class="empty">No posts yet. Tap <b>New post</b> to write your first one.</div>';
+  }).catch(function(e){ $('posts').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
+}
+$('posts').addEventListener('click', function(e){ var b = e.target.closest('.item'); if (b) edit(posts[+b.getAttribute('data-i')]); });
+$('new').addEventListener('click', function(){ edit(null); });
+$('back').addEventListener('click', function(){ if (dirty && !confirm('Leave without saving your changes?')) return; dirty = false; loadList(); });
+
+function edit(p){
+  cur = p ? JSON.parse(JSON.stringify(p)) : { title: '', summary: '', topic: 'story', body: '', cover_path: null, cover_alt: '', published: false, published_on: today() };
+  $('t').value = cur.title; $('sm').value = cur.summary || ''; $('tp').value = cur.topic; $('dt').value = cur.published_on || today();
+  $('bd').value = cur.body || ''; $('cva').value = cur.cover_alt || ''; cover(); counts(); tab(false); status(); dirty = false; show('edit');
+}
+function cover(){ var u = pub(cur.cover_path); $('cv').hidden = !u; $('cvx').hidden = !u; if (u) $('cv').src = u; }
+function counts(){ $('smc').textContent = $('sm').value.length + ' / 300'; }
+function status(){
+  var s = cur.id ? state(cur) : ['draft', 'New post, not saved yet'];
+  $('st').innerHTML = '<span class="chip ' + s[0] + '">' + esc(s[1]) + '</span>' + (cur.id && cur.published ? ' <a href="' + SITE + 'journal/post/?p=' + encodeURIComponent(cur.slug) + '" target="_blank" rel="noopener">View on the website</a>' : '');
+  $('unp').hidden = !cur.published; $('sav').hidden = !!cur.published; $('del').hidden = !cur.id; $('pub').textContent = cur.published ? 'Save changes' : 'Publish';
+}
+['t', 'sm', 'tp', 'dt', 'bd', 'cva'].forEach(function(id){ $(id).addEventListener('input', function(){ dirty = true; if (id === 'sm') counts(); }); });
+addEventListener('beforeunload', function(e){ if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+function gather(){
+  return { title: $('t').value.trim(), summary: $('sm').value.trim() || null, topic: $('tp').value, published_on: $('dt').value || today(),
+           body: $('bd').value, cover_path: cur.cover_path || null, cover_alt: $('cva').value.trim() || null };
+}
+function save(publish){
+  var d = gather();
+  if (!d.title) { toast('Give the post a title first.', true); $('t').focus(); return; }
+  if (publish === true && !d.body.trim()) { toast('The post is empty. Write something before publishing.', true); return; }
+  if (publish === true && d.cover_path && !d.cover_alt) { toast('Please describe the main photo before publishing.', true); $('cva').focus(); return; }
+  if (publish !== undefined) d.published = publish;
+  var btns = document.querySelectorAll('.bar button'); [].forEach.call(btns, function(b){ b.disabled = true; });
+  var go = function(slug, n){
+    var body = cur.id ? d : Object.assign({ slug: slug }, d);
+    return api('/rest/v1/cgc_posts' + (cur.id ? '?id=eq.' + cur.id : ''), { method: cur.id ? 'PATCH' : 'POST', json: body, headers: { Prefer: 'return=representation' } })
+      .catch(function(e){ if (!cur.id && /duplicate|unique/i.test(e.message) && n < 20) return go(slugify(d.title) + '-' + (n + 2), n + 1); throw e; });
+  };
+  return go(cur.slug || slugify(d.title), 0).then(function(rows){
+    cur = rows[0]; dirty = false; status();
+    toast(publish === true ? (state(cur)[0] === 'soon' ? 'Saved. It goes live on ' + fmt(cur.published_on) + '.' : 'Published. It\'s on the website now.') : publish === false ? 'Unpublished. It\'s back to a draft.' : 'Saved.');
+  }).catch(function(e){ toast(e.message, true); }).then(function(){ [].forEach.call(btns, function(b){ b.disabled = false; }); });
+}
+$('sav').addEventListener('click', function(){ save(cur.published ? undefined : false); });
+$('pub').addEventListener('click', function(){ save(true); });
+$('unp').addEventListener('click', function(){ if (confirm('Take this post off the website? It stays here as a draft.')) save(false); });
+$('del').addEventListener('click', function(){
+  if (!cur.id || !confirm('Delete "' + cur.title + '" for good? This can\'t be undone.')) return;
+  api('/rest/v1/cgc_posts?id=eq.' + cur.id, { method: 'DELETE' }).then(function(){ dirty = false; toast('Deleted.'); loadList(); }).catch(function(e){ toast(e.message, true); });
+});
+
+$('cvf').addEventListener('change', function(){
+  var f = this.files[0]; this.value = ''; if (!f) return; toast('Uploading photo…');
+  upload(f).then(function(p){ cur.cover_path = p; dirty = true; cover(); toast('Photo added. Remember to save.'); }).catch(function(e){ toast(e.message, true); });
+});
+$('cvx').addEventListener('click', function(){ cur.cover_path = null; dirty = true; cover(); });
+
+/* ---- formatting buttons ---- */
+function wrap(before, after, ph){
+  var ta = $('bd'), s = ta.selectionStart, e = ta.selectionEnd, v = ta.value, sel = v.slice(s, e) || ph;
+  ta.value = v.slice(0, s) + before + sel + after + v.slice(e); ta.focus();
+  ta.selectionStart = s + before.length; ta.selectionEnd = s + before.length + sel.length; dirty = true;
+}
+// Headings, quotes and lists work on whole lines: a selection (or the cursor's line) becomes its own
+// block, any existing heading/quote/list mark is swapped for the new one, and an empty line keeps it apart.
+function block(prefix, ph, fresh){
+  var ta = $('bd'), v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+  var n;
+  if (fresh || s === e) { n = v.indexOf('\n', e); s = e = n < 0 ? v.length : n; }   // nothing selected: a new block after this line
+  else { s = v.lastIndexOf('\n', s - 1) + 1; n = v.indexOf('\n', e); e = n < 0 ? v.length : n; }
+  var sel = v.slice(s, e).replace(/^\s+|\s+$/g, '');
+  var lines = (sel || ph).split('\n').map(function(l){ return l.replace(/^(##\s+|>\s?|[-*]\s+)/, ''); });
+  var txt = lines.map(function(l){ return prefix + l; }).join('\n');
+  var before = v.slice(0, s).replace(/\s+$/, ''), after = v.slice(e).replace(/^\s+/, '');
+  var pre = before ? before + '\n\n' : '', post = after ? '\n\n' + after : '\n\n';
+  ta.value = pre + txt + post; ta.focus();
+  var first = prefix.length, lastLen = lines[lines.length - 1].length;
+  ta.selectionStart = pre.length + first; ta.selectionEnd = pre.length + txt.length - (lines.length > 1 ? 0 : 0);
+  if (!sel) { ta.selectionStart = pre.length + first; ta.selectionEnd = pre.length + first + lastLen; }
+  dirty = true;
+}
+document.querySelector('.tools').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-t]'); if (!b) return; var t = b.getAttribute('data-t');
+  if (t === 'h') block('## ', 'Heading');
+  if (t === 'b') wrap('**', '**', 'bold words');
+  if (t === 'q') block('> ', 'A line worth pulling out');
+  if (t === 'l') block('- ', 'First point');
+  if (t === 'a') { var u = prompt('Paste the web address (starting https://)'); if (u) { if (!/^(https?:\/\/|mailto:|tel:)/.test(u)) u = 'https://' + u.replace(/^\/+/, ''); wrap('[', '](' + u + ')', 'link text'); } }
+});
+$('inf').addEventListener('change', function(){
+  var f = this.files[0]; this.value = ''; if (!f) return; toast('Uploading photo…');
+  var alt = (prompt('Describe the photo in a few words (for people who can\'t see it):') || '').replace(/[\[\]]/g, '');
+  upload(f).then(function(p){ block('', '![' + alt + '](' + pub(p) + ')', true); toast('Photo added. Remember to save.'); }).catch(function(e){ toast(e.message, true); });
+});
+
+/* ---- preview ---- */
+function tab(pv){
+  $('tw').setAttribute('aria-selected', !pv); $('tv').setAttribute('aria-selected', pv); $('write').hidden = pv; $('view').hidden = !pv;
+  if (pv) { var d = gather(), u = pub(d.cover_path);
+    $('view').innerHTML = '<article class="prev">' + (u ? '<img class="pc" src="' + esc(u) + '" alt="' + esc(d.cover_alt || '') + '">' : '') +
+      '<p class="chip draft">' + esc({ story: 'My story', game: 'The game', care: 'Club care' }[d.topic]) + ' · ' + esc(fmt(d.published_on)) + '</p><h1>' + esc(d.title || 'Your title') + '</h1>' +
+      (d.summary ? '<p class="sum">' + esc(d.summary) + '</p>' : '') + '<div class="prose">' + render(d.body) + '</div></article>'; }
+}
+$('tw').addEventListener('click', function(){ tab(false); }); $('tv').addEventListener('click', function(){ tab(true); });
+
+/* ---- start: a sign-in link lands here with a one-time token ---- */
+var q = new URLSearchParams(location.search), th = q.get('token_hash');
+var start = th
+  ? fetch(URL0 + '/auth/v1/verify', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: q.get('type') || 'magiclink', token_hash: th }) })
+      .then(function(r){ return r.json().then(function(j){ if (!r.ok || !j.access_token) throw new Error('That sign-in link has expired or was already used. Ask for a new one below.'); keep(j); }); })
+      .catch(function(e){ show('gate'); $('gmsg').className = 'msg bad'; $('gmsg').textContent = e.message; throw e; })
+      .then(function(){ history.replaceState(null, '', location.pathname); })
+  : Promise.resolve();
+start.then(session).then(function(t){ t ? loadList() : show('gate'); }).catch(function(){});
+})();
+</script>
+</body>
+</html>
