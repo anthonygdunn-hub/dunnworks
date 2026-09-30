@@ -1,0 +1,1553 @@
+{
+ "sections": [
+  {
+   "title": "Headline prices",
+   "note": "",
+   "items": [
+    {
+     "key": "svc.regrips.price",
+     "label": "Regrips",
+     "kind": "text",
+     "default": "From £8 a club, fitted",
+     "where": [
+      "Service cards, menu and page tops"
+     ]
+    },
+    {
+     "key": "svc.repairs.price",
+     "label": "Repairs",
+     "kind": "text",
+     "default": "From £5",
+     "where": [
+      "Service cards, menu and page tops"
+     ]
+    },
+    {
+     "key": "svc.club-mot.price",
+     "label": "Club MOT",
+     "kind": "text",
+     "default": "£30 a bag",
+     "where": [
+      "Service cards, menu and page tops"
+     ]
+    },
+    {
+     "key": "svc.tune-up.price",
+     "label": "Tune Up",
+     "kind": "text",
+     "default": "Coming January 2027",
+     "where": [
+      "Service cards, menu and page tops"
+     ]
+    },
+    {
+     "key": "svc.loft-and-lie.price",
+     "label": "Loft & Lie",
+     "kind": "text",
+     "default": "£5 a club",
+     "where": [
+      "Service cards, menu and page tops"
+     ]
+    },
+    {
+     "key": "svc.pimp-your-gear.price",
+     "label": "Pimp Your Gear",
+     "kind": "text",
+     "default": "Coming January 2027",
+     "where": [
+      "Service cards, menu and page tops"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Price list: Regrips",
+   "note": "",
+   "items": [
+    {
+     "key": "price.regrips.regrip-any-size.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Regrip, any size",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.regrips.regrip-any-size.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "from £8 a club",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.regrips.putter-grip.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Putter grip",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.regrips.putter-grip.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "from £18",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.regrips.fitting-only-using-your-own-grips.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Fitting only, using your own grips",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.regrips.fitting-only-using-your-own-grips.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "£4 a club",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.regrips.buy-6-regrips-get-the-7th-free-cheapest-grip-free.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Buy 6 regrips, get the 7th free (cheapest grip free)",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.regrips.buy-6-regrips-get-the-7th-free-cheapest-grip-free.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "7th free",
+     "where": [
+      "Price list"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Price list: Repairs",
+   "note": "",
+   "items": [
+    {
+     "key": "price.repairs.re-glue-a-loose-or-rattling-head.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Re-glue a loose or rattling head",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.repairs.re-glue-a-loose-or-rattling-head.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "£10",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.repairs.ferrule-replacement.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Ferrule replacement",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.repairs.ferrule-replacement.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "from £5",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.repairs.lengthen-or-shorten-a-club.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Lengthen or shorten a club",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.repairs.lengthen-or-shorten-a-club.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "£8",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.repairs.reshaft-labour-shaft-and-grip-extra.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Reshaft, labour (shaft and grip extra)",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.repairs.reshaft-labour-shaft-and-grip-extra.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "from £15",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.repairs.adjustable-adaptor-driver-fairway-or-hybrid.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Adjustable adaptor: driver, fairway or hybrid",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.repairs.adjustable-adaptor-driver-fairway-or-hybrid.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "£20",
+     "where": [
+      "Price list"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Price list: Club MOT",
+   "note": "",
+   "items": [
+    {
+     "key": "price.club-mot.full-bag-check-with-written-report.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Full bag check with written report",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.club-mot.full-bag-check-with-written-report.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "£30 a bag",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.club-mot.fee-refunded-in-full-on-work-over-100.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Fee refunded in full on work over £100",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.club-mot.fee-refunded-in-full-on-work-over-100.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "included",
+     "where": [
+      "Price list"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Price list: Tune Up",
+   "note": "",
+   "items": [
+    {
+     "key": "price.tune-up.whole-bag-clean-loft-and-lie-grip-refresh-small-fixes.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Whole bag: clean, loft and lie, grip refresh, small fixes",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.tune-up.whole-bag-clean-loft-and-lie-grip-refresh-small-fixes.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "from January 2027",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.tune-up.add-regrips.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Add regrips",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.tune-up.add-regrips.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "at regrip prices",
+     "where": [
+      "Price list"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Price list: Loft & Lie",
+   "note": "",
+   "items": [
+    {
+     "key": "price.loft-and-lie.check-and-adjust-per-club.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Check and adjust, per club",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.loft-and-lie.check-and-adjust-per-club.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "£5",
+     "where": [
+      "Price list"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Price list: Pimp Your Gear",
+   "note": "",
+   "items": [
+    {
+     "key": "price.pimp-your-gear.paint-fill-coloured-ferrules-and-colour-grips.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Paint fill, coloured ferrules and colour grips",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.pimp-your-gear.paint-fill-coloured-ferrules-and-colour-grips.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "from January 2027",
+     "where": [
+      "Price list"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Price list: Collection & delivery",
+   "note": "",
+   "items": [
+    {
+     "key": "price.collection.orders-of-40-or-more.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Orders of £40 or more",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.collection.orders-of-40-or-more.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "free",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.collection.orders-under-40.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Orders under £40",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.collection.orders-under-40.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "£5",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.collection.express-service-same-day-often-possible.label",
+     "label": "What it is",
+     "kind": "text",
+     "default": "Express service, same day often possible",
+     "where": [
+      "Price list"
+     ]
+    },
+    {
+     "key": "price.collection.express-service-same-day-often-possible.price",
+     "label": "Price",
+     "kind": "text",
+     "default": "call for details",
+     "where": [
+      "Price list"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Regrip calculator",
+   "note": "",
+   "items": [
+    {
+     "key": "calc.std",
+     "label": "Our grips, per club (£)",
+     "kind": "money",
+     "default": 8,
+     "where": [
+      "Calculator"
+     ]
+    },
+    {
+     "key": "calc.own",
+     "label": "Fitting your own grips, per club (£)",
+     "kind": "money",
+     "default": 4,
+     "where": [
+      "Calculator"
+     ]
+    },
+    {
+     "key": "calc.putter",
+     "label": "Putter grip, from (£)",
+     "kind": "money",
+     "default": 18,
+     "where": [
+      "Calculator"
+     ]
+    },
+    {
+     "key": "calc.freeover",
+     "label": "Free collection on orders of at least (£)",
+     "kind": "money",
+     "default": 40,
+     "where": [
+      "Calculator"
+     ]
+    },
+    {
+     "key": "calc.delivery",
+     "label": "Collection charge below that (£)",
+     "kind": "money",
+     "default": 5,
+     "where": [
+      "Calculator"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs: home page",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.which-areas-do-you-cover.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Which areas do you cover?",
+     "where": [
+      "Home page"
+     ]
+    },
+    {
+     "key": "faq.which-areas-do-you-cover.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "From Cranleigh down to the coast, between Shoreham and Bognor Regis: Horsham, Billingshurst, Pulborough, Steyning, Worthing, Littlehampton, Arundel and everywhere in between. Use the postcode checker above to check yours.",
+     "where": [
+      "Home page"
+     ]
+    },
+    {
+     "key": "faq.how-does-collection-work.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How does collection work?",
+     "where": [
+      "Home page"
+     ]
+    },
+    {
+     "key": "faq.how-does-collection-work.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Book in, and we'll arrange a time to collect from your home or work. Collection and delivery is free on orders of £40 or more, and £5 otherwise.",
+     "where": [
+      "Home page"
+     ]
+    },
+    {
+     "key": "faq.how-long-will-i-be-without-my-clubs.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How long will I be without my clubs?",
+     "where": [
+      "Home page"
+     ]
+    },
+    {
+     "key": "faq.how-long-will-i-be-without-my-clubs.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Most jobs are back with you within 72 hours of collection. If a part needs ordering, we'll tell you before we start.",
+     "where": [
+      "Home page"
+     ]
+    },
+    {
+     "key": "faq.how-do-i-pay.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How do I pay?",
+     "where": [
+      "Home page",
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.how-do-i-pay.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "[Payment methods, e.g. bank transfer, card or cash on delivery.]",
+     "where": [
+      "Home page",
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.do-you-do-an-express-service.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Do you do an express service?",
+     "where": [
+      "Home page"
+     ]
+    },
+    {
+     "key": "faq.do-you-do-an-express-service.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes, and same day is often possible. Call us on 07792 554989 for details.",
+     "where": [
+      "Home page"
+     ]
+    },
+    {
+     "key": "faq.who-gets-a-discount.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Who gets a discount?",
+     "where": [
+      "Home page",
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.who-gets-a-discount.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "All juniors under 17 get 20% off every service except custom logo designs.",
+     "where": [
+      "Home page",
+      "FAQs page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs: Regrips page",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.how-often-should-i-regrip.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How often should I regrip?",
+     "where": [
+      "Regrips page"
+     ]
+    },
+    {
+     "key": "faq.how-often-should-i-regrip.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "As a rule of thumb, once a year or every 40 rounds, whichever comes first. If you practise a lot or play in all weathers, grips wear faster.",
+     "where": [
+      "Regrips page"
+     ]
+    },
+    {
+     "key": "faq.how-soon-can-i-play-after-a-regrip.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How soon can I play after a regrip?",
+     "where": [
+      "Regrips page"
+     ]
+    },
+    {
+     "key": "faq.how-soon-can-i-play-after-a-regrip.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Straight away. Grips are fitted with a solvent that needs time to set, so they're left to cure before your clubs come back to you, fully set and ready to play.",
+     "where": [
+      "Regrips page"
+     ]
+    },
+    {
+     "key": "faq.can-i-supply-my-own-grips.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can I supply my own grips?",
+     "where": [
+      "Regrips page"
+     ]
+    },
+    {
+     "key": "faq.can-i-supply-my-own-grips.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes. Fitting only is £4 a club.",
+     "where": [
+      "Regrips page"
+     ]
+    },
+    {
+     "key": "faq.how-does-the-7th-free-offer-work.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How does the 7th free offer work?",
+     "where": [
+      "Regrips page"
+     ]
+    },
+    {
+     "key": "faq.how-does-the-7th-free-offer-work.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Buy six regrips and get the seventh free, on any grips. If you mix grips, the cheapest one is the free one. Regrip fourteen and two are free. The calculator above does the maths for you.",
+     "where": [
+      "Regrips page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs: Repairs page",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.is-it-worth-repairing-an-older-club.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Is it worth repairing an older club?",
+     "where": [
+      "Repairs page"
+     ]
+    },
+    {
+     "key": "faq.is-it-worth-repairing-an-older-club.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Often, yes, especially a favourite you're confident with. We'll tell you honestly if a repair doesn't make sense.",
+     "where": [
+      "Repairs page"
+     ]
+    },
+    {
+     "key": "faq.can-you-match-my-existing-shafts.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can you match my existing shafts?",
+     "where": [
+      "Repairs page"
+     ]
+    },
+    {
+     "key": "faq.can-you-match-my-existing-shafts.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "In most cases we can source the same model or a close equivalent, and we'll confirm the price of the shaft before ordering.",
+     "where": [
+      "Repairs page"
+     ]
+    },
+    {
+     "key": "faq.will-a-shortened-club-feel-different.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Will a shortened club feel different?",
+     "where": [
+      "Repairs page"
+     ]
+    },
+    {
+     "key": "faq.will-a-shortened-club-feel-different.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Cutting a club down makes the head feel lighter. We check the swingweight and can add weight to bring the feel back.",
+     "where": [
+      "Repairs page"
+     ]
+    },
+    {
+     "key": "faq.how-long-do-repairs-take.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How long do repairs take?",
+     "where": [
+      "Repairs page"
+     ]
+    },
+    {
+     "key": "faq.how-long-do-repairs-take.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Most repairs are back within 72 hours. Reshafts depend on the shaft; if we need to order one in, we'll tell you how long before we start.",
+     "where": [
+      "Repairs page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs: Club MOT page",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.what-if-everything-is-fine.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "What if everything is fine?",
+     "where": [
+      "Club MOT page"
+     ]
+    },
+    {
+     "key": "faq.what-if-everything-is-fine.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Then you'll know, and you can play with confidence. The report is yours either way.",
+     "where": [
+      "Club MOT page"
+     ]
+    },
+    {
+     "key": "faq.does-the-mot-include-repairs.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Does the MOT include repairs?",
+     "where": [
+      "Club MOT page"
+     ]
+    },
+    {
+     "key": "faq.does-the-mot-include-repairs.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "The MOT covers the inspection and written report. Any work is quoted separately, and the £30 MOT fee is refunded in full if you go ahead with work over £100.",
+     "where": [
+      "Club MOT page"
+     ]
+    },
+    {
+     "key": "faq.is-it-worth-doing-on-new-clubs.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Is it worth doing on new clubs?",
+     "where": [
+      "Club MOT page"
+     ]
+    },
+    {
+     "key": "faq.is-it-worth-doing-on-new-clubs.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes. Off-the-shelf clubs can vary slightly from their published specs, so a quick check is worthwhile.",
+     "where": [
+      "Club MOT page"
+     ]
+    },
+    {
+     "key": "faq.do-you-check-the-putter-too.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Do you check the putter too?",
+     "where": [
+      "Club MOT page"
+     ]
+    },
+    {
+     "key": "faq.do-you-check-the-putter-too.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes. Putter loft, lie and grip are all part of the MOT.",
+     "where": [
+      "Club MOT page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs: Tune Up page",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.what-s-the-difference-between-a-tune-up-and-an-mot.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "What's the difference between a Tune Up and an MOT?",
+     "where": [
+      "Tune Up page"
+     ]
+    },
+    {
+     "key": "faq.what-s-the-difference-between-a-tune-up-and-an-mot.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "The MOT is a check and a written report. The Tune Up includes the check, then does the work: cleaning, loft and lie and small fixes.",
+     "where": [
+      "Tune Up page"
+     ]
+    },
+    {
+     "key": "faq.does-it-include-new-grips.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Does it include new grips?",
+     "where": [
+      "Tune Up page"
+     ]
+    },
+    {
+     "key": "faq.does-it-include-new-grips.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "No, grips are deep cleaned. If they're past saving, we'll tell you, and you can add regrips at the normal price.",
+     "where": [
+      "Tune Up page"
+     ]
+    },
+    {
+     "key": "faq.what-if-you-find-a-bigger-problem.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "What if you find a bigger problem?",
+     "where": [
+      "Tune Up page"
+     ]
+    },
+    {
+     "key": "faq.what-if-you-find-a-bigger-problem.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Anything beyond a small fix, such as a reshaft, is quoted separately and nothing is done without your OK.",
+     "where": [
+      "Tune Up page"
+     ]
+    },
+    {
+     "key": "faq.does-it-include-woods-and-the-putter.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Does it include woods and the putter?",
+     "where": [
+      "Tune Up page"
+     ]
+    },
+    {
+     "key": "faq.does-it-include-woods-and-the-putter.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes, every club is cleaned and checked. Loft and lie adjustment is on irons and wedges; most woods and hybrids can't be bent, and the putter is checked and adjusted where possible.",
+     "where": [
+      "Tune Up page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs: Loft & Lie page",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.how-do-i-know-what-lie-angle-i-need.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How do I know what lie angle I need?",
+     "where": [
+      "Loft & Lie page"
+     ]
+    },
+    {
+     "key": "faq.how-do-i-know-what-lie-angle-i-need.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "If you've been fitted, we'll set your clubs to your fitting specs. [If not, explain how you advise, e.g. lie board and ball flight.]",
+     "where": [
+      "Loft & Lie page"
+     ]
+    },
+    {
+     "key": "faq.how-often-should-lofts-and-lies-be-checked.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How often should lofts and lies be checked?",
+     "where": [
+      "Loft & Lie page"
+     ]
+    },
+    {
+     "key": "faq.how-often-should-lofts-and-lies-be-checked.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Once a year is sensible for regular golfers, more often if you practise a lot off mats.",
+     "where": [
+      "Loft & Lie page"
+     ]
+    },
+    {
+     "key": "faq.will-adjusting-damage-my-clubs.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Will adjusting damage my clubs?",
+     "where": [
+      "Loft & Lie page"
+     ]
+    },
+    {
+     "key": "faq.will-adjusting-damage-my-clubs.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Done properly and within the club's limits, no. We check the head first and never force a club beyond what it will safely take.",
+     "where": [
+      "Loft & Lie page"
+     ]
+    },
+    {
+     "key": "faq.can-you-adjust-my-putter.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can you adjust my putter?",
+     "where": [
+      "Loft & Lie page"
+     ]
+    },
+    {
+     "key": "faq.can-you-adjust-my-putter.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes, in most cases. Putter loft and lie make a real difference to how the ball starts and rolls.",
+     "where": [
+      "Loft & Lie page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs: Pimp Your Gear page",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.how-long-does-paint-fill-last.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How long does paint fill last?",
+     "where": [
+      "Pimp Your Gear page"
+     ]
+    },
+    {
+     "key": "faq.how-long-does-paint-fill-last.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Done properly, years. It's a hard-wearing enamel, and topping it up later is quick and cheap.",
+     "where": [
+      "Pimp Your Gear page"
+     ]
+    },
+    {
+     "key": "faq.can-you-match-my-bag-or-club-colours.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can you match my bag or club colours?",
+     "where": [
+      "Pimp Your Gear page"
+     ]
+    },
+    {
+     "key": "faq.can-you-match-my-bag-or-club-colours.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes. Send a photo or a colour reference and we'll match it as closely as we can.",
+     "where": [
+      "Pimp Your Gear page"
+     ]
+    },
+    {
+     "key": "faq.will-it-affect-how-my-clubs-play.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Will it affect how my clubs play?",
+     "where": [
+      "Pimp Your Gear page"
+     ]
+    },
+    {
+     "key": "faq.will-it-affect-how-my-clubs-play.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "No. Paint fill and ferrules are cosmetic. Grips are fitted to your size exactly as a normal regrip.",
+     "where": [
+      "Pimp Your Gear page"
+     ]
+    },
+    {
+     "key": "faq.can-i-combine-it-with-other-services.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can I combine it with other services?",
+     "where": [
+      "Pimp Your Gear page"
+     ]
+    },
+    {
+     "key": "faq.can-i-combine-it-with-other-services.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes, and it's a good time to do it. Pair it with a Tune Up or regrips and it all comes back together.",
+     "where": [
+      "Pimp Your Gear page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs: Custom Logo page",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.which-golf-balls-can-you-put-a-logo-on.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Which golf balls can you put a logo on?",
+     "where": [
+      "Custom Logo page"
+     ]
+    },
+    {
+     "key": "faq.which-golf-balls-can-you-put-a-logo-on.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Callaway, Srixon, Titleist, TaylorMade and Wilson. Tell us the model you like, or we'll suggest one to suit your budget.",
+     "where": [
+      "Custom Logo page"
+     ]
+    },
+    {
+     "key": "faq.can-you-work-from-my-logo-file.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can you work from my logo file?",
+     "where": [
+      "Custom Logo page"
+     ]
+    },
+    {
+     "key": "faq.can-you-work-from-my-logo-file.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes. Vector files (.ai, .eps, .svg or .pdf) give the crispest result, but send what you have and we'll advise.",
+     "where": [
+      "Custom Logo page"
+     ]
+    },
+    {
+     "key": "faq.is-there-a-minimum-order.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Is there a minimum order?",
+     "where": [
+      "Custom Logo page"
+     ]
+    },
+    {
+     "key": "faq.is-there-a-minimum-order.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "[Confirm, e.g. single items welcome; larger orders by quote.]",
+     "where": [
+      "Custom Logo page"
+     ]
+    },
+    {
+     "key": "faq.how-long-does-it-take.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How long does it take?",
+     "where": [
+      "Custom Logo page"
+     ]
+    },
+    {
+     "key": "faq.how-long-does-it-take.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "[Typical turnaround after the proof is approved.]",
+     "where": [
+      "Custom Logo page"
+     ]
+    },
+    {
+     "key": "faq.does-the-junior-discount-apply.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Does the junior discount apply?",
+     "where": [
+      "Custom Logo page"
+     ]
+    },
+    {
+     "key": "faq.does-the-junior-discount-apply.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "No, custom logo designs are excluded from the junior discount.",
+     "where": [
+      "Custom Logo page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs page: Collection & turnaround",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.how-long-will-i-be-without-my-clubs.faqs-page.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How long will I be without my clubs?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.how-long-will-i-be-without-my-clubs.faqs-page.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Most jobs are back with you within 72 hours of collection. If a part needs ordering, such as a particular shaft, we'll tell you how long before we start.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.do-you-really-come-and-collect.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Do you really come and collect?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.do-you-really-come-and-collect.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes. We collect from your home or your golf club and bring your clubs back when they're done. It's free on orders of £40 or more, and £5 otherwise.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.which-areas-do-you-cover.faqs-page.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Which areas do you cover?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.which-areas-do-you-cover.faqs-page.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "From Cranleigh down to the coast: north to Cranleigh, east to Shoreham and west to Bognor Regis, taking in Horsham, Billingshurst, Pulborough, Steyning, Worthing, Littlehampton and Arundel. Use the postcode checker on our Areas page to check yours in seconds.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.can-i-drop-my-clubs-off-instead.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can I drop my clubs off instead?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.can-i-drop-my-clubs-off-instead.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "[Confirm whether you offer a drop-off point, and where.]",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.i-ve-got-a-round-this-weekend-can-you-help.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "I've got a round this weekend. Can you help?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.i-ve-got-a-round-this-weekend-can-you-help.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes. Our express service can often turn clubs round the same day. Call us on 07792 554989 for details.",
+     "where": [
+      "FAQs page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs page: Grips",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.can-you-fit-grips-i-ve-already-bought.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can you fit grips I've already bought?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.can-you-fit-grips-i-ve-already-bought.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes. Fitting only is £4 a club.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.how-often-should-i-regrip.faqs-page.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How often should I regrip?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.how-often-should-i-regrip.faqs-page.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Once a year or every 40 rounds, whichever comes first. If grips look shiny, feel slippery or you find yourself squeezing harder, it's time.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.what-grip-size-do-i-need.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "What grip size do I need?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.what-grip-size-do-i-need.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Your glove size is the best starting point, and our grip size guide on the Regrips page will suggest one. Feel matters more than any chart, so we're happy to talk it through when we collect.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.how-soon-can-i-play-after-a-regrip.faqs-page.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How soon can I play after a regrip?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.how-soon-can-i-play-after-a-regrip.faqs-page.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Straight away. Grips are left to set properly before they come back to you, so they're ready for your next round.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.how-does-the-7th-regrip-free-work.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How does the 7th regrip free work?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.how-does-the-7th-regrip-free-work.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Buy six regrips and get the seventh free, on any grips. If you mix grips, the cheapest one is the free one. The calculator on our Services page does the maths for you.",
+     "where": [
+      "FAQs page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs page: Repairs & adjustments",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.how-much-can-loft-and-lie-be-changed.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "How much can loft and lie be changed?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.how-much-can-loft-and-lie-be-changed.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "It depends on the club. Forged irons can usually be bent two or three degrees safely. Cast irons are more limited, often around one degree. Many hybrids and woods can't be bent at all. We check every head before it goes near the machine and never push a club beyond what it will safely take.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.can-you-shorten-or-lengthen-my-clubs.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can you shorten or lengthen my clubs?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.can-you-shorten-or-lengthen-my-clubs.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes, for £8 a club. We check the swingweight afterwards, because changing the length changes how the head feels, and can add weight to bring the feel back. We also cut down and extend junior clubs as they grow.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.can-you-recommend-a-shaft.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Can you recommend a shaft?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.can-you-recommend-a-shaft.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes. If you're reshafting, we'll talk through flex, weight and ball flight and give you an honest recommendation, whether that's like-for-like or something different. [Confirm the level of shaft advice you offer.]",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.is-it-worth-repairing-an-older-club.faqs-page.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Is it worth repairing an older club?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.is-it-worth-repairing-an-older-club.faqs-page.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Often, yes, especially a club you trust. If a repair isn't worth doing, we'll tell you honestly before you spend anything.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.what-s-in-a-club-mot.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "What's in a Club MOT?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.what-s-in-a-club-mot.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Every club checked: grips, loft and lie, shafts, heads, ferrules, lengths and grooves. You get a written report in plain English and a quote for anything we recommend. The £30 fee is refunded in full if you go ahead with work over £100.",
+     "where": [
+      "FAQs page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs page: Prices, payment & discounts",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.will-i-know-the-price-before-you-start.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Will I know the price before you start?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.will-i-know-the-price-before-you-start.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Always. Every job is priced before any work begins, and nothing is done without your OK.",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.do-you-work-with-golf-societies.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Do you work with golf societies?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.do-you-work-with-golf-societies.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Yes, with group orders: regrips for a whole society, or logo balls for a society or charity golf day, collected together and returned together. See our Golf societies & charities page.",
+     "where": [
+      "FAQs page"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "FAQs page: About us",
+   "note": "",
+   "items": [
+    {
+     "key": "faq.who-does-the-work.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Who does the work?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.who-does-the-work.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "Stuart, who founded Coastal Golf Co, looks after every club himself. [A line on your experience or training in club repair.]",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.is-your-work-guaranteed.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Is your work guaranteed?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.is-your-work-guaranteed.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "[Confirm, e.g. if a grip or repair fails because of our workmanship, we'll put it right free of charge.]",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.are-you-insured.q",
+     "label": "Question",
+     "kind": "text",
+     "default": "Are you insured?",
+     "where": [
+      "FAQs page"
+     ]
+    },
+    {
+     "key": "faq.are-you-insured.a",
+     "label": "Answer",
+     "kind": "long",
+     "default": "[Confirm your insurance, e.g. public liability and cover for customers' clubs while in our care.]",
+     "where": [
+      "FAQs page"
+     ]
+    }
+   ]
+  }
+ ]
+}

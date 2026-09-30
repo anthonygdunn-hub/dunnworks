@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Editor | Coastal Golf Co</title>
+<title>Website editor | Coastal Golf Co</title>
 <meta name="theme-color" content="#022042">
 <link rel="icon" href="https://www.coastalgolfco.co.uk/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,12 +71,37 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 .prose ul{margin:16px 0 0;padding-left:22px;font-size:18px;line-height:1.7;color:#28344a}
 .prose img{display:block;width:100%;height:auto;border-radius:12px;margin:22px 0 0}
 .prose a{color:var(--bronze);font-weight:700}
+.nav{display:flex;gap:6px;background:var(--navy2)}
+.nav .in{max-width:900px;margin:0 auto;padding:0 16px;display:flex;gap:4px;width:100%}
+.nav button{background:none;border:0;color:#cdd7e6;font-weight:800;padding:12px 14px;border-bottom:3px solid transparent;cursor:pointer;font-size:15px}
+.nav button[aria-current=page]{color:#fff;border-color:var(--gold)}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-top:12px}
+.sec>summary{cursor:pointer;padding:15px 16px;font:700 17px/1.2 'Oswald',Impact,sans-serif;text-transform:uppercase;letter-spacing:.03em;display:flex;gap:10px;align-items:center;list-style:none}
+.sec>summary::-webkit-details-marker{display:none}
+.sec>summary::after{content:"\25BE";margin-left:auto;color:var(--bronze);transition:transform .2s}
+.sec[open]>summary::after{transform:rotate(180deg)}
+.sec .fs{padding:0 16px 16px}
+.fld{border-top:1px solid var(--line);padding:12px 0}
+.fld:first-child{border-top:0}
+.fld .lb{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-weight:800;font-size:14px;margin-bottom:6px}
+.fld .wh{font-weight:600;font-size:12.5px;color:var(--body)}
+.fld textarea{min-height:110px}
+.fld .money{display:flex;align-items:center;gap:6px;max-width:180px}
+.fld .money span{font-weight:800;font-size:18px}
+.fld .acts{display:flex;gap:12px;margin-top:6px;font-size:13.5px}
+.fld .acts button{background:none;border:0;padding:0;color:var(--bronze);font-weight:800;text-decoration:underline;cursor:pointer}
+.fld.changed{background:#fff8e6;margin:0 -16px;padding:12px 16px}
+.fld.custom .lb::after{content:"Changed by you";font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:#d7eedd;color:var(--green);padding:2px 8px;border-radius:999px}
+.fld.todo .lb::after{content:"Needs your answer";font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:#f6e7c1;color:var(--bronze);padding:2px 8px;border-radius:999px}
+.badge{font:800 12px/1 'Mulish',sans-serif;background:var(--gold);color:var(--navy2);border-radius:999px;padding:4px 8px}
+.search{margin:14px 0 4px}
 [hidden]{display:none!important}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;z-index:9;max-width:calc(100vw - 32px)}
 </style>
 </head>
 <body>
-<header class="top"><div class="in"><div><b>Coastal Golf Co</b><small>Journal editor</small></div><button type="button" id="out" hidden>Sign out</button></div></header>
+<header class="top"><div class="in"><div><b>Coastal Golf Co</b><small>Website editor</small></div><button type="button" id="out" hidden>Sign out</button></div></header>
+<nav class="nav" id="nav" hidden aria-label="Editor"><div class="in"><button type="button" data-v="list" aria-current="page">Journal</button><button type="button" data-v="words">Prices &amp; FAQs</button></div></nav>
 <main id="main">
 
 <section id="v-gate" class="gate" hidden>
@@ -127,12 +152,23 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
   <div id="view" hidden></div>
 </section>
 
+<section id="v-words" hidden>
+  <h1 style="font-size:32px">Prices &amp; FAQs</h1>
+  <p class="help">Change a price or an answer, then tap <b>Save changes</b>. The website updates straight away, everywhere that wording appears. <b>Use original</b> puts back the wording from launch.</p>
+  <p class="help">Some prices also appear inside sentences (for example the page descriptions Google shows). Tony updates those; message him if a price changes for good.</p>
+  <input class="search" id="wq" type="text" placeholder="Search, e.g. putter or collection" aria-label="Search prices and FAQs">
+  <div id="words"><p class="help">Loading…</p></div>
+</section>
 </main>
 <div class="bar" id="bar" hidden><div class="in"><span class="st" id="st"></span>
   <button class="btn bad sm" type="button" id="del">Delete</button>
   <button class="btn line sm" type="button" id="unp" hidden>Unpublish</button>
   <button class="btn line sm" type="button" id="sav">Save draft</button>
   <button class="btn gold sm" type="button" id="pub">Publish</button>
+</div></div>
+<div class="bar" id="wbar" hidden><div class="in"><span class="st" id="wst">No changes yet</span>
+  <button class="btn line sm" type="button" id="wundo">Undo all</button>
+  <button class="btn gold sm" type="button" id="wsave" disabled>Save changes</button>
 </div></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
@@ -142,7 +178,8 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 var URL0 = 'https://acdpgarasgfhvupzsbxf.supabase.co', KEY = 'sb_publishable_OWTVpDyadL1lITnCp4gfAQ_EZxVHldY';
 var SITE = 'https://www.coastalgolfco.co.uk/', BUCKET = 'cgc-journal', AUTH = 'cgc-editor-auth';
 var $ = function(id){ return document.getElementById(id); };
-function show(v){ ['gate','list','edit'].forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('out').hidden = v === 'gate'; window.scrollTo(0, 0); }
+function show(v){ ['gate','list','edit','words'].forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
+  [].forEach.call(document.querySelectorAll('#nav button'), function(b){ if (b.getAttribute('data-v') === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); window.scrollTo(0, 0); }
 function toast(t, bad){ var e = $('toast'); e.textContent = t; e.style.background = bad ? 'var(--bad)' : 'var(--navy)'; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function(){ e.hidden = true; }, 3500); }
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -359,6 +396,72 @@ function tab(pv){
       (d.summary ? '<p class="sum">' + esc(d.summary) + '</p>' : '') + '<div class="prose">' + render(d.body) + '</div></article>'; }
 }
 $('tw').addEventListener('click', function(){ tab(false); }); $('tv').addEventListener('click', function(){ tab(true); });
+
+/* ---- prices & FAQs: the website's built-in wording (content.json, from the build) with Stuart's changes on top ---- */
+var MAN = null, SAVED = {}, EDIT = {}, TODO = /\[[^\]]*\](?!\()/;   // a [placeholder] still waiting for Stuart's words (links look like [text](url))
+function wval(it){ return it.key in EDIT ? EDIT[it.key] : it.key in SAVED ? SAVED[it.key] : String(it.default); }
+function wcount(){ var n = Object.keys(EDIT).length; $('wst').textContent = n ? n + (n === 1 ? ' change' : ' changes') + ' not saved yet' : 'No changes yet'; $('wsave').disabled = !n; }
+function loadWords(){
+  show('words'); $('words').innerHTML = '<p class="help">Loading…</p>'; EDIT = {}; wcount();
+  return Promise.all([ fetch('content.json', { cache: 'no-cache' }).then(function(r){ return r.json(); }), api('/rest/v1/cgc_content?select=key,value') ])
+    .then(function(res){ MAN = res[0]; SAVED = {}; res[1].forEach(function(x){ SAVED[x.key] = x.value; }); drawWords(); })
+    .catch(function(e){ $('words').innerHTML = '<p class="msg bad">' + esc(e.message || 'Could not load.') + '</p>'; });
+}
+function drawWords(){
+  var q = ($('wq').value || '').toLowerCase().trim(), open = {};
+  [].forEach.call(document.querySelectorAll('#words details[open]'), function(d){ open[d.getAttribute('data-s')] = 1; });
+  $('words').innerHTML = MAN.sections.map(function(sec, si){
+    var items = sec.items.filter(function(it){ return !q || (sec.title + ' ' + it.label + ' ' + wval(it) + ' ' + it.default).toLowerCase().indexOf(q) >= 0; });
+    if (!items.length) return '';
+    var nch = sec.items.filter(function(it){ return it.key in SAVED; }).length, ntodo = sec.items.filter(function(it){ return TODO.test(String(wval(it))); }).length;
+    return '<details class="sec" data-s="' + si + '"' + (q || open[si] ? ' open' : '') + '><summary>' + esc(sec.title) + (ntodo ? ' <span class="badge">' + ntodo + ' to answer</span>' : '') + (nch ? ' <span class="badge" style="background:#d7eedd;color:var(--green)">' + nch + ' changed</span>' : '') + '</summary><div class="fs">' +
+      items.map(function(it){
+        var v = wval(it), id = 'w-' + it.key.replace(/[^a-z0-9]/g, '_'), cls = 'fld' + (it.key in EDIT ? ' changed' : '') + (it.key in SAVED ? ' custom' : '') + (TODO.test(String(v)) ? ' todo' : '');
+        var input = it.kind === 'long' ? '<textarea id="' + id + '" data-key="' + it.key + '">' + esc(v) + '</textarea>'
+          : it.kind === 'money' ? '<div class="money"><span>£</span><input id="' + id + '" data-key="' + it.key + '" type="number" inputmode="decimal" min="0" step="0.5" value="' + esc(v) + '"></div>'
+          : '<input id="' + id + '" data-key="' + it.key + '" type="text" value="' + esc(v) + '">';
+        return '<div class="' + cls + '" data-f="' + it.key + '"><label class="lb" for="' + id + '" style="margin:0 0 6px">' + esc(it.label) + (it.where.length ? ' <span class="wh">' + esc(it.where.join(' · ')) + '</span>' : '') + '</label>' + input +
+          '<div class="acts">' + (it.key in EDIT ? '<button type="button" data-undo="' + it.key + '">Undo</button>' : '') + (it.key in SAVED ? '<button type="button" data-orig="' + it.key + '">Use original</button>' : '') + '</div></div>';
+      }).join('') + '</div></details>';
+  }).join('') || '<p class="help">Nothing matches that search.</p>';
+}
+function findItem(k){ for (var i = 0; i < MAN.sections.length; i++) for (var j = 0; j < MAN.sections[i].items.length; j++) if (MAN.sections[i].items[j].key === k) return MAN.sections[i].items[j]; return null; }
+$('words').addEventListener('input', function(e){
+  var el = e.target, k = el.getAttribute('data-key'); if (!k) return;
+  var it = findItem(k), cur = k in SAVED ? SAVED[k] : String(it.default), v = el.value;
+  if (v === cur) delete EDIT[k]; else EDIT[k] = v;
+  var f = el.closest('.fld'); f.classList.toggle('changed', k in EDIT);
+  var acts = f.querySelector('.acts'); var u = acts.querySelector('[data-undo]');
+  if (k in EDIT && !u) acts.insertAdjacentHTML('afterbegin', '<button type="button" data-undo="' + k + '">Undo</button>'); else if (!(k in EDIT) && u) u.remove();
+  wcount();
+});
+$('words').addEventListener('click', function(e){
+  var u = e.target.closest('[data-undo]'), o = e.target.closest('[data-orig]');
+  if (u){ delete EDIT[u.getAttribute('data-undo')]; drawWords(); wcount(); }
+  if (o){ var k = o.getAttribute('data-orig'), it = findItem(k); EDIT[k] = String(it.default); drawWords(); wcount(); }
+});
+$('wq').addEventListener('input', drawWords);
+$('wundo').addEventListener('click', function(){ if (Object.keys(EDIT).length && confirm('Undo all your unsaved changes?')) { EDIT = {}; drawWords(); wcount(); } });
+$('wsave').addEventListener('click', function(){
+  var keys = Object.keys(EDIT), up = [], back = [];
+  for (var i = 0; i < keys.length; i++){ var k = keys[i], it = findItem(k), v = String(EDIT[k]);
+    if (it.kind === 'money' && !(isFinite(parseFloat(v)) && parseFloat(v) >= 0)) { toast('"' + it.label + '" needs a number.', true); return; }
+    if (!v.trim()) { toast('"' + it.label + '" can\'t be empty. Use Undo or Use original instead.', true); return; }
+    if (v === String(it.default)) back.push(k); else up.push({ key: k, value: it.kind === 'money' ? String(parseFloat(v)) : v }); }
+  $('wsave').disabled = true;
+  var jobs = [];
+  if (up.length) jobs.push(api('/rest/v1/cgc_content', { method: 'POST', json: up, headers: { Prefer: 'resolution=merge-duplicates,return=minimal' } }));
+  if (back.length) jobs.push(api('/rest/v1/cgc_content?key=in.(' + back.map(function(k){ return '"' + k + '"'; }).join(',') + ')', { method: 'DELETE' }));
+  Promise.all(jobs).then(function(){
+    up.forEach(function(r){ SAVED[r.key] = r.value; }); back.forEach(function(k){ delete SAVED[k]; });
+    EDIT = {}; drawWords(); wcount(); toast('Saved. The website shows your changes now.');
+  }).catch(function(e){ toast(e.message, true); $('wsave').disabled = false; });
+});
+addEventListener('beforeunload', function(e){ if (Object.keys(EDIT).length) { e.preventDefault(); e.returnValue = ''; } });
+$('nav').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-v]'); if (!b) return; var v = b.getAttribute('data-v');
+  if (v === 'words') loadWords(); else { if (Object.keys(EDIT).length && !confirm('Leave without saving your price and FAQ changes?')) return; EDIT = {}; loadList(); }
+});
 
 /* ---- start: a sign-in link lands here with a one-time token ---- */
 var q = new URLSearchParams(location.search), th = q.get('token_hash');
