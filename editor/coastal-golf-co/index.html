@@ -297,7 +297,13 @@ $('pub').addEventListener('click', function(){ save(true); });
 $('unp').addEventListener('click', function(){ if (confirm('Take this post off the website? It stays here as a draft.')) save(false); });
 $('del').addEventListener('click', function(){
   if (!cur.id || !confirm('Delete "' + cur.title + '" for good? This can\'t be undone.')) return;
-  api('/rest/v1/cgc_posts?id=eq.' + cur.id, { method: 'DELETE' }).then(function(){ dirty = false; toast('Deleted.'); loadList(); }).catch(function(e){ toast(e.message, true); });
+  // the post's own photos go with it (main photo and any in the text)
+  var mine = [], pre = pub('x').slice(0, -1), re = /\]\(([^)\s]+)\)/g, m;
+  if (cur.cover_path) mine.push(cur.cover_path);
+  while ((m = re.exec(cur.body || ''))) if (m[1].indexOf(pre) === 0) mine.push(m[1].slice(pre.length));
+  api('/rest/v1/cgc_posts?id=eq.' + cur.id, { method: 'DELETE' })
+    .then(function(){ return mine.length ? api('/storage/v1/object/' + BUCKET, { method: 'DELETE', json: { prefixes: mine } }).catch(function(){}) : null; })
+    .then(function(){ dirty = false; toast('Deleted.'); loadList(); }).catch(function(e){ toast(e.message, true); });
 });
 
 $('cvf').addEventListener('change', function(){
