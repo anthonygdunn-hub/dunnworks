@@ -142,3 +142,27 @@ once that job is done. In the pack tab, **Download PDF** opens the print dialog
 to the client to attach it to, and records the date sent. Pack text lives in
 `dw_project_packs` (owner only); a job's wording in the pack comes from its
 `client_title` and `client_note`.
+
+## Coastal Golf Co stats (/console/#/cgc)
+
+One dashboard for coastalgolfco.co.uk, in the console under **Coastal Golf Co stats**.
+The code is `assets/js/dw-cgc.js`; the database side is `supabase/cgc-stats.sql`.
+
+| Section | Where it comes from |
+|---|---|
+| Visitors, pages, sources, devices, busiest times | Our own counter. A small script at the bottom of every page sends a beacon to the `cgc-track` function, which writes `cgc_pageviews`. No cookies and nothing stored on the visitor's device, so it counts everyone, cookie banner or not |
+| Bookings | `cgc_bookings`, from the booking form |
+| Google Analytics | GA4 (`G-7LGRWR6761`), read with a service account. Only people who accept cookies |
+| Google search | Search Console, same service account. Runs 2 to 3 days behind |
+| Speed and health | PageSpeed Insights (cached 12 hours, **Test again now** reruns it) and `cgc_uptime`, filled every 10 minutes by the `cgc-uptime` cron job calling `cgc-ping` |
+
+Everything is read through `rpc/cgc_traffic` and the `cgc-insights` function, both owner only.
+
+Connecting Google, once: open **Google settings** at the bottom of the dashboard and follow the
+five steps there (Cloud project with the Analytics Data and Search Console APIs, a service account
+with a JSON key, then add its email as Viewer in GA4 and as a Restricted user in Search Console).
+
+The counter script lives in the Coastal Golf Co build source (`site/build.py`, `COUNTER_JS`), so every
+build includes it. It only counts on www.coastalgolfco.co.uk. To stop your own visits being counted,
+open any page once with `?nocount` on the end (e.g. `https://www.coastalgolfco.co.uk/?nocount`) on each
+device you use.
