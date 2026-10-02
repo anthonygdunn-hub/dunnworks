@@ -250,6 +250,7 @@
 <script src="../assets/js/dw-data.js"></script>
 <script src="../assets/js/dw-keys.js"></script>
 <script src="../assets/js/dw-pack.js"></script>
+<script src="../assets/js/dw-cgc.js"></script>
 <script>
 (function () {
   'use strict';
@@ -324,8 +325,10 @@
       DWData.keys().catch(function () { return []; }),
       DWData.rest('dw_project_packs?select=*').catch(function () { return []; }),
       DWData.rest('dw_task_notes?select=*&order=created_at.asc').catch(function () { return []; }),
-      DWData.rest('dw_task_files?select=*&order=created_at.asc').catch(function () { return []; })
+      DWData.rest('dw_task_files?select=*&order=created_at.asc').catch(function () { return []; }),
+      DWCgc.summary()
     ]).then(function (out) {
+      D.cgc = out[10] || null;
       D.notes = {}; D.files = {};
       (out[8] || []).forEach(function (n) { (D.notes[n.task_id] = D.notes[n.task_id] || []).push(n); });
       (out[9] || []).forEach(function (f) { (D.files[f.task_id] = D.files[f.task_id] || []).push(f); });
@@ -368,9 +371,11 @@
     { id:'previews',  name:'Previews',         blurb:'Every concept site and report, with its passphrase' },
     { id:'targets',   name:'People to target', blurb:'The prospect list, who to chase and when' },
     { id:'jobs',      name:'Job search',       blurb:'Customer success and field sales roles, scored' },
-    { id:'enquiries', name:'Enquiries',        blurb:'Messages from the T Cooper Interiors form' }
+    { id:'enquiries', name:'Enquiries',        blurb:'Messages from the T Cooper Interiors form' },
+    { id:'cgc',       name:'Coastal Golf Co stats', blurb:'Visitors, bookings, Google search and site health for coastalgolfco.co.uk' }
   ];
-  var VIEWS = { wip:viewWip, previews:viewPreviews, targets:viewTargets, jobs:viewJobs, enquiries:viewEnquiries };
+  var VIEWS = { wip:viewWip, previews:viewPreviews, targets:viewTargets, jobs:viewJobs, enquiries:viewEnquiries,
+                cgc:function () { DWCgc.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); } };
 
   function counts() {
     var due = D.projects.filter(function (r) { return isTarget(r) && isDue(r); }).length;
@@ -380,6 +385,7 @@
       targets: D.projects.filter(isTarget).length,
       jobs: D.jobs.filter(function (j) { return (j.score || 0) >= 45 && j.status !== 'hidden' && j.status !== 'rejected'; }).length,
       enquiries: D.enquiries.length,
+      cgc: D.cgc ? D.cgc.cur.visits : '–',
       due: due,
       todo: Object.keys(D.tasks).reduce(function (n, k) { return n + D.tasks[k].filter(function (t) { return !t.done; }).length; }, 0)
     };
@@ -412,6 +418,12 @@
       var extra = a.id === 'targets' && c.due
         ? '<span class="flag warn">' + c.due + ' to chase</span>' : '';
       if (a.id === 'wip' && c.todo) extra = '<span class="flag warn">' + c.todo + ' jobs to do</span>';
+      if (a.id === 'cgc' && D.cgc) {
+        var up = (D.cgc.uptime || {}).last;
+        if (up && !up.ok) extra = '<span class="flag warn">Site down ' + esc(when(up.at)) + '</span>';
+        else if (D.cgc.now && D.cgc.now.live) extra = '<span class="flag live">' + D.cgc.now.live + ' on the site now</span>';
+        else extra = '<span class="flag">Visitors, last 7 days</span>';
+      }
       return '<a class="tile" href="#/' + a.id + '">' +
         '<span class="n">' + c[a.id] + '</span>' +
         '<b>' + a.name + '</b>' +
