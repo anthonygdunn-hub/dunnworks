@@ -159,8 +159,9 @@ The code is `assets/js/dw-cgc.js`; the database side is `supabase/cgc-stats.sql`
 Everything is read through `rpc/cgc_traffic` and the `cgc-insights` function, both owner only.
 
 Connecting Google, once: open **Google settings** at the bottom of the dashboard and follow the
-five steps there (Cloud project with the Analytics Data and Search Console APIs, a service account
-with a JSON key, then add its email as Viewer in GA4 and as a Restricted user in Search Console).
+six steps there (Cloud project with the Analytics Data and Search Console APIs, a service account
+with a JSON key, then add its email as Viewer in GA4 and as a Restricted user in Search Console, plus
+a PageSpeed Insights API key, because the keyless PageSpeed allowance is shared and often used up).
 
 The counter script lives in the Coastal Golf Co build source (`site/build.py`, `COUNTER_JS`), so every
 build includes it. It only counts on www.coastalgolfco.co.uk. To stop your own visits being counted,
