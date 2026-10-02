@@ -410,7 +410,13 @@
     fill('speed', '<p class="cg-loading">' + (force ? 'Running PageSpeed on mobile and desktop, this takes up to a minute...' : 'Loading the latest PageSpeed test...') + '</p>');
     return callFn('cgc-insights', { what:'speed', force: !!force }).then(function (r) {
       S.speed = r;
-      if (r.error) { fill('speed', '<p class="cg-err">PageSpeed: ' + esc(r.error) + '</p><button type="button" class="mini" data-cg="speed">Try again</button>'); return; }
+      if (r.error) {
+        var quota = /quota/i.test(r.error);
+        fill('speed', '<p class="cg-err">' + (quota ? 'Google\'s shared PageSpeed allowance is used up for today.' : 'PageSpeed: ' + esc(r.error)) + '</p>' +
+          (quota ? '<p class="note">Add a free PageSpeed API key in <b>Google settings</b> below (step 6) and tests will run whenever you ask.</p>' : '') +
+          '<button type="button" class="mini" data-cg="speed">Try again</button>');
+        return;
+      }
       drawSpeed(r);
     }).catch(function (e) { fill('speed', '<p class="cg-err">' + esc(e.message) + '</p><button type="button" class="mini" data-cg="speed">Try again</button>'); });
   }
@@ -456,11 +462,12 @@
         '<li>Paste that whole file below and save. Its email then shows here' + (S.saEmail ? ': <code>' + esc(S.saEmail) + '</code>' : '') + '</li>' +
         '<li>GA4: Admin, <b>Property access management</b>, add that email as <b>Viewer</b>. The property ID is under Admin, Property details (numbers only)</li>' +
         '<li>Search Console: Settings, <b>Users and permissions</b>, add that email with <b>Restricted</b> access</li>' +
+        '<li>PageSpeed: in the same Cloud project enable the <b>PageSpeed Insights API</b>, then Credentials, <b>Create credentials</b>, API key. Restrict it to that one API and paste it below</li>' +
       '</ol>' +
       '<form class="edit" data-cg-form style="border-top:0;padding-top:0">' +
         '<div><label for="cg-ga4">GA4 property ID</label><input id="cg-ga4" name="ga4" inputmode="numeric" placeholder="e.g. 456789123" value="' + esc(c.ga4_property) + '"></div>' +
         '<div><label for="cg-gsc">Search Console site</label><input id="cg-gsc" name="gsc" value="' + esc(c.gsc_site) + '"></div>' +
-        '<div><label for="cg-psi">PageSpeed API key (optional)</label><input id="cg-psi" name="psi" value="' + esc(c.psi_key) + '" placeholder="Only if tests hit a limit"></div>' +
+        '<div><label for="cg-psi">PageSpeed API key</label><input id="cg-psi" name="psi" value="' + esc(c.psi_key) + '" placeholder="AIza..."></div>' +
         '<div class="wide"><label for="cg-sa">Service account key (JSON)</label><textarea id="cg-sa" name="sa" spellcheck="false" placeholder="' +
           (c.hasKey ? 'A key is saved. Paste a new one here only to replace it.' : '{ &quot;type&quot;: &quot;service_account&quot;, ... }') + '"></textarea></div>' +
         '<div class="wide set-actions"><button class="mini go" type="submit">Save and connect</button><span class="saved" data-cg-saved></span></div>' +
@@ -479,7 +486,7 @@
     var btn = f.querySelector('button'); btn.disabled = true;
     DWData.rest('cgc_google?id=eq.1', { method:'PATCH', body: body, headers:{ Prefer:'return=minimal' } })
       .then(function () { say('Google settings saved.', 'ok'); return loadCfg(); })
-      .then(function () { return loadGoogle(true); })
+      .then(function () { if (body.psi_key && S.speed && S.speed.error) loadSpeed(true); return loadGoogle(true); })
       .catch(function (e) { say(e.message, 'bad'); })
       .finally(function () { btn.disabled = false; });
   }
