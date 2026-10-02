@@ -16,6 +16,15 @@
   var S = { days: 28, t: null, g: null, speed: null, cfg: null, saEmail: '' };
   var root = null, say = function () {};
 
+  /* DWData.fn arrived with this dashboard; a browser holding an older cached dw-data.js still works */
+  function callFn(name, body) {
+    if (DWData.fn) return DWData.fn(name, body);
+    var t = null; try { t = JSON.parse(localStorage.getItem('dw-auth') || 'null'); } catch (e) {}
+    return fetch(w.DW.url + '/functions/v1/' + name, { method:'POST', body: JSON.stringify(body || {}),
+      headers:{ apikey: w.DW.anonKey, Authorization: 'Bearer ' + (t && t.access_token ? t.access_token : w.DW.anonKey), 'Content-Type':'application/json' } })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || j.msg || ('HTTP ' + r.status)); return j; }); });
+  }
+
   /* ---------------------------------------------------------------- helpers */
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
     return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
@@ -92,7 +101,7 @@
       '<div class="cg-cols">' + cols + '</div></div></div>' + table;
   }
   function niceMax(v) {
-    if (!v) return 4;
+    if (!v || v <= 4) return 4;
     var p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p;
     return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
   }
@@ -322,7 +331,7 @@
 
   function loadGoogle(force) {
     fill('ga4', '<p class="cg-loading">Asking Google...</p>'); fill('gsc', '<p class="cg-loading">Asking Google...</p>');
-    return DWData.fn('cgc-insights', { what:'google', days: S.days, force: !!force }).then(function (g) {
+    return callFn('cgc-insights', { what:'google', days: S.days, force: !!force }).then(function (g) {
       S.g = g;
       if (g.setup) {
         var msg = '<p class="cg-empty">Not connected yet. Open <b>Google settings</b> at the bottom of this page to connect it, it takes about 10 minutes.</p>';
@@ -399,7 +408,7 @@
   /* ---------------------------------------------------------------- speed */
   function loadSpeed(force) {
     fill('speed', '<p class="cg-loading">' + (force ? 'Running PageSpeed on mobile and desktop, this takes up to a minute...' : 'Loading the latest PageSpeed test...') + '</p>');
-    return DWData.fn('cgc-insights', { what:'speed', force: !!force }).then(function (r) {
+    return callFn('cgc-insights', { what:'speed', force: !!force }).then(function (r) {
       S.speed = r;
       if (r.error) { fill('speed', '<p class="cg-err">PageSpeed: ' + esc(r.error) + '</p><button type="button" class="mini" data-cg="speed">Try again</button>'); return; }
       drawSpeed(r);
