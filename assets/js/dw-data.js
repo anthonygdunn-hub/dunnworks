@@ -204,6 +204,17 @@
       });
     },
     rest: rest,
+    // call a Supabase edge function as the signed-in user
+    fn: function (name, body) {
+      return session().then(function () {
+        return fetch(C.url + '/functions/v1/' + name, { method: 'POST', headers: headers(true), body: JSON.stringify(body || {}) });
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok) throw new Error(j.error || j.msg || ('HTTP ' + r.status));
+          return j;
+        });
+      });
+    },
     signInWithPassword: signInWithPassword,
     sendMagicLink: sendMagicLink,
     captureFromHash: captureFromHash,
