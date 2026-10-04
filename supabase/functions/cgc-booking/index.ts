@@ -4,7 +4,7 @@
 // to opening the customer's email app, so no request is ever lost silently.
 //
 // Secrets: RESEND_API_KEY; BOOKING_TO (default hello@coastalgolfco.co.uk);
-// BOOKING_FROM (a sender on a domain verified in Resend, e.g. bookings@coastalgolfco.co.uk).
+// BOOKING_FROM (default bookings@coastalgolfco.co.uk; coastalgolfco.co.uk is verified in Resend, 4 Oct 2026).
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const ORIGINS = [/^https:\/\/(www\.)?coastalgolfco\.co\.uk$/, /^https:\/\/anthonygdunn-hub\.github\.io$/, /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/];
@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       const r = await fetch("https://api.resend.com/emails", {
         method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          from: `Coastal Golf Co website <${Deno.env.get("BOOKING_FROM") ?? "onboarding@resend.dev"}>`,
+          from: `Coastal Golf Co website <${Deno.env.get("BOOKING_FROM") ?? "bookings@coastalgolfco.co.uk"}>`,
           to: [Deno.env.get("BOOKING_TO") ?? "hello@coastalgolfco.co.uk"],
           reply_to: row.email ?? undefined,
           subject: `Booking request: ${row.service ?? "not sure"} (${row.name})`,
