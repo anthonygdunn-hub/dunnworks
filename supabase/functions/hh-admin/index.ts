@@ -9,7 +9,7 @@
 //   unpublish / reject             -> takes it down (and rebuilds if it was live)
 //   rebuild                        -> asks GitHub to rebuild and redeploy the site
 //
-// Secrets: HH_GITHUB_TOKEN (fine-grained token, Actions: read and write on the honest-handicap repo),
+// Secrets: HH_GITHUB_TOKEN (optional, makes publishing instant instead of within 15 minutes: fine-grained token, Actions: read and write on the honest-handicap repo),
 // HH_GITHUB_REPO (default anthonygdunn-hub/honest-handicap), HH_FROM to email testers their code
 // (only once a domain like honesthandicap.golf is verified in Resend).
 import { CATS, corsFor, db, esc, newCode, send, sha } from "../_shared/hh.ts";
@@ -25,8 +25,9 @@ async function rebuild(reason: string) {
   const repo = Deno.env.get("HH_GITHUB_REPO") ?? "anthonygdunn-hub/honest-handicap";
   const at = new Date().toISOString();
   if (!token) {
-    await db.from("hh_settings").upsert({ key: "last_build", value: { at, reason, ok: false, why: "no HH_GITHUB_TOKEN yet" }, updated_at: at });
-    return { ok: false, why: "The site can't rebuild itself yet: the GitHub token hasn't been added. The change is saved and goes out on the next build." };
+    // no token: the site's own 15-minute check sees this timestamp and rebuilds
+    await db.from("hh_settings").upsert({ key: "last_build", value: { at, reason, ok: true, queued: true }, updated_at: at });
+    return { ok: true, queued: true, why: null, note: "It'll be on the site within about 15 minutes." };
   }
   const r = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/build.yml/dispatches`, {
     method: "POST",
@@ -36,7 +37,7 @@ async function rebuild(reason: string) {
   const ok = r.status === 204;
   const why = ok ? null : `GitHub said ${r.status}: ${(await r.text()).slice(0, 200)}`;
   await db.from("hh_settings").upsert({ key: "last_build", value: { at, reason, ok, why, repo }, updated_at: at });
-  return ok ? { ok, why: null } : { ok, why: "The rebuild didn't start. " + why };
+  return ok ? { ok, why: null, note: "It'll be on the site in about two minutes." } : { ok, why: "The rebuild didn't start. " + why };
 }
 
 Deno.serve(async (req) => {

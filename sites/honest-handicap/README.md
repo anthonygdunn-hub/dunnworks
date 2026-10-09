@@ -25,7 +25,7 @@ Card form  ──► hh-card (checks the code, takes up to 3 photos) ──► h
 
 * Tester names and courses on a card come from the tester's own record, so nobody can write as someone else
 * Buy now buttons only show for links ticked "Tracked (Ad)" with an https:// address. No link, no button
-* The nightly build at 03:17 is a safety net; publishing in the console rebuilds within about two minutes
+* Publishing in the console goes out within about 15 minutes (the workflow's 15-minute check), or about two minutes if `HH_GITHUB_TOKEN` is set. The nightly build at 03:17 is a safety net
 
 ## Layout
 
@@ -89,9 +89,11 @@ Anyone with "reduce motion" switched on gets still pictures instead.
 
 1. **Repo**: create an empty `anthonygdunn-hub/honest-handicap`, push this folder's contents to `main`.
    Settings, Pages, Source: **GitHub Actions**
-2. **Rebuild token**: GitHub, Settings, Developer settings, Fine-grained tokens. Repository access:
-   only `honest-handicap`. Permissions: **Actions: Read and write**. Add it in Supabase
-   (project acdpgarasgfhvupzsbxf, Edge Functions, Secrets) as `HH_GITHUB_TOKEN`
+2. **Rebuild token (optional)**: without it, the workflow checks Supabase every 15 minutes and rebuilds
+   when something has been published or taken down. For instant rebuilds: GitHub, Settings, Developer
+   settings, Fine-grained tokens. Repository access: only `honest-handicap`. Permissions:
+   **Actions: Read and write**. Add it in Supabase (project acdpgarasgfhvupzsbxf, Edge Functions,
+   Secrets) as `HH_GITHUB_TOKEN`
 3. **Emails**: alerts go to `HH_NOTIFY_TO` (default anthonygdunn@gmail.com). Once
    honesthandicap.golf is verified in Resend, set `HH_FROM` (e.g. `hello@honesthandicap.golf`) and
    testers get their code by email automatically. Until then the console gives you the message to send

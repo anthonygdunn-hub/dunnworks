@@ -128,3 +128,15 @@ revoke all on function public.hh_published_reviews() from public;
 revoke all on function public.hh_public_testers() from public;
 grant execute on function public.hh_published_reviews() to anon, authenticated;
 grant execute on function public.hh_public_testers() to anon, authenticated;
+
+-- the workflow's 15-minute check: has anything that changes the site happened since the last deploy?
+create or replace function public.hh_last_change()
+returns timestamptz language sql stable security definer set search_path = '' as $$
+  select greatest(
+    (select max(updated_at) from public.hh_reviews where status <> 'submitted'),
+    (select max(approved_at) from public.hh_testers),
+    (select max(updated_at) from public.hh_settings where key = 'last_build'),
+    'epoch'::timestamptz)
+$$;
+revoke all on function public.hh_last_change() from public;
+grant execute on function public.hh_last_change() to anon, authenticated;

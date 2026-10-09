@@ -1,6 +1,11 @@
 # Builds honesthandicap.golf from the published reviews in Supabase and deploys it to GitHub Pages.
-# Runs when the source changes, when a review is published or taken down in the dunnworks.io
-# console (hh-admin sends a workflow_dispatch), and once a night as a safety net.
+#
+# When it runs:
+#   - whenever the source changes (push to main)
+#   - straight away when hh-admin sends a workflow_dispatch (only if HH_GITHUB_TOKEN is set in Supabase)
+#   - every 15 minutes it checks Supabase for anything published, changed or taken down since the
+#     last successful build, and rebuilds only if there is. This is what makes publishing work with no token
+#   - once a night regardless, as a safety net
 name: Build and deploy
 
 on:
@@ -13,19 +18,52 @@ on:
         required: false
         default: Manual rebuild
   schedule:
+    - cron: "*/15 * * * *"
     - cron: "17 3 * * *"
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
+  deployments: read
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.c.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: c
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          CRON: ${{ github.event.schedule }}
+        run: |
+          if [ "$EVENT" != "schedule" ] || [ "$CRON" = "17 3 * * *" ]; then echo "build=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          URL=$(python3 -c "import json;print(json.load(open('site.json'))['supabase'])")
+          KEY=$(python3 -c "import json;print(json.load(open('site.json'))['publishable_key'])")
+          CHANGED=$(curl -fsS -X POST "$URL/rest/v1/rpc/hh_last_change" -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" -d '{}' | tr -d '"')
+          LAST=$(gh api "repos/$GITHUB_REPOSITORY/deployments?environment=github-pages&per_page=1" -q '.[0].created_at' 2>/dev/null || true)
+          echo "last change in Supabase: $CHANGED, last deploy: $LAST"
+          python3 - "$CHANGED" "$LAST" <<'PY' >> "$GITHUB_OUTPUT"
+          import sys, datetime
+          def p(s):
+              try: return datetime.datetime.fromisoformat(s.strip().replace("Z", "+00:00"))
+              except Exception: return None
+          c, l = p(sys.argv[1]), p(sys.argv[2])
+          # 5 minutes' grace: a change made while the last build was running still gets picked up
+          print("build=" + ("true" if c and (not l or c > l - datetime.timedelta(minutes=5)) else "false"))
+          PY
+
   build:
+    needs: check
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +77,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
   deploy:
     needs: build
     runs-on: ubuntu-latest

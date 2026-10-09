@@ -80,7 +80,7 @@
     var c = counts();
     var b = S.build;
     var build = b ? '<p class="hh-build' + (b.ok ? '' : ' bad') + '">Last rebuild ' + esc(ago(b.at)) + ': ' + esc(b.reason || '') +
-      (b.ok ? ' (started)' : ' (didn\'t start: ' + esc(b.why || 'unknown') + ')') + '</p>' : '';
+      (b.ok ? (b.queued ? ' (queued, goes out within 15 minutes)' : ' (started)') : ' (didn\'t start: ' + esc(b.why || 'unknown') + ')') + '</p>' : '';
     var tabs = [['testers', 'Testers', c.applied ? c.applied + ' to check' : c.approved],
                 ['cards', 'Cards to check', c.cards], ['live', 'Live reviews', c.live]];
     root.innerHTML =
@@ -218,7 +218,7 @@
     }
     if (a === 'rebuild') {
       btn.disabled = true;
-      admin({ action:'rebuild' }).then(function (j) { say(j.built && j.built.ok ? 'Rebuild started. It takes about two minutes.' : j.built.why, j.built && j.built.ok ? 'ok' : 'bad'); return refresh(); })
+      admin({ action:'rebuild' }).then(function (j) { say(j.built && j.built.ok ? 'Rebuild on its way. ' + (j.built.note || '') : j.built.why, j.built && j.built.ok ? 'ok' : 'bad'); return refresh(); })
         .catch(function (err) { say(err.message, 'bad'); }).then(function () { btn.disabled = false; });
       return;
     }
@@ -237,7 +237,7 @@
     if (a === 'decline_tester' || a === 'remove_tester' || a === 'unpublish' || a === 'reject') {
       btn.disabled = true;
       admin({ action:a, id:id }).then(function (j) {
-        say(j.built ? (j.built.ok ? 'Done. The site is rebuilding.' : 'Done. ' + j.built.why) : 'Done.', j.built && !j.built.ok ? 'bad' : 'ok'); return refresh();
+        say(j.built ? (j.built.ok ? 'Done. ' + (j.built.note || '') : 'Done. ' + j.built.why) : 'Done.', j.built && !j.built.ok ? 'bad' : 'ok'); return refresh();
       }).catch(function (err) { btn.disabled = false; say(err.message, 'bad'); });
       return;
     }
@@ -251,9 +251,9 @@
       patch('hh_reviews', id, body).then(function () {
         if (a === 'save') { var s = el.querySelector('[data-saved]'); if (s) s.textContent = 'Saved'; return refresh(); }
         if (live) return admin({ action:'rebuild', reason:'Updated ' + body.product }).then(function (j) {
-          say(j.built.ok ? 'Saved. The site is rebuilding.' : 'Saved. ' + j.built.why, j.built.ok ? 'ok' : 'bad'); return refresh(); });
+          say(j.built.ok ? 'Saved. ' + (j.built.note || '') : 'Saved. ' + j.built.why, j.built.ok ? 'ok' : 'bad'); return refresh(); });
         return admin({ action:'publish', id:id, slug:slug }).then(function (j) {
-          say(j.built && j.built.ok ? 'Published. It\'ll be live at ' + j.url + ' in about two minutes.' : 'Published at ' + j.url + '. ' + (j.built ? j.built.why : ''), j.built && j.built.ok ? 'ok' : 'bad');
+          say(j.built && j.built.ok ? 'Published: ' + j.url + '. ' + (j.built.note || '') : 'Published at ' + j.url + '. ' + (j.built ? j.built.why : ''), j.built && j.built.ok ? 'ok' : 'bad');
           S.open[id] = false; return refresh();
         });
       }).catch(function (err) { btn.disabled = false; say(err.message, 'bad'); });
