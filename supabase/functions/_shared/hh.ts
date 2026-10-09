@@ -68,10 +68,8 @@ export async function send(to: string[], subject: string, html: string, text: st
     return r.ok;
   } catch (e) { console.error("send failed", e); return false; }
 }
-// Resend's shared test sender (onboarding@resend.dev) can only reach the account owner, info@dunnworks.io.
-// Once a verified sender is set (HH_FROM etc.) alerts go to Gmail, or wherever HH_NOTIFY_TO says.
-const verifiedSender = () => !!(Deno.env.get("HH_FROM") ?? Deno.env.get("NOTIFY_FROM") ?? Deno.env.get("BOOKING_FROM"));
-export const notifyTo = () => [Deno.env.get("HH_NOTIFY_TO") ?? (verifiedSender() ? "anthonygdunn@gmail.com" : "info@dunnworks.io")];
+// Every alert goes to info@dunnworks.io unless HH_NOTIFY_TO says otherwise.
+export const notifyTo = () => [Deno.env.get("HH_NOTIFY_TO") ?? "info@dunnworks.io"];
 
 export function table(lines: [string, unknown][]) {
   return `<table style="border-collapse:collapse">${lines.map(([l, v]) =>

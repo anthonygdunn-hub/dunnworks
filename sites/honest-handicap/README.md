@@ -94,7 +94,7 @@ Anyone with "reduce motion" switched on gets still pictures instead.
    settings, Fine-grained tokens. Repository access: only `honest-handicap`. Permissions:
    **Actions: Read and write**. Add it in Supabase (project acdpgarasgfhvupzsbxf, Edge Functions,
    Secrets) as `HH_GITHUB_TOKEN`
-3. **Emails**: alerts go to `HH_NOTIFY_TO`; by default info@dunnworks.io while only Resend's test sender is available (it can only email the account owner), and anthonygdunn@gmail.com once a verified sender is set. Once
+3. **Emails**: alerts go to `HH_NOTIFY_TO`; info@dunnworks.io by default. Once
    honesthandicap.golf is verified in Resend, set `HH_FROM` (e.g. `hello@honesthandicap.golf`) and
    testers get their code by email automatically. Until then the console gives you the message to send
 
