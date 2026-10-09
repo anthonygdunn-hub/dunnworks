@@ -1,0 +1,100 @@
+<section class="hero">
+<div class="wrap">
+<div class="hero-copy">
+<div class="eyebrow">Real golfers · Real handicaps · Real verdicts</div>
+<h1>Golf kit, tested by golfers <em>like you.</em></h1>
+<p class="lead">Every review is written by a real club golfer after real rounds, with their handicap on the card. No lab, no tour pro, no hype.</p>
+<div class="ctas">
+<a class="btn btn-pink" href="/reviews/">Browse reviews<span class="gb"></span></a>
+<a class="btn btn-line" href="/how-we-test/">How we test<span class="gb"></span></a>
+</div>
+</div>
+<div class="hero-art">
+<svg id="hole" class="anim" data-still="3.9" viewBox="0 0 600 420" role="img" aria-label="A golf ball flies from the tee onto the green and drops into the hole">
+<defs>
+<pattern id="stripes" width="44" height="44" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)"><rect width="22" height="44" fill="#16165A"/><rect x="22" width="22" height="44" fill="#13134A"/></pattern>
+<radialGradient id="flood" cx="0.82" cy="0.05" r="0.75"><stop offset="0" stop-color="#19D3FF" stop-opacity=".22"/><stop offset="1" stop-color="#19D3FF" stop-opacity="0"/></radialGradient>
+<radialGradient id="gball" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#fff"/><stop offset=".7" stop-color="#e3e5f7"/><stop offset="1" stop-color="#a9add0"/></radialGradient>
+</defs>
+<rect width="600" height="420" fill="url(#flood)"/>
+<!-- floodlights -->
+<g stroke="#2B2B6E" stroke-width="3"><line x1="540" y1="40" x2="540" y2="210"/><line x1="60" y1="70" x2="60" y2="230"/></g>
+<rect x="526" y="30" width="28" height="12" rx="2" fill="#8BE9FF"/><rect x="47" y="60" width="26" height="11" rx="2" fill="#8BE9FF" opacity=".7"/>
+<!-- fairway -->
+<path d="M0 420 L0 330 C120 300 210 330 300 300 C390 270 450 300 600 262 L600 420 Z" fill="url(#stripes)" stroke="#2B2B6E" stroke-width="2"/>
+<!-- bunker -->
+<path d="M300 340 C318 324 360 326 372 340 C364 354 316 356 300 340 Z" fill="#2B2B6E"/>
+<!-- green -->
+<ellipse cx="468" cy="286" rx="96" ry="24" fill="#1C1C5A" stroke="#19D3FF" stroke-width="2"/>
+<ellipse cx="470" cy="286" rx="8" ry="3" fill="#05051a"/>
+<!-- flag -->
+<line x1="470" y1="286" x2="470" y2="176" stroke="#fff" stroke-width="3"/>
+<path d="M471 178 L520 192 L471 208 Z" fill="#FF2E9A"><animate attributeName="d" dur="1.6s" repeatCount="indefinite" values="M471 178 L520 192 L471 208 Z;M471 178 C490 182 505 196 516 196 C504 198 488 204 471 208 Z;M471 178 L520 192 L471 208 Z"/></path>
+<!-- tee -->
+<path d="M84 336 h12 l-4 18 h-4 z" fill="#FF2E9A"/>
+<!-- flight trail -->
+<path id="flight" d="M90 330 Q 270 -30 452 282 L 469 286" fill="none" stroke="#19D3FF" stroke-width="2.5" stroke-dasharray="6 7" pathLength="100" opacity=".85">
+<animate attributeName="stroke-dashoffset" values="100;0" dur="6s" repeatCount="indefinite"/>
+<animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.05;0.62;0.8;1" values="0;.85;.85;0;0"/>
+</path>
+<!-- ripple when it drops -->
+<ellipse cx="470" cy="286" rx="0" ry="0" fill="none" stroke="#FF2E9A" stroke-width="2.5">
+<animate attributeName="rx" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.75;1" values="0;0;30;30"/>
+<animate attributeName="ry" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.75;1" values="0;0;8;8"/>
+<animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.62;0.78;1" values="0;0;1;0;0"/>
+</ellipse>
+<!-- ball -->
+<circle r="7" fill="url(#gball)">
+<animateMotion dur="6s" repeatCount="indefinite" keyPoints="0;0;0.96;1;1" keyTimes="0;0.06;0.52;0.6;1" calcMode="linear"><mpath href="#flight"/></animateMotion>
+<animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.61;0.97;1" values="1;1;0;0;1"/>
+</circle>
+<text x="470" y="160" text-anchor="middle" font-family="DM Mono, monospace" font-size="13" letter-spacing="3" fill="#FF2E9A" opacity="0">IN THE HOLE
+<animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.64;0.9;0.96;1" values="0;0;1;1;0;0"/>
+</text>
+</svg>
+</div>
+</div>
+</section>
+<div class="mow" aria-hidden="true"></div>
+
+<section class="s">
+<div class="wrap">
+<div class="shead rv-up">
+<div><div class="hole">{{FLAG}}<span class="eyebrow">Hole 1 · Par 4</span></div><h2>Latest reviews</h2></div>
+<a class="btn btn-line btn-sm" href="/reviews/">See all reviews<span class="gb"></span></a>
+</div>
+<div class="cards">
+{{CARDS3}}
+</div>
+</div>
+</section>
+
+<section class="s kit-band">
+<div class="wrap">
+<div class="shead rv-up"><div><div class="hole">{{FLAG}}<span class="eyebrow">Hole 2 · Par 3</span></div><h2>Find your kit</h2></div></div>
+<div class="kit rv-up">{{KIT}}</div>
+</div>
+</section>
+
+<section class="s">
+<div class="wrap">
+<div class="shead rv-up"><div><div class="hole">{{FLAG}}<span class="eyebrow">Hole 3 · Par 5</span></div><h2>How we test</h2><p class="sub">Same card, every time. That's what makes a 9 from a 6-handicapper and a 7 from a 24-handicapper worth comparing.</p></div></div>
+<div class="steps rv-up">{{STEPS}}</div>
+</div>
+</section>
+
+<section class="s" style="padding-top:0">
+<div class="wrap rv-up">
+<div class="join">
+<div style="flex:999 1 420px;min-width:0"><h2>Got a handicap and an opinion?</h2><p>Join the testers. Review the kit you already play with, then the kit you've always wondered about.</p></div>
+<a class="btn btn-dark" href="/join/">Join the testers<span class="gb"></span></a>
+<svg class="flagbg" viewBox="0 0 100 120" aria-hidden="true"><line x1="20" y1="10" x2="20" y2="120" stroke="#0B0B2A" stroke-width="5"/><path class="flag-wave" d="M22 10 L90 30 L22 52 Z" fill="#0B0B2A"/></svg>
+</div>
+</div>
+</section>
+
+<section class="s" style="padding-top:0">
+<div class="wrap rv-up">
+<div class="partner"><div class="t"><div class="eyebrow" style="font-size:12px;margin-bottom:6px">Our fitting partner</div>Bought new clubs? Have them fitted and regripped by Coastal Golf Co, collected from your door from Cranleigh to the coast.</div><a class="btn btn-line btn-sm" href="https://www.coastalgolfco.co.uk/" target="_blank" rel="noopener">Visit Coastal Golf Co<span class="gb"></span></a></div>
+</div>
+</section>

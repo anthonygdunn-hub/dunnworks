@@ -251,6 +251,7 @@
 <script src="../assets/js/dw-keys.js"></script>
 <script src="../assets/js/dw-pack.js"></script>
 <script src="../assets/js/dw-cgc.js"></script>
+<script src="../assets/js/dw-hh.js"></script>
 <script>
 (function () {
   'use strict';
@@ -326,9 +327,11 @@
       DWData.rest('dw_project_packs?select=*').catch(function () { return []; }),
       DWData.rest('dw_task_notes?select=*&order=created_at.asc').catch(function () { return []; }),
       DWData.rest('dw_task_files?select=*&order=created_at.asc').catch(function () { return []; }),
-      DWCgc.summary()
+      DWCgc.summary(),
+      window.DWHh ? DWHh.summary() : null
     ]).then(function (out) {
       D.cgc = out[10] || null;
+      D.hh = out[11] || null;
       D.notes = {}; D.files = {};
       (out[8] || []).forEach(function (n) { (D.notes[n.task_id] = D.notes[n.task_id] || []).push(n); });
       (out[9] || []).forEach(function (f) { (D.files[f.task_id] = D.files[f.task_id] || []).push(f); });
@@ -372,10 +375,12 @@
     { id:'targets',   name:'People to target', blurb:'The prospect list, who to chase and when' },
     { id:'jobs',      name:'Job search',       blurb:'Customer success and field sales roles, scored' },
     { id:'enquiries', name:'Enquiries',        blurb:'Messages from the T Cooper Interiors form' },
-    { id:'cgc',       name:'Coastal Golf Co stats', blurb:'Visitors, bookings, Google search and site health for coastalgolfco.co.uk' }
+    { id:'cgc',       name:'Coastal Golf Co stats', blurb:'Visitors, bookings, Google search and site health for coastalgolfco.co.uk' },
+    { id:'hh',        name:'Honest Handicap',  blurb:'Tester applications, review cards to check, and live reviews on honesthandicap.golf' }
   ];
   var VIEWS = { wip:viewWip, previews:viewPreviews, targets:viewTargets, jobs:viewJobs, enquiries:viewEnquiries,
-                cgc:function () { DWCgc.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); } };
+                cgc:function () { DWCgc.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); },
+                hh:function () { DWHh.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); } };
 
   function counts() {
     var due = D.projects.filter(function (r) { return isTarget(r) && isDue(r); }).length;
@@ -386,6 +391,7 @@
       jobs: D.jobs.filter(function (j) { return (j.score || 0) >= 45 && j.status !== 'hidden' && j.status !== 'rejected'; }).length,
       enquiries: D.enquiries.length,
       cgc: D.cgc ? D.cgc.cur.visits : '–',
+      hh: D.hh ? D.hh.live : '–',
       due: due,
       todo: Object.keys(D.tasks).reduce(function (n, k) { return n + D.tasks[k].filter(function (t) { return !t.done; }).length; }, 0)
     };
@@ -423,6 +429,11 @@
         if (up && !up.ok) extra = '<span class="flag warn">Site down ' + esc(when(up.at)) + '</span>';
         else if (D.cgc.now && D.cgc.now.live) extra = '<span class="flag live">' + D.cgc.now.live + ' on the site now</span>';
         else extra = '<span class="flag">Visitors, last 7 days</span>';
+      }
+      if (a.id === 'hh' && D.hh) {
+        var todo = D.hh.applied + D.hh.cards;
+        extra = todo ? '<span class="flag warn">' + (D.hh.applied ? D.hh.applied + ' to approve' : '') + (D.hh.applied && D.hh.cards ? ' · ' : '') +
+          (D.hh.cards ? D.hh.cards + ' card' + (D.hh.cards === 1 ? '' : 's') + ' to check' : '') + '</span>' : '<span class="flag">Reviews live</span>';
       }
       return '<a class="tile" href="#/' + a.id + '">' +
         '<span class="n">' + c[a.id] + '</span>' +

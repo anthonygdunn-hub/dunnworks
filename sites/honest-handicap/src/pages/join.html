@@ -1,0 +1,20 @@
+<div class="wrap"><div class="prose" style="max-width:860px">
+<div class="hole" style="display:flex;align-items:center;gap:12px">{{FLAG}}<span class="eyebrow">Join the testers</span></div>
+<h1>Become a tester</h1>
+<p style="font-size:20px;color:var(--txt2)">If you play at least twice a month and you'd tell a mate the truth about their new driver, we'd like to hear from you.</p>
+<p>Testers review kit they already play with, and kit they've always wondered about. There's no fee and no catch: you just need a handicap, an opinion and enough rounds to back it up.</p>
+<form class="f" id="joinform" novalidate>
+<div><label for="j-name">Your name</label><input id="j-name" name="name" autocomplete="name" required></div>
+<div><label for="j-email">Email</label><input id="j-email" name="email" type="email" autocomplete="email" required></div>
+<div><label for="j-hc">Handicap index</label><input id="j-hc" name="handicap" inputmode="decimal" placeholder="e.g. 14.2" required></div>
+<div><label for="j-club">Home course</label><input id="j-club" name="course" required></div>
+<div><label for="j-often">How often do you play?</label><select id="j-often" name="often"><option>Twice a week or more</option><option selected>Once a week</option><option>Twice a month</option><option>Less often</option></select></div>
+<div><label for="j-kit">Kit you'd like to test</label><select id="j-kit" name="kit"><option>Anything</option><option>Clubs</option><option>Balls</option><option>Shoes and clothing</option><option>Bags and trolleys</option><option>Rangefinders and tech</option></select></div>
+<div class="full"><label for="j-bag">What's in your bag right now?</label><textarea id="j-bag" name="bag" placeholder="Driver, irons, putter, ball... whatever you remember"></textarea></div>
+<div class="hp" aria-hidden="true"><label for="j-web">Leave this empty</label><input id="j-web" name="website" tabindex="-1" autocomplete="off"></div>
+<div class="full"><label class="check"><input type="checkbox" name="ok" required> I'm happy for my first name, handicap and home course to appear on my reviews.</label></div>
+<div class="full"><p class="hint">We only use your details to run the tester panel. See <a href="/privacy/">privacy</a>.</p></div>
+<div class="full"><button class="btn btn-pink" type="submit">Send it<span class="gb"></span></button></div>
+<div class="msg" role="status" aria-live="polite"></div>
+</form>
+</div></div>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESC}}">
+<meta name="robots" content="{{ROBOTS}}">
+{{CANONICAL}}
+<meta property="og:site_name" content="Honest Handicap">
+<meta property="og:type" content="{{OGTYPE}}">
+<meta property="og:title" content="{{OGTITLE}}">
+<meta property="og:description" content="{{DESC}}">
+<meta property="og:image" content="{{OGIMAGE}}">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0B0B2A">
+<link rel="icon" href="{{ROOT}}favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+{{STYLES}}
+{{JSONLD}}
+</head>
+<body data-page="{{PAGE}}">
+<div class="putt" aria-hidden="true"><div class="ball"></div><svg class="cup" viewBox="0 0 12 18"><line x1="2" y1="1" x2="2" y2="18" stroke="#fff" stroke-width="1.4"/><path class="flag-wave" d="M2.5 1 L11 4 L2.5 7 Z" fill="#FF2E9A"/></svg></div>
+
+<a class="sr" href="#main">Skip to content</a>
+<div class="adbar">(Ad) marks affiliate links. If you buy through one we earn a commission, at no extra cost to you. <a href="/affiliate-disclosure/">How it works</a></div>
+
+<header class="top" id="top">
+<div class="wrap" style="position:relative">
+<a class="logo" href="/" aria-label="Honest Handicap home">{{LOGO}}</a>
+<button class="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mainnav"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<nav class="main" id="mainnav" aria-label="Main">
+<a href="/reviews/"{{CUR_reviews}}>Reviews</a>
+<a href="/how-we-test/"{{CUR_how-we-test}}>How we test</a>
+<a href="/testers/"{{CUR_testers}}>The testers</a>
+<a href="/about/"{{CUR_about}}>About</a>
+<a class="btn btn-pink btn-sm" href="/join/">Become a tester<span class="gb"></span></a>
+</nav>
+</div>
+</header>
+
+<main id="main">
+{{BODY}}
+</main>
+
+<footer>
+<svg class="grass" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 40 L0 22 {{GRASS}} L1200 22 L1200 40 Z" fill="#13134A"/></svg>
+<div class="wrap">
+<div class="about">
+{{LOGOFOOT}}
+<p>Links marked (Ad) are affiliate links: if you buy through one, Honest Handicap earns a commission from the retailer at no extra cost to you. It never changes a tester's score.</p>
+</div>
+<nav aria-label="Footer">
+<a href="/reviews/">Reviews</a><a href="/how-we-test/">How we test</a><a href="/testers/">The testers</a><a href="/join/">Become a tester</a><a href="/submit/">Testers: hand in a card</a><a href="/about/">About</a><a href="/affiliate-disclosure/">Affiliate disclosure</a><a href="/privacy/">Privacy &amp; cookies</a><a href="mailto:hello@honesthandicap.golf">hello@honesthandicap.golf</a>
+</nav>
+<div class="nineteen"><svg viewBox="0 0 30 44" aria-hidden="true"><line x1="4" y1="2" x2="4" y2="44" stroke="#fff" stroke-width="2.5"/><path class="flag-wave" d="M5 3 L28 10 L5 18 Z" fill="#FF2E9A"/></svg>The 19th hole</div>
+<div class="legal">© {{YEAR}} Honest Handicap, run by Dunnworks · honesthandicap.golf · Site by <a href="https://dunnworks.io/" target="_blank" rel="noopener">Dunnworks</a></div>
+</div>
+</footer>
+{{SCRIPTS}}
+</body>
+</html>

@@ -1,0 +1,48 @@
+<div class="wrap"><div class="prose" style="max-width:900px">
+<div class="hole" style="display:flex;align-items:center;gap:12px">{{FLAG}}<span class="eyebrow">For testers</span></div>
+<h1>Fill in your card</h1>
+<p style="font-size:20px;color:var(--txt2)">The same card for every review. Be honest: that's the whole point.</p>
+<p>Play at least three rounds with the kit, or two and a range session, before you hand a card in. Every card is checked before it goes up. Not a tester yet? <a href="/join/">Join here</a>.</p>
+<form class="f" id="reviewform" novalidate>
+<div class="full codebox">
+<label for="r-code">Your tester code</label>
+<div class="coderow"><input id="r-code" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="HH-XXXX-XXXX" required>
+<button class="btn btn-line btn-sm" type="button" id="r-check">Check my code<span class="gb"></span></button></div>
+<p class="hint">It's in the message Anthony sent when you joined. Lost it? Email <a href="mailto:hello@honesthandicap.golf">hello@honesthandicap.golf</a>.</p>
+<div class="msg" id="r-codemsg" role="status" aria-live="polite"></div>
+<p class="hi" id="r-hi" hidden></p>
+</div>
+<div class="hp" aria-hidden="true"><label for="r-web">Leave this empty</label><input id="r-web" name="website" tabindex="-1" autocomplete="off"></div>
+<fieldset id="r-rest" class="full">
+<legend class="sr">Your review card</legend>
+<div class="f">
+<div class="full"><label for="r-prod">Product (brand and model)</label><input id="r-prod" name="product" required placeholder="e.g. Golf Pride MCC Plus4"></div>
+<div><label for="r-cat">Category</label><select id="r-cat" name="category" required><option value="">Pick one</option>{{CATOPTIONS}}</select></div>
+<div><label for="r-hc">Your handicap today</label><input id="r-hc" name="handicap" inputmode="decimal"></div>
+<div><label for="r-from">Where did it come from?</label><select id="r-from" name="source"><option>I bought it</option><option>Loaned by the brand</option><option>Free from the brand</option><option>Gift</option></select></div>
+<div><label for="r-paid">Price paid</label><input id="r-paid" name="paid" placeholder="£"></div>
+<div class="full"><label for="r-rounds">Rounds and range sessions</label><input id="r-rounds" name="rounds" placeholder="e.g. 4 rounds, 1 range session" required></div>
+<div class="full"><span class="lab">Scores out of 10</span>
+<div class="scores">
+<div><label for="r-s1">Performance</label><input id="r-s1" name="performance" type="number" inputmode="numeric" min="1" max="10" required></div>
+<div><label for="r-s2">Feel</label><input id="r-s2" name="feel" type="number" inputmode="numeric" min="1" max="10" required></div>
+<div><label for="r-s3">Build quality</label><input id="r-s3" name="build" type="number" inputmode="numeric" min="1" max="10" required></div>
+<div><label for="r-s4">Value</label><input id="r-s4" name="value" type="number" inputmode="numeric" min="1" max="10" required></div>
+<div><label for="r-s5">Overall verdict</label><input id="r-s5" name="overall" type="number" inputmode="numeric" min="1" max="10" required></div>
+</div></div>
+<div><label for="r-again">Buy it again with your own money?</label><select id="r-again" name="again" required><option value="">Pick one</option><option>Yes</option><option>No</option></select></div>
+<div></div>
+<div class="full"><label for="r-one">One-line verdict</label><input id="r-one" name="oneline" maxlength="200" required></div>
+<div class="full"><label for="r-play">How it played</label><textarea id="r-play" name="writeup" required placeholder="The conditions you played in, how it compared with what you had before, and anything that changed over the rounds."></textarea></div>
+<div><label for="r-suits">Who it suits</label><input id="r-suits" name="suits"></div>
+<div><label for="r-not">Who it doesn't</label><input id="r-not" name="notsuits"></div>
+<div class="full"><label for="r-annoy">One thing that annoyed you</label><input id="r-annoy" name="annoyed"></div>
+<div class="full"><label for="r-photos">Photos of the kit in use (up to 3)</label><input id="r-photos" type="file" accept="image/*" multiple>
+<div class="thumbs" id="r-thumbs"></div>
+<p class="hint">Your own photos, please: in the bag, on the course, in the wet. No faces of anyone who hasn't said yes.</p></div>
+<div class="full"><button class="btn btn-pink" type="submit">Hand in my card<span class="gb"></span></button></div>
+<div class="msg" role="status" aria-live="polite"></div>
+</div>
+</fieldset>
+</form>
+</div></div>
