@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Honest Handicap | Golf kit, tested by golfers like you</title>
+<meta name="description" content="Golf kit reviews written by real club golfers after real rounds, with their handicap on the card.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="{{FAVICON}}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mid:#0B0B2A;--card:#13134A;--card2:#1C1C5A;--line:#2B2B6E;--deep:#08081F;
+  --cyan:#19D3FF;--cyan2:#8BE9FF;--pink:#FF2E9A;--white:#FFFFFF;
+  --txt:#E6E8FF;--txt2:#C9CCF2;--txt3:#A9ADDB;
+  --head:'Barlow Condensed',sans-serif;--mono:'DM Mono',monospace;--body:'Barlow',sans-serif;
+  --wrap:1200px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--mid);color:var(--txt);font-family:var(--body);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--cyan)}a:hover{color:var(--cyan2)}
+img,svg{max-width:100%}
+h1,h2,h3{font-family:var(--head);font-weight:800;text-transform:uppercase;color:var(--white);margin:0;line-height:1}
+p{margin:0}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase}
+.ph{border-bottom:1.5px dashed var(--pink);color:inherit}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+
+/* putt-line scroll progress: the ball rolls toward the flag as you read */
+.putt{position:fixed;top:0;left:0;right:0;height:6px;z-index:60;pointer-events:none;background:linear-gradient(var(--line),var(--line)) 0 50%/100% 2px no-repeat}
+.putt .ball{position:absolute;top:-2px;left:0;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #0004,0 0 8px #fff8;transform:translateX(var(--p,0px))}
+.putt .cup{position:absolute;right:6px;top:-12px;width:12px;height:18px}
+
+/* ad bar */
+.adbar{background:var(--card);border-bottom:1px solid var(--line);padding:9px 24px;text-align:center;font-family:var(--mono);font-size:12.5px;color:var(--txt2)}
+
+/* header */
+header.top{position:sticky;top:0;z-index:50;background:rgba(11,11,42,.92);backdrop-filter:blur(8px);border-bottom:1px solid transparent;transition:border-color .2s}
+header.top.stuck{border-color:var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:14px;padding-bottom:14px}
+.logo{display:block;line-height:0}.logo svg{height:48px;width:auto}
+nav.main{display:flex;align-items:center;gap:6px 26px;flex-wrap:wrap;font-family:var(--head);font-weight:600;font-size:19px;letter-spacing:1px;text-transform:uppercase}
+nav.main a{color:var(--white);text-decoration:none;padding:6px 0;position:relative}
+nav.main a:not(.btn)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--pink);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+nav.main a:not(.btn):hover::after,nav.main a[aria-current]::after{transform:scaleX(1)}
+.menu-btn{display:none;background:none;border:2px solid var(--cyan);color:var(--cyan);border-radius:4px;width:48px;height:44px;cursor:pointer}
+@media (max-width:860px){
+  .menu-btn{display:block}
+  nav.main{display:none;position:absolute;left:0;right:0;top:100%;background:var(--mid);border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;padding:12px 24px 20px}
+  nav.main.open{display:flex}
+  nav.main a{padding:12px 0}
+}
+
+/* buttons, with a ball that rolls in on hover */
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--head);font-weight:800;font-size:20px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;padding:13px 26px;border-radius:4px;border:2px solid transparent;cursor:pointer;min-height:48px;transition:transform .15s}
+.btn:active{transform:translateY(1px)}
+.btn-pink{background:var(--pink);color:var(--mid)}.btn-pink:hover{color:var(--mid);background:#ff52ad}
+.btn-line{border-color:var(--cyan);color:var(--cyan);background:none}.btn-line:hover{color:var(--mid);background:var(--cyan)}
+.btn-dark{background:var(--mid);color:#fff}.btn-dark:hover{color:#fff;background:#000}
+.btn .gb{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff 0 40%,#d9dbf0 70%,#a9add0);box-shadow:inset -1px -1px 0 #0002;transform:translateX(-6px) rotate(0);opacity:0;transition:transform .45s cubic-bezier(.2,.8,.3,1),opacity .2s}
+.btn:hover .gb{opacity:1;transform:translateX(0) rotate(360deg)}
+.btn-sm{font-size:17px;padding:10px 18px;min-height:44px}
+
+/* pages */
+.page{display:none}.page.on{display:block;animation:pagein .35s ease-out}
+@keyframes pagein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* hero */
+.hero{padding:56px 0 40px;position:relative}
+.hero .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:40px}
+.hero-copy{flex:999 1 480px;min-width:0;display:flex;flex-direction:column;gap:22px}
+.hero h1{font-size:clamp(48px,7vw,92px);line-height:.93}
+.hero h1 em{font-style:normal;color:var(--pink)}
+.hero p.lead{font-size:20px;color:var(--txt2);max-width:560px}
+.ctas{display:flex;flex-wrap:wrap;gap:14px}
+.hero-art{flex:1 1 440px;min-width:0}
+.hero-art svg{width:100%;height:auto;display:block}
+
+/* mown fairway stripe divider */
+.mow{height:18px;background:repeating-linear-gradient(90deg,#14144d 0 48px,#191960 48px 96px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);animation:mow 18s linear infinite}
+@keyframes mow{to{background-position:192px 0}}
+
+/* section heads: each section is a hole on the course */
+section.s{padding:84px 0}
+.shead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:30px}
+.shead .hole{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.shead .hole svg{width:22px;height:30px}
+.shead h2{font-size:clamp(36px,4.5vw,48px)}
+.sub{color:var(--txt2);font-size:19px;max-width:660px;margin-top:10px}
+
+/* scorecard (hero card and review card) */
+.scard{border:3px solid var(--cyan);background:var(--card) radial-gradient(circle at 1px 1px,#ffffff0d 1px,transparent 1.5px) 0 0/9px 9px}
+.scard .row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.scard .row>div{padding:12px 16px}
+.scard .row>div+div{border-left:1.5px solid var(--line)}
+.scard .hd{border-bottom:1.5px solid var(--cyan);font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--cyan)}
+.scard .hd>div+div{border-left-color:var(--cyan)}
+.scard .bd{border-bottom:1.5px solid var(--line);font-family:var(--head);font-weight:600;font-size:22px;color:#fff}
+.scard .ft{padding:12px 16px;border-top:1.5px solid var(--cyan);font-family:var(--mono);font-size:12px;color:var(--txt3)}
+.scard .bd .v{color:var(--pink)}
+
+/* pencil-circled verdict: the circle draws itself when it comes into view */
+.verdict{position:relative;display:inline-flex;align-items:center;justify-content:center;width:58px;height:50px;font-family:var(--head);font-weight:800;font-size:28px;color:#fff;flex:0 0 auto}
+.verdict svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.verdict ellipse{fill:none;stroke:var(--pink);stroke-width:3.2;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset .9s cubic-bezier(.6,.1,.3,1) .15s}
+.in .verdict ellipse,.verdict.in ellipse{stroke-dashoffset:0}
+.verdict.big{width:110px;height:92px;font-size:54px}
+.verdict.big ellipse{stroke-width:2.6}
+
+/* review cards */
+.cards{display:flex;flex-wrap:wrap;gap:24px}
+.rcard{flex:1 1 300px;min-width:0;background:var(--card);border:1.5px solid var(--line);border-radius:6px;overflow:hidden;text-decoration:none;color:var(--txt);display:flex;flex-direction:column;transition:transform .25s,border-color .25s}
+.rcard:hover{transform:translateY(-4px);border-color:var(--cyan);color:var(--txt)}
+.rcard .pic{height:200px;background:var(--card2) radial-gradient(circle at 1px 1px,#ffffff10 1px,transparent 1.5px) 0 0/10px 10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;color:var(--txt3);position:relative;overflow:hidden}
+.rcard .pic .tee{position:absolute;bottom:18px;left:50%;width:40px;transform:translateX(-50%);transition:transform .4s}
+.rcard .pic .tee circle,.rcard .pic .tee g{transform-box:fill-box}
+.rcard:hover .pic .tee .chip{animation:chip .9s cubic-bezier(.3,.7,.4,1)}
+@keyframes chip{0%{transform:none}35%{transform:translate(14px,-46px) rotate(220deg)}70%{transform:translate(26px,-8px) rotate(400deg)}85%{transform:translate(30px,-16px) rotate(460deg);opacity:1}100%{transform:translate(34px,0) rotate(520deg);opacity:0}}
+.rcard .bd{padding:20px;display:flex;flex-direction:column;gap:10px;flex-grow:1}
+.rcard .cat{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--cyan)}
+.rcard h3{font-size:26px;line-height:1.08;text-transform:none}
+.rcard .meta{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto;font-size:15px;color:var(--txt2)}
+
+/* kit grid with swinging club icons */
+.kit-band{background:var(--card);border-top:1.5px solid var(--line);border-bottom:1.5px solid var(--line)}
+.kit{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+@media (max-width:520px){.kit{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.kit a{font-size:17px;padding:14px 12px;gap:10px}.kit svg{width:26px;height:26px;flex-basis:26px}}
+.kit a{display:flex;align-items:center;gap:14px;padding:18px 18px;border:1.5px solid var(--cyan);border-radius:4px;color:#fff;text-decoration:none;font-family:var(--head);font-weight:600;font-size:21px;letter-spacing:.5px;text-transform:uppercase;transition:background .2s}
+.kit a:hover{background:#19d3ff14;color:#fff}
+.kit svg{width:34px;height:34px;flex:0 0 34px;stroke:var(--cyan);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transform-origin:50% 8%;transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.kit a:hover svg{transform:rotate(-28deg)}
+
+/* steps */
+.steps{display:flex;flex-wrap:wrap;gap:24px}
+.step{flex:1 1 260px;min-width:0;border-top:4px solid var(--pink);padding-top:18px;display:flex;flex-direction:column;gap:10px}
+.step .n{font-family:var(--mono);font-size:13px;letter-spacing:2px;color:var(--cyan)}
+.step h3{font-size:28px}
+.step p{color:var(--txt2)}
+
+/* join band */
+.join{background:var(--pink);color:var(--mid);border-radius:6px;padding:44px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
+.join h2{color:var(--mid);font-size:clamp(34px,4.4vw,46px);margin-bottom:8px}
+.join p{font-size:19px;font-weight:500}
+.join .flagbg{position:absolute;right:28px;top:14px;width:64px;opacity:.22;pointer-events:none}
+
+/* partner strip */
+.partner{border:1.5px solid var(--cyan);border-radius:6px;padding:26px 30px;display:flex;flex-wrap:wrap;gap:14px 30px;align-items:center;justify-content:space-between}
+.partner .t{flex:999 1 420px;min-width:0;font-size:19px;color:#fff}
+
+/* review page */
+.crumbs{font-family:var(--mono);font-size:13px;color:var(--txt3)}
+.rv{display:flex;flex-wrap:wrap;gap:44px;align-items:flex-start;padding:30px 0 84px}
+.rv article{flex:999 1 620px;min-width:0;display:flex;flex-direction:column;gap:28px}
+.rv aside{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:96px}
+@media (max-width:980px){.rv aside{position:static}}
+.rv h1{font-size:clamp(40px,5.5vw,64px)}
+.rv .lede{font-size:21px;color:var(--txt2)}
+.card5{border:3px solid var(--cyan);background:var(--card)}
+.card5 .r{display:flex;flex-wrap:wrap}
+.card5 .r>div{flex:1 1 130px;padding:12px 18px}
+.card5 .r>div+div{border-left:1.5px solid var(--line)}
+.card5 .h{border-bottom:1.5px solid var(--cyan);font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--cyan)}
+.card5 .h>div+div{border-left-color:var(--cyan)}
+.card5 .b{font-family:var(--head);font-weight:600;font-size:26px;color:#fff}
+.card5 .b>div{padding-top:18px;padding-bottom:18px}
+.card5 .vbox{flex:0 0 150px!important;display:flex;align-items:center;justify-content:center;border-left:3px solid var(--cyan)!important}
+.photo{height:360px;background:var(--card2) radial-gradient(circle at 1px 1px,#ffffff10 1px,transparent 1.5px) 0 0/10px 10px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;color:var(--txt3);text-align:center;padding:20px}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bar{display:flex;align-items:center;gap:16px}
+.bar b{flex:0 0 140px;font-weight:600;color:#fff}
+.bar .track{flex:1 1 auto;height:12px;background:var(--line);border-radius:6px;overflow:hidden;position:relative}
+.bar .fill{position:absolute;inset:0 auto 0 0;width:0;background:var(--cyan);border-radius:6px;transition:width 1.1s cubic-bezier(.3,.8,.3,1)}
+.bar .fill::after{content:"";position:absolute;right:-1px;top:0;width:12px;height:12px;border-radius:50%;background:#fff}
+.in .bar .fill{width:var(--w)}
+.bar span{flex:0 0 44px;text-align:right;font-family:var(--mono)}
+.again{padding:16px 20px;background:var(--card);border:1.5px solid var(--pink);border-radius:6px;font-size:19px;color:#fff}
+.again strong{font-family:var(--head);font-size:22px;letter-spacing:.5px;text-transform:uppercase;color:var(--pink);margin-right:8px}
+.three{display:flex;flex-wrap:wrap;gap:20px}
+.three>div{flex:1 1 200px;min-width:0;padding-top:14px;border-top:4px solid var(--cyan)}
+.three .l{font-family:var(--mono);font-size:12px;letter-spacing:2px;margin-bottom:6px}
+.box{background:var(--card);border:1.5px solid var(--line);border-radius:6px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.price{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.price .p{font-family:var(--head);font-weight:800;font-size:26px;color:#fff}
+.box .btn{justify-content:center}
+.small{font-size:13.5px;line-height:1.5;color:var(--txt3)}
+.more a{display:flex;justify-content:space-between;gap:12px;color:#fff;text-decoration:none;padding:8px 0;border-bottom:1px solid var(--line)}
+.more a b{font-family:var(--head);color:var(--pink)}
+
+/* buy button: the ball drops into the cup on hover */
+.buy{position:relative;overflow:hidden;padding-right:52px}
+.buy .cupball{position:absolute;right:16px;top:50%;width:22px;height:22px;transform:translateY(-50%)}
+.buy .cupball .b{transform:translateY(-14px);opacity:0;transition:transform .35s cubic-bezier(.5,0,.8,.4),opacity .1s}
+.buy:hover .cupball .b{transform:translateY(4px);opacity:1}
+
+/* forms */
+form.f{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px}
+@media (max-width:640px){form.f{grid-template-columns:1fr}}
+.f .full{grid-column:1/-1}
+.f label{display:block;font-weight:600;color:#fff;margin-bottom:6px}
+.f input,.f select,.f textarea{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:4px;color:#fff;font:inherit;padding:12px 14px;min-height:48px}
+.f textarea{min-height:120px;resize:vertical}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--cyan);outline:none}
+.f .hint{font-size:14px;color:var(--txt3);margin-top:4px}
+.f .check{display:flex;gap:10px;align-items:flex-start;font-weight:400}
+.f .check input{width:22px;min-height:22px;height:22px;margin-top:3px;accent-color:var(--pink)}
+.scores{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.msg{grid-column:1/-1;padding:14px 16px;border:1.5px solid var(--cyan);border-radius:4px;display:none}
+.msg.show{display:block}
+
+/* testers */
+.testers{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+.tester{background:var(--card);border:1.5px solid var(--line);border-radius:6px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.tester .av{width:64px;height:64px;border-radius:50%;background:var(--card2);border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:800;font-size:24px;color:#fff}
+.tester .hc{font-family:var(--mono);font-size:13px;color:var(--cyan)}
+
+/* prose pages */
+.prose{max-width:760px;display:flex;flex-direction:column;gap:18px;padding:30px 0 84px}
+.prose h1{font-size:clamp(40px,5.5vw,60px)}
+.prose h2{font-size:30px;margin-top:14px}
+.prose ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+
+/* footer: the 19th hole */
+footer{background:var(--deep);border-top:1.5px solid var(--line);position:relative}
+footer .grass{display:block;width:100%;height:40px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:32px;justify-content:space-between;padding-top:36px;padding-bottom:40px}
+footer .about{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:12px}
+footer .about svg.lg{height:40px;width:auto}
+footer .about p{font-size:15px;color:var(--txt3)}
+footer nav{flex:1 1 300px;display:flex;flex-wrap:wrap;gap:10px 26px;align-content:flex-start;font-size:15px}
+footer .nineteen{flex:0 0 auto;display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:800;font-size:22px;color:#fff;text-transform:uppercase}
+footer .nineteen svg{width:30px;height:44px}
+footer .legal{flex:1 1 100%;font-family:var(--mono);font-size:12.5px;color:var(--txt3)}
+
+/* animated flag (used in several places) */
+.flag-wave{transform-origin:0 50%;animation:wave 1.6s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:skewY(0) scaleX(1)}50%{transform:skewY(-6deg) scaleX(.92)}}
+
+/* reveal on scroll */
+.rv-up{opacity:0;transform:translateY(16px);transition:opacity .6s ease-out,transform .6s ease-out}
+.rv-up.in{opacity:1;transform:none}
+
+/* 404 */
+.lost{text-align:center;padding:80px 0 100px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.lost svg{width:260px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .rv-up{opacity:1;transform:none}
+  .verdict ellipse{stroke-dashoffset:0}
+  .bar .fill{width:var(--w)}
+}
+</style>
+</head>
+<body>
+<div class="putt" aria-hidden="true"><div class="ball"></div><svg class="cup" viewBox="0 0 12 18"><line x1="2" y1="1" x2="2" y2="18" stroke="#fff" stroke-width="1.4"/><path class="flag-wave" d="M2.5 1 L11 4 L2.5 7 Z" fill="#FF2E9A"/></svg></div>
+
+<a class="sr" href="#main">Skip to content</a>
+<div class="adbar">(Ad) marks affiliate links. If you buy through one we earn a commission, at no extra cost to you. <a href="#/disclosure">How it works</a></div>
+
+<header class="top" id="top">
+<div class="wrap" style="position:relative">
+<a class="logo" href="#/" aria-label="Honest Handicap home">{{LOGO}}</a>
+<button class="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mainnav"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<nav class="main" id="mainnav" aria-label="Main">
+<a href="#/reviews">Reviews</a>
+<a href="#/how-we-test">How we test</a>
+<a href="#/testers">The testers</a>
+<a href="#/about">About</a>
+<a class="btn btn-pink btn-sm" href="#/join">Become a tester<span class="gb"></span></a>
+</nav>
+</div>
+</header>
+
+<main id="main">
+
+<!-- ============ HOME ============ -->
+<div class="page" data-page="home" data-title="Honest Handicap | Golf kit, tested by golfers like you">
+<section class="hero">
+<div class="wrap">
+<div class="hero-copy">
+<div class="eyebrow">Real golfers · Real handicaps · Real verdicts</div>
+<h1>Golf kit, tested by golfers <em>like you.</em></h1>
+<p class="lead">Every review is written by a real club golfer after real rounds, with their handicap on the card. No lab, no tour pro, no hype.</p>
+<div class="ctas">
+<a class="btn btn-pink" href="#/reviews">Browse reviews<span class="gb"></span></a>
+<a class="btn btn-line" href="#/how-we-test">How we test<span class="gb"></span></a>
+</div>
+</div>
+<div class="hero-art">
+<svg id="hole" viewBox="0 0 600 420" role="img" aria-label="A golf ball flies from the tee onto the green and drops into the hole">
+<defs>
+<pattern id="stripes" width="44" height="44" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)"><rect width="22" height="44" fill="#16165A"/><rect x="22" width="22" height="44" fill="#13134A"/></pattern>
+<radialGradient id="flood" cx="0.82" cy="0.05" r="0.75"><stop offset="0" stop-color="#19D3FF" stop-opacity=".22"/><stop offset="1" stop-color="#19D3FF" stop-opacity="0"/></radialGradient>
+<radialGradient id="gball" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#fff"/><stop offset=".7" stop-color="#e3e5f7"/><stop offset="1" stop-color="#a9add0"/></radialGradient>
+</defs>
+<rect width="600" height="420" fill="url(#flood)"/>
+<!-- floodlights -->
+<g stroke="#2B2B6E" stroke-width="3"><line x1="540" y1="40" x2="540" y2="210"/><line x1="60" y1="70" x2="60" y2="230"/></g>
+<rect x="526" y="30" width="28" height="12" rx="2" fill="#8BE9FF"/><rect x="47" y="60" width="26" height="11" rx="2" fill="#8BE9FF" opacity=".7"/>
+<!-- fairway -->
+<path d="M0 420 L0 330 C120 300 210 330 300 300 C390 270 450 300 600 262 L600 420 Z" fill="url(#stripes)" stroke="#2B2B6E" stroke-width="2"/>
+<!-- bunker -->
+<path d="M300 340 C318 324 360 326 372 340 C364 354 316 356 300 340 Z" fill="#2B2B6E"/>
+<!-- green -->
+<ellipse cx="468" cy="286" rx="96" ry="24" fill="#1C1C5A" stroke="#19D3FF" stroke-width="2"/>
+<ellipse cx="470" cy="286" rx="8" ry="3" fill="#05051a"/>
+<!-- flag -->
+<line x1="470" y1="286" x2="470" y2="176" stroke="#fff" stroke-width="3"/>
+<path d="M471 178 L520 192 L471 208 Z" fill="#FF2E9A"><animate attributeName="d" dur="1.6s" repeatCount="indefinite" values="M471 178 L520 192 L471 208 Z;M471 178 C490 182 505 196 516 196 C504 198 488 204 471 208 Z;M471 178 L520 192 L471 208 Z"/></path>
+<!-- tee -->
+<path d="M84 336 h12 l-4 18 h-4 z" fill="#FF2E9A"/>
+<!-- flight trail -->
+<path id="flight" d="M90 330 Q 270 -30 452 282 L 469 286" fill="none" stroke="#19D3FF" stroke-width="2.5" stroke-dasharray="6 7" pathLength="100" opacity=".85">
+<animate attributeName="stroke-dashoffset" values="100;0" dur="6s" repeatCount="indefinite"/>
+<animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.05;0.62;0.8;1" values="0;.85;.85;0;0"/>
+</path>
+<!-- ripple when it drops -->
+<ellipse cx="470" cy="286" rx="0" ry="0" fill="none" stroke="#FF2E9A" stroke-width="2.5">
+<animate attributeName="rx" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.75;1" values="0;0;30;30"/>
+<animate attributeName="ry" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.75;1" values="0;0;8;8"/>
+<animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.62;0.78;1" values="0;0;1;0;0"/>
+</ellipse>
+<!-- ball -->
+<circle r="7" fill="url(#gball)">
+<animateMotion dur="6s" repeatCount="indefinite" keyPoints="0;0;0.96;1;1" keyTimes="0;0.06;0.52;0.6;1" calcMode="linear"><mpath href="#flight"/></animateMotion>
+<animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.61;0.97;1" values="1;1;0;0;1"/>
+</circle>
+<text x="470" y="160" text-anchor="middle" font-family="DM Mono, monospace" font-size="13" letter-spacing="3" fill="#FF2E9A" opacity="0">IN THE HOLE
+<animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.6;0.64;0.9;0.96;1" values="0;0;1;1;0;0"/>
+</text>
+</svg>
+</div>
+</div>
+</section>
+<div class="mow" aria-hidden="true"></div>
+
+<section class="s">
+<div class="wrap">
+<div class="shead rv-up">
+<div><div class="hole">{{FLAG}}<span class="eyebrow">Hole 1 · Par 4</span></div><h2>Latest reviews</h2></div>
+<a class="btn btn-line btn-sm" href="#/reviews">See all reviews<span class="gb"></span></a>
+</div>
+<div class="cards">
+{{CARDS3}}
+</div>
+</div>
+</section>
+
+<section class="s kit-band">
+<div class="wrap">
+<div class="shead rv-up"><div><div class="hole">{{FLAG}}<span class="eyebrow">Hole 2 · Par 3</span></div><h2>Find your kit</h2></div></div>
+<div class="kit rv-up">{{KIT}}</div>
+</div>
+</section>
+
+<section class="s">
+<div class="wrap">
+<div class="shead rv-up"><div><div class="hole">{{FLAG}}<span class="eyebrow">Hole 3 · Par 5</span></div><h2>How we test</h2><p class="sub">Same card, every time. That's what makes a 9 from a 6-handicapper and a 7 from a 24-handicapper worth comparing.</p></div></div>
+<div class="steps rv-up">{{STEPS}}</div>
+</div>
+</section>
+
+<section class="s" style="padding-top:0">
+<div class="wrap rv-up">
+<div class="join">
+<div style="flex:999 1 420px;min-width:0"><h2>Got a handicap and an opinion?</h2><p>Join the testers. Review the kit you already play with, then the kit you've always wondered about.</p></div>
+<a class="btn btn-dark" href="#/join">Join the testers<span class="gb"></span></a>
+<svg class="flagbg" viewBox="0 0 100 120" aria-hidden="true"><line x1="20" y1="10" x2="20" y2="120" stroke="#0B0B2A" stroke-width="5"/><path class="flag-wave" d="M22 10 L90 30 L22 52 Z" fill="#0B0B2A"/></svg>
+</div>
+</div>
+</section>
+
+<section class="s" style="padding-top:0">
+<div class="wrap rv-up">
+<div class="partner"><div class="t"><div class="eyebrow" style="font-size:12px;margin-bottom:6px">Our fitting partner</div>Bought new clubs? Have them fitted and regripped by Coastal Golf Co, collected from your door from Cranleigh to the coast.</div><a class="btn btn-line btn-sm" href="https://www.coastalgolfco.co.uk/" target="_blank" rel="noopener">Visit Coastal Golf Co<span class="gb"></span></a></div>
+</div>
+</section>
+</div>
+
+<!-- ============ ALL REVIEWS ============ -->
+<div class="page" data-page="reviews" data-title="Reviews | Honest Handicap">
+<section class="s" style="padding-top:44px">
+<div class="wrap">
+<div class="shead"><div><div class="hole">{{FLAG}}<span class="eyebrow">The full card</span></div><h2>All reviews</h2><p class="sub">Every verdict from every tester. Pick a category to narrow it down.</p></div></div>
+<div class="kit" style="margin-bottom:34px" id="filters">{{FILTERS}}</div>
+<div class="cards" id="allcards">{{CARDSALL}}</div>
+</div>
+</section>
+</div>
+
+<!-- ============ SAMPLE REVIEW ============ -->
+<div class="page" data-page="review" data-title="[Brand] [Model] wet-weather grip review | Honest Handicap">
+<div class="wrap">
+<div class="rv">
+<article>
+<div class="crumbs"><a href="#/reviews">Reviews</a> › <a href="#/reviews/grips">Grips</a> › <span class="ph">[Brand] [Model]</span></div>
+<h1><span class="ph">[Brand] [Model]</span> wet-weather grip review</h1>
+<p class="lede"><span class="ph">[One-line verdict in the tester's words, e.g. what it was like in the rain.]</span></p>
+<div class="card5 rv-up">
+<div class="r h"><div>Tester</div><div>Handicap</div><div>Home course</div><div>Rounds played</div><div class="vbox" style="justify-content:center">Verdict</div></div>
+<div class="r b"><div><span class="ph">[First name]</span></div><div><span class="ph">[14]</span></div><div><span class="ph">[Course]</span></div><div><span class="ph">[4] + [1] range</span></div><div class="vbox"><span class="verdict big">{{CIRCLE}}<span class="ph" style="border:0">8</span></span></div></div>
+</div>
+<p class="small" style="font-family:var(--mono)">Bought by the tester for <span class="ph">[£PRICE]</span> from <span class="ph">[Retailer]</span>. Nobody paid for this review.</p>
+<div class="photo"><span>[Tester's photo of the grip on their club, ideally in the wet]</span></div>
+<section class="rv-up" style="display:flex;flex-direction:column;gap:14px">
+<h2 style="font-size:34px">The scores</h2>
+<div class="bars">
+<div class="bar"><b>Performance</b><span class="track"><span class="fill" style="--w:80%"></span></span><span class="ph">[8]</span></div>
+<div class="bar"><b>Feel</b><span class="track"><span class="fill" style="--w:70%"></span></span><span class="ph">[7]</span></div>
+<div class="bar"><b>Build quality</b><span class="track"><span class="fill" style="--w:90%"></span></span><span class="ph">[9]</span></div>
+<div class="bar"><b>Value</b><span class="track"><span class="fill" style="--w:70%"></span></span><span class="ph">[7]</span></div>
+</div>
+<div class="again"><strong>Buy it again with my own money?</strong><span class="ph">[Yes]</span></div>
+</section>
+<section style="display:flex;flex-direction:column;gap:14px">
+<h2 style="font-size:34px">How it played</h2>
+<p class="ph" style="border:0">[The tester's write-up, in their own words: the conditions they played in, how the grip felt in the wet compared with what they had before, and anything that changed over the rounds.]</p>
+<p class="ph" style="border:0">[A second paragraph: what surprised them, and whether it made any difference to their scores or confidence.]</p>
+</section>
+<section class="three">
+<div><div class="l" style="color:var(--cyan)">SUITS</div><span class="ph">[Who it's right for]</span></div>
+<div style="border-top-color:var(--txt3)"><div class="l" style="color:var(--txt2)">DOESN'T SUIT</div><span class="ph">[Who should look elsewhere]</span></div>
+<div style="border-top-color:var(--pink)"><div class="l" style="color:var(--pink)">ONE THING THAT ANNOYED ME</div><span class="ph">[The honest gripe]</span></div>
+</section>
+<div class="partner"><div class="t"><div class="eyebrow" style="font-size:12px;margin-bottom:6px">Want these fitted?</div>Coastal Golf Co regrips from £8 a club, collected from your door from Cranleigh to the coast.</div><a class="btn btn-line btn-sm" href="https://www.coastalgolfco.co.uk/services/regrips/" target="_blank" rel="noopener">Book a regrip<span class="gb"></span></a></div>
+</article>
+<aside aria-label="Where to buy">
+<div class="box">
+<div class="eyebrow" style="font-size:12px">Where to buy</div>
+<div class="price"><span style="font-weight:600"><span class="ph">[Retailer 1]</span></span><span class="p"><span class="ph">[£PRICE]</span></span></div>
+<a class="btn btn-pink buy" href="#buy-1" rel="sponsored noopener">Buy now (Ad){{CUP}}</a>
+<div style="height:1px;background:var(--line)"></div>
+<div class="price"><span style="font-weight:600"><span class="ph">[Retailer 2]</span></span><span class="p"><span class="ph">[£PRICE]</span></span></div>
+<a class="btn btn-line buy" href="#buy-2" rel="sponsored noopener">Buy now (Ad){{CUP}}</a>
+<p class="small">Prices checked <span class="ph">[date]</span>. We earn a commission if you buy through these links. It never changes the score.</p>
+</div>
+<div class="box more">
+<div class="eyebrow" style="font-size:12px">More grip reviews</div>
+<a href="#/review/sample"><span><span class="ph">[Brand] [Model]</span> midsize grip</span><b class="ph">[7]</b></a>
+<a href="#/review/sample"><span><span class="ph">[Brand] [Model]</span> putter grip</span><b class="ph">[8]</b></a>
+<a href="#/review/sample"><span>Midsize or standard? Tested</span><b>–</b></a>
+</div>
+</aside>
+</div>
+</div>
+</div>
+
+<!-- ============ HOW WE TEST ============ -->
+<div class="page" data-page="how-we-test" data-title="How we test | Honest Handicap">
+<div class="wrap"><div class="prose">
+<div class="hole" style="display:flex;align-items:center;gap:12px">{{FLAG}}<span class="eyebrow">The rules of the course</span></div>
+<h1>How we test</h1>
+<p style="font-size:20px;color:var(--txt2)">Every review on Honest Handicap comes from a real club golfer who has played with the kit. Here's the card they all fill in.</p>
+<div class="steps" style="margin:18px 0">{{STEPS}}</div>
+<h2>The scorecard</h2>
+<ul>
+<li>The tester's first name, handicap, home course and how often they play</li>
+<li>Where the kit came from and what they paid</li>
+<li>Rounds and range sessions played with it</li>
+<li>Scores out of 10 for performance, feel, build quality and value</li>
+<li>Would they buy it again with their own money? Yes or no</li>
+<li>Who it suits, who it doesn't, and one thing that annoyed them</li>
+<li>An overall verdict out of 10, circled in pencil</li>
+</ul>
+<h2>Free kit</h2>
+<p>If a brand lends or gives us something to test, the review says so at the top. The verdict is still the tester's own, and a brand never sees a review before it's published.</p>
+<h2>How we make money</h2>
+<p>Buy now buttons marked (Ad) are affiliate links. If you buy through one, the retailer pays us a small commission. It costs you nothing extra and it never changes a score. <a href="#/disclosure">Read the full disclosure</a>.</p>
+</div></div>
+</div>
+
+<!-- ============ TESTERS ============ -->
+<div class="page" data-page="testers" data-title="The testers | Honest Handicap">
+<section class="s" style="padding-top:44px"><div class="wrap">
+<div class="shead"><div><div class="hole">{{FLAG}}<span class="eyebrow">On the tee</span></div><h2>The testers</h2><p class="sub">Club golfers from scratch to 28. Every one plays every week.</p></div><a class="btn btn-pink btn-sm" href="#/join">Become a tester<span class="gb"></span></a></div>
+<div class="testers">{{TESTERS}}</div>
+</div></section>
+</div>
+
+<!-- ============ JOIN ============ -->
+<div class="page" data-page="join" data-title="Become a tester | Honest Handicap">
+<div class="wrap"><div class="prose" style="max-width:860px">
+<div class="hole" style="display:flex;align-items:center;gap:12px">{{FLAG}}<span class="eyebrow">Join the testers</span></div>
+<h1>Become a tester</h1>
+<p style="font-size:20px;color:var(--txt2)">If you play at least twice a month and you'd tell a mate the truth about their new driver, we'd like to hear from you.</p>
+<form class="f" id="joinform" novalidate>
+<div><label for="j-name">Your name</label><input id="j-name" name="name" autocomplete="name" required></div>
+<div><label for="j-email">Email</label><input id="j-email" name="email" type="email" autocomplete="email" required></div>
+<div><label for="j-hc">Handicap index</label><input id="j-hc" name="handicap" inputmode="decimal" placeholder="e.g. 14.2" required></div>
+<div><label for="j-club">Home course</label><input id="j-club" name="course" required></div>
+<div><label for="j-often">How often do you play?</label><select id="j-often" name="often"><option>Twice a week or more</option><option selected>Once a week</option><option>Twice a month</option><option>Less often</option></select></div>
+<div><label for="j-kit">Kit you'd like to test</label><select id="j-kit" name="kit"><option>Anything</option><option>Clubs</option><option>Balls</option><option>Shoes and clothing</option><option>Bags and trolleys</option><option>Rangefinders and tech</option></select></div>
+<div class="full"><label for="j-bag">What's in your bag right now?</label><textarea id="j-bag" name="bag" placeholder="Driver, irons, putter, ball... whatever you remember"></textarea></div>
+<div class="full"><label class="check"><input type="checkbox" name="ok" required> I'm happy for my first name, handicap and home course to appear on my reviews.</label></div>
+<div class="full"><button class="btn btn-pink" type="submit">Send it<span class="gb"></span></button></div>
+<div class="msg" role="status" aria-live="polite"></div>
+</form>
+</div></div>
+</div>
+
+<!-- ============ SUBMIT A REVIEW (testers) ============ -->
+<div class="page" data-page="submit" data-title="Submit a review | Honest Handicap">
+<div class="wrap"><div class="prose" style="max-width:900px">
+<div class="hole" style="display:flex;align-items:center;gap:12px">{{FLAG}}<span class="eyebrow">For testers</span></div>
+<h1>Fill in your card</h1>
+<p style="font-size:20px;color:var(--txt2)">The same card for every review. Be honest: that's the whole point.</p>
+<form class="f" id="reviewform" novalidate>
+<div><label for="r-name">Your first name</label><input id="r-name" name="name" required></div>
+<div><label for="r-hc">Handicap</label><input id="r-hc" name="handicap" inputmode="decimal" required></div>
+<div class="full"><label for="r-prod">Product (brand and model)</label><input id="r-prod" name="product" required></div>
+<div><label for="r-cat">Category</label><select id="r-cat" name="category">{{CATOPTIONS}}</select></div>
+<div><label for="r-from">Where did it come from?</label><select id="r-from" name="source"><option>I bought it</option><option>Loaned by the brand</option><option>Free from the brand</option><option>Gift</option></select></div>
+<div><label for="r-paid">Price paid</label><input id="r-paid" name="paid" placeholder="£"></div>
+<div><label for="r-rounds">Rounds and range sessions</label><input id="r-rounds" name="rounds" placeholder="e.g. 4 rounds, 1 range"></div>
+<div class="full"><span style="display:block;font-weight:600;color:#fff;margin-bottom:6px">Scores out of 10</span>
+<div class="scores">
+<div><label for="r-s1">Performance</label><input id="r-s1" name="performance" type="number" min="1" max="10"></div>
+<div><label for="r-s2">Feel</label><input id="r-s2" name="feel" type="number" min="1" max="10"></div>
+<div><label for="r-s3">Build quality</label><input id="r-s3" name="build" type="number" min="1" max="10"></div>
+<div><label for="r-s4">Value</label><input id="r-s4" name="value" type="number" min="1" max="10"></div>
+<div><label for="r-s5">Overall verdict</label><input id="r-s5" name="overall" type="number" min="1" max="10"></div>
+</div></div>
+<div><label for="r-again">Buy it again with your own money?</label><select id="r-again" name="again"><option>Yes</option><option>No</option></select></div>
+<div></div>
+<div class="full"><label for="r-one">One-line verdict</label><input id="r-one" name="oneline"></div>
+<div class="full"><label for="r-play">How it played</label><textarea id="r-play" name="writeup"></textarea></div>
+<div><label for="r-suits">Who it suits</label><input id="r-suits" name="suits"></div>
+<div><label for="r-not">Who it doesn't</label><input id="r-not" name="notsuits"></div>
+<div class="full"><label for="r-annoy">One thing that annoyed you</label><input id="r-annoy" name="annoyed"></div>
+<div class="full"><p class="hint">Photos: reply to the email this sends with 2 or 3 photos of the kit in use.</p></div>
+<div class="full"><button class="btn btn-pink" type="submit">Hand in my card<span class="gb"></span></button></div>
+<div class="msg" role="status" aria-live="polite"></div>
+</form>
+</div></div>
+</div>
+
+<!-- ============ ABOUT ============ -->
+<div class="page" data-page="about" data-title="About | Honest Handicap">
+<div class="wrap"><div class="prose">
+<div class="hole" style="display:flex;align-items:center;gap:12px">{{FLAG}}<span class="eyebrow">The clubhouse</span></div>
+<h1>About Honest Handicap</h1>
+<p style="font-size:20px;color:var(--txt2)">Most golf kit reviews come from tour pros, testing robots or people who've never had to fix a slice on a wet Sunday in February. Ours come from club golfers.</p>
+<p>Honest Handicap started with a group of society golfers in Hampshire who were tired of buying kit on the strength of reviews written for players nothing like them. So every review here shows the tester's handicap, their home course and how many rounds they played, and asks one simple question: would you buy it again with your own money?</p>
+<p><span class="ph">[A line or two from Anthony about why he started it.]</span></p>
+<p>Want to get in touch? Email <a href="mailto:hello@honesthandicap.golf">hello@honesthandicap.golf</a>.</p>
+</div></div>
+</div>
+
+<!-- ============ DISCLOSURE ============ -->
+<div class="page" data-page="disclosure" data-title="Affiliate disclosure | Honest Handicap">
+<div class="wrap"><div class="prose">
+<div class="hole" style="display:flex;align-items:center;gap:12px">{{FLAG}}<span class="eyebrow">Straight down the middle</span></div>
+<h1>Affiliate disclosure</h1>
+<p style="font-size:20px;color:var(--txt2)">Buy now buttons and links marked (Ad) are affiliate links. If you buy through one, Honest Handicap earns a commission from the retailer.</p>
+<ul>
+<li>It costs you nothing extra: the price is the same as going to the retailer directly</li>
+<li>It never changes a score. Testers score kit before any links are added, and brands never see a review before it's published</li>
+<li>We link to more than one retailer where we can, so you can choose</li>
+<li>Kit lent or given to us by a brand is declared at the top of that review</li>
+</ul>
+<p>Retailers we may earn from: <span class="ph">[list the affiliate programmes once approved]</span>.</p>
+</div></div>
+</div>
+
+<!-- ============ PRIVACY ============ -->
+<div class="page" data-page="privacy" data-title="Privacy and cookies | Honest Handicap">
+<div class="wrap"><div class="prose">
+<div class="hole" style="display:flex;align-items:center;gap:12px">{{FLAG}}<span class="eyebrow">Local rules</span></div>
+<h1>Privacy and cookies</h1>
+<p>Honest Handicap is run by <span class="ph">[Anthony Dunn, trading as Honest Handicap]</span>. Contact: <a href="mailto:hello@honesthandicap.golf">hello@honesthandicap.golf</a>.</p>
+<h2>What we collect</h2>
+<p>If you apply to be a tester or send us a review, we keep what you send so we can reply and publish your review. Only your first name, handicap and home course appear on the site, and only with your OK.</p>
+<h2>Cookies</h2>
+<p>This site doesn't set its own tracking cookies. When you click a Buy now link, the retailer may set a cookie so they know the sale came from us; that's covered by their own privacy policy.</p>
+<h2>Your rights</h2>
+<p>Ask us at any time to see, change or delete what we hold about you, and we'll do it within a month.</p>
+</div></div>
+</div>
+
+<!-- ============ 404 ============ -->
+<div class="page" data-page="lost" data-title="Lost ball | Honest Handicap">
+<div class="wrap"><div class="lost">
+<svg viewBox="0 0 260 150" aria-hidden="true"><path d="M0 120 C60 96 120 132 180 108 C220 94 240 104 260 98 L260 150 L0 150 Z" fill="#13134A"/><g stroke="#2B2B6E" stroke-width="3" stroke-linecap="round"><path d="M40 118 l-6 -22 M48 116 l2 -24 M56 118 l8 -20 M150 112 l-4 -26 M160 110 l4 -24 M170 112 l10 -18"/></g><circle cx="110" cy="112" r="10" fill="#fff"><animate attributeName="cy" values="60;112;104;112" keyTimes="0;.5;.7;1" dur="1.4s" fill="freeze"/></circle><g stroke="#19D3FF" stroke-width="3" stroke-linecap="round"><path d="M96 92 l-4 -26 M104 90 l2 -28 M118 92 l6 -24 M126 96 l10 -20"/></g></svg>
+<div class="eyebrow">Lost ball</div>
+<h1 style="font-size:clamp(44px,6vw,72px)">That one's in the rough.</h1>
+<p style="color:var(--txt2);font-size:19px">The page you were looking for isn't here. Take a drop and play on.</p>
+<a class="btn btn-pink" href="#/">Back to the first tee<span class="gb"></span></a>
+</div></div>
+</div>
+
+</main>
+
+<footer>
+<svg class="grass" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 40 L0 22 {{GRASS}} L1200 22 L1200 40 Z" fill="#13134A"/></svg>
+<div class="wrap">
+<div class="about">
+{{LOGOFOOT}}
+<p>Links marked (Ad) are affiliate links: if you buy through one, Honest Handicap earns a commission from the retailer at no extra cost to you. It never changes a tester's score.</p>
+</div>
+<nav aria-label="Footer">
+<a href="#/reviews">Reviews</a><a href="#/how-we-test">How we test</a><a href="#/testers">The testers</a><a href="#/join">Become a tester</a><a href="#/submit">Testers: hand in a card</a><a href="#/about">About</a><a href="#/disclosure">Affiliate disclosure</a><a href="#/privacy">Privacy &amp; cookies</a><a href="mailto:hello@honesthandicap.golf">hello@honesthandicap.golf</a>
+</nav>
+<div class="nineteen"><svg viewBox="0 0 30 44" aria-hidden="true"><line x1="4" y1="2" x2="4" y2="44" stroke="#fff" stroke-width="2.5"/><path class="flag-wave" d="M5 3 L28 10 L5 18 Z" fill="#FF2E9A"/></svg>The 19th hole</div>
+<div class="legal">© 2026 Honest Handicap · honesthandicap.golf · Site by <a href="https://dunnworks.io/" target="_blank" rel="noopener">Dunnworks</a></div>
+</div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* router: one page per address, #/reviews, #/review/sample ... */
+  var pages = {};
+  document.querySelectorAll('.page').forEach(function(p){ pages[p.dataset.page] = p; });
+  function route(){
+    if (location.hash && location.hash.indexOf('#/') !== 0) return; /* plain in-page anchors */
+    var h = location.hash.replace(/^#\/?/, '');
+    var parts = h.split('/'), key = parts[0] || 'home', filter = null;
+    if (key === 'review') key = 'review';
+    else if (key === 'reviews' && parts[1]) filter = parts[1];
+    if (!pages[key]) key = 'lost';
+    Object.keys(pages).forEach(function(k){ pages[k].classList.toggle('on', k === key); });
+    document.title = pages[key].dataset.title;
+    document.querySelectorAll('nav.main a').forEach(function(a){
+      var m = a.getAttribute('href').replace('#/','');
+      if (m && (key === m || (key === 'review' && m === 'reviews'))) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    });
+    if (key === 'reviews') applyFilter(filter);
+    window.scrollTo(0, 0);
+    closeMenu();
+    observe();
+  }
+  window.addEventListener('hashchange', route);
+
+  /* category filter on All reviews */
+  function applyFilter(cat){
+    document.querySelectorAll('#allcards .rcard').forEach(function(c){ c.style.display = (!cat || c.dataset.cat === cat) ? '' : 'none'; });
+    document.querySelectorAll('#filters a').forEach(function(a){ a.style.background = (a.dataset.cat === (cat || 'all')) ? '#19d3ff26' : ''; });
+  }
+
+  /* mobile menu */
+  var btn = document.querySelector('.menu-btn'), nav = document.getElementById('mainnav');
+  function closeMenu(){ nav.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+  btn.addEventListener('click', function(){ var o = nav.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); });
+
+  /* reveal: pencil circles draw, score bars fill, blocks rise */
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: .25 }) : null;
+  function observe(){
+    document.querySelectorAll('.page.on .rv-up, .page.on .verdict, .page.on .rcard').forEach(function(el){
+      if (!io || reduce) { el.classList.add('in'); return; }
+      if (!el.classList.contains('in')) io.observe(el);
+    });
+  }
+
+  /* the putt line: the ball rolls toward the flag as the page scrolls */
+  var ball = document.querySelector('.putt .ball'), head = document.getElementById('top');
+  function onScroll(){
+    var max = document.documentElement.scrollHeight - innerWidth * 0 - innerHeight;
+    var p = max > 0 ? Math.min(1, scrollY / max) : 0;
+    ball.style.setProperty('--p', (p * (innerWidth - 34)) + 'px');
+    head.classList.toggle('stuck', scrollY > 10);
+  }
+  addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
+
+  /* still pictures for anyone who prefers less motion */
+  if (reduce) { var hole = document.getElementById('hole'); if (hole && hole.pauseAnimations) { hole.setCurrentTime(3.9); hole.pauseAnimations(); } }
+
+  /* forms: no server yet, so they open an email to hello@ with everything filled in */
+  function mailForm(id, subject){
+    var f = document.getElementById(id); if (!f) return;
+    f.addEventListener('submit', function(e){
+      e.preventDefault();
+      var msg = f.querySelector('.msg');
+      var bad = Array.prototype.filter.call(f.querySelectorAll('[required]'), function(i){ return i.type === 'checkbox' ? !i.checked : !i.value.trim(); });
+      if (bad.length){ msg.textContent = 'Please fill in the boxes marked as needed, and tick the box at the end.'; msg.classList.add('show'); bad[0].focus(); return; }
+      var lines = [];
+      Array.prototype.forEach.call(f.elements, function(el){
+        if (!el.name || el.type === 'submit') return;
+        var lab = f.querySelector('label[for="' + el.id + '"]');
+        lines.push((lab ? lab.textContent : el.name) + ': ' + (el.type === 'checkbox' ? (el.checked ? 'Yes' : 'No') : el.value));
+      });
+      location.href = 'mailto:hello@honesthandicap.golf?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(lines.join('\n'));
+      msg.textContent = 'Thanks. Your email app should now open with everything filled in: press send and you\'re on the card.'; msg.classList.add('show');
+    });
+  }
+  mailForm('joinform', 'Become a tester');
+  mailForm('reviewform', 'Review card');
+
+  route(); onScroll();
+})();
+</script>
+</body>
+</html>
