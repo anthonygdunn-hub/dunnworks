@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Funworks mark">
+  <rect x="0.75" y="0.75" width="30.5" height="30.5" fill="#1a1a1a" stroke="#ff4fa3" stroke-width="1.5"/>
+  <path d="M9 13c1.5 7 12.5 7 14 0" fill="none" stroke="#ff4fa3" stroke-width="2.2" stroke-linecap="square"/>
+  <rect x="7.6" y="11.6" width="2.8" height="2.8" fill="#f4f2f8"/>
+  <rect x="21.6" y="11.6" width="2.8" height="2.8" fill="#f4f2f8"/>
+</svg>
