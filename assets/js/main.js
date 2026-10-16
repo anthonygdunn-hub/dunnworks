@@ -394,6 +394,46 @@
     return;
   }
 
+  /* ---- sister studio bar ----
+     Mirrors the Dunnworks strip on funworks.io. funworks.io does not resolve
+     yet, so the bar stays off until it does: flip FUNWORKS_LIVE to true and
+     it appears on every public page. Nothing else needs changing. */
+  var FUNWORKS_LIVE = true;
+
+  (function () {
+    if (!FUNWORKS_LIVE) return;
+    if (/^\/(console|admin|preview)(\/|$)/.test(window.location.pathname)) return;
+
+    var css = document.createElement("style");
+    css.textContent = [
+      ".sisterbar{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;",
+      "gap:6px 12px;padding:10px 16px;background:#7035ff;color:#fff;text-decoration:none;",
+      "font-family:var(--font-mono);font-size:12.5px;line-height:1.5;letter-spacing:.04em;",
+      "transition:background .15s ease}",
+      ".sisterbar:hover,.sisterbar:focus-visible{background:#5d20f0;color:#fff}",
+      ".sisterbar b{font-family:var(--font-mono);font-weight:500;font-size:11px;letter-spacing:.14em;",
+      "text-transform:uppercase;background:#fff;color:#7035ff;padding:3px 9px;border-radius:var(--radius,2px)}",
+      ".sisterbar u{text-decoration:underline;text-underline-offset:3px}",
+      "@media (max-width:560px){.sisterbar{font-size:11.5px;padding:9px 14px}}",
+      "@media print{.sisterbar{display:none}}"
+    ].join("");
+    document.head.appendChild(css);
+
+    var bar = document.createElement("a");
+    bar.className = "sisterbar";
+    bar.href = "https://funworks.io/";
+    bar.rel = "noopener";
+    bar.setAttribute("aria-label", "Funworks, the sister studio to Dunnworks");
+    bar.innerHTML =
+      "<b>Sister studio</b>" +
+      "<span>Need the logo and brand too? Funworks does identity, AI imagery and motion: " +
+      "<u>funworks.io</u> →</span>";
+
+    var skip = document.querySelector(".skip");
+    if (skip && skip.parentNode === document.body) skip.insertAdjacentElement("afterend", bar);
+    else document.body.insertBefore(bar, document.body.firstChild);
+  })();
+
   /* ---- private area link in every footer ---- */
   (function () {
     if (/^\/(console|admin|preview)(\/|$)/.test(window.location.pathname)) return;
