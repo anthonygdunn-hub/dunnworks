@@ -407,12 +407,12 @@
     var css = document.createElement("style");
     css.textContent = [
       ".sisterbar{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;",
-      "gap:6px 12px;padding:10px 16px;background:#7035ff;color:#fff;text-decoration:none;",
+      "gap:6px 12px;padding:10px 16px;background:#d3246f;color:#fff;text-decoration:none;",
       "font-family:var(--font-mono);font-size:12.5px;line-height:1.5;letter-spacing:.04em;",
       "transition:background .15s ease}",
-      ".sisterbar:hover,.sisterbar:focus-visible{background:#5d20f0;color:#fff}",
+      ".sisterbar:hover,.sisterbar:focus-visible{background:#b01a58;color:#fff}",
       ".sisterbar b{font-family:var(--font-mono);font-weight:500;font-size:11px;letter-spacing:.14em;",
-      "text-transform:uppercase;background:#fff;color:#7035ff;padding:3px 9px;border-radius:var(--radius,2px)}",
+      "text-transform:uppercase;background:#fff;color:#d3246f;padding:3px 9px;border-radius:var(--radius,2px)}",
       ".sisterbar u{text-decoration:underline;text-underline-offset:3px}",
       "@media (max-width:560px){.sisterbar{font-size:11.5px;padding:9px 14px}}",
       "@media print{.sisterbar{display:none}}"
