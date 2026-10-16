@@ -398,7 +398,7 @@
      Mirrors the Dunnworks strip on funworks.io. funworks.io does not resolve
      yet, so the bar stays off until it does: flip FUNWORKS_LIVE to true and
      it appears on every public page. Nothing else needs changing. */
-  var FUNWORKS_LIVE = true;
+  var FUNWORKS_LIVE = false;
 
   (function () {
     if (!FUNWORKS_LIVE) return;
