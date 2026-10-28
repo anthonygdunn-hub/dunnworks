@@ -6,11 +6,13 @@
 //   { action: "approved", user_id }  -> tells the user they can sign in. Owner or Trip Log admin JWT only.
 // Deploy with verify_jwt = false (the first call has no user JWT).
 // Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (built in), RESEND_API_KEY,
-// TL_NOTIFY_TO (default info@dunnworks.io), NOTIFY_FROM (default onboarding@resend.dev,
+// TL_NOTIFY_TO (comma-separated; default info@dunnworks.io and anthonygdunn@gmail.com), NOTIFY_FROM (default onboarding@resend.dev,
 // which only delivers to the Resend account owner; use a verified domain to email users).
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const OWNER = "info@dunnworks.io";
+// who hears about new registrations (comma-separated TL_NOTIFY_TO overrides this)
+const ALERT_TO = (Deno.env.get("TL_NOTIFY_TO") ?? "info@dunnworks.io,anthonygdunn@gmail.com").split(",").map((e) => e.trim()).filter(Boolean);
 const APP = "https://dunnworks.io/triplog/";
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -22,7 +24,7 @@ const json = (body: unknown, status = 200) =>
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const esc = (v: unknown) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-async function send(to: string, subject: string, heading: string, lines: string[], cta: { href: string; label: string }) {
+async function send(to: string | string[], subject: string, heading: string, lines: string[], cta: { href: string; label: string }) {
   const key = Deno.env.get("RESEND_API_KEY");
   if (!key) { console.warn("RESEND_API_KEY not set"); return false; }
   const from = Deno.env.get("NOTIFY_FROM") ?? "onboarding@resend.dev";
@@ -37,7 +39,7 @@ async function send(to: string, subject: string, heading: string, lines: string[
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: `Trip Log <${from}>`, to: [to], subject, html, text: lines.join("\n\n") + "\n\n" + cta.href }),
+    body: JSON.stringify({ from: `Trip Log <${from}>`, to: Array.isArray(to) ? to : [to], subject, html, text: lines.join("\n\n") + "\n\n" + cta.href }),
   });
   if (!r.ok) console.error("resend", r.status, await r.text());
   return r.ok;
@@ -57,7 +59,7 @@ Deno.serve(async (req) => {
       .eq("email", email).eq("status", "pending").is("notified_at", null).gte("created_at", since).maybeSingle();
     if (p) {
       await db.from("tl_profiles").update({ notified_at: new Date().toISOString() }).eq("user_id", p.user_id);
-      await send(Deno.env.get("TL_NOTIFY_TO") ?? OWNER, `Trip Log: ${p.full_name || email} wants access`, "New Trip Log registration", [
+      await send(ALERT_TO, `Trip Log: ${p.full_name || email} wants access`, "New Trip Log registration", [
         `${p.full_name || "Someone"} (${email}) has registered and is waiting for you to approve them.`,
         [p.employer, p.employee_no && `Employee ${p.employee_no}`, p.vehicle_reg, p.manager_name && `Manager ${p.manager_name}`].filter(Boolean).join(" · "),
       ].filter(Boolean), { href: APP + "admin/", label: "Review registration" });
