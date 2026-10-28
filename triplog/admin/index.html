@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trip Log Approvals</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" href="../icons/icon-192.png" type="image/png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .who { display: grid; gap: 2px; min-width: 0; }
+  .who b { overflow-wrap: anywhere; }
+  .person { display: grid; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .person:first-child { border-top: 0; }
+  .person .top { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+  .person .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .person .btns .btn { min-height: 42px; padding: 0 14px; font-size: .9rem; }
+  .count { font-family: var(--mono); background: var(--surface-3); border-radius: 999px; padding: 2px 9px; font-size: .8rem; }
+</style>
+</head>
+<body>
+<div class="app"><main id="m" class="auth"><div class="boot"><div class="spinner"></div></div></main></div>
+<div id="toast" class="toast" role="status" hidden></div>
+<script src="../config.js"></script>
+<script src="../vendor/supabase.js"></script>
+<script>
+(function () {
+  'use strict';
+  const sb = supabase.createClient(TL.url, TL.key, { auth: { storageKey: 'tl-admin-auth', persistSession: true } });
+  const m = document.getElementById('m');
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const toast = (t) => { const el = document.getElementById('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.x); toast.x = setTimeout(() => el.hidden = true, 2800); };
+  const when = (s) => s ? new Date(s).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+  let session = null, rows = [];
+
+  const head = '<div class="brand-head"><img src="../icons/icon-192.png" alt=""><h1>Approvals</h1><p class="muted">Trip Log registrations. You can approve people here but you never see their trips.</p></div>';
+
+  function signInView(err) {
+    m.className = 'auth';
+    m.innerHTML = head + '<form class="card" id="f"><h2>Owner sign in</h2>' + (err ? '<div class="notice bad">' + esc(err) + '</div>' : '') +
+      '<label class="field"><span>Email</span><input type="email" name="email" value="' + esc(TL.owner) + '" autocomplete="username" required></label>' +
+      '<label class="field"><span>Password</span><input type="password" name="password" autocomplete="current-password" required></label>' +
+      '<button class="btn primary block" type="submit">Sign in</button></form>';
+    document.getElementById('f').onsubmit = async (e) => {
+      e.preventDefault();
+      const { data, error } = await sb.auth.signInWithPassword({ email: e.target.email.value.trim(), password: e.target.password.value });
+      if (error) return signInView(error.message);
+      session = data.session; load();
+    };
+  }
+
+  async function load() {
+    if ((session.user.email || '').toLowerCase() !== TL.owner) { await sb.auth.signOut(); return signInView('Only ' + TL.owner + ' can approve registrations.'); }
+    const { data, error } = await sb.from('tl_profiles').select('*').order('created_at', { ascending: false });
+    if (error) { m.innerHTML = head + '<div class="card"><div class="notice bad">' + esc(error.message) + '</div></div>'; return; }
+    rows = data; render();
+  }
+
+  function person(p) {
+    const btn = (act, label, cls) => '<button class="btn ' + (cls || '') + '" data-act="' + act + '" data-id="' + p.user_id + '">' + label + '</button>';
+    let btns = '';
+    if (p.status === 'pending') btns = btn('approved', 'Approve', 'primary') + btn('rejected', 'Decline', 'danger');
+    if (p.status === 'approved') btns = btn('rejected', 'Revoke access', 'danger');
+    if (p.status === 'rejected') btns = btn('approved', 'Approve after all') + btn('delete', 'Remove', 'danger');
+    return '<div class="person"><div class="top"><div class="who"><b>' + esc(p.full_name || 'No name given') + '</b><span class="small muted">' + esc(p.email) + '</span>' +
+      '<span class="small muted">' + [p.employer, p.employee_no && 'Emp ' + p.employee_no, p.vehicle_reg, p.manager_name && 'Manager: ' + p.manager_name].filter(Boolean).map(esc).join(' · ') + '</span></div>' +
+      '<span class="small muted" style="white-space:nowrap">' + (p.status === 'approved' ? 'Approved ' + when(p.approved_at) : 'Registered ' + when(p.created_at)) + '</span></div>' +
+      '<div class="btns">' + btns + '</div></div>';
+  }
+
+  function render() {
+    m.className = '';
+    m.style.paddingTop = 'calc(env(safe-area-inset-top) + 28px)';
+    const g = (s) => rows.filter((r) => r.status === s);
+    const sec = (title, list, empty) => '<section class="card"><div class="card-head"><h2>' + title + '</h2><span class="count">' + list.length + '</span></div>' +
+      (list.length ? '<div>' + list.map(person).join('') + '</div>' : '<p class="muted small">' + empty + '</p>') + '</section>';
+    m.innerHTML = head + sec('Waiting for you', g('pending'), 'Nobody waiting.') + sec('Approved', g('approved'), 'No one approved yet.') +
+      (g('rejected').length ? sec('Declined', g('rejected'), '') : '') +
+      '<div class="actions two"><button class="btn" id="rf">Refresh</button><button class="btn" id="so">Sign out</button></div>';
+    document.getElementById('rf').onclick = load;
+    document.getElementById('so').onclick = async () => { await sb.auth.signOut(); signInView(); };
+  }
+
+  m.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const id = b.dataset.id, act = b.dataset.act; const p = rows.find((r) => r.user_id === id);
+    if (act === 'delete') {
+      if (!confirm('Remove ' + p.email + ' from Trip Log? Their account stays, but they would have to register again.')) return;
+      const { error } = await sb.from('tl_profiles').delete().eq('user_id', id);
+      if (error) return toast(error.message); toast('Removed'); return load();
+    }
+    if (act === 'rejected' && !confirm((p.status === 'approved' ? 'Revoke access for ' : 'Decline ') + p.email + '?')) return;
+    b.disabled = true;
+    const { error } = await sb.from('tl_profiles').update({ status: act }).eq('user_id', id);
+    if (error) { b.disabled = false; return toast(error.message); }
+    if (act === 'approved') {
+      try {
+        await fetch(TL.url + '/functions/v1/' + TL.notifyFn, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: TL.key, Authorization: 'Bearer ' + session.access_token }, body: JSON.stringify({ action: 'approved', user_id: id }) });
+      } catch (err) {}
+      toast('Approved. They can sign in now');
+    } else toast('Done');
+    load();
+  });
+
+  sb.auth.getSession().then(({ data }) => { session = data.session; if (session) load(); else signInView(); });
+})();
+</script>
+</body>
+</html>
