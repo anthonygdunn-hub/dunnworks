@@ -28,7 +28,7 @@
 <script>
 (function () {
   'use strict';
-  const sb = supabase.createClient(TL.url, TL.key, { auth: { storageKey: 'tl-admin-auth', persistSession: true } });
+  const sb = supabase.createClient(TL.url, TL.key, { auth: { storageKey: 'tl-auth', persistSession: true } });
   const m = document.getElementById('m');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const toast = (t) => { const el = document.getElementById('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.x); toast.x = setTimeout(() => el.hidden = true, 2800); };
@@ -39,8 +39,8 @@
 
   function signInView(err) {
     m.className = 'auth';
-    m.innerHTML = head + '<form class="card" id="f"><h2>Owner sign in</h2>' + (err ? '<div class="notice bad">' + esc(err) + '</div>' : '') +
-      '<label class="field"><span>Email</span><input type="email" name="email" value="' + esc(TL.owner) + '" autocomplete="username" required></label>' +
+    m.innerHTML = head + '<form class="card" id="f"><h2>Admin sign in</h2>' + (err ? '<div class="notice bad">' + esc(err) + '</div>' : '') +
+      '<label class="field"><span>Email</span><input type="email" name="email" autocomplete="username" required></label>' +
       '<label class="field"><span>Password</span><input type="password" name="password" autocomplete="current-password" required></label>' +
       '<button class="btn primary block" type="submit">Sign in</button></form>';
     document.getElementById('f').onsubmit = async (e) => {
@@ -52,7 +52,8 @@
   }
 
   async function load() {
-    if ((session.user.email || '').toLowerCase() !== TL.owner) { await sb.auth.signOut(); return signInView('Only ' + TL.owner + ' can approve registrations.'); }
+    const adm = await sb.rpc('tl_is_admin');
+    if (adm.error || adm.data !== true) { m.innerHTML = head + '<div class="card"><h2>Admins only</h2><p>' + esc(session.user.email) + ' is not a Trip Log admin.</p><a class="btn primary block" href="../">Back to Trip Log</a></div>'; return; }
     const { data, error } = await sb.from('tl_profiles').select('*').order('created_at', { ascending: false });
     if (error) { m.innerHTML = head + '<div class="card"><div class="notice bad">' + esc(error.message) + '</div></div>'; return; }
     rows = data; render();
@@ -61,12 +62,13 @@
   function person(p) {
     const btn = (act, label, cls) => '<button class="btn ' + (cls || '') + '" data-act="' + act + '" data-id="' + p.user_id + '">' + label + '</button>';
     let btns = '';
+    if (session && p.user_id === session.user.id) return '<div class="person"><div class="top"><div class="who"><b>' + esc(p.full_name || 'You') + '</b><span class="small muted">' + esc(p.email) + '</span></div><span class="pill business">You' + (p.is_admin ? ' · admin' : '') + '</span></div></div>';
     if (p.status === 'pending') btns = btn('approved', 'Approve', 'primary') + btn('rejected', 'Decline', 'danger');
     if (p.status === 'approved') btns = btn('rejected', 'Revoke access', 'danger');
     if (p.status === 'rejected') btns = btn('approved', 'Approve after all') + btn('delete', 'Remove', 'danger');
     return '<div class="person"><div class="top"><div class="who"><b>' + esc(p.full_name || 'No name given') + '</b><span class="small muted">' + esc(p.email) + '</span>' +
       '<span class="small muted">' + [p.employer, p.employee_no && 'Emp ' + p.employee_no, p.vehicle_reg, p.manager_name && 'Manager: ' + p.manager_name].filter(Boolean).map(esc).join(' · ') + '</span></div>' +
-      '<span class="small muted" style="white-space:nowrap">' + (p.status === 'approved' ? 'Approved ' + when(p.approved_at) : 'Registered ' + when(p.created_at)) + '</span></div>' +
+      (p.is_admin ? '<span class="pill business">Admin</span>' : '') + '<span class="small muted" style="white-space:nowrap">' + (p.status === 'approved' ? 'Approved ' + when(p.approved_at) : 'Registered ' + when(p.created_at)) + '</span></div>' +
       '<div class="btns">' + btns + '</div></div>';
   }
 
@@ -78,7 +80,7 @@
       (list.length ? '<div>' + list.map(person).join('') + '</div>' : '<p class="muted small">' + empty + '</p>') + '</section>';
     m.innerHTML = head + sec('Waiting for you', g('pending'), 'Nobody waiting.') + sec('Approved', g('approved'), 'No one approved yet.') +
       (g('rejected').length ? sec('Declined', g('rejected'), '') : '') +
-      '<div class="actions two"><button class="btn" id="rf">Refresh</button><button class="btn" id="so">Sign out</button></div>';
+      '<div class="actions two"><button class="btn" id="rf">Refresh</button><a class="btn" href="../">Back to Trip Log</a></div><button class="btn ghost" id="so">Sign out</button>';
     document.getElementById('rf').onclick = load;
     document.getElementById('so').onclick = async () => { await sb.auth.signOut(); signInView(); };
   }

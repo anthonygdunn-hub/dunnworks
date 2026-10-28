@@ -163,7 +163,11 @@
   }
   window.addEventListener('online', () => { updateSyncBadge(); sync(); });
   window.addEventListener('offline', updateSyncBadge);
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sync(); });
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState !== 'visible') return;
+    if (state.profile && state.profile.is_admin && navigator.onLine) { await loadProfile(); if (!isTyping() && !document.querySelector('.sheet-back')) render(); }
+    sync();
+  });
 
   // ---------------------------------------------------------------- derived data
   const liveLegs = () => Object.values(state.legs).filter((l) => !l.deleted);
@@ -221,6 +225,11 @@
     if (error) { state.profile = cachedProfile(); state.profileErr = error.message; return; }
     state.profileErr = '';
     state.profile = data; cacheProfile();
+    state.pendingCount = 0;
+    if (data && data.is_admin && data.status === 'approved') {
+      const r = await sb.from('tl_profiles').select('user_id', { count: 'exact', head: true }).eq('status', 'pending');
+      state.pendingCount = r.count || 0;
+    }
   }
 
   async function notify(body) {
@@ -354,7 +363,7 @@
 
   function viewLog() {
     const open = openLeg();
-    let html = installBanner();
+    let html = adminNudge() + installBanner();
     if (open) {
       html += '<section class="card live"><div class="card-head"><span class="pill open">On the road</span><span class="pill ' + open.kind + '">' + (open.kind === 'private' ? 'Private' : 'Work') + '</span></div>' +
         '<p class="route">' + esc(open.from_place) + (open.to_place ? ' to ' + esc(open.to_place) : '') + '</p>' +
@@ -715,7 +724,7 @@
     const p = state.profile;
     let theme = 'dark'; try { theme = localStorage.getItem('tl-theme') || 'dark'; } catch (e) {}
     const places = placesList();
-    return '<form class="card" data-form="profile" autocomplete="on"><h2>Your details</h2><p class="small muted">These go on the top of every report.</p>' +
+    return adminCard() + '<form class="card" data-form="profile" autocomplete="on"><h2>Your details</h2><p class="small muted">These go on the top of every report.</p>' +
       fieldI('Full name', 'full_name', 'text', p.full_name || '', 'name', true) +
       fieldI('Employee number', 'employee_no', 'text', p.employee_no || '', 'off') +
       fieldI('Vehicle registration', 'vehicle_reg', 'text', p.vehicle_reg || '', 'off', false, '', ' style="text-transform:uppercase"') +
@@ -742,6 +751,17 @@
       '<li>Your trips are only visible to you. The administrator can approve accounts but cannot see anyone\'s journeys</li></ul></details></section>';
   }
 
+  function adminCard() {
+    if (!state.profile || !state.profile.is_admin) return '';
+    const n = state.pendingCount || 0;
+    return '<section class="hero"><div class="card-head"><h2>Approvals</h2>' + (n ? '<span class="pill private">' + n + ' waiting</span>' : '<span class="pill business">Admin</span>') + '</div>' +
+      '<p class="small muted">' + (n ? n + ' ' + (n === 1 ? 'person is' : 'people are') + ' waiting to use Trip Log.' : 'Nobody waiting. New registrations show up here.') + ' You can approve people but never see their trips.</p>' +
+      '<a class="btn primary block" href="admin/">Open approvals</a></section>';
+  }
+  function adminNudge() {
+    if (!state.profile || !state.profile.is_admin || !state.pendingCount) return '';
+    return '<div class="notice info"><span><b>' + state.pendingCount + ' waiting for approval</b></span><a class="btn" href="admin/">Review</a></div>';
+  }
   function placeSheet(pl) {
     const isNew = !pl;
     pl = pl || { label: '', address: '' };

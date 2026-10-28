@@ -3,7 +3,7 @@
 //      Called by the app straight after sign-up, before the user may have a session,
 //      so it only acts on a pending profile created in the last day that has not
 //      already triggered an email. Always answers ok, so it can't be used to probe emails.
-//   { action: "approved", user_id }  -> tells the user they can sign in. Owner JWT only.
+//   { action: "approved", user_id }  -> tells the user they can sign in. Owner or Trip Log admin JWT only.
 // Deploy with verify_jwt = false (the first call has no user JWT).
 // Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (built in), RESEND_API_KEY,
 // TL_NOTIFY_TO (default info@dunnworks.io), NOTIFY_FROM (default onboarding@resend.dev,
@@ -68,7 +68,14 @@ Deno.serve(async (req) => {
   if (b.action === "approved") {
     const jwt = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
     const { data: u } = await db.auth.getUser(jwt);
-    if ((u?.user?.email ?? "").toLowerCase() !== OWNER) return json({ error: "Forbidden" }, 403);
+    const caller = u?.user;
+    if (!caller) return json({ error: "Forbidden" }, 403);
+    let isAdmin = (caller.email ?? "").toLowerCase() === OWNER;
+    if (!isAdmin) {
+      const { data: me } = await db.from("tl_profiles").select("is_admin,status").eq("user_id", caller.id).maybeSingle();
+      isAdmin = !!me && me.is_admin === true && me.status === "approved";
+    }
+    if (!isAdmin) return json({ error: "Forbidden" }, 403);
     const { data: p } = await db.from("tl_profiles").select("*").eq("user_id", String(b.user_id ?? "")).maybeSingle();
     if (!p || p.status !== "approved") return json({ error: "Not approved" }, 400);
     const sent = await send(p.email, "You're in: Trip Log is ready", "You're approved", [

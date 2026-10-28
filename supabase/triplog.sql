@@ -154,3 +154,52 @@ revoke execute on function public.tl_is_approved() from public, anon;
 grant execute on function public.tl_is_approved() to authenticated;
 revoke execute on function public.tl_handle_new_user() from public, anon, authenticated;
 revoke execute on function public.tl_profiles_guard() from public, anon, authenticated;
+
+-- ------------------------------------------------------------------ admins (28 Oct 2026)
+-- Trip Log admins can see registrations and approve, decline or revoke them.
+-- They never see anyone's trips. Only the owner (info@dunnworks.io) or the
+-- dashboard can make someone an admin. Separate from the Dunnworks console.
+alter table public.tl_profiles add column if not exists is_admin boolean not null default false;
+
+create or replace function public.tl_is_admin() returns boolean
+language sql stable security definer set search_path = public as $$
+  select public.dw_is_owner() or exists (
+    select 1 from public.tl_profiles
+    where user_id = auth.uid() and status = 'approved' and is_admin)
+$$;
+revoke execute on function public.tl_is_admin() from public, anon;
+grant execute on function public.tl_is_admin() to authenticated;
+
+drop policy if exists "tl read own profile" on public.tl_profiles;
+create policy "tl read own profile" on public.tl_profiles
+  for select to authenticated using (user_id = auth.uid() or public.tl_is_admin());
+drop policy if exists "tl update own profile" on public.tl_profiles;
+create policy "tl update own profile" on public.tl_profiles
+  for update to authenticated using (user_id = auth.uid() or public.tl_is_admin())
+  with check (user_id = auth.uid() or public.tl_is_admin());
+drop policy if exists "tl owner deletes profiles" on public.tl_profiles;
+create policy "tl owner deletes profiles" on public.tl_profiles
+  for delete to authenticated using (public.tl_is_admin());
+
+create or replace function public.tl_profiles_guard() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  new.updated_at := now();
+  if tg_op = 'UPDATE' and coalesce(auth.role(), '') in ('authenticated', 'anon') then
+    if not public.dw_is_owner() then
+      new.is_admin := old.is_admin; new.email := old.email;
+      new.user_id := old.user_id; new.notified_at := old.notified_at;
+    end if;
+    if not public.tl_is_admin() then
+      new.status := old.status; new.approved_at := old.approved_at;
+    end if;
+  end if;
+  if tg_op = 'UPDATE' and new.status = 'approved' and old.status <> 'approved' then
+    new.approved_at := now();
+  end if;
+  return new;
+end $$;
+revoke execute on function public.tl_profiles_guard() from public, anon, authenticated;
+
+-- To make someone an admin from the SQL editor:
+--   update public.tl_profiles set is_admin = true where email = 'someone@example.com';

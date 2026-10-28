@@ -1,7 +1,7 @@
 /* Trip Log offline worker: keeps the app itself on the phone so it opens with no signal.
  * Trip data lives in the page's own storage and syncs to Supabase when online;
  * Supabase requests are never cached here. Bump VERSION on every release. */
-const VERSION = 'tl-v1';
+const VERSION = 'tl-v2';
 const SHELL = [
   './', 'index.html', 'styles.css', 'app.js', 'config.js', 'manifest.webmanifest',
   'vendor/supabase.js', 'vendor/jspdf.umd.min.js', 'vendor/jspdf.plugin.autotable.min.js',
