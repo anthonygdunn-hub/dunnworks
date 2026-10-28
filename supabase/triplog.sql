@@ -1,6 +1,6 @@
 -- Trip Log — dunnworks.io/triplog
 -- Private and business mileage log for company car / fuel card drivers.
--- Project acdpgarasgfhvupzsbxf.
+-- Project acdpgarasgfhvupzsbxf. Applied 28 Oct 2026.
 --
 -- How access works
 --   1. Someone registers in the app with email + password. Supabase creates the
@@ -61,7 +61,9 @@ create or replace function public.tl_profiles_guard() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
   new.updated_at := now();
-  if tg_op = 'UPDATE' and not public.dw_is_owner() then
+  -- signed-in app users (other than the owner) can edit their details but never their status;
+  -- the SQL editor and service role are unaffected, so the dashboard can approve too
+  if tg_op = 'UPDATE' and coalesce(auth.role(), '') in ('authenticated', 'anon') and not public.dw_is_owner() then
     new.status      := old.status;
     new.approved_at := old.approved_at;
     new.notified_at := old.notified_at;
@@ -148,4 +150,7 @@ create policy "tl own legs" on public.tl_legs
 
 revoke all on public.tl_profiles, public.tl_places, public.tl_legs from anon;
 grant select, insert, update, delete on public.tl_profiles, public.tl_places, public.tl_legs to authenticated;
-revoke execute on function public.tl_is_approved() from anon;
+revoke execute on function public.tl_is_approved() from public, anon;
+grant execute on function public.tl_is_approved() to authenticated;
+revoke execute on function public.tl_handle_new_user() from public, anon, authenticated;
+revoke execute on function public.tl_profiles_guard() from public, anon, authenticated;
