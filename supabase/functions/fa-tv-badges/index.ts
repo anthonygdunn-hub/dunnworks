@@ -1,41 +1,30 @@
 // fa-tv-badges: fill in team badges for The Falkners Arms TV listings.
-// Called every 10 minutes by pg_cron (see supabase/falkners-tv.sql). Takes no
-// input and only looks up teams already in fa_tv that have no cached badge, a
-// few dozen per run, so calling it from outside does nothing the schedule
-// wouldn't do anyway. Deployed with verify_jwt off for that reason.
+// Called every 5 minutes by pg_cron (see supabase/falkners-tv.sql). Takes no
+// input and only fills in teams already in fa_tv that have no cached badge,
+// so calling it from outside does nothing the schedule wouldn't do anyway.
+// Deployed with verify_jwt off for that reason.
+//
+// Source: TheSportsDB's free team search. The free key is shared by everyone
+// and rate limited, so each run makes a handful of calls and stops at the
+// first 429. Badges are cached for good in fa_tv_badges, so after the first
+// fill only new teams need looking up.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-const SPORT: Record<string, string> = { Football: 'Soccer', Rugby: 'Rugby', Cricket: 'Cricket' };
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
-// Names that TheSportsDB files differently from how UK listings write them.
-const ALIAS: Record<string, string> = {
-  'Paris Saint-Germain': 'Paris SG', 'PSG': 'Paris SG', 'PSG Women': 'Paris SG Women',
-  'Inter Milan': 'Inter', 'AC Milan': 'Milan', 'Roma': 'AS Roma', 'Bodo/Glimt': 'Bodo Glimt',
-  'Wolves': 'Wolverhampton Wanderers', 'Spurs': 'Tottenham Hotspur', 'QPR': 'Queens Park Rangers',
+const TSDB_ALIAS: Record<string, string> = {
+  'Paris Saint-Germain': 'Paris SG', 'PSG': 'Paris SG', 'Inter Milan': 'Inter', 'Roma': 'AS Roma',
 };
+const SPORT: Record<string, string> = { Football: 'Soccer', Rugby: 'Rugby', Cricket: 'Cricket' };
 
-function variants(name: string): string[] {
-  const out = [name];
-  if (ALIAS[name]) out.unshift(ALIAS[name]);
-  const strip = name.replace(/\s+(WFC|Women|Ladies|W)$/i, '').trim();
-  if (strip !== name) out.push(strip + ' Women', strip);
-  const fc = name.replace(/\s+(FC|AFC)$/i, '').trim();
-  if (fc !== name) out.push(fc);
-  return [...new Set(out)];
-}
+const baseName = (n: string) => n.replace(/\s+(WFC|Women|Ladies|W)$/i, '').trim();
 
-// TheSportsDB's free key allows about 30 calls a minute, shared with everyone
-// else on the same key, so go gently: one call every 2.5 seconds, at most 45
-// calls a run (the function has 150 seconds).
 let calls = 0;
-const MAX_CALLS = 45;
 const pause = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
-async function lookup(team: string, sport: string): Promise<string | null> {
+async function tsdb(team: string, sport: string): Promise<string | null> {
   const want = SPORT[sport];
-  for (const v of variants(team)) {
-    if (calls >= MAX_CALLS) throw new Error('budget');
+  for (const v of [...new Set([TSDB_ALIAS[team] || team, baseName(team)])]) {
+    if (calls >= 8) throw new Error('budget');
     calls++;
     await pause(2500);
     const r = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchteams.php?t=' + encodeURIComponent(v));
@@ -57,22 +46,22 @@ Deno.serve(async () => {
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   const { data: cached } = await db.from('fa_tv_badges').select('team,badge,looked_up_at');
   const have = new Map((cached || []).map((c: any) => [c.team, c]));
-  const weekAgo = Date.now() - 2 * 864e5;
+  const retryAfter = Date.now() - 2 * 864e5;
   const todo: [string, string][] = [];
   for (const r of rows || []) for (const t of [r.home, r.away]) {
     if (!t || todo.some((x) => x[0] === t)) continue;
     const c: any = have.get(t);
-    if (!c || (!c.badge && new Date(c.looked_up_at).getTime() < weekAgo)) todo.push([t, r.sport]);
+    if (!c || (!c.badge && new Date(c.looked_up_at).getTime() < retryAfter)) todo.push([t, r.sport]);
   }
-  let found = 0, missed = 0;
-  let checked = 0;
+  if (!todo.length) { await db.rpc('fa_tv_apply_badges'); return Response.json({ todo: 0 }); }
+
+  let found = 0, missed = 0, waiting = 0;
   for (const [team, sport] of todo) {
     let badge: string | null = null;
-    try { badge = await lookup(team, sport); } catch (_) { break; }
-    checked++;
-    await db.from('fa_tv_badges').upsert({ team, sport, badge, looked_up_at: new Date().toISOString() });
+    try { badge = await tsdb(team, sport); } catch (_) { waiting++; continue; }
     badge ? found++ : missed++;
+    await db.from('fa_tv_badges').upsert({ team, sport, badge, looked_up_at: new Date().toISOString() });
   }
   await db.rpc('fa_tv_apply_badges');
-  return new Response(JSON.stringify({ checked, found, missed, waiting: todo.length - checked }), { headers: { 'Content-Type': 'application/json' } });
+  return Response.json({ todo: todo.length, found, missed, waiting });
 });

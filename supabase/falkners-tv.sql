@@ -3,7 +3,7 @@
 -- A scheduled task researches the next seven days of sport on Sky, TNT, BBC,
 -- ITV and Prime Video each morning and upserts rows into fa_tv (keyed on
 -- ext_key so re-runs update rather than duplicate). Team badges are filled in
--- separately by the fa-tv-badges edge function, which pg_cron calls every 10
+-- separately by the fa-tv-badges edge function, which pg_cron calls every 5
 -- minutes; it looks up any team without a badge on TheSportsDB's free API and
 -- caches the result in fa_tv_badges.
 --
@@ -63,9 +63,9 @@ language sql security definer set search_path = public as $$
 $$;
 revoke all on function public.fa_tv_apply_badges() from public, anon, authenticated;
 
--- Every 10 minutes, ask the edge function to fill in missing badges.
+-- Every 5 minutes, ask the edge function to fill in missing badges.
 select cron.unschedule('fa-tv-badges') where exists (select 1 from cron.job where jobname = 'fa-tv-badges');
-select cron.schedule('fa-tv-badges', '*/10 * * * *', $$
+select cron.schedule('fa-tv-badges', '*/5 * * * *', $$
   select net.http_post(
     url := 'https://acdpgarasgfhvupzsbxf.supabase.co/functions/v1/fa-tv-badges',
     headers := '{"Content-Type":"application/json"}'::jsonb,
