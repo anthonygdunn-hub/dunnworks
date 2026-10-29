@@ -1,7 +1,7 @@
 // fa-tv-badges: fill in team badges for The Falkners Arms TV listings.
 // Called every 10 minutes by pg_cron (see supabase/falkners-tv.sql). Takes no
-// input and only looks up teams already in fa_tv that have no cached badge, at
-// most 25 per run, so calling it from outside does nothing the schedule
+// input and only looks up teams already in fa_tv that have no cached badge, a
+// few dozen per run, so calling it from outside does nothing the schedule
 // wouldn't do anyway. Deployed with verify_jwt off for that reason.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
@@ -25,9 +25,19 @@ function variants(name: string): string[] {
   return [...new Set(out)];
 }
 
+// TheSportsDB's free key allows about 30 calls a minute, shared with everyone
+// else on the same key, so go gently: one call every 2.5 seconds, at most 45
+// calls a run (the function has 150 seconds).
+let calls = 0;
+const MAX_CALLS = 45;
+const pause = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 async function lookup(team: string, sport: string): Promise<string | null> {
   const want = SPORT[sport];
   for (const v of variants(team)) {
+    if (calls >= MAX_CALLS) throw new Error('budget');
+    calls++;
+    await pause(2500);
     const r = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchteams.php?t=' + encodeURIComponent(v));
     if (r.status === 429) throw new Error('rate limited');
     if (!r.ok) continue;
@@ -36,12 +46,12 @@ async function lookup(team: string, sport: string): Promise<string | null> {
     const hit = teams.find((t: any) => (!want || t.strSport === want) && t.strBadge && t.strTeam.toLowerCase() === v.toLowerCase())
       || teams.find((t: any) => (!want || t.strSport === want) && t.strBadge);
     if (hit) return hit.strBadge;
-    await new Promise((res) => setTimeout(res, 400));
   }
   return null;
 }
 
 Deno.serve(async () => {
+  calls = 0; // the worker can stay warm between runs
   const since = new Date(Date.now() - 6 * 3600e3).toISOString();
   const { data: rows, error } = await db.from('fa_tv').select('home,away,sport').gte('starts_at', since).in('sport', Object.keys(SPORT));
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
@@ -55,13 +65,14 @@ Deno.serve(async () => {
     if (!c || (!c.badge && new Date(c.looked_up_at).getTime() < weekAgo)) todo.push([t, r.sport]);
   }
   let found = 0, missed = 0;
-  for (const [team, sport] of todo.slice(0, 25)) {
+  let checked = 0;
+  for (const [team, sport] of todo) {
     let badge: string | null = null;
     try { badge = await lookup(team, sport); } catch (_) { break; }
+    checked++;
     await db.from('fa_tv_badges').upsert({ team, sport, badge, looked_up_at: new Date().toISOString() });
     badge ? found++ : missed++;
-    await new Promise((res) => setTimeout(res, 2100));
   }
   await db.rpc('fa_tv_apply_badges');
-  return new Response(JSON.stringify({ checked: Math.min(todo.length, 25), found, missed, waiting: Math.max(0, todo.length - 25) }), { headers: { 'Content-Type': 'application/json' } });
+  return new Response(JSON.stringify({ checked, found, missed, waiting: todo.length - checked }), { headers: { 'Content-Type': 'application/json' } });
 });
