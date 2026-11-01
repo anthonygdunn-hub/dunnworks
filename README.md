@@ -167,3 +167,7 @@ The counter script lives in the Coastal Golf Co build source (`site/build.py`, `
 build includes it. It only counts on www.coastalgolfco.co.uk. To stop your own visits being counted,
 open any page once with `?nocount` on the end (e.g. `https://www.coastalgolfco.co.uk/?nocount`) on each
 device you use.
+
+## Funworks
+
+Funworks (funworks.io) is the sister studio for logos and branding. Its site lives in the separate repo anthonygdunn-hub/funworks. On this site it appears as the pink strip above the top bar, the nav item, the home page section and price callout, the branding section on services.html, two options in each enquiry form and a footer column. Pink is only used on Funworks elements. Prices quoted here (Logo Sprint £295, Brand Kit £650, Full Identity £1,250, AI imagery £195, motion £150, Content Club £150 a month, Brand + Site bundle £1,850) must match funworks.io when either changes.
