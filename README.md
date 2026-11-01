@@ -30,8 +30,7 @@ Work through this list. Everything marked placeholder is visible on the page, so
 2. Prices. £750, £1,450, £950 and £35 a month are starting points, and the extras run from £150 to £600. Change any of them, then check the same figures on index.html, services.html and contact.html.
 3. Claims to confirm. Four numbers appear as counters: 30+ sites live, 2 weeks typical build, 1 working day reply, £0 monthly platform fee. The comparison table on the home page quotes £17 to £45 for platform fees and 2 to 5 MB page weight. Confirm you are happy standing behind each one.
 4. Screenshots. The four project cards now show real home page screenshots from assets/img. Retake any of them when a site changes: capture the top of the home page, crop to roughly 2 by 1, save as WebP under 20 KB, and keep the same file name.
-5. Funworks prices. The Funworks section on the home page, the branding section on services.html, the price callout and the enquiry options quote Funworks starting prices (£295, £650, £195, £150, £1,250, £150 a month) and the Brand + Site bundle at £1,850. The bundle carries a visible placeholder tag. Every Funworks link points at https://funworks.io/, so register the domain before this goes live.
-6. Web3Forms key. In contact.html, replace `REPLACE-WITH-YOUR-WEB3FORMS-ACCESS-KEY` with the key from web3forms.com. Until you do, the form opens the visitor's email app instead, so the page still works.
+5. Web3Forms key. In contact.html, replace `REPLACE-WITH-YOUR-WEB3FORMS-ACCESS-KEY` with the key from web3forms.com. Until you do, the form opens the visitor's email app instead, so the page still works.
 
 ## Putting it live on GitHub Pages
 
@@ -168,3 +167,7 @@ The counter script lives in the Coastal Golf Co build source (`site/build.py`, `
 build includes it. It only counts on www.coastalgolfco.co.uk. To stop your own visits being counted,
 open any page once with `?nocount` on the end (e.g. `https://www.coastalgolfco.co.uk/?nocount`) on each
 device you use.
+
+## Funworks
+
+Funworks (funworks.io) is the sister studio for logos and branding. Its site lives in the separate repo anthonygdunn-hub/funworks. On this site it appears as the pink strip above the top bar, the nav item, the home page section and price callout, the branding section on services.html, two options in each enquiry form and a footer column. Pink is only used on Funworks elements. Prices quoted here (Logo Sprint £295, Brand Kit £650, Full Identity £1,250, AI imagery £195, motion £150, Content Club £150 a month, Brand + Site bundle £1,850) must match funworks.io when either changes.
