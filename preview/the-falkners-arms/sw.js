@@ -1,7 +1,7 @@
 /* The Falkners Arms offline worker: keeps the app on the phone so it opens
  * with no signal. Live listings, bookings and the gallery come from Supabase
  * and are never cached here. Bump VERSION on every release. */
-const VERSION = 'fa-v2';
+const VERSION = 'fa-v3';
 const BASE = '/preview/the-falkners-arms/';
 const SHELL = [BASE, BASE + 'manifest.webmanifest', BASE + 'icons/icon-192.png', BASE + 'icons/icon-512.png', BASE + 'icons/apple-touch-icon.png'];
 
@@ -33,4 +33,23 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request)));
+});
+
+// Phone alerts from the staff app: show them, and open the right page when tapped
+self.addEventListener('push', (e) => {
+  let m = {};
+  try { m = e.data ? e.data.json() : {}; } catch (err) { m = { title: 'The Falkners Arms', body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(m.title || 'The Falkners Arms', {
+    body: m.body || '', tag: m.tag || undefined, renotify: !!m.tag,
+    icon: BASE + 'icons/icon-192.png', badge: BASE + 'icons/icon-192.png', data: { url: BASE + (m.url || '#/admin/today') }
+  }));
+});
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const target = (e.notification.data && e.notification.data.url) || BASE;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+    const w = wins.find((c) => c.url.includes(BASE));
+    if (w) { w.navigate(target).catch(() => {}); return w.focus(); }
+    return self.clients.openWindow(target);
+  }));
 });
