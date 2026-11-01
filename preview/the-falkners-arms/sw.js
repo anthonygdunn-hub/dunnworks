@@ -1,7 +1,7 @@
 /* The Falkners Arms offline worker: keeps the app on the phone so it opens
  * with no signal. Live listings, bookings and the gallery come from Supabase
  * and are never cached here. Bump VERSION on every release. */
-const VERSION = 'fa-v1';
+const VERSION = 'fa-v2';
 const BASE = '/preview/the-falkners-arms/';
 const SHELL = [BASE, BASE + 'manifest.webmanifest', BASE + 'icons/icon-192.png', BASE + 'icons/icon-512.png', BASE + 'icons/apple-touch-icon.png'];
 
