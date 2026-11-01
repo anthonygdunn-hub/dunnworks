@@ -1,0 +1,16 @@
+{
+  "name": "Trip Log",
+  "short_name": "Trip Log",
+  "description": "Private and work mileage, logged by odometer and sent to payroll as a signed PDF.",
+  "start_url": "/triplog/",
+  "scope": "/triplog/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08080c",
+  "theme_color": "#08080c",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
