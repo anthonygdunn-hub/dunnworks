@@ -459,6 +459,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#drawer
 
 /* ------------------------------------------------------------------ looks
    Logo and colour scheme. The preview shows a chooser; the live build fixes both. */
+const LOGOS = [['a', 'Modern'], ['b', 'Heritage'], ['c', 'Sporty'], ['d', '1 Price tag'], ['e', '2 b-iron'], ['f', '3 Swing path'], ['g', '4 Second round'],
+  ['h', '5 Crest'], ['i', '6 Scorecard'], ['j', '7 Divot'], ['k', '8 Teed up'], ['l', '9 Script'], ['m', '10 Back/Swing']];
 const SCHEMES = {
   fairway: { name: 'Fairway', note: 'Green and flag yellow', ink: '#1E2328', turf: '#1F5C45', flag: '#FFC629', paper: '#FAFAF7', soft: '#9FC9B4' },
   links:   { name: 'Links', note: 'Navy and sand', ink: '#16243A', turf: '#1F3A60', flag: '#E4B866', paper: '#F8F7F2', soft: '#AFC3DE' },
@@ -496,7 +498,7 @@ if (C.preview) {
   lp.innerHTML = `<button type="button" class="lp-open" aria-expanded="false"><span class="lp-dots"></span>Try a look</button>
     <div class="lp-panel" role="dialog" aria-label="Try a logo and colour scheme">
       <p>Try a logo <button type="button" class="lp-x" aria-label="Close">×</button></p>
-      <div><button type="button" data-l="a">Modern</button><button type="button" data-l="b">Heritage</button><button type="button" data-l="c">Sporty</button></div>
+      <div class="lp-logos">${LOGOS.filter(([k]) => C.logos[k + '-light']).map(([k, n]) => `<button type="button" data-l="${k}">${n}</button>`).join('')}</div>
       <p>Try a colour scheme</p>
       <div>${Object.entries(SCHEMES).map(([k, v]) => `<button type="button" data-s="${k}" title="${v.note}"><span>${[v.ink, v.turf, v.flag].map(c => `<i style="background:${c}"></i>`).join('')}</span>${v.name}</button>`).join('')}</div>
       <small>Your choice is remembered on this device. Tell Dunnworks which you like.</small>

@@ -13,7 +13,8 @@ SRC = os.path.join(HERE, 'src')
 BRAND = os.path.join(HERE, 'brand', 'logos')
 FONTS_DIR = os.path.join(HERE, 'fonts')
 
-LOGO = 'a'  # chosen logo for the live build: a modern, b heritage, c sporty
+LOGO = 'a'  # chosen logo: a modern, b heritage, c sporty, d price tag, e b-iron, f swing path,
+            # g second round, h crest, i scorecard, j divot, k teed up, l script, m back/swing
 SCHEME = 'fairway'  # chosen colour scheme: fairway, links, claret, tour, sky
 WHATSAPP = ''  # Backswing's mobile in international form without +, e.g. 447700900123. Empty = placeholder
 EMAIL = 'info@backswinggolf.co.uk'
@@ -49,6 +50,7 @@ def logos():
         'a-light': svg_uri('a-modern-light.svg'), 'a-dark': svg_uri('a-modern-dark.svg'),
         'b-light': svg_uri('b-heritage-light.svg'), 'b-dark': svg_uri('b-heritage-dark.svg'),
         'c-light': svg_uri('c-sporty-light.svg'), 'c-dark': svg_uri('c-sporty-dark.svg'),
+        **{f'{k}-{v}': svg_uri(f'{k}-{v}.svg') for k in 'defghijklm' for v in ('light', 'dark')},
     }
 
 def build(preview=True, golive=False):
@@ -58,7 +60,7 @@ def build(preview=True, golive=False):
         lg = {k: v for k, v in lg.items() if k.startswith(LOGO)}
     cfg = {'supabaseUrl': SUPABASE_URL, 'anonKey': ANON_KEY, 'email': EMAIL, 'preview': preview, 'logos': lg, 'logo': LOGO, 'scheme': SCHEME,
            'adminUrl': f'https://{DOMAIN}/#/admin' if golive else ('https://dunnworks.io/preview/backswing-golf/#/admin' if preview else 'https://anthonygdunn-hub.github.io/backswing-golf/#/admin')}
-    mark = {'a': 'a-mark-light.svg', 'b': 'b-heritage-light.svg', 'c': 'c-mark-light.svg'}[LOGO]
+    mark = {'a': 'a-mark-light.svg', 'b': 'b-heritage-light.svg', 'c': 'c-mark-light.svg'}.get(LOGO, 'a-mark-light.svg')
     rep = {
         '/*FONTS*/': fonts_css(), '/*CSS*/': read(os.path.join(SRC, 'style.css')),
         '/*APPJS*/': read(os.path.join(SRC, 'app.js')), '/*ADMINJS*/': read(os.path.join(SRC, 'admin.js')),

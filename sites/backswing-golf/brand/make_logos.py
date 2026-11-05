@@ -192,6 +192,10 @@ files = {
     'c-mark-light.svg':    mark_only_c(INK, FLAG),
     'c-mark-dark.svg':     mark_only_c(PAPER, FLAG, INK),
 }
+import more_logos
+for key, (light, dark) in more_logos.build(font, text_paths, svg, INK, TURF, FLAG, PAPER, '#9FC9B4').items():
+    files[f'{key}-light.svg'] = light
+    files[f'{key}-dark.svg'] = dark
 for k, v in files.items():
     save(k, v)
 print('wrote', len(files), 'logos to', OUT)

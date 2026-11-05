@@ -45,7 +45,10 @@ p{margin:0 0 1em;max-width:68ch}
 .top{position:sticky;top:0;z-index:50;background:rgba(250,250,247,.96);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--line)}
 .top .wrap{display:flex;align-items:center;gap:20px;height:92px}
 .brand{display:flex;align-items:center;text-decoration:none;flex:none}
-.brand img{height:62px;width:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.08))}
+.brand img{height:62px;width:auto;max-width:min(330px,56vw);object-fit:contain;object-position:left center;filter:drop-shadow(0 6px 10px rgba(0,0,0,.08))}
+.brand[data-logo="h"] img,.brand[data-logo="k"] img{height:72px}
+.brand[data-logo="m"] img{height:80px}
+.brand[data-logo="i"] img{height:60px}
 .brand[data-logo="b"] img{height:80px}
 .brand[data-logo="c"] img{height:58px}
 .nav{display:flex;gap:4px;margin-left:8px}
@@ -493,3 +496,8 @@ body.is-admin .lookpick,body.is-admin .wa-pin{display:none}
 
 .anim .brand img{animation:logoIn .9s cubic-bezier(.3,1.4,.5,1) .1s both}
 @keyframes logoIn{from{opacity:0;transform:translateX(-14px) scale(.9)}to{opacity:1;transform:none}}
+
+.lookpick .lp-panel{max-height:calc(100vh - 40px);overflow:auto}
+.lookpick .lp-logos button{font-size:13px;padding:5px 8px}
+@media (max-width:980px){.brand[data-logo="h"] img,.brand[data-logo="k"] img{height:54px}.brand[data-logo="m"] img{height:58px}}
+footer [data-logo-slot] img{max-width:300px;object-fit:contain;object-position:left center}
