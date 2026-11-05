@@ -155,7 +155,7 @@ PAGES[''] = async () => {
     const tile = (c, href, blurb, n, cls, pic) => `<a class="cat${cls}" href="${href}">
         <span class="cat-ic" aria-hidden="true">${CAT_ICON[c] || CAT_ICON.Other}</span>
         <span class="cat-t"><b>${esc(c)}</b><span class="cat-b">${esc(blurb)}</span></span>
-        <span class="cat-n">${n} in stock</span>
+        <span class="cat-n"><b>${Number(n).toLocaleString('en-GB')}</b><span>in stock</span></span>
         ${pic ? `<img loading="lazy" alt="" src="${esc(img(pic.img, 500))}">` : ''}</a>`;
     $('#cats').innerHTML = order.map((c, i) => tile(c, `#/shop?cat=${encodeURIComponent(c)}`, CAT_BLURB[c] || '', counts[c], i === 0 ? ' big' : '', s.find(p => p.category === c && p.img && (i || p.featured)) || s.find(p => p.category === c && p.img))).join('')
       + tile('Everything', '#/shop', 'Browse the lot', s.length, ' all', null);
