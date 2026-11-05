@@ -254,7 +254,8 @@ fieldset.all .chk.more{display:flex}
 
 /* forms and prose */
 .page-head{padding-top:clamp(36px,5vw,64px);padding-bottom:10px}
-.prose{max-width:760px;padding-bottom:70px}
+.prose{padding-bottom:70px}
+.prose>*{max-width:760px}
 .prose h2{font-size:34px;margin-top:1.4em}
 .prose ul{padding-left:1.2em}
 .prose li{margin:.3em 0}
@@ -522,3 +523,5 @@ footer [data-logo-slot] img{max-width:300px;object-fit:contain;object-position:l
   .cat{padding-bottom:18px}
 }
 .cat.big .cat-b,.cat.all .cat-b{text-shadow:none}
+
+body.is-admin [data-r]{opacity:1!important;transform:none!important}

@@ -412,7 +412,7 @@ window.addEventListener('hashchange', route);
 const REVEAL = '.head, .card, .cat, .scale > div, .steps li, .trust li, .faq details, .prose > *, .finder, .cond, .actions, .reassure li, .specs tr, .empty, .formgrid > *, .page-head > *';
 const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px', threshold: .08 }) : null;
 function decorate() {
-  if (RM || !io) return;
+  if (RM || !io || document.body.classList.contains('is-admin')) return;
   $$(REVEAL, main).forEach(el => {
     if (el.dataset.r !== undefined) return;
     el.dataset.r = '';
