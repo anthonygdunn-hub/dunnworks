@@ -14,6 +14,8 @@ BRAND = os.path.join(HERE, 'brand', 'logos')
 FONTS_DIR = os.path.join(HERE, 'fonts')
 
 LOGO = 'a'  # chosen logo for the live build: a modern, b heritage, c sporty
+SCHEME = 'fairway'  # chosen colour scheme: fairway, links, claret, tour, sky
+WHATSAPP = ''  # Backswing's mobile in international form without +, e.g. 447700900123. Empty = placeholder
 EMAIL = 'info@backswinggolf.co.uk'
 EBAY_STORE = 'https://www.ebay.co.uk/str/backswinggolf'
 SUPABASE_URL = 'https://acdpgarasgfhvupzsbxf.supabase.co'
@@ -54,7 +56,7 @@ def build(preview=True, golive=False):
     lg = logos()
     if not preview:
         lg = {k: v for k, v in lg.items() if k.startswith(LOGO)}
-    cfg = {'supabaseUrl': SUPABASE_URL, 'anonKey': ANON_KEY, 'email': EMAIL, 'preview': preview, 'logos': lg, 'logo': LOGO,
+    cfg = {'supabaseUrl': SUPABASE_URL, 'anonKey': ANON_KEY, 'email': EMAIL, 'preview': preview, 'logos': lg, 'logo': LOGO, 'scheme': SCHEME,
            'adminUrl': f'https://{DOMAIN}/#/admin' if golive else ('https://dunnworks.io/preview/backswing-golf/#/admin' if preview else 'https://anthonygdunn-hub.github.io/backswing-golf/#/admin')}
     mark = {'a': 'a-mark-light.svg', 'b': 'b-heritage-light.svg', 'c': 'c-mark-light.svg'}[LOGO]
     rep = {
@@ -64,8 +66,22 @@ def build(preview=True, golive=False):
         '/*FAVICON*/': svg_uri(mark),
         '<!--ROBOTS-->': '' if golive else '<meta name="robots" content="noindex, nofollow">',
     }
+    if WHATSAPP:
+        rep['/*WA_LINK*/'] = f'https://wa.me/{WHATSAPP}?text=' + 'Hi%20Backswing%20Golf%2C%20'
+        rep['/*TEL_LINK*/'] = 'tel:+' + WHATSAPP
+    else:
+        rep['/*WA_LINK*/'] = '#/contact'
+        rep['/*TEL_LINK*/'] = '#/contact'
     for k, v in rep.items():
         html = html.replace(k, v)
+    html = html.replace('<html lang="en-GB">', f'<html lang="en-GB" data-scheme="{SCHEME}">')
+    if not WHATSAPP:
+        if preview:
+            # show where it goes, highlighted, until the number arrives
+            html = html.replace('class="wa-pin"', 'class="wa-pin ph" title="WhatsApp number to come"')
+        else:
+            html = re.sub(r'<a class="wa-pin".*?</a>\n', '', html, flags=re.S)
+            html = re.sub(r'<nav class="mbar".*?</nav>\n', '', html, flags=re.S)
     if not preview:
         # placeholders stay in the wording but lose the highlight
         html = re.sub(r'\s?class="ph"', '', html)

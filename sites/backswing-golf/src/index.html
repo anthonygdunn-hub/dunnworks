@@ -14,7 +14,8 @@
 </head>
 <body>
 <a class="sr" href="#main" style="position:absolute;left:8px;top:8px;z-index:999" onfocus="this.classList.remove('sr')" onblur="this.classList.add('sr')">Skip to content</a>
-<div class="announce" data-k="announce">Free UK delivery on every order. 14-day returns.</div>
+<div class="announce"><span id="ticker" data-k="announce">Free UK delivery on every order. 14-day returns.</span></div>
+<div class="progress" id="progress" aria-hidden="true"></div>
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#/" data-logo-slot="light" aria-label="Backswing Golf home"><img alt="Backswing Golf" src=""></a>
@@ -60,9 +61,14 @@
 
 <!-- ============================================================ templates -->
 <template id="tpl-home">
-  <section class="hero"><div class="wrap">
+  <section class="hero">
+  <svg class="hero-arc" viewBox="0 0 600 600" aria-hidden="true">
+    <path class="arc" pathLength="1" d="M256.6 546.2 A250 250 0 1 1 497 146.1" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="round"/>
+    <circle class="arc-ball" r="22" fill="#FFC629"><animateMotion dur="1.6s" begin="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines=".45 0 .2 1" path="M256.6 546.2 A250 250 0 1 1 497 146.1"/></circle>
+  </svg>
+  <div class="wrap">
     <div>
-      <h1 data-k="hero_title">Tour-spec clubs. Second-hand prices.</h1>
+      <h1 data-k="hero_title" data-split>Tour-spec clubs. Second-hand prices.</h1>
       <p class="lede" data-k="hero_intro">Ex-demo and pre-loved golf clubs, heads and shafts, checked and graded before they go on sale. New stock goes up most days.</p>
       <p class="count"><b id="stockcount">…</b> items in stock right now, <span id="leftcount">…</span> of them left-handed</p>
       <form class="finder" id="finder">
@@ -80,10 +86,10 @@
   </div></section>
 
   <div class="trust"><ul class="wrap" style="padding:0">
-    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.7"/><circle cx="17" cy="17.5" r="1.7"/></svg><span><b data-k="trust1_t">Free UK delivery</b><span data-k="trust1">Usually 2 to 3 days</span></span></li>
-    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span><b data-k="trust2_t">14-day returns</b><span data-k="trust2">If it is not right, send it back</span></span></li>
-    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1 6.2L12 17.4l-5.5 2.9 1-6.2L3 9.7l6.2-.9z"/></svg><span><b data-k="trust3_t">100% positive on eBay</b><span data-k="trust3">Over 1,200 clubs sold</span></span></li>
-    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span><b data-k="trust4_t">Photos of the real thing</b><span data-k="trust4">Marks and all, never stock images</span></span></li>
+    <li class="t-van"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.7"/><circle cx="17" cy="17.5" r="1.7"/></svg><span><b data-k="trust1_t">Free UK delivery</b><span data-k="trust1">Usually 2 to 3 days</span></span></li>
+    <li class="t-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span><b data-k="trust2_t">14-day returns</b><span data-k="trust2">If it is not right, send it back</span></span></li>
+    <li class="t-star"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1 6.2L12 17.4l-5.5 2.9 1-6.2L3 9.7l6.2-.9z"/></svg><span><b data-k="trust3_t">100% positive on eBay</b><span data-k="trust3">Over 1,200 clubs sold</span></span></li>
+    <li class="t-eye"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span><b data-k="trust4_t">Photos of the real thing</b><span data-k="trust4">Marks and all, never stock images</span></span></li>
   </ul></div>
 
   <section class="band"><div class="wrap">
@@ -112,7 +118,7 @@
     </div>
   </div></section>
 
-  <section class="band turf"><div class="wrap split">
+  <section class="band turf sellband"><div class="wrap split">
     <div>
       <h2>Sell us your clubs</h2>
       <p class="lede" data-k="sell_intro">Got clubs gathering dust? Tell us what you have, add a few photos, and we will come back with an offer.</p>
@@ -123,7 +129,9 @@
       <li><span><b>Add a few photos</b>Faces and soles are the ones that matter.</span></li>
       <li><span><b>We email you an offer</b>Usually within two working days. No obligation.</span></li>
     </ol>
-  </div></section>
+  </div>
+  <div class="putt" aria-hidden="true"><span class="hole"><i class="pin"></i><i class="flg"></i></span><span class="pball"></span></div>
+  </section>
 </template>
 
 <template id="tpl-shop">
@@ -269,6 +277,26 @@
   </div>
 </template>
 
+<a class="wa-pin" id="wa-pin" href="/*WA_LINK*/" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
+  <span class="wa-label">Chat on WhatsApp</span>
+  <span class="wa-disc">
+    <svg class="wa-scene" viewBox="0 0 72 72" aria-hidden="true">
+      <circle cx="36" cy="36" r="34" fill="#1E2328"/>
+      <path class="wa-arc" pathLength="1" d="M33.6 66.5 A30.5 30.5 0 1 1 60 18.6" fill="none" stroke="#FFC629" stroke-width="3.2" stroke-linecap="round"/>
+      <ellipse cx="36" cy="53" rx="19" ry="6" fill="#1F5C45"/>
+      <ellipse cx="40" cy="53" rx="3.6" ry="1.5" fill="#0d1114"/>
+      <line x1="40" y1="20" x2="40" y2="53" stroke="#FAFAF7" stroke-width="1.8" stroke-linecap="round"/>
+      <path class="wa-flag" d="M40.6 20.5 L55 25 L40.6 29.8 Z" fill="#FFC629"/>
+      <circle class="wa-ball" r="2.8" fill="#FAFAF7"><animateMotion id="wachip" dur="1.1s" begin="1.8s; wachip.end+7s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines=".3 0 .6 1" path="M16 52 Q26 14 40 52.6"/><set attributeName="r" to="2.8" begin="wachip.begin"/><animate attributeName="r" from="2.8" to="0" begin="wachip.end" dur=".25s" fill="freeze"/></circle>
+    </svg>
+    <span class="wa-bub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6a9.4 9.4 0 0 0-8.1 14.1L2.6 21.4l4.8-1.3A9.4 9.4 0 1 0 12 2.6z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M8.6 7.4c.3-.6.6-.6.9-.6h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .6l-.5.7c-.1.2-.2.3 0 .6.5.9 1.2 1.6 2.1 2.1.3.2.4.1.6 0l.7-.8c.2-.2.3-.2.6-.1l1.8.9c.3.1.4.2.4.4 0 .5-.2 1.2-.7 1.6-.6.5-1.5.7-2.4.4-1.2-.4-2.6-1.1-3.8-2.3-1.1-1.1-1.9-2.4-2.2-3.4-.3-1 0-1.8.5-2.5z" fill="currentColor"/></svg></span>
+  </span>
+</a>
+<nav class="mbar" aria-label="Quick contact">
+  <a class="btn flag" href="/*TEL_LINK*/"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></svg>Call</a>
+  <a class="btn ghost" href="/*WA_LINK*/" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6a9.4 9.4 0 0 0-8.1 14.1L2.6 21.4l4.8-1.3A9.4 9.4 0 1 0 12 2.6z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M8.6 7.4c.3-.6.6-.6.9-.6h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .6l-.5.7c-.1.2-.2.3 0 .6.5.9 1.2 1.6 2.1 2.1.3.2.4.1.6 0l.7-.8c.2-.2.3-.2.6-.1l1.8.9c.3.1.4.2.4.4 0 .5-.2 1.2-.7 1.6-.6.5-1.5.7-2.4.4-1.2-.4-2.6-1.1-3.8-2.3-1.1-1.1-1.9-2.4-2.2-3.4-.3-1 0-1.8.5-2.5z" fill="currentColor"/></svg>WhatsApp</a>
+  <a class="btn" href="#/shop">Shop</a>
+</nav>
 <script>window.BSG_CONFIG = /*CONFIG*/;</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
 <script>/*APPJS*/</script>

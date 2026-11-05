@@ -11,6 +11,8 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const gbp = n => '£' + Number(n).toFixed(2).replace(/\.00$/, '');
 const main = $('#main');
+const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!RM) document.documentElement.classList.add('anim');
 
 const CATS = ['Iron sets', 'Irons', 'Drivers', 'Fairway woods', 'Hybrids', 'Wedges', 'Putters', 'Heads', 'Shafts', 'Headcovers', 'Bags', 'Grips', 'Job lots', 'Other'];
 const CAT_BLURB = {
@@ -20,6 +22,25 @@ const CAT_BLURB = {
   Shafts: 'With and without adapters', Headcovers: 'Tour and retail covers', Bags: 'Stand, cart and staff bags',
   Grips: 'Fresh grips', 'Job lots': 'Bundles at a bundle price', Other: 'Everything else'
 };
+/* line icons for the category tiles, drawn on a 32 grid */
+const ic = d => `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d.replace(/<(path|rect|circle) /g, '<$1 pathLength="1" ')}</svg>`;
+const CAT_ICON = {
+  'Iron sets': ic('<path d="M9 4v17M16 3v18M23 4v17"/><path d="M9 21l-4 5h6zM16 21l-4 5h6zM23 21l-4 5h6z"/>'),
+  Irons: ic('<path d="M21 3 13 21"/><path d="M13 21 7 25.5a1.5 1.5 0 0 0 .9 2.7l7.6-.2 1.3-4.5z"/><path d="M11 26h3"/>'),
+  Drivers: ic('<path d="M24 3 17 19"/><path d="M17 19c-5-1-11 1-12 5s3 5.5 8 5 8-3 7.5-6.5c-.3-2-1.6-3.2-3.5-3.5z"/><path d="M9 25.5h5"/>'),
+  'Fairway woods': ic('<path d="M23 3 17 20"/><path d="M17 20c-4-1-9 .5-10 4s2.5 4.5 6.5 4 6.5-2.5 6.2-5.5c-.2-1.6-1.2-2.3-2.7-2.5z"/><path d="M25 22h3M26.5 20.5v3"/>'),
+  Hybrids: ic('<path d="M22 3 16 20"/><path d="M16 20c-3-.6-7 .5-8 3.5s1.5 4 5 3.6 5.6-2 5.4-4.6c-.1-1.3-1-2.2-2.4-2.5z"/><path d="M10 24.5l7-1"/>'),
+  Wedges: ic('<path d="M21 3 14 20"/><path d="M14 20 7 26.5h10.5L17 20.5z"/><path d="M9.5 24h6M11 22h4.5"/>'),
+  Putters: ic('<path d="M19 3v20"/><path d="M8 23h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2z"/><path d="M14 25.5h4"/>'),
+  Heads: ic('<path d="M20 6l2 7"/><path d="M22 13 9 22a2 2 0 0 0 1 3.6l11.5-.6 2.5-11z"/><path d="M13 21.5l7-1M14.5 19l6-1"/><circle cx="19.5" cy="4.5" r="1.5"/>'),
+  Shafts: ic('<path d="M25 4 9 24"/><path d="M9 24l-3.5 4.5"/><rect x="5" y="22" width="5" height="8" rx="1" transform="rotate(38 7.5 26)"/><path d="M22 8l2 1.6M19 12l2 1.6"/>'),
+  Headcovers: ic('<path d="M11 28V18c0-7 3-12 9-12s7 4 6 8c-.6 2.6-3 4-6 4h-3v10"/><path d="M11 28h6"/><path d="M14 22h3M14 25h3"/><path d="M20 10c1.5 0 2.5 1 2.5 2"/>'),
+  Bags: ic('<rect x="10" y="10" width="12" height="19" rx="3"/><path d="M12 10V5M16 10V3M20 10V5"/><path d="M10 15h12M13 20h6"/><path d="M22 13c3 0 4 2 4 5v4"/>'),
+  Grips: ic('<rect x="12" y="3" width="8" height="26" rx="4"/><path d="M12 9h8M12 13h8M12 17h8M12 21h8"/>'),
+  'Job lots': ic('<path d="M4 11l12-6 12 6-12 6z"/><path d="M4 11v11l12 6 12-6V11"/><path d="M16 17v11"/><path d="M10 8l12 6"/>'),
+  Other: ic('<circle cx="16" cy="16" r="11"/><circle cx="12.5" cy="12.5" r="1"/><circle cx="18" cy="11" r="1"/><circle cx="20.5" cy="16.5" r="1"/><circle cx="15.5" cy="19.5" r="1"/><circle cx="11" cy="18" r="1"/>'),
+  Everything: ic('<rect x="5" y="5" width="9" height="9" rx="2"/><rect x="18" y="5" width="9" height="9" rx="2"/><rect x="5" y="18" width="9" height="9" rx="2"/><rect x="18" y="18" width="9" height="9" rx="2"/>')
+};
 const GRADES = ['Ex-demo', 'Excellent', 'Very good', 'Good', 'Fair'];
 const FLEXES = ['Ladies', 'Senior', 'Regular', 'Stiff/Regular', 'Stiff', 'Extra stiff'];
 const LIST_COLS = 'id,slug,title,price,was_price,category,brand,hand,flex,grade,ebay_condition,featured,status,created_at,sold_at,img:images->>0';
@@ -27,6 +48,7 @@ const LIST_COLS = 'id,slug,title,price,was_price,category,brand,hand,flex,grade,
 let STOCK = null;          // live list, loaded once per visit
 let SOLD = [];
 let CONTENT = {};
+let LEFT = 0;
 
 /* ------------------------------------------------------------------ data */
 async function get(path) {
@@ -53,7 +75,19 @@ async function loadContent() {
   applyContent();
 }
 function applyContent(root = document) {
-  $$('[data-k]', root).forEach(el => { const v = CONTENT[el.dataset.k]; if (v) el.textContent = v; });
+  $$('[data-k]', root).forEach(el => { const v = CONTENT[el.dataset.k]; if (v) el.textContent = v; if (el.hasAttribute('data-split')) splitWords(el); });
+}
+function splitWords(el) {
+  const words = el.textContent.trim().split(/\s+/);
+  el.innerHTML = words.map((w, i) => `<span class="w" style="--i:${i}"><span>${esc(w)}</span></span>`).join(' ');
+  el.setAttribute('aria-label', words.join(' '));
+}
+function countUp(el, to) {
+  if (!el) return;
+  if (RM) { el.textContent = to.toLocaleString('en-GB'); return; }
+  const t0 = performance.now(), dur = 1400;
+  const step = t => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(to * e).toLocaleString('en-GB'); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
 }
 
 /* ------------------------------------------------------------------ bits */
@@ -98,7 +132,7 @@ PAGES[''] = async () => {
   rail.innerHTML = skeletons(6); feat.innerHTML = skeletons(4);
   // finder
   const f = { hand: 'Right' };
-  $$('#finder .seg button').forEach(b => b.onclick = () => { $$('#finder .seg button').forEach(x => x.setAttribute('aria-pressed', x === b)); f.hand = b.dataset.v; });
+  $$('#finder .seg button').forEach((b, i) => b.onclick = () => { $$('#finder .seg button').forEach(x => x.setAttribute('aria-pressed', x === b)); $('#finder .seg').style.setProperty('--i', i); f.hand = b.dataset.v; });
   $('#finder').onsubmit = e => {
     e.preventDefault();
     const q = new URLSearchParams();
@@ -109,23 +143,27 @@ PAGES[''] = async () => {
   };
   try {
     const s = await loadStock();
-    $('#stockcount').textContent = s.length.toLocaleString('en-GB');
-    $('#leftcount').textContent = s.filter(p => p.hand === 'Left').length;
+    countUp($('#stockcount'), s.length);
+    countUp($('#leftcount'), s.filter(p => p.hand === 'Left').length);
+    LEFT = s.filter(p => p.hand === 'Left').length;
     rail.innerHTML = s.slice(0, 12).map(card).join('');
     const fe = s.filter(p => p.featured);
     feat.innerHTML = (fe.length ? fe : s).slice(0, 8).map(card).join('');
     const counts = {}; s.forEach(p => counts[p.category] = (counts[p.category] || 0) + 1);
     const top = CATS.filter(c => counts[c]).sort((a, b) => counts[b] - counts[a]);
-    const order = ['Iron sets', ...top.filter(c => c !== 'Iron sets')].slice(0, 11);
-    $('#cats').innerHTML = order.map((c, i) => {
-      const pic = s.find(p => p.category === c && p.img);
-      return `<a class="cat${i === 0 ? ' big' : ''}" href="#/shop?cat=${encodeURIComponent(c)}"><div><b>${esc(c)}</b><br><span>${esc(CAT_BLURB[c] || '')}</span></div><span>${counts[c]} in stock</span>${pic && i ? `<img loading="lazy" alt="" src="${esc(img(pic.img, 225))}">` : ''}</a>`;
-    }).join('') + `<a class="cat" href="#/shop"><div><b>Everything</b><br><span>Browse the lot</span></div><span>${s.length} in stock</span></a>`;
+    const order = (counts['Iron sets'] ? ['Iron sets', ...top.filter(c => c !== 'Iron sets')] : top).slice(0, 12);
+    const tile = (c, href, blurb, n, cls, pic) => `<a class="cat${cls}" href="${href}">
+        <span class="cat-ic" aria-hidden="true">${CAT_ICON[c] || CAT_ICON.Other}</span>
+        <span class="cat-t"><b>${esc(c)}</b><span class="cat-b">${esc(blurb)}</span></span>
+        <span class="cat-n">${n} in stock</span>
+        ${pic ? `<img loading="lazy" alt="" src="${esc(img(pic.img, 500))}">` : ''}</a>`;
+    $('#cats').innerHTML = order.map((c, i) => tile(c, `#/shop?cat=${encodeURIComponent(c)}`, CAT_BLURB[c] || '', counts[c], i === 0 ? ' big' : '', s.find(p => p.category === c && p.img && (i || p.featured)) || s.find(p => p.category === c && p.img))).join('')
+      + tile('Everything', '#/shop', 'Browse the lot', s.length, ' all', null);
     const brands = [...new Set(s.map(p => p.brand).filter(Boolean))].sort();
     $('#f-brand').innerHTML = '<option value="">Any brand</option>' + brands.map(b => `<option>${esc(b)}</option>`).join('');
     $('#f-cat').innerHTML = '<option value="">Anything</option>' + CATS.filter(c => counts[c]).map(c => `<option>${esc(c)}</option>`).join('');
     const hp = s.find(p => p.featured && p.img) || s[0];
-    if (hp) { $('#heropic').innerHTML = `<img src="${esc(img(hp.img, 1600))}" alt=""><a class="tag" href="#/club/${esc(hp.slug)}">${gbp(hp.price)} <small>${esc(hp.title.split('/')[0].trim().slice(0, 40))}</small></a>`; }
+    if (hp) { $('#heropic').innerHTML = `<img src="${esc(img(hp.img, 1600))}" alt=""><a class="tag swing-in" href="#/club/${esc(hp.slug)}">${gbp(hp.price)} <small>${esc(hp.title.split('/')[0].trim().slice(0, 40))}</small></a>`; }
   } catch (e) {
     rail.innerHTML = feat.innerHTML = `<p class="note err">${esc(e.message)}. Refresh the page to try again.</p>`;
   }
@@ -269,7 +307,7 @@ PAGES.club = async (q, slug) => {
   applyContent(main);
   // gallery
   let gi = 0;
-  const show = i => { gi = (i + pics.length) % pics.length; const m = $('#gmain img'); m.src = img(pics[gi], 1600); m.alt = `${p.title}, photo ${gi + 1} of ${pics.length}`; $$('.thumbs button').forEach(b => b.setAttribute('aria-current', +b.dataset.i === gi)); };
+  const show = i => { gi = (i + pics.length) % pics.length; const m = $('#gmain img'); m.classList.remove('fade'); void m.offsetWidth; m.classList.add('fade'); m.src = img(pics[gi], 1600); m.alt = `${p.title}, photo ${gi + 1} of ${pics.length}`; $$('.thumbs button').forEach(b => b.setAttribute('aria-current', +b.dataset.i === gi)); };
   $$('.thumbs button').forEach(b => b.onclick = () => show(+b.dataset.i));
   $('.prev')?.addEventListener('click', () => show(gi - 1));
   $('.next')?.addEventListener('click', () => show(gi + 1));
@@ -361,10 +399,57 @@ async function route() {
   setNav(name);
   $('#drawer').classList.remove('open');
   if (!route.skipScroll) window.scrollTo(0, 0);
+  main.classList.remove('enter'); void main.offsetWidth; main.classList.add('enter');
   await fn(q, decodeURIComponent(rest.join('/')));
   main.focus({ preventScroll: true });
+  decorate();
 }
 window.addEventListener('hashchange', route);
+
+/* ------------------------------------------------------------------ motion */
+// Reveal on scroll: anything matching REVEAL fades up as it enters the screen,
+// siblings staggered. New content (stock arriving, page changes) is picked up automatically.
+const REVEAL = '.head, .card, .cat, .scale > div, .steps li, .trust li, .faq details, .prose > *, .finder, .cond, .actions, .reassure li, .specs tr, .empty, .formgrid > *, .page-head > *';
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px', threshold: .08 }) : null;
+function decorate() {
+  if (RM || !io) return;
+  $$(REVEAL, main).forEach(el => {
+    if (el.dataset.r !== undefined) return;
+    el.dataset.r = '';
+    const sib = [...el.parentElement.children].filter(x => x.dataset.r !== undefined);
+    el.style.setProperty('--d', Math.min(sib.indexOf(el), 8) * 70 + 'ms');
+    io.observe(el);
+  });
+  $$('.band, .trust, .scale, .cats', main).forEach(el => { if (!el.dataset.w) { el.dataset.w = 1; io.observe(el); } });
+}
+let decoQ = 0;
+new MutationObserver(() => { cancelAnimationFrame(decoQ); decoQ = requestAnimationFrame(decorate); }).observe(main, { childList: true, subtree: true });
+
+// header shrinks and a thin progress line fills as you scroll
+const top_ = $('.top'), prog = $('#progress');
+let ticking = false;
+addEventListener('scroll', () => {
+  if (ticking) return; ticking = true;
+  requestAnimationFrame(() => {
+    const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
+    top_.classList.toggle('sc', y > 30);
+    if (prog) prog.style.transform = `scaleX(${h > 0 ? Math.min(1, y / h) : 0})`;
+    ticking = false;
+  });
+}, { passive: true });
+
+// announcement strip cycles through a few messages
+(function ticker() {
+  const box = $('#ticker'); if (!box || RM) return;
+  let i = 0;
+  setInterval(() => {
+    const msgs = [CONTENT.announce || 'Free UK delivery on every order. 14-day returns.', '100% positive feedback on eBay, over 1,200 clubs sold', 'New stock goes up most days', LEFT ? `Left-handed? ${LEFT} clubs in stock right now` : 'Plenty of left-handed clubs in stock', 'Got clubs to sell? We will make you an offer'];
+    i = (i + 1) % msgs.length;
+    box.classList.add('out');
+    setTimeout(() => { box.textContent = msgs[i]; box.classList.remove('out'); box.classList.add('inn'); setTimeout(() => box.classList.remove('inn'), 500); }, 380);
+  }, 4200);
+})();
+if (RM) $$('svg').forEach(s => s.pauseAnimations && s.pauseAnimations());
 
 /* header search */
 $('#topsearch').addEventListener('submit', e => { e.preventDefault(); const v = $('#q').value.trim(); location.hash = '#/shop' + (v ? '?q=' + encodeURIComponent(v) : ''); });
@@ -372,17 +457,64 @@ $('#burger').onclick = () => $('#drawer').classList.add('open');
 $$('#drawer .scrim, #drawer .x').forEach(el => el.onclick = () => $('#drawer').classList.remove('open'));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#drawer').classList.remove('open'); $('#filters')?.classList.remove('open'); } });
 
-/* preview-only logo chooser */
+/* ------------------------------------------------------------------ looks
+   Logo and colour scheme. The preview shows a chooser; the live build fixes both. */
+const SCHEMES = {
+  fairway: { name: 'Fairway', note: 'Green and flag yellow', ink: '#1E2328', turf: '#1F5C45', flag: '#FFC629', paper: '#FAFAF7', soft: '#9FC9B4' },
+  links:   { name: 'Links', note: 'Navy and sand', ink: '#16243A', turf: '#1F3A60', flag: '#E4B866', paper: '#F8F7F2', soft: '#AFC3DE' },
+  claret:  { name: 'Clubhouse', note: 'Claret and gold', ink: '#2A1A1D', turf: '#6E1F2F', flag: '#D9A93F', paper: '#F8F4EC', soft: '#E3B9B9' },
+  tour:    { name: 'Tour', note: 'Black and orange', ink: '#141618', turf: '#2A2E33', flag: '#FF6A2B', paper: '#F6F6F4', soft: '#B9BEC4' },
+  sky:     { name: 'Sky', note: 'Teal and amber', ink: '#122630', turf: '#0F6E8C', flag: '#FFB23E', paper: '#F7FAFB', soft: '#A9D3E1' }
+};
+let LOOK = { logo: C.logo || 'a', scheme: C.scheme || 'fairway' };
+const BASE = SCHEMES.fairway;
+function recolour(uri, sc) {
+  if (sc === BASE) return uri;
+  try {
+    let svg = atob(uri.split(',')[1]);
+    const map = { [BASE.ink]: sc.ink, [BASE.turf]: sc.turf, [BASE.flag]: sc.flag, [BASE.paper]: sc.paper, [BASE.soft]: sc.soft };
+    svg = svg.replace(/#[0-9A-Fa-f]{6}/g, h => map[h.toUpperCase()] || h);
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  } catch (e) { return uri; }
+}
+function applyLook() {
+  const sc = SCHEMES[LOOK.scheme] || BASE;
+  document.documentElement.dataset.scheme = LOOK.scheme;
+  $('meta[name="theme-color"]')?.setAttribute('content', sc.turf);
+  $$('[data-logo-slot]').forEach(el => { el.dataset.logo = LOOK.logo; const im = $('img', el); im.src = recolour(C.logos[LOOK.logo + (el.dataset.logoSlot === 'dark' ? '-dark' : '-light')], sc); });
+  const lp = $('.lookpick');
+  if (lp) {
+    $$('[data-l]', lp).forEach(b => b.setAttribute('aria-pressed', b.dataset.l === LOOK.logo));
+    $$('[data-s]', lp).forEach(b => b.setAttribute('aria-pressed', b.dataset.s === LOOK.scheme));
+    $('.lp-dots', lp).innerHTML = [sc.ink, sc.turf, sc.flag].map(c => `<i style="background:${c}"></i>`).join('');
+  }
+  try { localStorage.setItem('bsg-look', JSON.stringify(LOOK)); } catch (e) {}
+}
 if (C.preview) {
-  const pick = document.createElement('div'); pick.className = 'logopick';
-  pick.innerHTML = '<p>Try a logo</p><div><button data-l="a" aria-pressed="true">Modern</button><button data-l="b">Heritage</button><button data-l="c">Sporty</button></div>';
-  document.body.appendChild(pick);
-  pick.onclick = e => { const b = e.target.closest('button'); if (!b) return; setLogo(b.dataset.l); $$('button', pick).forEach(x => x.setAttribute('aria-pressed', x === b)); };
+  try { const saved = JSON.parse(localStorage.getItem('bsg-look') || 'null'); if (saved && SCHEMES[saved.scheme] && C.logos[saved.logo + '-light']) LOOK = saved; } catch (e) {}
+  const lp = document.createElement('div'); lp.className = 'lookpick';
+  lp.innerHTML = `<button type="button" class="lp-open" aria-expanded="false"><span class="lp-dots"></span>Try a look</button>
+    <div class="lp-panel" role="dialog" aria-label="Try a logo and colour scheme">
+      <p>Try a logo <button type="button" class="lp-x" aria-label="Close">×</button></p>
+      <div><button type="button" data-l="a">Modern</button><button type="button" data-l="b">Heritage</button><button type="button" data-l="c">Sporty</button></div>
+      <p>Try a colour scheme</p>
+      <div>${Object.entries(SCHEMES).map(([k, v]) => `<button type="button" data-s="${k}" title="${v.note}"><span>${[v.ink, v.turf, v.flag].map(c => `<i style="background:${c}"></i>`).join('')}</span>${v.name}</button>`).join('')}</div>
+      <small>Your choice is remembered on this device. Tell Dunnworks which you like.</small>
+    </div>`;
+  document.body.appendChild(lp);
+  lp.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.classList.contains('lp-open')) { lp.classList.add('open'); return; }
+    if (b.classList.contains('lp-x')) { lp.classList.remove('open'); return; }
+    if (b.dataset.l) LOOK.logo = b.dataset.l;
+    if (b.dataset.s) LOOK.scheme = b.dataset.s;
+    applyLook();
+  });
+  // open it once on the first visit so the client knows it is there
+  try { if (!localStorage.getItem('bsg-look-seen')) { setTimeout(() => lp.classList.add('open'), 2500); localStorage.setItem('bsg-look-seen', '1'); } } catch (e) {}
 }
-function setLogo(l) {
-  $$('[data-logo-slot]').forEach(el => { el.dataset.logo = l; const im = $('img', el); im.src = C.logos[l + (el.dataset.logoSlot === 'dark' ? '-dark' : '-light')]; });
-}
-setLogo(C.preview ? 'a' : (C.logo || 'a'));
+applyLook();
+
 loadContent();
 route();
 })();
