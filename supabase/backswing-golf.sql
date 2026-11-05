@@ -1,0 +1,9 @@
+-- Backswing Golf shop (applied 5 Nov 2026 as migrations bsg_shop_schema, bsg_tradein_photos,
+-- bsg_ebay_auth_and_trigger, bsg_load_ebay_stock). Kept here as the record.
+-- Tables: bsg_editors, bsg_products, bsg_tradeins, bsg_content, bsg_sync_log, bsg_ebay_auth
+-- Buckets: bsg-images (public read, editors write), bsg-tradeins (private, public insert under in/)
+-- Access: bsg_is_editor() = dw_is_owner() or email in bsg_editors.
+--   anon reads live and sold stock and wording, and can submit trade-ins; editors do everything else.
+--   bsg_ebay_auth has no policies: only the bsg-ebay-sync function (service role) touches tokens.
+-- Trigger bsg_touch(): stamps updated_at/sold_at; an admin edit to an eBay item's title, price,
+--   qty or status sets sync_state = 'pending_push' unless the sync itself set sync_state.
