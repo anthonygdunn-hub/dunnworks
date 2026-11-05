@@ -93,30 +93,35 @@ def save(name, s):
         fh.write(s)
 
 # ---------------------------------------------------------------- A: modern
-# Mark: the backswing itself. A three-quarter arc traced by the clubhead, ending
-# at the top of the swing in a ball. Wordmark lowercase, tight, calm.
-def mark_a(x, y, r, ink, ball):
-    sw = r * 0.2
-    def pt(deg):
+# Mark: the backswing itself, set in a solid disc so it reads at any size. A thick
+# yellow arc traced by the clubhead round the back of the swing, the ball at address.
+# Wordmark heavy lowercase; GOLF in a yellow tag.
+def mark_a(x, y, r, disc, arc, ball):
+    def pt(deg, rr):
         a = math.radians(deg)
-        return x + r * math.sin(a), y - r * math.cos(a)
-    # clubhead path: from address at the bottom, round the back, to just past the top
-    pts = [pt(d) for d in range(190, 412, 4)]
+        return x + rr * math.sin(a), y - rr * math.cos(a)
+    ra = r * 0.6; sw = r * 0.2
+    pts = [pt(d, ra) for d in range(196, 414, 3)]
     d = 'M' + ' L'.join(f'{px:.1f} {py:.1f}' for px, py in pts)
-    bx, by = pt(180)
-    return (f'<path d="{d}" fill="none" stroke="{ink}" stroke-width="{sw:.1f}" stroke-linecap="round" stroke-linejoin="round"/>'
-            f'<circle cx="{bx:.1f}" cy="{by + sw*0.2:.1f}" r="{sw*0.85:.1f}" fill="{ball}"/>')
+    bx, by = pt(180, ra)
+    return (f'<circle cx="{x}" cy="{y}" r="{r}" fill="{disc}"/>'
+            f'<path d="{d}" fill="none" stroke="{arc}" stroke-width="{sw:.1f}" stroke-linecap="round" stroke-linejoin="round"/>'
+            f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="{sw*0.78:.1f}" fill="{ball}"/>')
 
-def logo_a(ink, ball, sub, w=760, h=200):
-    f = font('barlow', 700)
-    fs = font('barlow', 500)
-    word, ww = text_paths(f, 'backswing', 112, 210, 128, track=-0.02)
-    tag, _ = text_paths(fs, 'GOLF', 30, 216, 172, track=0.32)
-    return svg(w, h, mark_a(96, 94, 64, ink, ball) +
-               f'<path d="{word}" fill="{ink}"/><path d="{tag}" fill="{sub}"/>')
+def logo_a(ink, disc, arc, ball, tagbg, tagfg, h=200):
+    f = font('barlow', 800)
+    fs = font('barlow', 700)
+    word, ww = text_paths(f, 'backswing', 128, 214, 122, track=-0.025)
+    tag, tw = text_paths(fs, 'GOLF', 30, 0, 0, track=0.3)
+    tx, ty = 220, 142
+    tag, tw = text_paths(fs, 'GOLF', 30, tx + 14, ty + 31, track=0.3)
+    pill = f'<rect x="{tx}" y="{ty}" width="{tw + 28:.0f}" height="42" rx="6" fill="{tagbg}"/>'
+    w = int(214 + ww + 16)
+    return svg(w, h, mark_a(96, 100, 92, disc, arc, ball) +
+               f'<path d="{word}" fill="{ink}"/>' + pill + f'<path d="{tag}" fill="{tagfg}"/>')
 
-def mark_only_a(ink, ball, bg=None):
-    return svg(200, 200, mark_a(100, 104, 66, ink, ball), bg)
+def mark_only_a(disc, arc, ball, bg=None):
+    return svg(200, 200, mark_a(100, 100, 96, disc, arc, ball), bg)
 
 # ---------------------------------------------------------------- B: heritage
 # Roundel: name around the top, what they do around the bottom, crossed irons
@@ -137,19 +142,20 @@ def irons(cx, cy, col):
 def logo_b(ring, fill, ink, accent, size=400):
     c = size / 2
     serif = font('dm-serif-display', 400)
-    small = font('barlow', 600)
+    small = font('barlow', 700)
     top = arc_text(serif, "BACKSWING", 52, c, c, 144, 0, track=0.08, outside=True)
     bottom = arc_text(small, 'PRE-LOVED GOLF CLUBS', 22, c, c, 168, 180, track=0.22, outside=False)
     mono, _ = text_paths(serif, 'BG', 74, c, c + 26, anchor='middle')
     body = (
         f'<circle cx="{c}" cy="{c}" r="{c-6}" fill="{fill}"/>'
-        f'<circle cx="{c}" cy="{c}" r="{c-6}" fill="none" stroke="{ring}" stroke-width="8"/>'
+        f'<circle cx="{c}" cy="{c}" r="{c-8}" fill="none" stroke="{ring}" stroke-width="12"/>'
+        f'<circle cx="{c}" cy="{c}" r="{c-22}" fill="none" stroke="{ring}" stroke-width="2"/>'
         f'<circle cx="{c}" cy="{c}" r="{c-66}" fill="none" stroke="{ring}" stroke-width="2.5"/>'
         f'<path d="{top}" fill="{ink}"/>'
         f'<path d="{bottom}" fill="{ink}"/>'
         f'<circle cx="{c-150}" cy="{c+12}" r="6" fill="{accent}"/><circle cx="{c+150}" cy="{c+12}" r="6" fill="{accent}"/>'
         f'<g opacity="1">{irons(c, c+2, accent)}</g>'
-        f'<circle cx="{c}" cy="{c}" r="58" fill="{fill}" stroke="{ring}" stroke-width="2.5"/>'
+        f'<circle cx="{c}" cy="{c}" r="60" fill="{fill}" stroke="{ring}" stroke-width="5"/>'
         f'<path d="{mono}" fill="{ink}"/>'
     )
     return svg(size, size, body)
@@ -160,12 +166,13 @@ def logo_b(ring, fill, ink, accent, size=400):
 def logo_c(ink, flag, sub, w=820, h=220):
     f = font('barlow-condensed', 800, 'italic')
     fs = font('barlow-condensed', 600, 'italic')
-    word, ww = text_paths(f, 'BACKSWING', 150, 150, 150, track=0.0)
-    tag, _ = text_paths(fs, 'GOLF  /  USED & EX-DEMO CLUBS', 30, 162, 196, track=0.12)
+    word, ww = text_paths(f, 'BACKSWING', 160, 150, 152, track=0.0)
+    tag, _ = text_paths(font('barlow-condensed', 800, 'italic'), 'GOLF  /  USED & EX-DEMO CLUBS', 32, 160, 210, track=0.1)
     flagd = (f'<path d="M38 18 L60 18 L48 168 L26 168 Z" fill="{ink}"/>'
              f'<path d="M60 18 L142 44 L54 86 Z" fill="{flag}"/>'
              f'<path d="M14 172 L72 172 L68 186 L10 186 Z" fill="{flag}"/>')
-    return svg(w, h, flagd + f'<path d="{word}" fill="{ink}"/><path d="{tag}" fill="{sub}"/>')
+    stripe = f'<path d="M162 168 L{150 + ww - 6:.0f} 168 L{146 + ww - 6:.0f} 176 L158 176 Z" fill="{flag}"/>'
+    return svg(int(150 + ww + 20), h + 14, flagd + f'<path d="{word}" fill="{ink}"/>' + stripe + f'<path d="{tag}" fill="{sub}"/>')
 
 def mark_only_c(ink, flag, bg=None):
     return svg(200, 200,
@@ -174,11 +181,11 @@ def mark_only_c(ink, flag, bg=None):
                f'<path d="M14 172 L72 172 L68 186 L10 186 Z" fill="{flag}"/></g>', bg)
 
 files = {
-    'a-modern-light.svg':  logo_a(INK, FLAG, TURF),
-    'a-modern-dark.svg':   logo_a(PAPER, FLAG, '#9FC9B4'),
-    'a-mark-light.svg':    mark_only_a(INK, FLAG),
-    'a-mark-dark.svg':     mark_only_a(PAPER, FLAG, INK),
-    'b-heritage-light.svg': logo_b(TURF, PAPER, TURF, TURF),
+    'a-modern-light.svg':  logo_a(INK, TURF, FLAG, PAPER, FLAG, INK),
+    'a-modern-dark.svg':   logo_a(PAPER, TURF, FLAG, PAPER, FLAG, INK),
+    'a-mark-light.svg':    mark_only_a(TURF, FLAG, PAPER),
+    'a-mark-dark.svg':     mark_only_a(TURF, FLAG, PAPER, INK),
+    'b-heritage-light.svg': logo_b(FLAG, TURF, PAPER, FLAG),
     'b-heritage-dark.svg':  logo_b(FLAG, TURF, PAPER, FLAG),
     'c-sporty-light.svg':  logo_c(INK, FLAG, TURF),
     'c-sporty-dark.svg':   logo_c(PAPER, FLAG, FLAG),
