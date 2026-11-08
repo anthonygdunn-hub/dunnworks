@@ -360,7 +360,8 @@
         '<div data-sec="search"><p class="dwt-loading">Loading...</p></div></section>' +
       '<section class="dwt-sec"><h2>Links back from client sites <small>Checked live</small></h2>' +
         '<p class="dwt-lede">Every site you have built, fetched just now and searched for a real link to dunnworks.io. ' +
-        'A credit in the footer of a site that ranks is worth more than anything you can do to your own pages.</p>' +
+        'A credit in the footer of a site that ranks is worth more than anything you can do to your own pages. ' +
+        'Only the home page is read, so a credit that sits on an inner page shows up here as no link.</p>' +
         '<div data-sec="links"><p class="dwt-loading">Loading...</p></div></section>' +
       '<section class="dwt-sec"><h2>What this cannot see <small>Honestly</small></h2>' +
         '<div data-sec="gap"></div></section>';
