@@ -556,7 +556,55 @@
 
   /* -------------------------------------------------------------------- css */
 
+  /* The shared dwt- styles live in dw-traffic.js, but this view can be the first
+     one opened in a session, so it carries the same block under the same id.
+     Whichever module renders first wins and the other skips it. Keep in step
+     with the matching block in dw-traffic.js. */
+  function base() {
+    if (document.getElementById('dwt-css')) return;
+    var s = document.createElement('style'); s.id = 'dwt-css';
+    s.textContent = [
+      '.dwt-bar-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:20px}',
+      '.dwt-bar-top .sp{flex:1 1 10px}',
+      '.dwt-sec{margin-bottom:30px}',
+      '.dwt-sec h2{font-size:19px;margin-bottom:4px}',
+      '.dwt-sec h2 small{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin-left:10px;font-weight:400}',
+      '.dwt-lede{color:var(--muted);font-size:14px;margin-bottom:14px;max-width:70ch}',
+      '.dwt-loading,.dwt-none{color:var(--muted-2);font-size:14px}',
+      '.dwt-err{color:var(--bad);font-size:14px}',
+      '.dwt-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:9px;margin-bottom:18px}',
+      '.dwt-stat{border:1px solid var(--line);border-radius:var(--radius);background:var(--ink-2);padding:14px 16px}',
+      '.dwt-stat b{display:block;font-family:var(--font-display);font-size:26px;line-height:1.1}',
+      '.dwt-stat span{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted-2);margin-top:4px}',
+      '.dwt-stat em{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:6px}',
+      '.dwt-d{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em}',
+      '.dwt-d.up{color:#4fd08a}.dwt-d.down{color:#ff6b8a}',
+      '.dwt-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px}',
+      '.dwt-bars{display:grid;gap:7px}',
+      '.dwt-bar{display:grid;grid-template-columns:minmax(90px,30%) 1fr auto;gap:11px;align-items:center;font-size:13.5px}',
+      '.dwt-bk{color:var(--paper);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '.dwt-bt{background:var(--ink-3);border-radius:2px;height:9px;overflow:hidden}',
+      '.dwt-bt i{display:block;height:100%;background:var(--accent);border-radius:2px}',
+      '.dwt-bn{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}',
+      '.dwt-bn em{font-style:normal;color:var(--muted-2);font-size:11px}',
+      '.dwt-days{display:flex;align-items:flex-end;gap:3px;height:120px;margin:6px 0 10px}',
+      '.dwt-day{flex:1 1 0;min-width:2px;background:var(--ink-3);border-radius:2px 2px 0 0;position:relative}',
+      '.dwt-day i{position:absolute;left:0;right:0;bottom:0;background:var(--accent);border-radius:2px 2px 0 0}',
+      '.dwt-axis{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:var(--muted-2)}',
+      '.dwt-tbl{width:100%;border-collapse:collapse;font-size:13.5px}',
+      '.dwt-tbl th{text-align:left;font-family:var(--font-mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted-2);font-weight:400;padding:0 10px 8px 0;border-bottom:1px solid var(--line)}',
+      '.dwt-tbl td{padding:8px 10px 8px 0;border-bottom:1px solid var(--line);color:var(--muted)}',
+      '.dwt-tbl td:first-child{color:var(--paper)}',
+      '.dwt-tbl .n{font-family:var(--font-mono);font-size:12px;text-align:right;white-space:nowrap}',
+      '.dwt-flag{border:1px solid var(--accent);border-radius:var(--radius);background:var(--accent-dim);padding:14px 16px;font-size:14px;color:var(--paper);margin-bottom:16px}',
+      '.dwt-flag b{font-weight:600}',
+      '@media (max-width:620px){.dwt-bar{grid-template-columns:minmax(76px,40%) 1fr auto}}'
+    ].join('');
+    document.head.appendChild(s);
+  }
+
   function css() {
+    base();
     if (document.getElementById('dws-css')) return;
     var s = document.createElement('style'); s.id = 'dws-css';
     s.textContent = [
