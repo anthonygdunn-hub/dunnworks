@@ -106,7 +106,13 @@
         });
 
         var imgs = [].slice.call(d.querySelectorAll('img'));
-        var noAlt = imgs.filter(function (i) { return !(i.getAttribute('alt') || '').trim(); });
+        /* An image needs an alt ATTRIBUTE. alt="" is not a missing alt: it is the
+           correct way to mark an image decorative so a screen reader skips it,
+           which is right for a logo sitting beside its own wordmark, or for the
+           layers of one composite picture. Counting those as failures pushes you
+           into writing noise like "logo" next to the word "Dunnworks". */
+        var noAlt = imgs.filter(function (i) { return !i.hasAttribute('alt'); });
+        var decor = imgs.filter(function (i) { return i.hasAttribute('alt') && !(i.getAttribute('alt') || '').trim(); });
 
         var out = {}, ext = {};
         [].slice.call(d.querySelectorAll('a[href]')).forEach(function (a) {
@@ -126,7 +132,7 @@
           words: words,
           types: types.filter(function (t, i) { return types.indexOf(t) === i; }),
           badLd: badLd,
-          imgs: imgs.length, noAlt: noAlt.length,
+          imgs: imgs.length, noAlt: noAlt.length, decor: decor.length,
           outLinks: Object.keys(out),
           ext: Object.keys(ext).filter(function (h) { return h && !/dunnworks\.io$/.test(h); }),
           ogTitle: !!d.querySelector('meta[property="og:title"]'),
@@ -268,8 +274,9 @@
         'Only ' + p.h2 + ' subheading' + (p.h2 === 1 ? '' : 's') + ' across ' + p.words + ' words',
         'Break it up with H2s. People scan headings before they read, and so does Google.');
       check('content', p.noAlt === 0, p.noAlt > 5 ? 'med' : 'low', p.path,
-        p.noAlt + ' of ' + p.imgs + ' images have no alt text',
-        'Describe each image in its alt attribute. It is how Google Images finds them and how a screen reader reads them.');
+        p.noAlt + ' of ' + p.imgs + ' images have no alt attribute at all',
+        'Give each one an alt. Where the image is purely decorative write alt="", which is the correct way to ' +
+        'tell a screen reader to skip it - that is not the same as leaving the attribute off.');
 
       /* --- structured data --- */
       var want = wanted(p.path);
@@ -454,7 +461,8 @@
           f((p.outLinks || []).length >= 3, (p.outLinks || []).length) +
         '</tr>';
       }).join('') + '</tbody></table></div>' +
-      '<p class="dws-note">Title and Desc are character counts. Alt is images with no alt text over images on the page. ' +
+      '<p class="dws-note">Title and Desc are character counts. Alt counts images with no alt attribute, over images ' +
+      'on the page; alt="" counts as handled, because that is how you correctly mark an image decorative. ' +
       'In and Out are internal links. Red is a failed check.</p>');
   }
 
