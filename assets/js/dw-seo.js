@@ -25,6 +25,10 @@
   /* pages robots.txt keeps out, so the audit does not flag our own back rooms */
   var PRIVATE = /^\/(console|admin|preview|client|editor)(\/|$)/;
 
+  /* legal boilerplate: it has to exist, but it is not trying to rank, so the
+     thin-content and internal-link checks would only ever cry wolf about it */
+  var UTILITY = /^\/(cookies|privacy|terms|legal)(\.html|\/|$)/;
+
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
     return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
   function num(x) { return x == null || isNaN(x) ? '-' : Number(x).toLocaleString('en-GB'); }
@@ -255,9 +259,11 @@
         p.h1.length === 0 ? 'No H1' : p.h1.length + ' H1 headings',
         p.h1.length === 0 ? 'Add one H1 saying plainly what the page is for.'
                           : 'Keep one H1 and demote the rest to H2. More than one muddles what the page is about.');
-      check('content', p.words >= 300, p.words < 150 ? 'high' : 'med', p.path,
-        'Only ' + p.words + ' words of content',
-        'Under 300 words rarely ranks for anything competitive. Say more about the actual job, in your own words.');
+      if (!UTILITY.test(p.path)) {
+        check('content', p.words >= 300, p.words < 150 ? 'high' : 'med', p.path,
+          'Only ' + p.words + ' words of content',
+          'Under 300 words rarely ranks for anything competitive. Say more about the actual job, in your own words.');
+      }
       check('content', p.h2 >= 2 || p.words < 300, 'low', p.path,
         'Only ' + p.h2 + ' subheading' + (p.h2 === 1 ? '' : 's') + ' across ' + p.words + ' words',
         'Break it up with H2s. People scan headings before they read, and so does Google.');
@@ -277,13 +283,19 @@
       }
 
       /* --- internal links --- */
-      check('links', p.inbound >= 1, 'high', p.path, 'Nothing on the site links to it',
-        'Link to it from a page people actually reach. An orphan page is one Google finds last and trusts least.');
-      check('links', p.inbound >= 3 || p.path === '/', 'low', p.path,
-        'Only ' + p.inbound + ' internal link' + (p.inbound === 1 ? '' : 's') + ' point here',
-        'Add a couple more from related pages. Internal links are the one ranking factor entirely in your hands.');
+      check('links', p.inbound >= 1, UTILITY.test(p.path) ? 'low' : 'high', p.path,
+        'No link to it in the HTML as served',
+        'This audit reads the HTML the server sends, which is what a crawler sees first. A link added afterwards ' +
+        'by JavaScript is found late, if at all. Put a plain <a> in the page source.');
+      if (!UTILITY.test(p.path)) {
+        check('links', p.inbound >= 3 || p.path === '/', 'low', p.path,
+          'Only ' + p.inbound + ' internal link' + (p.inbound === 1 ? '' : 's') +
+            (p.inbound === 1 ? ' points' : ' point') + ' here',
+          'Add a couple more from related pages. Internal links are the one ranking factor entirely in your hands.');
+      }
       check('links', (p.outLinks || []).length >= 3, 'low', p.path,
-        'Links out to only ' + (p.outLinks || []).length + ' other pages',
+        'Links out to only ' + (p.outLinks || []).length + ' other page' +
+          ((p.outLinks || []).length === 1 ? '' : 's'),
         'Send people somewhere next. A page with no way onward is where the visit ends.');
 
       if (!inSitemap) {
