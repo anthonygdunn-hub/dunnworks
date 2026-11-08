@@ -434,6 +434,51 @@
     else document.body.insertBefore(bar, document.body.firstChild);
   })();
 
+  /* ---- visit counter ----
+     Sends one beacon when a page opens and one with the time spent when it closes.
+     No cookies, nothing kept on the visitor's device, and the edge function stores a
+     daily hash rather than the IP, so this needs no consent. Private areas are skipped. */
+  (function () {
+    if (/^\/(console|admin|preview|triplog)(\/|$)/.test(window.location.pathname)) return;
+    if (navigator.doNotTrack === "1" || window.doNotTrack === "1") return;
+
+    var URL_ = "https://acdpgarasgfhvupzsbxf.supabase.co/functions/v1/dw-track";
+    var vid = (Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+    var began = Date.now();
+    var sent = false;
+
+    function post(body, beacon) {
+      var s = JSON.stringify(body);
+      try {
+        if (beacon && navigator.sendBeacon) {
+          navigator.sendBeacon(URL_, new Blob([s], { type: "text/plain;charset=UTF-8" }));
+          return;
+        }
+        fetch(URL_, { method: "POST", body: s, headers: { "Content-Type": "text/plain;charset=UTF-8" },
+                      keepalive: true, mode: "cors" }).catch(function () {});
+      } catch (e) {}
+    }
+
+    var utm = null;
+    try {
+      var q = new URLSearchParams(window.location.search);
+      utm = q.get("utm_source") || q.get("ref") || q.get("src") || null;
+    } catch (e) {}
+
+    post({ v: vid, p: window.location.pathname, r: document.referrer || null,
+           u: utm, w: window.innerWidth || 0 }, false);
+
+    function leave() {
+      if (sent) return;
+      sent = true;
+      post({ t: "leave", v: vid, ms: Date.now() - began }, true);
+    }
+    window.addEventListener("pagehide", leave);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") leave();
+    });
+  })();
+
   /* ---- private area link in every footer ---- */
   (function () {
     if (/^\/(console|admin|preview)(\/|$)/.test(window.location.pathname)) return;
