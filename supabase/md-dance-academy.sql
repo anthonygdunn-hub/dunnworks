@@ -51,5 +51,16 @@
 --   email and phone alert; on the 1st each real family (email, active dancer, not demo) gets fees owed, weekly
 --   classes, that month's lessons, events entered, events open for entries and other dates. md_mailings holds each
 --   month's status (scheduled, held, sending, sent) and principals can hold it from Fees; md_mail_log records sends.
+-- Money out (migrations md_money_out, md_money_out_fixes_and_samples, md_pay_policy_recursion_fix, md_pay_skip_unset_principals):
+--   md_pay_settings  per staff: employed or self-employed, hourly rate, per group class, per lesson, or % share of lesson price
+--   md_pay_runs / md_pay_lines  md_pay_build(start, end[, run]) drafts pay from the timetable: group classes (not Private
+--                  slots, not closed days from md_closed()), lessons booked or taught (share, then per lesson, then hourly),
+--                  and approved expense claims. Hand-added 'adjust' lines survive a rebuild. Approved runs are locked;
+--                  marking paid marks their expense claims paid. Coaches see only their own lines in approved runs.
+--   md_outgoings     all spending by category with receipt photos (storage bucket md-receipts, own folder per user);
+--                  staff can claim (status claimed), principals approve or turn down.
+--   md_venues / md_hall_bookings  hall hire costed at each hall's hourly rate, bookable for a whole term from the timetable.
+--   md_trips         competition trips: hotel, stay, travel, who is going; costs are md_outgoings with trip_id.
+--   Money report in the staff app: fees paid and shop in, against coach pay, hall hire and spending, per month, CSV export.
 -- Demo logins: md.principal@preview.dunnworks.io and md.coach@preview.dunnworks.io, and parent md.parent@preview.dunnworks.io
 --   (Sarah Whitfield's sample family). Remove before real data.

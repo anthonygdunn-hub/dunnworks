@@ -229,6 +229,20 @@ html.text-xl main,html.text-xl dialog form{zoom:1.25}
 .warn{background:var(--warn-l);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:14px;font-weight:500}
 .lens{display:flex;gap:6px;flex-wrap:wrap}
 
+#print{display:none}
+.lrows{display:flex;flex-direction:column}
+.card.lrows{padding:4px 16px}
+.lrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.lrows>.lrow:last-child,.lrows>div:last-child>.lrow{border-bottom:0}
+.lrow .lw{flex:none;width:96px;font-size:13.5px;color:var(--ink2);line-height:1.35}
+.lrow .grow{flex:1;min-width:140px}
+.lrow .amt{flex:none;font-weight:600;text-align:right;white-space:nowrap}
+.lrow .acts{flex:none;display:flex;gap:6px;margin-left:auto}
+@media (max-width:600px){.lrow .lw{width:72px}.lrow .acts{width:100%;justify-content:flex-end}}
+.stmtdoc{display:flex;flex-direction:column;gap:12px}
+.stmtdoc table{width:100%;border-collapse:collapse;font-size:14px}
+.stmtdoc th,.stmtdoc td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+@media print{body.printing>*:not(#print){display:none!important}body.printing #print{display:block;padding:24px;color:#000}body.printing{background:#fff}}
 </style>
 </head>
 <body>
@@ -241,6 +255,9 @@ html.text-xl main,html.text-xl dialog form{zoom:1.25}
   <symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></symbol>
   <symbol id="i-team" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-3.6 3.8-5.5 7-5.5s6 1.9 7 5.5"/><path d="M19 4l.8 1.6 1.7.3-1.2 1.2.3 1.7-1.6-.8-1.6.8.3-1.7-1.2-1.2 1.7-.3z"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11v3"/><path d="M16 13.5h.01"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></symbol>
   <symbol id="i-more" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
@@ -374,6 +391,7 @@ async function load(){
   S.ld = ld;
   S.d = { classes: r[0], families: r[1], dancers: r[2], enrol: r[3], requests: r[4], events: r[5], entries: r[6], staff: r[7],
     charges: S.principal ? r[8] : [], payments: S.principal ? r[9] : [], orders: S.principal ? r[10] : [], messages: S.principal ? r[11] : [] };
+  await loadMoney();
   S.mail = S.principal ? await q(sb.from('md_mailings').select('*').order('month', { ascending: false }).limit(3)).catch(function(){ return []; }) : [];
 }
 var by = function(list, key){ var m = {}; (list || []).forEach(function(x){ m[x[key]] = x; }); return m; };
@@ -409,6 +427,7 @@ function counts(){
   var c = {};
   c.bookings = S.d.requests.filter(function(r){ return r.status === 'new'; }).length + (S.d.messages || []).filter(function(m){ return m.status === 'new'; }).length;
   c.shop = (S.d.orders || []).filter(function(o){ return o.status === 'new'; }).length;
+  c.pay = S.principal && S.m ? S.m.spend.filter(function(o){ return o.paid_by && o.status === 'claimed'; }).length : 0;
   return c;
 }
 function navItems(){ return NAV.filter(function(n){ return !n.p || S.principal; }); }
@@ -931,6 +950,7 @@ document.addEventListener('click', async function(e){
 
 /* events */
 var KINDS = ['Term', 'Medals', 'Show', 'Competition', 'Social', 'Other'];
+function tripNote(evId){ var tr = ((S.m && S.m.trips) || []).filter(function(t){ return t.event_id === evId; })[0]; if (!tr) return ''; return '<div class="card" style="background:var(--bg)"><b>Trip</b><dl class="kv small">' + (tr.hotel ? '<dt>Hotel</dt><dd>' + esc(tr.hotel) + (tr.hotel_address ? ', ' + esc(tr.hotel_address) : '') + (tr.booking_ref ? ' (ref ' + esc(tr.booking_ref) + ')' : '') + '</dd>' : '') + (tr.check_in ? '<dt>Stay</dt><dd>' + esc(nice(tr.check_in) + ' to ' + nice(tr.check_out || tr.check_in)) + '</dd>' : '') + (tr.travel ? '<dt>Travel</dt><dd>' + esc(tr.travel) + '</dd>' : '') + (tr.who ? '<dt>Going</dt><dd>' + esc(tr.who) + '</dd>' : '') + '</dl></div>'; }
 VIEWS.events = function(){
   var t = today(), up = S.f.ev === 'up';
   var list = S.d.events.filter(function(x){ return up ? (x.ends_on || x.starts_on) >= t : (x.ends_on || x.starts_on) < t; });
@@ -941,7 +961,7 @@ VIEWS.events = function(){
   return h + '<div class="list">' + list.map(function(x){
     var ents = S.d.entries.filter(function(n){ return n.event_id === x.id; });
     return '<details class="item"><summary><div style="flex:none;width:58px;text-align:center"><b style="font:700 1.5rem/1 var(--display);display:block">' + new Date(x.starts_on + 'T12:00:00Z').getUTCDate() + '</b><span class="small muted">' + nice(x.starts_on, { month: 'short' }) + '</span></div><div class="t"><b>' + esc(x.title) + demoTag(x) + '</b><small>' + esc(x.kind) + (x.time_label ? ' · ' + esc(x.time_label) : '') + (x.venue ? ' · ' + esc(x.venue) : '') + (x.ends_on ? ' · until ' + nice(x.ends_on) : '') + '</small></div>' + (x.open ? '<span class="pill ok">Open to families</span>' : '') + (ents.length ? '<span class="pill">' + ents.length + ' entered</span>' : '') + '</summary>' +
-      '<div class="body">' + (x.details ? '<p>' + esc(x.details) + '</p>' : '') + '<h3>Entries</h3>' + (ents.length ? '<div class="stack">' + ents.map(function(n){ var d = dancer(n.dancer_id); return d ? '<div class="row between"><span>' + esc(d.first_name + ' ' + (d.last_name || '')) + '</span><span class="row">' + (S.principal ? '<select class="in" style="min-height:38px;width:auto" data-entry="' + n.id + '">' + ['entered', 'paid', 'withdrawn'].map(function(k){ return '<option' + (k === n.status ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select>' : '<span class="pill ' + (n.status === 'paid' ? 'ok' : n.status === 'withdrawn' ? 'grey' : '') + '">' + esc(n.status) + '</span>') + '</span></div>' : ''; }).join('') + '</div>' : '<p class="muted small">No dancers entered.</p>') +
+      '<div class="body">' + (x.details ? '<p>' + esc(x.details) + '</p>' : '') + tripNote(x.id) + '<h3>Entries</h3>' + (ents.length ? '<div class="stack">' + ents.map(function(n){ var d = dancer(n.dancer_id); return d ? '<div class="row between"><span>' + esc(d.first_name + ' ' + (d.last_name || '')) + '</span><span class="row">' + (S.principal ? '<select class="in" style="min-height:38px;width:auto" data-entry="' + n.id + '">' + ['entered', 'paid', 'withdrawn'].map(function(k){ return '<option' + (k === n.status ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select>' : '<span class="pill ' + (n.status === 'paid' ? 'ok' : n.status === 'withdrawn' ? 'grey' : '') + '">' + esc(n.status) + '</span>') + '</span></div>' : ''; }).join('') + '</div>' : '<p class="muted small">No dancers entered.</p>') +
       (S.principal ? '<div class="row"><button class="btn sm" type="button" data-enter="' + x.id + '">Enter dancers</button><button class="btn ghost sm" type="button" data-event="' + x.id + '">Edit</button></div>' : '') + '</div></details>';
   }).join('') + '</div>';
 };
@@ -1020,6 +1040,364 @@ document.addEventListener('click', async function(e){
         var row = { name: fd.get('name'), day: fd.get('day') ? +fd.get('day') : null, kind: fd.get('kind'), starts: fd.get('starts') || null, ends: fd.get('ends') || null, venue: fd.get('venue'), ages: fd.get('ages') || null, class_fee_pence: pence(fd.get('cf')) || null, term_fee_pence: pence(fd.get('tf')) || null, trial: !!fd.get('trial'), active: !!fd.get('active') };
         if (x.id) await q(sb.from('md_classes').update(row).eq('id', x.id)); else await q(sb.from('md_classes').insert(Object.assign(row, { sort: 100 + S.d.classes.length })));
         await load(); toast('Class saved'); render(); }); }
+});
+
+/* ---------------- money out: coach pay, spending, hall hire, trips, money report */
+var CATS = ['Competitions & travel', 'Costumes & shop stock', 'Music & licences', 'Insurance & memberships', 'Equipment', 'Training & exams', 'Marketing', 'Other'];
+var EMP = { employed: 'Employed', self_employed: 'Self-employed' };
+async function loadMoney(){
+  var from = addDays(today(), -400), to = addDays(today(), 150), safe = function(p){ return q(p).catch(function(){ return []; }); };
+  var r = await Promise.all([
+    safe(sb.from('md_pay_settings').select('*')),
+    safe(sb.from('md_pay_runs').select('*').order('period_start', { ascending: false }).limit(24)),
+    safe(sb.from('md_outgoings').select('*').gte('on_date', from).order('on_date', { ascending: false })),
+    S.principal ? safe(sb.from('md_venues').select('*').order('name')) : [],
+    S.principal ? safe(sb.from('md_hall_bookings').select('*').gte('on_date', from).lte('on_date', to).order('on_date').order('starts')) : [],
+    safe(sb.from('md_trips').select('*').order('starts_on', { ascending: false }))
+  ]);
+  var runs = r[1], lines = [];
+  var ids = runs.map(function(x){ return x.id; });
+  for (var i = 0; i < ids.length; i += 100) lines = lines.concat(await safe(sb.from('md_pay_lines').select('*').in('run_id', ids.slice(i, i + 100)).order('on_date')));
+  S.m = { rates: r[0], runs: runs, lines: lines, spend: r[2], venues: r[3], hall: r[4], trips: r[5] };
+}
+var staffName = function(id){ var s = S.d.staff.filter(function(x){ return x.user_id === id; })[0]; return s ? s.name : 'Someone no longer on the team'; };
+var rateOf = function(id){ return S.m.rates.filter(function(x){ return x.user_id === id; })[0] || null; };
+function rateText(r){
+  if (!r) return 'No pay set';
+  var bits = [];
+  if (r.hourly_pence != null) bits.push(money(r.hourly_pence) + ' an hour');
+  if (r.per_class_pence != null) bits.push(money(r.per_class_pence) + ' a class');
+  if (r.lesson_share_pct != null) bits.push(+r.lesson_share_pct + '% of each lesson');
+  else if (r.per_lesson_pence != null) bits.push(money(r.per_lesson_pence) + ' a lesson');
+  return (bits.join(', ') || 'No rates yet') + ' · ' + EMP[r.employment];
+}
+var lrow = function(a, b, c, d){ return '<div class="lrow"><div class="lw">' + a + '</div><div class="grow">' + b + '</div><div class="amt">' + (c || '') + '</div>' + (d ? '<div class="acts">' + d + '</div>' : '') + '</div>'; };
+var plural = function(n, a, b){ return n + ' ' + (n === 1 ? a : b); };
+var mins = function(m){ if (!m) return ''; var h = Math.floor(m / 60), r = m % 60; return (h ? h + 'h' : '') + (r ? (h ? ' ' : '') + r + 'm' : ''); };
+var runLines = function(id){ return S.m.lines.filter(function(l){ return l.run_id === id; }); };
+var sum = function(a, f){ return a.reduce(function(s, x){ return s + (f ? f(x) : x.amount_pence || 0); }, 0); };
+var runPill = function(st){ return st === 'draft' ? '<span class="pill warn">Draft</span>' : st === 'approved' ? '<span class="pill">Approved, to pay</span>' : '<span class="pill ok">Paid</span>'; };
+var period = function(r){ return nice(r.period_start, { day: 'numeric', month: 'short' }) + ' to ' + nice(r.period_end, { day: 'numeric', month: 'short', year: 'numeric' }); };
+function closedDay(d){ return S.d.events.some(function(e){ return e.kind === 'Term' && /no classes|holiday|half term|closed/i.test(e.title) && d >= e.starts_on && d <= (e.ends_on || e.starts_on); }); }
+function receiptBtn(o){ return o.receipt_path ? '<button class="btn ghost sm" type="button" data-receipt="' + esc(o.receipt_path) + '">Receipt</button>' : ''; }
+async function uploadReceipt(file){
+  if (!file || !file.size) return null;
+  if (file.size > 10485760) throw new Error('That file is over 10MB');
+  var path = S.me.user_id + '/' + Date.now() + '-' + String(file.name || 'receipt').replace(/[^\w.-]+/g, '-').slice(-60);
+  var r = await sb.storage.from('md-receipts').upload(path, file, { contentType: file.type || 'application/octet-stream' });
+  if (r.error) throw r.error;
+  return path;
+}
+
+/* pay */
+NAV.splice(6, 0, { k: 'pay', label: 'Pay', icon: 'wallet' }, { k: 'spend', label: 'Spending', icon: 'receipt', p: 1 }, { k: 'report', label: 'Money report', icon: 'chart', p: 1 });
+VIEWS.pay = function(){ return S.principal ? payPrincipal() : payCoach(); };
+function claimsHtml(list, mine){
+  if (!list.length) return '';
+  return '<section class="stack"><h2>' + (mine ? 'Your expense claims' : 'Expense claims to check') + '</h2><div class="list">' + list.map(function(o){
+    var st = o.status === 'claimed' ? '<span class="pill warn">Waiting</span>' : o.status === 'approved' ? '<span class="pill">Approved, paid back with your next pay</span>' : o.status === 'paid' ? '<span class="pill ok">Paid back</span>' : '<span class="pill bad">Not approved</span>';
+    return '<div class="item"><div class="sum" style="cursor:default"><div class="t"><b>' + esc(o.label) + ' · ' + money(o.amount_pence) + '</b><small>' + esc(nice(o.on_date)) + (mine ? '' : ' · ' + esc(staffName(o.paid_by))) + ' · ' + esc(o.category) + (o.supplier ? ' · ' + esc(o.supplier) : '') + '</small></div>' + st + '</div>' +
+      '<div class="row" style="padding:0 16px 14px">' + receiptBtn(o) + (!mine && o.status === 'claimed' ? '<button class="btn sm" type="button" data-claim="approved" data-id="' + o.id + '">Approve</button><button class="btn ghost sm" type="button" data-claim="rejected" data-id="' + o.id + '">Turn down</button>' : '') +
+      (mine && o.status === 'claimed' ? '<button class="btn ghost sm" type="button" data-delclaim="' + o.id + '">Withdraw</button>' : '') + '</div></div>';
+  }).join('') + '</div></section>';
+}
+function payPrincipal(){
+  if (S.f.run) { var run = S.m.runs.filter(function(r){ return r.id === S.f.run; })[0]; if (run) return runDetail(run); S.f.run = null; }
+  var h = '<div class="head"><div><h1>Pay</h1><p class="muted">Worked out from the timetable: group classes, private lessons and approved expenses.</p></div><button class="btn" type="button" data-newrun>Start a pay run</button></div>';
+  h += claimsHtml(S.m.spend.filter(function(o){ return o.paid_by && o.status === 'claimed'; }), false);
+  h += '<section class="stack"><h2>Pay runs</h2>' + (S.m.runs.length ? '<div class="list">' + S.m.runs.map(function(r){
+    var ls = runLines(r.id), people = {}; ls.forEach(function(l){ people[l.user_id] = (people[l.user_id] || 0) + l.amount_pence; });
+    return '<button type="button" class="item" style="text-align:left;font:inherit;color:inherit;cursor:pointer" data-run="' + r.id + '"><div class="sum"><div class="t"><b>' + esc(period(r)) + '</b><small>' + Object.keys(people).map(function(u){ return esc(staffName(u).split(' ')[0]) + ' ' + money(people[u]); }).join(' · ') + '</small></div><b>' + money(sum(ls)) + '</b>' + runPill(r.status) + '</div></button>';
+  }).join('') + '</div>' : '<div class="empty">No pay runs yet. Start one for last month to see how it works.</div>') + '</section>';
+  h += '<section class="stack"><h2>How each person is paid</h2><div class="card lrows">' + S.d.staff.filter(function(s){ return s.active; }).map(function(s){
+    return lrow('<b>' + esc(s.name) + '</b><div class="small muted">' + esc(s.role) + '</div>', '<span class="small">' + esc(rateText(rateOf(s.user_id))) + '</span>', '', '<button class="btn ghost sm" type="button" data-rates="' + s.user_id + '">Set pay</button>');
+  }).join('') + '</div><p class="small muted">Principals with no pay set are left out of pay runs.</p></section>';
+  return h;
+}
+function runDetail(r){
+  var ls = runLines(r.id), draft = r.status === 'draft', by = {};
+  ls.forEach(function(l){ (by[l.user_id] = by[l.user_id] || []).push(l); });
+  var h = '<div class="head"><div><button class="btn ghost sm" type="button" data-run="">‹ All pay runs</button><h1 style="margin-top:8px">Pay ' + esc(period(r)) + '</h1><p class="muted">' + runPill(r.status) + ' ' + money(sum(ls)) + ' in total' + (r.paid_at ? ' · paid ' + esc(nice(r.paid_at)) : '') + '</p></div>' +
+    '<div class="row">' + (draft ? '<button class="btn ghost" type="button" data-rebuild="' + r.id + '">Update from timetable</button><button class="btn line" type="button" data-adjust="' + r.id + '">Add an extra</button><button class="btn" type="button" data-runst="approved">Approve</button>' : r.status === 'approved' ? '<button class="btn" type="button" data-runst="paid">Mark as paid</button>' : '') + '</div></div>';
+  if (draft) h += '<p class="small muted">Check each line. Remove anything that didn’t happen, or add extras such as cover, travel or a bonus. Approving locks it.</p>';
+  if (!ls.length) h += '<div class="empty">Nothing to pay in this period.</div>';
+  h += Object.keys(by).sort(function(a, b){ return staffName(a).localeCompare(staffName(b)); }).map(function(u){
+    var mine = by[u], rt = rateOf(u), cls = mine.filter(function(l){ return l.kind === 'class'; }), les = mine.filter(function(l){ return l.kind === 'lesson'; });
+    return '<section class="card stack"><div class="row between"><div><h3>' + esc(staffName(u)) + '</h3><p class="small muted">' + esc(rateText(rt)) + '</p></div><div style="text-align:right"><b style="font:700 1.5rem var(--display)">' + money(sum(mine)) + '</b><div class="small muted">' + plural(cls.length, 'class', 'classes') + ' · ' + plural(les.length, 'lesson', 'lessons') + ' · ' + mins(sum(mine.filter(function(l){ return l.minutes; }), function(l){ return l.minutes; })) + '</div></div></div>' +
+      (!rt && (cls.length || les.length) ? '<p class="warn">No pay set for ' + esc(staffName(u).split(' ')[0]) + ', so these lines are £0. Set their pay, then update from timetable.</p>' : '') +
+      '<div class="lrows">' + mine.map(function(l){
+        return lrow(esc(nice(l.on_date)), esc(l.label) + (l.minutes ? '<div class="small muted">' + mins(l.minutes) + '</div>' : ''), money(l.amount_pence), draft ? '<button class="btn ghost sm" style="padding:0 10px" type="button" data-delline="' + l.id + '" aria-label="Remove ' + esc(l.label) + ' on ' + esc(nice(l.on_date)) + '">' + ic('x') + '</button>' : '');
+      }).join('') + '</div><div class="row"><button class="btn ghost sm" type="button" data-statement-pay="' + u + '">' + (rt && rt.employment === 'employed' ? 'Payslip summary' : 'Statement') + '</button></div></section>';
+  }).join('');
+  if (draft) h += '<div class="row"><button class="btn ghost sm" type="button" data-delrun="' + r.id + '">Delete this draft</button></div>';
+  return h;
+}
+function payCoach(){
+  var me = S.me.user_id, rt = rateOf(me), runs = S.m.runs.filter(function(r){ return runLines(r.id).some(function(l){ return l.user_id === me; }); });
+  var h = '<div class="head"><div><h1>My pay</h1><p class="muted">' + esc(rateText(rt)) + '</p></div><button class="btn" type="button" data-claimnew>Claim an expense</button></div>';
+  h += claimsHtml(S.m.spend.filter(function(o){ return o.paid_by === me; }), true);
+  h += '<section class="stack"><h2>Approved pay</h2>' + (runs.length ? '<div class="list">' + runs.map(function(r){
+    var mine = runLines(r.id).filter(function(l){ return l.user_id === me; });
+    return '<details class="item"><summary><div class="t"><b>' + esc(period(r)) + '</b><small>' + plural(mine.filter(function(l){ return l.kind === 'class'; }).length, 'class', 'classes') + ' · ' + plural(mine.filter(function(l){ return l.kind === 'lesson'; }).length, 'lesson', 'lessons') + '</small></div><b>' + money(sum(mine)) + '</b>' + runPill(r.status) + '</summary><div class="body"><div class="lrows">' +
+      mine.map(function(l){ return lrow(esc(nice(l.on_date)), esc(l.label), money(l.amount_pence)); }).join('') + '</div><div class="row"><button class="btn ghost sm" type="button" data-statement-pay="' + me + '" data-forrun="' + r.id + '">' + (rt && rt.employment === 'employed' ? 'Payslip summary' : 'Statement') + '</button></div></div></details>';
+  }).join('') + '</div>' : '<div class="empty">Your pay shows here once a principal approves it.</div>') + '</section>';
+  return h;
+}
+function statementHtml(u, r){
+  var mine = runLines(r.id).filter(function(l){ return l.user_id === u; }), rt = rateOf(u), emp = rt && rt.employment === 'employed';
+  return '<div class="stmtdoc"><div class="row between"><div><b style="font:700 1.3rem var(--display)">MD Dance Academy</b><div class="small muted">Bordon, Hampshire · 07810 208765</div></div><div style="text-align:right"><b>' + (emp ? 'Pay summary' : 'Statement of work') + '</b><div class="small">' + esc(period(r)) + '</div></div></div>' +
+    '<p><b>' + esc(staffName(u)) + '</b><br><span class="small muted">' + esc(rateText(rt)) + '</span></p>' +
+    '<table><thead><tr><th>Date</th><th>Work</th><th class="num">Time</th><th class="num">Amount</th></tr></thead><tbody>' + mine.map(function(l){ return '<tr><td>' + esc(nice(l.on_date)) + '</td><td>' + esc(l.label) + '</td><td class="num">' + mins(l.minutes) + '</td><td class="num">' + money(l.amount_pence) + '</td></tr>'; }).join('') +
+    '<tr><td></td><td><b>Total</b></td><td class="num">' + mins(sum(mine.filter(function(l){ return l.minutes; }), function(l){ return l.minutes; })) + '</td><td class="num"><b>' + money(sum(mine)) + '</b></td></tr></tbody></table>' +
+    '<p class="small muted">' + (emp ? 'Gross pay before tax and National Insurance. Your payslip from payroll shows deductions.' : 'Self-employed: you are responsible for your own tax and National Insurance.') + ' ' + (r.status === 'paid' ? 'Paid ' + esc(nice(r.paid_at)) + '.' : 'Approved, payment to follow.') + '</p></div>';
+}
+function printHtml(html){
+  var p = $('#print'); if (!p) { p = document.createElement('div'); p.id = 'print'; document.body.appendChild(p); }
+  p.innerHTML = html; document.body.classList.add('printing');
+  setTimeout(function(){ window.print(); document.body.classList.remove('printing'); }, 50);
+}
+function ratesDlg(u){
+  var r = rateOf(u) || {}, pv = function(p){ return p == null ? '' : (p / 100).toFixed(2); };
+  openDlg('Pay for ' + staffName(u), '<label class="field">Employment<select class="in" name="emp"><option value="self_employed"' + (r.employment !== 'employed' ? ' selected' : '') + '>Self-employed (they invoice you)</option><option value="employed"' + (r.employment === 'employed' ? ' selected' : '') + '>Employed (through payroll)</option></select></label>' +
+    '<p class="small muted">Fill in only what applies. A class uses the per-class fee if set, otherwise the hourly rate. A lesson uses the share if set, then the per-lesson fee, then the hourly rate.</p>' +
+    '<div class="fgrid"><label class="field">Hourly rate £<input class="in" name="hourly" inputmode="decimal" value="' + pv(r.hourly_pence) + '"></label><label class="field">Per group class £<input class="in" name="perclass" inputmode="decimal" value="' + pv(r.per_class_pence) + '"></label>' +
+    '<label class="field">Per private lesson £<input class="in" name="perlesson" inputmode="decimal" value="' + pv(r.per_lesson_pence) + '"></label><label class="field">Share of lesson price %<input class="in" name="share" inputmode="decimal" value="' + (r.lesson_share_pct == null ? '' : +r.lesson_share_pct) + '"></label>' +
+    '<label class="field full">Notes<input class="in" name="notes" value="' + esc(r.notes || '') + '" placeholder="e.g. bank details held by MD, UTR number"></label></div>', 'Save', async function(fd){
+    var num = function(k){ var v = String(fd.get(k) || '').trim(); return v === '' ? null : pence(v); };
+    var share = String(fd.get('share') || '').trim(), sh = share === '' ? null : Math.min(100, Math.max(0, parseFloat(share) || 0));
+    await q(sb.from('md_pay_settings').upsert({ user_id: u, employment: fd.get('emp'), hourly_pence: num('hourly'), per_class_pence: num('perclass'), per_lesson_pence: num('perlesson'), lesson_share_pct: sh, notes: fd.get('notes') || null, updated_at: new Date().toISOString() }));
+    await loadMoney(); render(); toast('Pay saved');
+  });
+}
+function spendDlg(o, opts){
+  o = o || {}; opts = opts || {};
+  var claim = !!opts.claim, trips = S.m.trips;
+  openDlg(o.id ? 'Edit spending' : claim ? 'Claim an expense' : 'Add spending',
+    (claim ? '<p class="small">Something you paid for yourself. A principal checks it, and it’s paid back with your next pay.</p>' : '') +
+    '<div class="fgrid"><label class="field">Date<input class="in" type="date" name="on" required value="' + esc(o.on_date || today()) + '"></label><label class="field">Amount £<input class="in" name="amt" inputmode="decimal" required value="' + (o.amount_pence ? (o.amount_pence / 100).toFixed(2) : '') + '"></label>' +
+    '<label class="field full">What for<input class="in" name="label" required maxlength="140" value="' + esc(o.label || '') + '" placeholder="e.g. Hotel for Southern Counties"></label>' +
+    '<label class="field">Type<select class="in" name="cat">' + CATS.map(function(c){ return '<option' + ((o.category || opts.cat || 'Other') === c ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></label>' +
+    '<label class="field">Shop or supplier<input class="in" name="sup" maxlength="80" value="' + esc(o.supplier || '') + '"></label>' +
+    (trips.length && !claim ? '<label class="field full">Competition trip<select class="in" name="trip"><option value="">Not for a trip</option>' + trips.map(function(t){ return '<option value="' + t.id + '"' + ((o.trip_id || opts.trip) === t.id ? ' selected' : '') + '>' + esc(t.title + ', ' + nice(t.starts_on)) + '</option>'; }).join('') + '</select></label>' : '') +
+    '<label class="field full">Receipt<span class="hint">A photo or PDF, up to 10MB' + (o.receipt_path ? '. One is already attached' : '') + '</span><input class="in" type="file" name="file" accept="image/*,application/pdf" style="padding:10px"></label></div>',
+    claim ? 'Send claim' : 'Save', async function(fd){
+      var amt = pence(fd.get('amt')); if (!amt) { toast('Add the amount', true); return false; }
+      var path = await uploadReceipt(fd.get('file'));
+      var row = { on_date: fd.get('on'), amount_pence: amt, label: fd.get('label'), category: fd.get('cat'), supplier: fd.get('sup') || null, trip_id: fd.get('trip') || null };
+      if (path) row.receipt_path = path;
+      if (claim) { row.paid_by = S.me.user_id; row.status = 'claimed'; delete row.trip_id; }
+      if (o.id) await q(sb.from('md_outgoings').update(row).eq('id', o.id)); else await q(sb.from('md_outgoings').insert(row));
+      await loadMoney(); render(); toast(claim ? 'Claim sent' : 'Saved');
+    });
+}
+
+/* spending: all spending, hall hire, trips */
+VIEWS.spend = function(){
+  var tab = S.f.sp || 'all';
+  var h = '<div class="head"><div><h1>Spending</h1><p class="muted">Everything the school pays for, with receipts.</p></div><div class="row">' + (tab === 'hall' ? '<button class="btn line" type="button" data-hallone>One-off booking</button><button class="btn" type="button" data-hallterm>Book the hall for classes</button>' : tab === 'trips' ? '<button class="btn" type="button" data-trip="">Add a trip</button>' : '<button class="btn" type="button" data-spend="">Add spending</button>') + '</div></div>' +
+    '<div class="chips">' + [['all', 'All spending'], ['hall', 'Hall hire'], ['trips', 'Competition trips']].map(function(x){ return '<button type="button" class="chip" data-chip="sp" data-val="' + x[0] + '" aria-pressed="' + (tab === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  if (tab === 'hall') return h + hallHtml();
+  if (tab === 'trips') return h + tripsHtml();
+  var month = today().slice(0, 7), list = S.m.spend.filter(function(o){ return o.status !== 'rejected' && o.status !== 'claimed'; });
+  var mon = list.filter(function(o){ return o.on_date.slice(0, 7) === month; }), byCat = {};
+  mon.forEach(function(o){ byCat[o.category] = (byCat[o.category] || 0) + o.amount_pence; });
+  var hallMon = sum(S.m.hall.filter(function(b){ return b.status === 'booked' && b.on_date.slice(0, 7) === month; }), function(b){ return b.cost_pence; });
+  h += '<div class="grid g4"><div class="card stat"><b>' + money(sum(mon) + hallMon) + '</b><span>spent this month, with hall hire</span></div>' + Object.keys(byCat).sort(function(a, b){ return byCat[b] - byCat[a]; }).slice(0, 3).map(function(c){ return '<div class="card stat"><b>' + money(byCat[c]) + '</b><span>' + esc(c) + '</span></div>'; }).join('') + '</div>';
+  var claims = S.m.spend.filter(function(o){ return o.paid_by && o.status === 'claimed'; }).length;
+  if (claims) h += '<div class="banner"><span>' + claims + ' expense claim' + (claims > 1 ? 's' : '') + ' waiting for you to check</span><button class="btn sm" type="button" data-go="pay">Check</button></div>';
+  h += list.length ? '<div class="card lrows">' + list.slice(0, 80).map(function(o){
+    var t = o.trip_id && S.m.trips.filter(function(x){ return x.id === o.trip_id; })[0];
+    return lrow(esc(nice(o.on_date)), '<b>' + esc(o.label) + '</b><div class="small muted">' + esc([o.category, o.supplier, t ? t.title : '', o.paid_by ? 'paid by ' + staffName(o.paid_by).split(' ')[0] : '', o.demo ? 'sample' : ''].filter(Boolean).join(' · ')) + '</div>', money(o.amount_pence), receiptBtn(o) + (o.paid_by ? '' : '<button class="btn ghost sm" type="button" data-spend="' + o.id + '">Edit</button>'));
+  }).join('') + '</div>' : '<div class="empty">Nothing spent yet.</div>';
+  return h;
+};
+function hallHtml(){
+  var t = today(), up = S.m.hall.filter(function(b){ return b.on_date >= addDays(t, -31); });
+  var vn = function(id){ var v = S.m.venues.filter(function(x){ return x.id === id; })[0]; return v ? v.name : ''; };
+  var h = '<section class="stack"><h2>Halls</h2><div class="card lrows">' + S.m.venues.map(function(v){
+    var unpaid = sum(S.m.hall.filter(function(b){ return b.venue_id === v.id && b.status === 'booked' && !b.paid && b.on_date <= t; }), function(b){ return b.cost_pence; });
+    return lrow('<b>' + esc(v.name) + '</b><div class="small muted">' + esc([v.contact, v.phone].filter(Boolean).join(' · ')) + '</div>', (v.hourly_pence ? money(v.hourly_pence) + ' an hour' : '<span class="pill warn">Set the rate</span>'), (unpaid ? '<span class="pill bad">' + money(unpaid) + ' to pay</span>' : '<span class="pill ok">Paid up</span>'), '<button class="btn ghost sm" type="button" data-venue="' + v.id + '">Edit</button>' + (unpaid ? '<button class="btn sm" type="button" data-hallpaid="' + v.id + '">Mark paid</button>' : ''));
+  }).join('') + '</div><button class="btn ghost sm" type="button" data-venue="" style="align-self:flex-start">Add a hall</button></section>';
+  var byMonth = {};
+  up.forEach(function(b){ (byMonth[b.on_date.slice(0, 7)] = byMonth[b.on_date.slice(0, 7)] || []).push(b); });
+  h += Object.keys(byMonth).sort().map(function(m){
+    var bs = byMonth[m], live = bs.filter(function(b){ return b.status === 'booked'; });
+    return '<details class="item"' + (m === t.slice(0, 7) ? ' open' : '') + '><summary><div class="t"><b>' + esc(nice(m + '-01', { month: 'long', year: 'numeric' })) + '</b><small>' + plural(live.length, 'booking', 'bookings') + (live.length ? ' · ' + mins(sum(live, function(b){ return Math.round((new Date('2000-01-01T' + b.ends) - new Date('2000-01-01T' + b.starts)) / 60000); })) : '') + '</small></div><b>' + money(sum(live, function(b){ return b.cost_pence; })) + '</b></summary><div class="body"><div class="lrows">' +
+      bs.map(function(b){ return '<div' + (b.status === 'cancelled' ? ' style="opacity:.55"' : '') + '>' + lrow(esc(nice(b.on_date)) + '<br>' + hm(b.starts) + '–' + hm(b.ends), esc(vn(b.venue_id)) + '<div class="small muted">' + esc(b.note || '') + (b.status === 'cancelled' ? ' · cancelled' : b.paid ? ' · paid' : '') + '</div>', money(b.cost_pence), '<button class="btn ghost sm" type="button" data-hallcancel="' + b.id + '">' + (b.status === 'cancelled' ? 'Rebook' : 'Cancel') + '</button>') + '</div>'; }).join('') +
+      '</div></div></details>';
+  }).join('') || '<div class="empty">No hall bookings yet. Use “Book the hall for classes” to add a whole term in one go.</div>';
+  return h;
+}
+function tripsHtml(){
+  if (!S.m.trips.length) return '<div class="empty">No competition trips yet. Add one to keep the hotel, travel and costs together.</div>';
+  return '<div class="list">' + S.m.trips.map(function(tr){
+    var costs = S.m.spend.filter(function(o){ return o.trip_id === tr.id && o.status !== 'rejected'; });
+    return '<details class="item"><summary><div class="t"><b>' + esc(tr.title) + '</b><small>' + esc(nice(tr.starts_on) + (tr.ends_on && tr.ends_on !== tr.starts_on ? ' to ' + nice(tr.ends_on) : '') + (tr.hotel ? ' · ' + tr.hotel : '')) + '</small></div><b>' + money(sum(costs)) + '</b></summary><div class="body">' +
+      '<dl class="kv small">' + (tr.hotel ? '<dt>Hotel</dt><dd>' + esc(tr.hotel) + (tr.hotel_address ? '<br>' + esc(tr.hotel_address) : '') + '</dd>' : '') + (tr.check_in ? '<dt>Stay</dt><dd>' + esc(nice(tr.check_in) + ' to ' + nice(tr.check_out || tr.check_in)) + (tr.rooms ? ', ' + tr.rooms + ' room' + (tr.rooms > 1 ? 's' : '') : '') + '</dd>' : '') + (tr.booking_ref ? '<dt>Booking ref</dt><dd>' + esc(tr.booking_ref) + '</dd>' : '') + (tr.travel ? '<dt>Travel</dt><dd>' + esc(tr.travel) + '</dd>' : '') + (tr.who ? '<dt>Going</dt><dd>' + esc(tr.who) + '</dd>' : '') + (tr.notes ? '<dt>Notes</dt><dd>' + esc(tr.notes) + '</dd>' : '') + '</dl>' +
+      (costs.length ? '<div class="lrows">' + costs.map(function(o){ return lrow(esc(nice(o.on_date)), esc(o.label) + '<div class="small muted">' + esc(o.supplier || '') + '</div>', money(o.amount_pence), receiptBtn(o)); }).join('') + '</div>' : '<p class="small muted">No costs added yet.</p>') +
+      '<div class="row"><button class="btn sm" type="button" data-tripcost="' + tr.id + '">Add a cost</button><button class="btn ghost sm" type="button" data-trip="' + tr.id + '">Edit trip</button></div></div></details>';
+  }).join('') + '</div>';
+}
+function venueDlg(v){
+  v = v || {};
+  openDlg(v.id ? 'Edit ' + v.name : 'Add a hall', '<div class="fgrid"><label class="field full">Name<input class="in" name="name" required value="' + esc(v.name || '') + '"></label><label class="field">Hourly rate £<input class="in" name="rate" inputmode="decimal" value="' + (v.hourly_pence ? (v.hourly_pence / 100).toFixed(2) : '') + '"></label><label class="field">Contact<input class="in" name="contact" value="' + esc(v.contact || '') + '"></label><label class="field">Phone<input class="in" type="tel" name="phone" value="' + esc(v.phone || '') + '"></label><label class="field">Email<input class="in" type="email" name="email" value="' + esc(v.email || '') + '"></label></div>' +
+    (v.id ? '<label class="check"><input type="checkbox" name="reprice"> Update the cost of future bookings at this hall to the new rate</label>' : ''), 'Save', async function(fd){
+    var row = { name: fd.get('name'), hourly_pence: pence(fd.get('rate')), contact: fd.get('contact') || null, phone: fd.get('phone') || null, email: fd.get('email') || null };
+    if (v.id) {
+      await q(sb.from('md_venues').update(row).eq('id', v.id));
+      if (fd.get('reprice')) { var fut = S.m.hall.filter(function(b){ return b.venue_id === v.id && b.on_date >= today(); }); for (var i = 0; i < fut.length; i++) await q(sb.from('md_hall_bookings').update({ cost_pence: hallCost(row.hourly_pence, fut[i].starts, fut[i].ends) }).eq('id', fut[i].id)); }
+    } else await q(sb.from('md_venues').insert(row));
+    await loadMoney(); render(); toast('Saved');
+  });
+}
+var hallCost = function(rate, s, e){ var m = (new Date('2000-01-01T' + e) - new Date('2000-01-01T' + s)) / 60000; return Math.max(0, Math.round(rate * m / 60)); };
+function hallTermDlg(){
+  var cls = S.d.classes.filter(function(c){ return c.active !== false && c.starts && c.ends; });
+  var t = today(), end = addDays(t, 90);
+  openDlg('Book the hall for classes', '<p class="small">Adds a booking for every session of the classes you tick, skipping holidays. Each one is costed at that hall’s hourly rate.</p><div class="pick">' + cls.map(function(c){
+      var v = S.m.venues.filter(function(x){ return x.name === c.venue; })[0];
+      return '<label><input type="checkbox" name="cls" value="' + c.id + '" checked><span>' + esc(c.name) + '<br><span class="small muted">' + esc(classTime(c)) + '</span></span><small>' + esc(c.venue || '') + (v && v.hourly_pence ? ' · ' + money(hallCost(v.hourly_pence, c.starts, c.ends)) : ' · no rate') + '</small></label>';
+    }).join('') + '</div><div class="fgrid"><label class="field">From<input class="in" type="date" name="from" required value="' + t + '"></label><label class="field">To<input class="in" type="date" name="to" required value="' + end + '"></label></div>', 'Book', async function(fd){
+    var ids = fd.getAll('cls'), from = fd.get('from'), to = fd.get('to'), rows = [], skipped = 0, series = (crypto.randomUUID ? crypto.randomUUID() : null);
+    if (to < from) { toast('The end date is before the start', true); return false; }
+    for (var d = from; d <= to; d = addDays(d, 1)) {
+      cls.filter(function(c){ return ids.indexOf(c.id) > -1 && c.day === dow(d); }).forEach(function(c){
+        var v = S.m.venues.filter(function(x){ return x.name === c.venue; })[0];
+        if (!v) { skipped++; return; }
+        if (closedDay(d)) return;
+        if (S.m.hall.some(function(b){ return b.class_id === c.id && b.on_date === d && b.status === 'booked'; })) return;
+        rows.push({ venue_id: v.id, on_date: d, starts: c.starts, ends: c.ends, cost_pence: hallCost(v.hourly_pence, c.starts, c.ends), class_id: c.id, note: c.name, series_id: series, status: 'booked' });
+      });
+    }
+    if (!rows.length) { toast(skipped ? 'Those classes have no hall set up' : 'Already booked for those dates', true); return false; }
+    for (var i = 0; i < rows.length; i += 200) await q(sb.from('md_hall_bookings').insert(rows.slice(i, i + 200)));
+    await loadMoney(); render(); toast(rows.length + ' bookings added, ' + money(sum(rows, function(b){ return b.cost_pence; })));
+  });
+}
+function hallOneDlg(){
+  openDlg('One-off hall booking', '<div class="fgrid"><label class="field full">Hall<select class="in" name="v">' + S.m.venues.map(function(v){ return '<option value="' + v.id + '">' + esc(v.name) + '</option>'; }).join('') + '</select></label><label class="field">Date<input class="in" type="date" name="d" required value="' + today() + '"></label><label class="field">From<input class="in" type="time" name="s" required value="18:00"></label><label class="field">To<input class="in" type="time" name="e" required value="20:00"></label><label class="field">Cost £<span class="hint">Leave empty to use the hourly rate</span><input class="in" name="c" inputmode="decimal"></label><label class="field full">What for<input class="in" name="n" placeholder="e.g. Showcase rehearsal"></label></div>', 'Book', async function(fd){
+    var v = S.m.venues.filter(function(x){ return x.id === fd.get('v'); })[0];
+    if (fd.get('e') <= fd.get('s')) { toast('The end time is before the start', true); return false; }
+    await q(sb.from('md_hall_bookings').insert({ venue_id: v.id, on_date: fd.get('d'), starts: fd.get('s'), ends: fd.get('e'), cost_pence: String(fd.get('c') || '').trim() ? pence(fd.get('c')) : hallCost(v.hourly_pence, fd.get('s'), fd.get('e')), note: fd.get('n') || null, status: 'booked' }));
+    await loadMoney(); render(); toast('Booked');
+  });
+}
+function tripDlg(tr){
+  tr = tr || {};
+  var comps = S.d.events.filter(function(e){ return e.kind !== 'Term'; });
+  openDlg(tr.id ? 'Edit trip' : 'Add a competition trip', '<div class="fgrid"><label class="field full">Event<select class="in" name="ev"><option value="">Not linked to an event</option>' + comps.map(function(e){ return '<option value="' + e.id + '"' + (tr.event_id === e.id ? ' selected' : '') + '>' + esc(e.title + ', ' + nice(e.starts_on)) + '</option>'; }).join('') + '</select></label>' +
+    '<label class="field full">Trip name<input class="in" name="title" required value="' + esc(tr.title || '') + '" placeholder="e.g. Blackpool Junior Festival"></label><label class="field">From<input class="in" type="date" name="s" required value="' + esc(tr.starts_on || '') + '"></label><label class="field">To<input class="in" type="date" name="e" value="' + esc(tr.ends_on || '') + '"></label>' +
+    '<label class="field full">Hotel<input class="in" name="hotel" value="' + esc(tr.hotel || '') + '"></label><label class="field full">Hotel address<input class="in" name="addr" value="' + esc(tr.hotel_address || '') + '"></label><label class="field">Check in<input class="in" type="date" name="ci" value="' + esc(tr.check_in || '') + '"></label><label class="field">Check out<input class="in" type="date" name="co" value="' + esc(tr.check_out || '') + '"></label>' +
+    '<label class="field">Rooms<input class="in" type="number" min="0" name="rooms" value="' + esc(tr.rooms || '') + '"></label><label class="field">Booking ref<input class="in" name="ref" value="' + esc(tr.booking_ref || '') + '"></label><label class="field full">Travel<input class="in" name="travel" value="' + esc(tr.travel || '') + '" placeholder="e.g. minibus from Forest Community Centre, 7am"></label><label class="field full">Who’s going<input class="in" name="who" value="' + esc(tr.who || '') + '"></label><label class="field full">Notes<textarea class="in" name="notes">' + esc(tr.notes || '') + '</textarea></label></div>', 'Save', async function(fd){
+    var ev = S.d.events.filter(function(e){ return e.id === fd.get('ev'); })[0];
+    var row = { event_id: fd.get('ev') || null, title: fd.get('title') || (ev ? ev.title : ''), starts_on: fd.get('s'), ends_on: fd.get('e') || null, hotel: fd.get('hotel') || null, hotel_address: fd.get('addr') || null, check_in: fd.get('ci') || null, check_out: fd.get('co') || null, rooms: fd.get('rooms') ? +fd.get('rooms') : null, booking_ref: fd.get('ref') || null, travel: fd.get('travel') || null, who: fd.get('who') || null, notes: fd.get('notes') || null };
+    if (tr.id) await q(sb.from('md_trips').update(row).eq('id', tr.id)); else await q(sb.from('md_trips').insert(row));
+    await loadMoney(); render(); toast('Trip saved');
+  });
+}
+
+/* money report */
+function moneyRows(from, to){
+  var rows = [], inR = function(d){ return d >= from && d <= to; };
+  S.d.payments.forEach(function(p){ if (inR(p.paid_on)) { var f = fam(p.family_id); rows.push({ d: p.paid_on, io: 'In', cat: 'Fees paid', what: (f ? f.parent_name : 'Family') + (p.method ? ' (' + p.method + ')' : ''), p: p.amount_pence }); } });
+  (S.d.orders || []).forEach(function(o){ var d = String(o.created_at).slice(0, 10); if (o.status === 'collected' && o.total_pence && inR(d)) rows.push({ d: d, io: 'In', cat: 'Shop', what: 'Order ' + (o.ref || '') + ' ' + (o.dancer_name || ''), p: o.total_pence }); });
+  S.m.spend.forEach(function(o){ if ((o.status === 'paid' || o.status === 'approved') && inR(o.on_date)) rows.push({ d: o.on_date, io: 'Out', cat: o.category, what: o.label + (o.supplier && o.supplier !== o.label ? ', ' + o.supplier : ''), p: -o.amount_pence }); });
+  S.m.hall.forEach(function(b){ if (b.status === 'booked' && inR(b.on_date) && b.on_date <= today()) { var v = S.m.venues.filter(function(x){ return x.id === b.venue_id; })[0]; rows.push({ d: b.on_date, io: 'Out', cat: 'Hall hire', what: (v ? v.name : 'Hall') + (b.note ? ', ' + b.note : ''), p: -b.cost_pence }); } });
+  S.m.runs.forEach(function(r){ if (r.status === 'draft') return; runLines(r.id).forEach(function(l){ if (l.kind !== 'expense' && inR(l.on_date)) rows.push({ d: l.on_date, io: 'Out', cat: 'Coach pay', what: staffName(l.user_id) + ': ' + l.label, p: -l.amount_pence }); }); });
+  return rows.sort(function(a, b){ return a.d.localeCompare(b.d); });
+}
+VIEWS.report = function(){
+  var t = today(), months = [];
+  for (var i = 0; i < 12; i++) { var d = new Date(t.slice(0, 7) + '-15T12:00:00Z'); d.setUTCMonth(d.getUTCMonth() - i); months.push(d.toISOString().slice(0, 7)); }
+  var all = moneyRows(months[11] + '-01', t), cats = {};
+  all.forEach(function(r){ if (r.io === 'Out') cats[r.cat] = 1; });
+  var catList = ['Coach pay', 'Hall hire'].concat(Object.keys(cats).filter(function(c){ return c !== 'Coach pay' && c !== 'Hall hire'; }).sort());
+  var cell = function(p){ return p ? money(p) : '<span class="muted">–</span>'; };
+  var ms = months.slice();
+  var tot = function(m, f){ return sum(all.filter(function(r){ return r.d.slice(0, 7) === m && f(r); }), function(r){ return r.p; }); };
+  var cur = t.slice(0, 7), inNow = tot(cur, function(r){ return r.io === 'In'; }), outNow = -tot(cur, function(r){ return r.io === 'Out'; });
+  var owed = sum(S.d.families, function(f){ var b = balance(f.id); return b > 0 ? b : 0; });
+  var hallDue = sum(S.m.hall.filter(function(b){ return b.status === 'booked' && !b.paid && b.on_date <= t; }), function(b){ return b.cost_pence; });
+  var payDue = sum(S.m.runs.filter(function(r){ return r.status === 'approved'; }), function(r){ return sum(runLines(r.id)); });
+  var h = '<div class="head"><div><h1>Money report</h1><p class="muted">Money in against money out, month by month. Coach pay counts once a pay run is approved; hall hire on the day it’s used.</p></div><button class="btn line" type="button" data-export>Export for the accountant</button></div>';
+  h += '<div class="grid g4"><div class="card stat"><b>' + money(inNow) + '</b><span>in this month</span></div><div class="card stat"><b>' + money(outNow) + '</b><span>out this month</span></div><div class="card stat' + (inNow - outNow < 0 ? '' : '') + '"><b>' + money(Math.abs(inNow - outNow)) + '</b><span>' + (inNow - outNow < 0 ? 'down' : 'up') + ' this month</span></div><div class="card stat"><b>' + money(owed) + '</b><span>fees owed to MD</span></div></div>';
+  if (hallDue || payDue) h += '<div class="banner"><span>Still to pay: ' + [hallDue ? money(hallDue) + ' hall hire' : '', payDue ? money(payDue) + ' approved coach pay' : ''].filter(Boolean).join(' and ') + '</span><button class="btn sm" type="button" data-go="' + (payDue ? 'pay' : 'spend') + '">See</button></div>';
+  h += '<div class="tw"><table><thead><tr><th>Month</th>' + ms.map(function(m){ return '<th class="num">' + esc(nice(m + '-01', { month: 'short' })) + '</th>'; }).join('') + '<th class="num">12 months</th></tr></thead><tbody>' +
+    '<tr><td><b>Fees paid</b></td>' + ms.map(function(m){ return '<td class="num">' + cell(tot(m, function(r){ return r.cat === 'Fees paid'; })) + '</td>'; }).join('') + '<td class="num"><b>' + money(sum(all.filter(function(r){ return r.cat === 'Fees paid'; }), function(r){ return r.p; })) + '</b></td></tr>' +
+    '<tr><td><b>Shop</b></td>' + ms.map(function(m){ return '<td class="num">' + cell(tot(m, function(r){ return r.cat === 'Shop'; })) + '</td>'; }).join('') + '<td class="num"><b>' + money(sum(all.filter(function(r){ return r.cat === 'Shop'; }), function(r){ return r.p; })) + '</b></td></tr>' +
+    catList.map(function(c){ return '<tr><td>' + esc(c) + '</td>' + ms.map(function(m){ return '<td class="num">' + cell(-tot(m, function(r){ return r.io === 'Out' && r.cat === c; })) + '</td>'; }).join('') + '<td class="num">' + money(-sum(all.filter(function(r){ return r.io === 'Out' && r.cat === c; }), function(r){ return r.p; })) + '</td></tr>'; }).join('') +
+    '<tr style="background:var(--blush)"><td><b>Profit</b></td>' + ms.map(function(m){ var p = tot(m, function(){ return true; }); return '<td class="num"><b' + (p < 0 ? ' style="color:var(--bad)"' : '') + '>' + money(p) + '</b></td>'; }).join('') + '<td class="num"><b>' + money(sum(all, function(r){ return r.p; })) + '</b></td></tr></tbody></table></div>';
+  h += '<p class="small muted">Sample families, spending and hall bookings are included until you clear sample data on the Team page.</p>';
+  return h;
+};
+function exportDlg(){
+  var t = today(), d = new Date(t + 'T12:00:00Z'), y = d.getUTCFullYear(), taxStart = (t >= y + '-04-06' ? y : y - 1) + '-04-06';
+  openDlg('Export for the accountant', '<p class="small">A spreadsheet file (CSV) with every payment in and out: date, in or out, type, details and amount. It opens in Excel, Numbers or Google Sheets.</p><div class="fgrid"><label class="field">From<input class="in" type="date" name="f" value="' + taxStart + '"></label><label class="field">To<input class="in" type="date" name="t" value="' + t + '"></label></div>', 'Download', function(fd){
+    var rows = moneyRows(fd.get('f'), fd.get('t')), csv = [['Date', 'In or out', 'Type', 'Details', 'Amount (£)']].concat(rows.map(function(r){ return [r.d, r.io, r.cat, r.what, (r.p / 100).toFixed(2)]; }));
+    var text = csv.map(function(r){ return r.map(function(c){ c = String(c); return /[",\n]/.test(c) || /^[=+\-@]/.test(c) && isNaN(+c) ? '"' + c.replace(/"/g, '""').replace(/^([=+\-@])/, "'$1") + '"' : c; }).join(','); }).join('\r\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv' })); a.download = 'md-dance-money-' + fd.get('f') + '-to-' + fd.get('t') + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+    toast(rows.length + ' rows exported');
+  });
+}
+
+/* clicks */
+document.addEventListener('click', async function(e){
+  var t;
+  try {
+    if ((t = e.target.closest('[data-run]'))) { S.f.run = t.dataset.run || null; render(); window.scrollTo(0, 0); }
+    else if (e.target.closest('[data-newrun]')) {
+      var td = today(), first = td.slice(0, 8) + '01', prevEnd = addDays(first, -1), prevStart = prevEnd.slice(0, 8) + '01';
+      openDlg('Start a pay run', '<p class="small">Pulls in every group class and private lesson in the dates you choose, plus approved expense claims. You check it before approving.</p><div class="fgrid"><label class="field">From<input class="in" type="date" name="f" required value="' + prevStart + '"></label><label class="field">To<input class="in" type="date" name="t" required value="' + prevEnd + '"></label></div>', 'Work it out', async function(fd){
+        var r = await sb.rpc('md_pay_build', { p_start: fd.get('f'), p_end: fd.get('t') });
+        if (r.error) { toast(r.error.message, true); return false; }
+        await loadMoney(); S.f.run = r.data; render(); window.scrollTo(0, 0);
+      });
+    }
+    else if ((t = e.target.closest('[data-rebuild]'))) {
+      var run = S.m.runs.filter(function(r){ return r.id === t.dataset.rebuild; })[0];
+      var r2 = await sb.rpc('md_pay_build', { p_start: run.period_start, p_end: run.period_end, p_run: run.id });
+      if (r2.error) throw r2.error;
+      await loadMoney(); render(); toast('Updated from the timetable. Your extras were kept');
+    }
+    else if ((t = e.target.closest('[data-delline]'))) { await q(sb.from('md_pay_lines').delete().eq('id', t.dataset.delline)); await loadMoney(); render(); }
+    else if ((t = e.target.closest('[data-adjust]'))) {
+      var rid = t.dataset.adjust;
+      openDlg('Add an extra', '<div class="fgrid"><label class="field full">For<select class="in" name="u">' + S.d.staff.filter(function(s){ return s.active; }).map(function(s){ return '<option value="' + s.user_id + '">' + esc(s.name) + '</option>'; }).join('') + '</select></label><label class="field full">What for<input class="in" name="l" required placeholder="e.g. Covered Monday class, competition day"></label><label class="field">Date<input class="in" type="date" name="d" value="' + today() + '"></label><label class="field">Amount £<span class="hint">Use a minus for a deduction</span><input class="in" name="a" required inputmode="decimal"></label></div>', 'Add', async function(fd){
+        var raw = String(fd.get('a')).trim(), amt = (raw.charAt(0) === '-' ? -1 : 1) * pence(raw);
+        if (!amt) { toast('Add the amount', true); return false; }
+        await q(sb.from('md_pay_lines').insert({ run_id: rid, user_id: fd.get('u'), kind: 'adjust', on_date: fd.get('d') || null, label: fd.get('l'), amount_pence: amt }));
+        await loadMoney(); render(); toast('Added');
+      });
+    }
+    else if ((t = e.target.closest('[data-runst]'))) {
+      var st = t.dataset.runst, rr = S.m.runs.filter(function(r){ return r.id === S.f.run; })[0];
+      var ok = await confirmDlg(st === 'approved' ? 'Approve this pay run?' : 'Mark as paid?', st === 'approved' ? 'It locks, and each coach can see their pay and statement. ' + money(sum(runLines(rr.id))) + ' in total.' : 'Confirms everyone in this run has been paid, including any expenses paid back.', st === 'approved' ? 'Approve' : 'Mark as paid');
+      if (!ok) return;
+      await q(sb.from('md_pay_runs').update({ status: st }).eq('id', rr.id)); await loadMoney(); render(); toast(st === 'approved' ? 'Approved' : 'Marked as paid');
+    }
+    else if ((t = e.target.closest('[data-delrun]'))) { if (!(await confirmDlg('Delete this draft?', 'You can start it again at any time.', 'Delete'))) return; await q(sb.from('md_pay_runs').delete().eq('id', t.dataset.delrun)); S.f.run = null; await loadMoney(); render(); }
+    else if ((t = e.target.closest('[data-statement-pay]'))) { var run2 = S.m.runs.filter(function(r){ return r.id === (t.dataset.forrun || S.f.run); })[0]; infoDlg('Statement', statementHtml(t.dataset.statementPay, run2) + '<button class="btn line" type="button" data-printstmt>Print or save as PDF</button>'); S.f.stmt = [t.dataset.statementPay, run2.id]; }
+    else if (e.target.closest('[data-printstmt]')) { var rr3 = S.m.runs.filter(function(r){ return r.id === S.f.stmt[1]; })[0]; printHtml(statementHtml(S.f.stmt[0], rr3)); }
+    else if ((t = e.target.closest('[data-rates]'))) ratesDlg(t.dataset.rates);
+    else if ((t = e.target.closest('[data-claim]'))) { await q(sb.from('md_outgoings').update({ status: t.dataset.claim }).eq('id', t.dataset.id)); await loadMoney(); render(); toast(t.dataset.claim === 'approved' ? 'Approved. It’s added to their next pay run' : 'Turned down'); }
+    else if ((t = e.target.closest('[data-delclaim]'))) { await q(sb.from('md_outgoings').delete().eq('id', t.dataset.delclaim)); await loadMoney(); render(); toast('Claim withdrawn'); }
+    else if (e.target.closest('[data-claimnew]')) spendDlg(null, { claim: true });
+    else if ((t = e.target.closest('[data-spend]'))) spendDlg(S.m.spend.filter(function(o){ return o.id === t.dataset.spend; })[0]);
+    else if ((t = e.target.closest('[data-tripcost]'))) spendDlg(null, { trip: t.dataset.tripcost, cat: 'Competitions & travel' });
+    else if ((t = e.target.closest('[data-trip]'))) tripDlg(S.m.trips.filter(function(x){ return x.id === t.dataset.trip; })[0]);
+    else if ((t = e.target.closest('[data-receipt]'))) { var s = await sb.storage.from('md-receipts').createSignedUrl(t.dataset.receipt, 300); if (s.error) throw s.error; window.open(s.data.signedUrl, '_blank', 'noopener'); }
+    else if ((t = e.target.closest('[data-venue]'))) venueDlg(S.m.venues.filter(function(v){ return v.id === t.dataset.venue; })[0]);
+    else if (e.target.closest('[data-hallterm]')) hallTermDlg();
+    else if (e.target.closest('[data-hallone]')) hallOneDlg();
+    else if ((t = e.target.closest('[data-hallcancel]'))) { var b = S.m.hall.filter(function(x){ return x.id === t.dataset.hallcancel; })[0]; await q(sb.from('md_hall_bookings').update({ status: b.status === 'cancelled' ? 'booked' : 'cancelled' }).eq('id', b.id)); await loadMoney(); render(); }
+    else if ((t = e.target.closest('[data-hallpaid]'))) {
+      var due = S.m.hall.filter(function(b){ return b.venue_id === t.dataset.hallpaid && b.status === 'booked' && !b.paid && b.on_date <= today(); });
+      if (!(await confirmDlg('Mark hall hire paid?', due.length + ' bookings up to today, ' + money(sum(due, function(b){ return b.cost_pence; })) + '.', 'Mark paid'))) return;
+      for (var i = 0; i < due.length; i += 100) await q(sb.from('md_hall_bookings').update({ paid: true }).in('id', due.slice(i, i + 100).map(function(b){ return b.id; })));
+      await loadMoney(); render(); toast('Marked paid');
+    }
+    else if (e.target.closest('[data-export]')) exportDlg();
+  } catch (err) { fail(err); }
 });
 
 /* ---------------- settings: home screen, notifications, text size */
