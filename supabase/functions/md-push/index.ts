@@ -3,6 +3,8 @@
 //            plus the class's coach for trials and enrolments.
 // 'lesson'  (signed-in staff): a lesson was booked, changed or cancelled for another coach; tells that coach.
 // 'test'    (signed-in staff): a test alert to your own phone.
+// 'incident', 'timeoff', 'notice' (signed-in staff): alerts for reports, time off and notices.
+// 'compliance' (pg_cron md-compliance, internal key): renewals due in 30 or 7 days, today, or overdue.
 // 'parent'  (signed-in parent): an event entry or details change, to principals.
 // 'reminders' (pg_cron md-4pm-reminders, internal key): at 4pm London time, each coach's booked lessons and classes today.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
@@ -58,14 +60,20 @@ Deno.serve(async (req) => {
     const { data: staff } = await admin.from("md_staff").select("user_id").eq("active", true);
     const active = new Set((staff || []).map((s: { user_id: string }) => s.user_id));
     const { data: ls } = await admin.from("md_lessons").select("id,starts,coach_id,guest,md_lesson_dancers(md_dancers(first_name))").eq("on_date", today).eq("status", "booked").order("starts");
-    const { data: cs } = await admin.from("md_classes").select("name,starts,coach_id,day").eq("active", true).in("day", dow === 0 ? [0, 7] : [dow]).order("starts");
+    const { data: cs } = await admin.from("md_classes").select("id,name,starts,coach_id,day").eq("active", true).in("day", dow === 0 ? [0, 7] : [dow]).order("starts");
+    const { data: cov } = await admin.from("md_class_cover").select("class_id,cover_id,cancelled").eq("on_date", today);
+    const { data: closed } = await admin.rpc("md_closed", { d: today });
     const per = new Map<string, { t: string; s: string }[]>();
     const add = (id: string | null, t: string, s: string) => { if (!id || !active.has(id)) return; if (!per.has(id)) per.set(id, []); per.get(id)!.push({ t, s }); };
     for (const l of (ls || []) as { starts: string; coach_id: string; guest: string | null; md_lesson_dancers: { md_dancers: { first_name: string } | null }[] }[]) {
       const names = l.md_lesson_dancers.map((x) => x.md_dancers?.first_name).filter(Boolean).concat(l.guest ? [l.guest] : []).join(" & ") || "Lesson";
       add(l.coach_id, l.starts, t12(l.starts) + " " + names);
     }
-    for (const c of (cs || []) as { name: string; starts: string; coach_id: string }[]) add(c.coach_id, c.starts, t12(c.starts) + " " + c.name);
+    if (!closed) for (const c of (cs || []) as { id: string; name: string; starts: string; coach_id: string }[]) {
+      const cv = (cov || []).find((x: { class_id: string }) => x.class_id === c.id) as { cover_id: string | null; cancelled: boolean } | undefined;
+      if (cv?.cancelled) continue;
+      add(cv?.cover_id || c.coach_id, c.starts, t12(c.starts) + " " + c.name + (cv?.cover_id && cv.cover_id !== c.coach_id ? " (cover)" : ""));
+    }
     let sent = 0;
     for (const [id, items] of per) {
       items.sort((a, z) => a.t.localeCompare(z.t));
@@ -73,6 +81,22 @@ Deno.serve(async (req) => {
       sent += await send([id], { title: items.length === 1 ? "Your lesson tonight" : "Your " + items.length + " lessons tonight", body: clip(body, 180), url: "#timetable", tag: "today-" + today });
     }
     return json({ ok: true, coaches: per.size, sent });
+  }
+
+  if (b.kind === "compliance") {
+    if (!keys.internal || req.headers.get("x-internal") !== keys.internal) return json({ error: "not allowed" }, 403);
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
+    const plus = (n: number) => { const x = new Date(today + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+    const { data: items } = await admin.from("md_compliance").select("title,user_id,expires_on").in("expires_on", [plus(30), plus(7), today, plus(-1)]);
+    const { data: ps } = await admin.from("md_staff").select("user_id").eq("active", true).eq("role", "Principal");
+    let sent = 0;
+    for (const it of (items || []) as { title: string; user_id: string | null; expires_on: string }[]) {
+      const days = Math.round((Date.parse(it.expires_on) - Date.parse(today)) / 864e5);
+      const who = it.user_id ? (await admin.from("md_staff").select("name").eq("user_id", it.user_id).maybeSingle()).data?.name : null;
+      const body = (who ? who.split(" ")[0] + "'s " : "") + it.title + (days > 0 ? " runs out in " + days + " days, on " + day(it.expires_on) : days === 0 ? " runs out today" : " ran out yesterday");
+      sent += await send([...(ps || []).map((p: { user_id: string }) => p.user_id), ...(it.user_id ? [it.user_id] : [])], { title: days > 0 ? "Renewal coming up" : "Renewal overdue", body: clip(body, 180), url: "#safety", tag: "comp-" + it.title });
+    }
+    return json({ ok: true, items: (items || []).length, sent });
   }
 
   const caller = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: req.headers.get("Authorization") || "" } }, auth: { persistSession: false } });
@@ -101,6 +125,44 @@ Deno.serve(async (req) => {
   if (!who?.user || !isStaff) return json({ error: "not allowed" }, 403);
   const { data: me } = await admin.from("md_staff").select("name").eq("user_id", who.user.id).maybeSingle();
   const myName = clip(me?.name || "Dunnworks", 40);
+
+  if (b.kind === "incident") {
+    const { data: inc } = await admin.from("md_incidents").select("kind,reported_by,dancer_id,person").eq("id", String(b.id)).maybeSingle();
+    if (!inc || inc.reported_by !== who.user.id) return json({ ok: true, sent: 0 });
+    const { data: ps } = await admin.from("md_staff").select("user_id").eq("active", true).eq("role", "Principal");
+    const safe = inc.kind === "Safeguarding concern";
+    let name = inc.person || "";
+    if (inc.dancer_id) name = (await admin.from("md_dancers").select("first_name").eq("id", inc.dancer_id).maybeSingle()).data?.first_name || name;
+    return json({ ok: true, sent: await send((ps || []).map((p: { user_id: string }) => p.user_id).filter((x: string) => x !== who.user!.id), {
+      title: safe ? "New safeguarding concern" : "New " + inc.kind.toLowerCase() + " report", body: safe ? "Reported by " + myName + ". Open the app to read it." : (name ? name + " · " : "") + "reported by " + myName, url: "#safety", tag: "inc-" + b.id }) });
+  }
+
+  if (b.kind === "timeoff") {
+    const { data: t } = await admin.from("md_timeoff").select("user_id,starts_on,ends_on,status").eq("id", String(b.id)).maybeSingle();
+    if (!t) return json({ ok: true, sent: 0 });
+    const when = day(t.starts_on) + (t.ends_on !== t.starts_on ? " to " + day(t.ends_on) : "");
+    if (t.status === "requested" && t.user_id === who.user.id) {
+      const { data: ps } = await admin.from("md_staff").select("user_id").eq("active", true).eq("role", "Principal");
+      return json({ ok: true, sent: await send((ps || []).map((p: { user_id: string }) => p.user_id).filter((x: string) => x !== who.user!.id), { title: "Time off request", body: myName + " asked for " + when, url: "#timeoff" }) });
+    }
+    const { data: isP } = await caller.rpc("md_is_principal");
+    if (!isP) return json({ ok: true, sent: 0 });
+    return json({ ok: true, sent: await send([t.user_id], { title: t.status === "approved" ? "Time off approved" : "Time off not approved", body: when + " · by " + myName, url: "#timeoff" }) });
+  }
+
+  if (b.kind === "notice") {
+    const { data: isP } = await caller.rpc("md_is_principal");
+    const { data: n } = await admin.from("md_notices").select("title,body,kind,class_id").eq("id", String(b.id)).maybeSingle();
+    if (!n) return json({ ok: true, sent: 0 });
+    let to: string[] = [];
+    if (n.kind === "notice" && isP) to = ((await admin.from("md_staff").select("user_id").eq("active", true)).data || []).map((s: { user_id: string }) => s.user_id);
+    else if (n.kind === "handover" && n.class_id) {
+      const { data: c } = await admin.from("md_classes").select("coach_id").eq("id", n.class_id).maybeSingle();
+      const { data: ps } = await admin.from("md_staff").select("user_id").eq("active", true).eq("role", "Principal");
+      to = [c?.coach_id, ...(ps || []).map((p: { user_id: string }) => p.user_id)].filter(Boolean) as string[];
+    }
+    return json({ ok: true, sent: await send(to.filter((x) => x !== who.user!.id), { title: n.kind === "notice" ? clip(n.title || "New notice", 80) : "Handover note from " + myName, body: clip(n.body, 180), url: "#board" }) });
+  }
 
   if (b.kind === "test") {
     return json({ ok: true, sent: await send([who.user.id], { title: "Notifications are on", body: "You'll get alerts like this for new bookings and lesson changes.", url: "#today" }) });

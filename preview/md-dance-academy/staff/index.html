@@ -392,6 +392,7 @@ async function load(){
   S.d = { classes: r[0], families: r[1], dancers: r[2], enrol: r[3], requests: r[4], events: r[5], entries: r[6], staff: r[7],
     charges: S.principal ? r[8] : [], payments: S.principal ? r[9] : [], orders: S.principal ? r[10] : [], messages: S.principal ? r[11] : [] };
   await loadMoney();
+  await loadRunning();
   S.mail = S.principal ? await q(sb.from('md_mailings').select('*').order('month', { ascending: false }).limit(3)).catch(function(){ return []; }) : [];
 }
 var by = function(list, key){ var m = {}; (list || []).forEach(function(x){ m[x[key]] = x; }); return m; };
@@ -427,6 +428,7 @@ function counts(){
   var c = {};
   c.bookings = S.d.requests.filter(function(r){ return r.status === 'new'; }).length + (S.d.messages || []).filter(function(m){ return m.status === 'new'; }).length;
   c.shop = (S.d.orders || []).filter(function(o){ return o.status === 'new'; }).length;
+  if (S.r) { c.timeoff = (S.principal ? S.r.timeoff.filter(function(x){ return x.status === 'requested'; }).length : 0) + needsCover().filter(function(x){ return x.open; }).length; c.safety = S.principal ? S.r.incidents.filter(function(i){ return i.status === 'open'; }).length : 0; }
   c.pay = S.principal && S.m ? S.m.spend.filter(function(o){ return o.paid_by && o.status === 'claimed'; }).length : 0;
   return c;
 }
@@ -469,6 +471,7 @@ VIEWS.today = function(){
   var owed = S.principal ? S.d.families.reduce(function(s, f){ var b = balance(f.id); return s + (b > 0 ? b : 0); }, 0) : 0;
   var newReq = S.d.requests.filter(function(r){ return r.status === 'new'; }).length;
   var h = '<div class="head"><div><h1>Hello, ' + esc(who().split(' ')[0]) + '</h1><p class="muted">' + nice(t, { weekday: 'long', day: 'numeric', month: 'long' }) + '</p></div></div>';
+  h += todayAlerts();
   if (S.principal && hasDemo()) h += '<div class="banner"><span>Sample families and bookings are showing so you can try everything. Clear them before real details go in.</span><button class="btn dark sm" type="button" data-cleardemo>Clear sample data</button></div>';
   if (!isStandalone() && !store.get('md-install-hide', false)) h += '<div class="card installcard"><img src="icons/icon-192.png" alt=""><div style="flex:1;min-width:180px"><b>Put MD Staff on your home screen</b><div class="small muted">Opens like an app, works on poor signal, and can send you alerts.</div></div><button class="btn sm" type="button" data-set="install">Show me</button><button class="btn ghost sm" type="button" data-hideinstall>Not now</button></div>';
   h += '<div class="grid g4">' +
@@ -1400,6 +1403,218 @@ document.addEventListener('click', async function(e){
   } catch (err) { fail(err); }
 });
 
+/* ---------------- running the school: notices, time off and cover, safety (incidents and renewals) */
+async function loadRunning(){
+  var safe = function(p){ return q(p).catch(function(){ return []; }); }, t = today();
+  var r = await Promise.all([
+    safe(sb.from('md_notices').select('*').gte('created_at', addDays(t, -90) + 'T00:00:00Z').order('created_at', { ascending: false })),
+    safe(sb.from('md_timeoff').select('*').gte('ends_on', addDays(t, -60)).order('starts_on')),
+    safe(sb.from('md_class_cover').select('*').gte('on_date', addDays(t, -60)).order('on_date')),
+    safe(sb.from('md_incidents').select('*').order('happened_at', { ascending: false }).limit(200)),
+    safe(sb.from('md_compliance').select('*').order('expires_on'))
+  ]);
+  S.r = { notices: r[0], timeoff: r[1], cover: r[2], incidents: r[3], comp: r[4] };
+}
+NAV.splice(NAV.findIndex(function(n){ return n.k === 'events'; }) + 1, 0, { k: 'board', label: 'Notices', icon: 'msg' }, { k: 'timeoff', label: 'Time off & cover', icon: 'today' }, { k: 'safety', label: 'Safety', icon: 'alert' });
+var whoName = function(id){ return staffName(id); };
+var firstName = function(id){ return staffName(id).split(' ')[0]; };
+function needsCover(){
+  var t = today(), out = [];
+  S.r.timeoff.filter(function(x){ return x.status === 'approved' && x.ends_on >= t; }).forEach(function(x){
+    for (var d = x.starts_on < t ? t : x.starts_on; d <= x.ends_on; d = addDays(d, 1)) {
+      if (closedDay(d)) continue;
+      S.d.classes.filter(function(c){ return c.active !== false && c.coach_id === x.user_id && c.day === dow(d) && c.kind !== 'Private' && c.starts; }).forEach(function(c){
+        var cv = S.r.cover.filter(function(v){ return v.class_id === c.id && v.on_date === d; })[0];
+        out.push({ c: c, d: d, away: x.user_id, cv: cv || null, open: !cv || (!cv.cover_id && !cv.cancelled) });
+      });
+    }
+  });
+  return out;
+}
+function lessonsDuringTimeoff(){
+  var t = today(), out = [];
+  S.r.timeoff.filter(function(x){ return x.status === 'approved' && x.ends_on >= t; }).forEach(function(x){
+    (S.lessons || []).forEach(function(l){ if (l.coach_id === x.user_id && l.status === 'booked' && l.on_date >= x.starts_on && l.on_date <= x.ends_on && l.on_date >= t) out.push(l); });
+  });
+  return out;
+}
+var compState = function(c){ if (!c.expires_on) return 'ok'; var t = today(); return c.expires_on < t ? 'bad' : c.expires_on <= addDays(t, 60) ? 'warn' : 'ok'; };
+function todayAlerts(){
+  if (!S.r) return '';
+  var h = '', t = today(), me = S.me.user_id;
+  var pinned = S.r.notices.filter(function(n){ return n.kind === 'notice' && n.pinned && (!n.expires_on || n.expires_on >= t); })[0];
+  if (pinned) h += '<button type="button" class="banner" style="border:0;text-align:left;cursor:pointer;width:100%;background:#FFF3D6;color:#5A3B00" data-go="board"><span><b>' + esc(pinned.title || 'Notice') + '</b> ' + esc(pinned.body.slice(0, 140)) + '</span></button>';
+  var nc = needsCover().filter(function(x){ return x.open && (S.principal || x.away !== me); });
+  if (nc.length) h += '<div class="banner"><span>' + plural(nc.length, 'class needs', 'classes need') + ' cover, first ' + esc(nice(nc[0].d)) + '</span><button class="btn sm" type="button" data-go="timeoff">Sort cover</button></div>';
+  var mine = S.r.cover.filter(function(v){ return v.cover_id === me && v.on_date >= t; });
+  mine.slice(0, 2).forEach(function(v){ var c = S.d.classes.filter(function(x){ return x.id === v.class_id; })[0]; if (c) h += '<div class="banner" style="background:var(--ok-l);color:var(--ok)"><span>You’re covering <b>' + esc(c.name) + '</b> on ' + esc(nice(v.on_date)) + ', ' + hm(c.starts) + '</span></div>'; });
+  if (S.principal) {
+    var req = S.r.timeoff.filter(function(x){ return x.status === 'requested'; }).length;
+    var open = S.r.incidents.filter(function(i){ return i.status === 'open'; }).length;
+    var due = S.r.comp.filter(function(c){ return compState(c) !== 'ok'; }).length;
+    if (req || open || due) h += '<div class="row">' + (req ? '<button class="btn line sm" type="button" data-go="timeoff">' + plural(req, 'time off request', 'time off requests') + '</button>' : '') + (open ? '<button class="btn line sm" type="button" data-go="safety">' + plural(open, 'open report', 'open reports') + '</button>' : '') + (due ? '<button class="btn line sm" type="button" data-go="safety">' + plural(due, 'renewal due', 'renewals due') + '</button>' : '') + '</div>';
+  } else {
+    var mineDue = S.r.comp.filter(function(c){ return c.user_id === me && compState(c) !== 'ok'; });
+    if (mineDue.length) h += '<div class="banner"><span>Your ' + esc(mineDue[0].title) + (mineDue[0].expires_on < t ? ' has run out' : ' runs out ' + esc(nice(mineDue[0].expires_on))) + '</span><button class="btn sm" type="button" data-go="safety">Update</button></div>';
+  }
+  return h;
+}
+
+/* notices */
+VIEWS.board = function(){
+  var t = today(), notices = S.r.notices.filter(function(n){ return n.kind === 'notice' && (!n.expires_on || n.expires_on >= t); }).sort(function(a, b){ return (b.pinned - a.pinned) || b.created_at.localeCompare(a.created_at); });
+  var hand = S.r.notices.filter(function(n){ return n.kind === 'handover'; });
+  var card = function(n){
+    var c = n.class_id && S.d.classes.filter(function(x){ return x.id === n.class_id; })[0];
+    return '<div class="card stack">' + (n.title ? '<div class="row between"><h3>' + esc(n.title) + '</h3>' + (n.pinned ? '<span class="pill">Pinned</span>' : '') + '</div>' : '') + (c ? '<span class="pill grey" style="align-self:flex-start">' + esc(c.name) + '</span>' : '') +
+      '<p style="white-space:pre-wrap">' + esc(n.body) + '</p><div class="row between"><span class="small muted">' + esc(n.author_name || whoName(n.author)) + ' · ' + esc(ago(n.created_at)) + '</span>' + ((n.author === S.me.user_id || S.principal) ? '<button class="btn ghost sm" type="button" data-delnotice="' + n.id + '">Delete</button>' : '') + '</div></div>';
+  };
+  return '<div class="head"><div><h1>Notices</h1><p class="muted">News for the team, and handover notes between coaches.</p></div><div class="row">' + (S.principal ? '<button class="btn line" type="button" data-notice="notice">Post a notice</button>' : '') + '<button class="btn" type="button" data-notice="handover">Write a handover note</button></div></div>' +
+    '<section class="stack"><h2>Notices</h2>' + (notices.length ? notices.map(card).join('') : '<div class="empty">No notices right now.</div>') + '</section>' +
+    '<section class="stack"><h2>Handover notes</h2>' + (hand.length ? hand.slice(0, 30).map(card).join('') : '<div class="empty">Leave a note for whoever teaches next: kit, injuries, what you covered.</div>') + '</section>';
+};
+function noticeDlg(kind){
+  var cls = S.d.classes.filter(function(c){ return c.active !== false; });
+  openDlg(kind === 'notice' ? 'Post a notice' : 'Handover note', (kind === 'notice' ? '<label class="field">Title<input class="in" name="title" required maxlength="100"></label>' : '<label class="field">Class<select class="in" name="cls"><option value="">Not about one class</option>' + cls.map(function(c){ return '<option value="' + c.id + '">' + esc(c.name + ', ' + classTime(c)) + '</option>'; }).join('') + '</select></label>') +
+    '<label class="field">' + (kind === 'notice' ? 'Notice' : 'Note') + '<textarea class="in" name="body" required maxlength="2000" rows="5"' + (kind === 'handover' ? ' placeholder="e.g. Covered the cha cha basic. Speaker charger is in the cupboard. Amara has a sore knee."' : '') + '></textarea></label>' +
+    (kind === 'notice' ? '<div class="fgrid"><label class="check"><input type="checkbox" name="pin"> Pin to the top of everyone’s Today page</label><label class="field">Take down on<span class="hint">Optional</span><input class="in" type="date" name="exp"></label></div>' : '') +
+    '<p class="small muted">' + (kind === 'notice' ? 'Everyone with notifications on gets an alert.' : 'The class coach and principals get an alert.') + '</p>', 'Post', async function(fd){
+    var row = { kind: kind, title: fd.get('title') || null, body: fd.get('body'), class_id: fd.get('cls') || null, pinned: !!fd.get('pin'), expires_on: fd.get('exp') || null, author: S.me.user_id, author_name: S.me.name };
+    var n = await q(sb.from('md_notices').insert(row).select().single());
+    try { sb.functions.invoke('md-push', { body: { kind: 'notice', id: n.id } }); } catch (x) {}
+    await loadRunning(); render(); toast('Posted');
+  });
+}
+
+/* time off and cover */
+VIEWS.timeoff = function(){
+  var t = today(), me = S.me.user_id;
+  var mine = S.r.timeoff.filter(function(x){ return x.user_id === me && x.ends_on >= t; });
+  var req = S.r.timeoff.filter(function(x){ return x.status === 'requested' && x.user_id !== me; });
+  var away = S.r.timeoff.filter(function(x){ return x.status === 'approved' && x.ends_on >= t; });
+  var nc = needsCover(), ls = lessonsDuringTimeoff();
+  var tpill = function(s){ return s === 'approved' ? '<span class="pill ok">Approved</span>' : s === 'declined' ? '<span class="pill bad">Not approved</span>' : '<span class="pill warn">Waiting</span>'; };
+  var when = function(x){ return nice(x.starts_on) + (x.ends_on !== x.starts_on ? ' to ' + nice(x.ends_on) : ''); };
+  var h = '<div class="head"><div><h1>Time off & cover</h1><p class="muted">Ask for time off, and make sure every class is covered.</p></div><button class="btn" type="button" data-askoff>Ask for time off</button></div>';
+  if (S.principal && req.length) h += '<section class="stack"><h2>To approve</h2><div class="list">' + req.map(function(x){ return '<div class="item"><div class="sum" style="cursor:default"><div class="t"><b>' + esc(whoName(x.user_id)) + ' · ' + esc(when(x)) + '</b><small>' + esc(x.reason || 'No reason given') + '</small></div></div><div class="row" style="padding:0 16px 14px"><button class="btn sm" type="button" data-offst="approved" data-id="' + x.id + '">Approve</button><button class="btn ghost sm" type="button" data-offst="declined" data-id="' + x.id + '">Turn down</button></div></div>'; }).join('') + '</div></section>';
+  h += '<section class="stack"><h2>Cover needed</h2>' + (nc.length ? '<div class="list">' + nc.map(function(x){
+    var cv = x.cv, status = cv && cv.cancelled ? '<span class="pill grey">Class off</span>' : cv && cv.cover_id ? '<span class="pill ok">' + esc(firstName(cv.cover_id)) + ' covering</span>' : '<span class="pill bad">Needs cover</span>';
+    var acts = S.principal ? '<button class="btn sm" type="button" data-cover="' + x.c.id + '" data-d="' + x.d + '">' + (x.open ? 'Choose cover' : 'Change') + '</button>' : (x.open && x.away !== me ? '<button class="btn sm" type="button" data-offer="' + x.c.id + '" data-d="' + x.d + '">I can cover</button>' : '');
+    return '<div class="item"><div class="sum" style="cursor:default"><div class="t"><b>' + esc(x.c.name) + '</b><small>' + esc(nice(x.d) + ', ' + hm(x.c.starts) + ' · ' + (x.c.venue || '') + ' · ' + firstName(x.away) + ' is off') + '</small></div>' + status + '</div>' + (acts ? '<div class="row" style="padding:0 16px 14px">' + acts + '</div>' : '') + '</div>';
+  }).join('') + '</div>' : '<div class="empty">Every class is covered.</div>') +
+    (ls.length ? '<div class="banner"><span>' + plural(ls.length, 'private lesson is', 'private lessons are') + ' booked with someone who’s off. Move them to another coach on the timetable.</span><button class="btn sm" type="button" data-go="timetable">Timetable</button></div>' : '') + '</section>';
+  h += '<section class="stack"><h2>Who’s off</h2>' + (away.length ? '<div class="card lrows">' + away.map(function(x){ return lrow(esc(when(x)), '<b>' + esc(whoName(x.user_id)) + '</b>' + (x.reason && (S.principal || x.user_id === me) ? '<div class="small muted">' + esc(x.reason) + '</div>' : ''), ''); }).join('') + '</div>' : '<div class="empty">Nobody has time off booked.</div>') + '</section>';
+  if (mine.length) h += '<section class="stack"><h2>Your time off</h2><div class="card lrows">' + mine.map(function(x){ return lrow(esc(when(x)), esc(x.reason || ''), tpill(x.status), (x.status === 'requested' || x.starts_on > t) ? '<button class="btn ghost sm" type="button" data-deloff="' + x.id + '">Cancel</button>' : ''); }).join('') + '</div></section>';
+  return h;
+};
+function askOffDlg(){
+  openDlg('Ask for time off', '<div class="fgrid"><label class="field">From<input class="in" type="date" name="s" required value="' + addDays(today(), 7) + '"></label><label class="field">To<input class="in" type="date" name="e" required value="' + addDays(today(), 7) + '"></label><label class="field full">Reason<span class="hint">Optional, only principals see it</span><input class="in" name="r" maxlength="140"></label></div><p class="small muted">A principal approves it, then your classes on those days show as needing cover.</p>', 'Send request', async function(fd){
+    if (fd.get('e') < fd.get('s')) { toast('The end date is before the start', true); return false; }
+    var x = await q(sb.from('md_timeoff').insert({ user_id: S.me.user_id, starts_on: fd.get('s'), ends_on: fd.get('e'), reason: fd.get('r') || null, status: 'requested' }).select().single());
+    try { sb.functions.invoke('md-push', { body: { kind: 'timeoff', id: x.id } }); } catch (e) {}
+    await loadRunning(); render(); toast('Request sent');
+  });
+}
+function coverDlg(cid, d){
+  var c = S.d.classes.filter(function(x){ return x.id === cid; })[0], cv = S.r.cover.filter(function(v){ return v.class_id === cid && v.on_date === d; })[0] || {};
+  var off = S.r.timeoff.filter(function(x){ return x.status === 'approved' && d >= x.starts_on && d <= x.ends_on; }).map(function(x){ return x.user_id; });
+  openDlg('Cover for ' + c.name, '<p class="small">' + esc(nice(d, { weekday: 'long', day: 'numeric', month: 'long' }) + ', ' + hm(c.starts) + ' to ' + hm(c.ends) + ' · ' + (c.venue || '')) + '</p><div class="stack">' +
+    S.d.staff.filter(function(s){ return s.active && off.indexOf(s.user_id) < 0; }).map(function(s){ return '<label class="check"><input type="radio" name="who" value="' + s.user_id + '"' + (cv.cover_id === s.user_id ? ' checked' : '') + '> ' + esc(s.name) + '</label>'; }).join('') +
+    '<label class="check"><input type="radio" name="who" value="off"' + (cv.cancelled ? ' checked' : '') + '> No class that day</label><label class="check"><input type="radio" name="who" value=""' + (!cv.cover_id && !cv.cancelled ? ' checked' : '') + '> Still needs cover</label></div><p class="small muted">Pay runs pay whoever covers, and nothing if the class is off. The cover coach gets the 4pm reminder.</p>', 'Save', async function(fd){
+    var w = fd.get('who') || '';
+    await q(sb.from('md_class_cover').upsert({ class_id: cid, on_date: d, cover_id: w && w !== 'off' ? w : null, cancelled: w === 'off', set_by: S.me.name }, { onConflict: 'class_id,on_date' }));
+    await loadRunning(); render(); toast(w === 'off' ? 'Marked as no class' : w ? firstName(w) + ' is covering' : 'Saved');
+  });
+}
+
+/* safety: accident book, safeguarding, renewals */
+var KINDS = ['Accident', 'Safeguarding concern', 'Near miss', 'Other'];
+var COMP = ['DBS check', 'First aid', 'Safeguarding training', 'Insurance', 'Licence', 'Membership', 'Qualification', 'Risk assessment', 'Other'];
+VIEWS.safety = function(){
+  var tab = S.f.sf || 'reports', t = today(), me = S.me.user_id;
+  var h = '<div class="head"><div><h1>Safety</h1><p class="muted">Accident book, safeguarding concerns, and certificates and licences that need renewing.</p></div><div class="row">' + (tab === 'reports' ? '<button class="btn" type="button" data-report>Report an accident or concern</button>' : '<button class="btn" type="button" data-comp="">Add a certificate</button>') + '</div></div>' +
+    '<div class="chips">' + [['reports', 'Reports'], ['renewals', 'Renewals']].map(function(x){ return '<button type="button" class="chip" data-chip="sf" data-val="' + x[0] + '" aria-pressed="' + (tab === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  if (tab === 'renewals') {
+    var list = S.r.comp.slice().sort(function(a, b){ return String(a.expires_on || '9999').localeCompare(String(b.expires_on || '9999')); });
+    var grp = function(st, title){ var l = list.filter(function(c){ return compState(c) === st; }); return l.length ? '<section class="stack"><h2>' + title + '</h2><div class="card lrows">' + l.map(function(c){
+      return lrow(c.expires_on ? esc(nice(c.expires_on, { day: 'numeric', month: 'short', year: 'numeric' })) : 'No expiry', '<b>' + esc(c.title) + '</b><div class="small muted">' + esc([c.kind, c.user_id ? whoName(c.user_id) : 'Whole school', c.ref].filter(Boolean).join(' · ')) + '</div>', st === 'bad' ? '<span class="pill bad">Run out</span>' : st === 'warn' ? '<span class="pill warn">Due soon</span>' : '<span class="pill ok">OK</span>',
+        (c.doc_path ? '<button class="btn ghost sm" type="button" data-doc="' + esc(c.doc_path) + '">View</button>' : '') + ((S.principal || c.user_id === me) ? '<button class="btn ghost sm" type="button" data-comp="' + c.id + '">Update</button>' : ''));
+    }).join('') + '</div></section>' : ''; };
+    var out = grp('bad', 'Run out') + grp('warn', 'Due in the next 60 days') + grp('ok', 'Up to date');
+    return h + (out || '<div class="empty">Add DBS checks, first aid certificates, insurance and licences, and you’ll get reminders 30 and 7 days before each runs out.</div>') + '<p class="small muted">Reminders go to principals' + (S.principal ? '' : ' and you') + ' 30 days and 7 days before, and on the day.</p>';
+  }
+  var reps = S.r.incidents;
+  h += '<div class="banner" style="background:var(--bad-l);color:var(--bad)"><span>If a child is in danger right now, call 999. Tell a principal about any safeguarding worry the same day.</span></div>';
+  if (!reps.length) return h + '<div class="empty">' + (S.principal ? 'No reports yet.' : 'Reports you make show here. Principals see them straight away.') + '</div>';
+  return h + '<div class="list">' + reps.map(function(i){
+    var d = i.dancer_id && dancer(i.dancer_id), name = d ? d.first_name + ' ' + (d.last_name || '') : i.person || '';
+    return '<details class="item"><summary><div class="t"><b>' + esc(i.kind) + (name ? ' · ' + esc(name) : '') + '</b><small>' + esc(nice(i.happened_at) + ' ' + new Date(i.happened_at).toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', timeZone: 'Europe/London' }) + (i.place ? ' · ' + i.place : '') + ' · by ' + (i.reporter_name || whoName(i.reported_by))) + '</small></div>' + (i.status === 'open' ? '<span class="pill ' + (i.kind === 'Safeguarding concern' ? 'bad' : 'warn') + '">Open</span>' : '<span class="pill grey">Closed</span>') + '</summary><div class="body">' + incidentKv(i, name) +
+      '<div class="row"><button class="btn ghost sm" type="button" data-printinc="' + i.id + '">Print or save</button>' + (S.principal && i.status === 'open' ? '<button class="btn sm" type="button" data-closeinc="' + i.id + '">Close with outcome</button>' : '') + '</div></div></details>';
+  }).join('') + '</div>';
+};
+function incidentKv(i, name){
+  return '<dl class="kv small"><dt>Type</dt><dd>' + esc(i.kind) + '</dd><dt>When</dt><dd>' + esc(new Date(i.happened_at).toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Europe/London' })) + '</dd>' + (i.place ? '<dt>Where</dt><dd>' + esc(i.place) + '</dd>' : '') + (name ? '<dt>Who</dt><dd>' + esc(name) + '</dd>' : '') +
+    '<dt>What happened</dt><dd style="white-space:pre-wrap">' + esc(i.what) + '</dd>' + (i.injury ? '<dt>Injury</dt><dd>' + esc(i.injury) + '</dd>' : '') + (i.action ? '<dt>Action taken</dt><dd style="white-space:pre-wrap">' + esc(i.action) + '</dd>' : '') +
+    '<dt>Parent told</dt><dd>' + (i.parent_told ? 'Yes' + (i.parent_told_at ? ', ' + esc(new Date(i.parent_told_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/London' })) : '') : 'Not yet') + '</dd><dt>Reported by</dt><dd>' + esc(i.reporter_name || whoName(i.reported_by)) + ', ' + esc(new Date(i.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/London' })) + '</dd>' +
+    (i.status === 'closed' ? '<dt>Outcome</dt><dd style="white-space:pre-wrap">' + esc(i.outcome || '') + '<br><span class="muted">Closed by ' + esc(i.closed_by || '') + '</span></dd>' : '') + '</dl>';
+}
+function reportDlg(){
+  var now = new Date(), local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  var places = S.d.classes.map(function(c){ return c.venue; }).filter(function(v, i, a){ return v && a.indexOf(v) === i; });
+  var ds = S.d.dancers.slice().sort(function(a, b){ return a.first_name.localeCompare(b.first_name); });
+  openDlg('Report an accident or concern', '<div class="fgrid"><label class="field">Type<select class="in" name="kind">' + KINDS.map(function(k){ return '<option>' + k + '</option>'; }).join('') + '</select></label><label class="field">When<input class="in" type="datetime-local" name="when" required value="' + local + '"></label>' +
+    '<label class="field full">Where<input class="in" name="place" list="placesList" value="' + esc(places[0] || '') + '"><datalist id="placesList">' + places.map(function(p){ return '<option value="' + esc(p) + '">'; }).join('') + '</datalist></label>' +
+    '<label class="field">Dancer<select class="in" name="dancer"><option value="">Someone else</option>' + ds.map(function(d){ return '<option value="' + d.id + '">' + esc(d.first_name + ' ' + (d.last_name || '')) + '</option>'; }).join('') + '</select></label><label class="field">Or their name<input class="in" name="person" placeholder="If not a dancer"></label>' +
+    '<label class="field full">What happened<span class="hint">Facts only: what you saw or were told, in their words where you can</span><textarea class="in" name="what" required rows="4"></textarea></label>' +
+    '<label class="field full">Any injury<input class="in" name="injury"></label><label class="field full">What you did<span class="hint">First aid given, who was told</span><textarea class="in" name="action" rows="3"></textarea></label>' +
+    '<label class="check full"><input type="checkbox" name="told"> Parent or carer has been told</label></div><p class="small muted">For a safeguarding concern, don’t tell the parent if that could put the child at risk. A principal will decide.</p>', 'Save report', async function(fd){
+    var row = { kind: fd.get('kind'), happened_at: new Date(fd.get('when')).toISOString(), place: fd.get('place') || null, dancer_id: fd.get('dancer') || null, person: fd.get('person') || null, what: fd.get('what'), injury: fd.get('injury') || null, action: fd.get('action') || null, parent_told: !!fd.get('told'), parent_told_at: fd.get('told') ? new Date().toISOString() : null, reported_by: S.me.user_id, reporter_name: S.me.name, status: 'open' };
+    var x = await q(sb.from('md_incidents').insert(row).select().single());
+    try { sb.functions.invoke('md-push', { body: { kind: 'incident', id: x.id } }); } catch (e) {}
+    await loadRunning(); S.f.sf = 'reports'; render(); toast('Report saved. Principals have been told');
+  });
+}
+function compDlg(c){
+  c = c || {};
+  var path = null;
+  openDlg(c.id ? 'Update ' + c.title : 'Add a certificate or licence', '<div class="fgrid"><label class="field">Type<select class="in" name="kind">' + COMP.map(function(k){ return '<option' + (c.kind === k ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select></label><label class="field">Name<input class="in" name="title" required value="' + esc(c.title || '') + '" placeholder="e.g. Paediatric first aid"></label>' +
+    (S.principal ? '<label class="field">For<select class="in" name="who"><option value="">Whole school</option>' + S.d.staff.filter(function(s){ return s.active; }).map(function(s){ return '<option value="' + s.user_id + '"' + (c.user_id === s.user_id ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') + '</select></label>' : '') +
+    '<label class="field">Runs out on<input class="in" type="date" name="exp" value="' + esc(c.expires_on || '') + '"></label><label class="field">Number or reference<input class="in" name="ref" value="' + esc(c.ref || '') + '"></label><label class="field full">Copy of the certificate<span class="hint">Photo or PDF, up to 10MB</span><input class="in" type="file" name="file" accept="image/*,application/pdf" style="padding:10px"></label></div>', 'Save', async function(fd){
+    var f = fd.get('file');
+    if (f && f.size) { var p = S.me.user_id + '/' + Date.now() + '-' + String(f.name || 'doc').replace(/[^\w.-]+/g, '-').slice(-60); var up = await sb.storage.from('md-docs').upload(p, f, { contentType: f.type || 'application/octet-stream' }); if (up.error) throw up.error; path = p; }
+    var row = { kind: fd.get('kind'), title: fd.get('title'), expires_on: fd.get('exp') || null, ref: fd.get('ref') || null, user_id: S.principal ? (fd.get('who') || null) : S.me.user_id, updated_at: new Date().toISOString() };
+    if (path) row.doc_path = path;
+    if (c.id) await q(sb.from('md_compliance').update(row).eq('id', c.id)); else await q(sb.from('md_compliance').insert(row));
+    await loadRunning(); render(); toast('Saved');
+  });
+}
+document.addEventListener('click', async function(e){
+  var t;
+  try {
+    if ((t = e.target.closest('[data-notice]'))) noticeDlg(t.dataset.notice);
+    else if ((t = e.target.closest('[data-delnotice]'))) { if (!(await confirmDlg('Delete this?', 'It comes off the board for everyone.', 'Delete'))) return; await q(sb.from('md_notices').delete().eq('id', t.dataset.delnotice)); await loadRunning(); render(); }
+    else if (e.target.closest('[data-askoff]')) askOffDlg();
+    else if ((t = e.target.closest('[data-offst]'))) {
+      await q(sb.from('md_timeoff').update({ status: t.dataset.offst, decided_by: S.me.name }).eq('id', t.dataset.id));
+      try { sb.functions.invoke('md-push', { body: { kind: 'timeoff', id: t.dataset.id } }); } catch (x) {}
+      await loadRunning(); render(); toast(t.dataset.offst === 'approved' ? 'Approved. Their classes now show as needing cover' : 'Turned down');
+    }
+    else if ((t = e.target.closest('[data-deloff]'))) { await q(sb.from('md_timeoff').delete().eq('id', t.dataset.deloff)); await loadRunning(); render(); toast('Cancelled'); }
+    else if ((t = e.target.closest('[data-cover]'))) coverDlg(t.dataset.cover, t.dataset.d);
+    else if ((t = e.target.closest('[data-offer]'))) { var r = await sb.rpc('md_offer_cover', { p_class: t.dataset.offer, p_date: t.dataset.d }); if (r.error) throw r.error; await loadRunning(); render(); toast('Thanks, you’re covering it'); }
+    else if (e.target.closest('[data-report]')) reportDlg();
+    else if ((t = e.target.closest('[data-closeinc]'))) {
+      var id = t.dataset.closeinc;
+      openDlg('Close this report', '<label class="field">Outcome<span class="hint">What was done and who was told, e.g. parent spoke to, referred to the local authority, no further action</span><textarea class="in" name="o" required rows="4"></textarea></label>', 'Close report', async function(fd){
+        await q(sb.from('md_incidents').update({ status: 'closed', outcome: fd.get('o'), closed_by: S.me.name, closed_at: new Date().toISOString() }).eq('id', id)); await loadRunning(); render(); toast('Closed');
+      });
+    }
+    else if ((t = e.target.closest('[data-printinc]'))) { var i = S.r.incidents.filter(function(x){ return x.id === t.dataset.printinc; })[0], d = i.dancer_id && dancer(i.dancer_id); printHtml('<div class="stmtdoc"><b style="font:700 1.3rem var(--display)">MD Dance Academy · ' + esc(i.kind) + ' report</b>' + incidentKv(i, d ? d.first_name + ' ' + (d.last_name || '') : i.person || '') + '</div>'); }
+    else if ((t = e.target.closest('[data-comp]'))) compDlg(S.r.comp.filter(function(c){ return c.id === t.dataset.comp; })[0]);
+    else if ((t = e.target.closest('[data-doc]'))) { var s = await sb.storage.from('md-docs').createSignedUrl(t.dataset.doc, 300); if (s.error) throw s.error; window.open(s.data.signedUrl, '_blank', 'noopener'); }
+  } catch (err) { fail(err); }
+});
+
 /* ---------------- settings: home screen, notifications, text size */
 var store = { get: function(k, d){ try { var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }, set: function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
 var SETTINGS = [['push', 'Notifications', 'bell'], ['text', 'Text size', 'text'], ['install', 'Add to home screen', 'phone']];
@@ -1491,7 +1706,7 @@ dlg.addEventListener('close', function(){ if (pendingRefresh) { pendingRefresh =
 function startLive(){
   if (live || !sb.channel) return;
   live = sb.channel('md-staff-live');
-  ['md_requests', 'md_lessons', 'md_orders', 'md_messages'].forEach(function(t){
+  ['md_requests', 'md_lessons', 'md_orders', 'md_messages', 'md_notices'].forEach(function(t){
     live.on('postgres_changes', { event: '*', schema: 'public', table: t }, function(p){
       var n = p && p.new || {};
       var msg = p.eventType === 'INSERT' && t === 'md_requests' ? 'New booking: ' + (n.dancer_name || '') : p.eventType === 'INSERT' && t === 'md_orders' ? 'New shop order ' + (n.ref || '') : p.eventType === 'INSERT' && t === 'md_messages' ? 'New website message' : null;

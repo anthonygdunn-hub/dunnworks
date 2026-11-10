@@ -62,5 +62,14 @@
 --   md_venues / md_hall_bookings  hall hire costed at each hall's hourly rate, bookable for a whole term from the timetable.
 --   md_trips         competition trips: hotel, stay, travel, who is going; costs are md_outgoings with trip_id.
 --   Money report in the staff app: fees paid and shop in, against coach pay, hall hire and spending, per month, CSV export.
+-- Running the school (migration md_running_the_school):
+--   md_compliance    DBS, first aid, insurance, licences, memberships with expiry dates, per person or whole school;
+--                  copies in storage bucket md-docs. Cron md-compliance (08:15 UTC) alerts 30 and 7 days before, on the day, after.
+--   md_incidents     accident book and safeguarding concerns; staff report and see their own, principals see all and close
+--                  with an outcome. Never deleted. Safeguarding alerts carry no names.
+--   md_timeoff       staff ask, principals approve; approved time off is visible to all staff.
+--   md_class_cover   cover coach or "no class" for one class date; md_offer_cover() lets any coach take an uncovered class.
+--                  Pay runs and the 4pm reminder follow the cover.
+--   md_notices       notice board (principals) and handover notes (any staff), pinned notices on Today, realtime.
 -- Demo logins: md.principal@preview.dunnworks.io and md.coach@preview.dunnworks.io, and parent md.parent@preview.dunnworks.io
 --   (Sarah Whitfield's sample family). Remove before real data.
