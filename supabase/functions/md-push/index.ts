@@ -3,6 +3,7 @@
 //            plus the class's coach for trials and enrolments.
 // 'lesson'  (signed-in staff): a lesson was booked, changed or cancelled for another coach; tells that coach.
 // 'test'    (signed-in staff): a test alert to your own phone.
+// 'reminders' (pg_cron md-4pm-reminders, internal key): at 4pm London time, each coach's booked lessons and classes today.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import webpush from "npm:web-push@3.6.7";
 
@@ -44,6 +45,33 @@ Deno.serve(async (req) => {
     }
     const link = type === "order" ? "#shop" : "#bookings";
     return json({ ok: true, sent: await send(ids, { title: clip(b.title, 80), body: clip(b.body, 180), url: link }) });
+  }
+
+  if (b.kind === "reminders") {
+    if (!keys.internal || req.headers.get("x-internal") !== keys.internal) return json({ error: "not allowed" }, 403);
+    const now = new Date();
+    const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", hour12: false }).format(now));
+    if (hour !== 16 && !b.force) return json({ ok: true, skipped: "not 4pm in London" });
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(now);
+    const dow = new Date(today + "T12:00:00Z").getUTCDay();
+    const { data: staff } = await admin.from("md_staff").select("user_id").eq("active", true);
+    const active = new Set((staff || []).map((s: { user_id: string }) => s.user_id));
+    const { data: ls } = await admin.from("md_lessons").select("id,starts,coach_id,guest,md_lesson_dancers(md_dancers(first_name))").eq("on_date", today).eq("status", "booked").order("starts");
+    const { data: cs } = await admin.from("md_classes").select("name,starts,coach_id,day").eq("active", true).in("day", dow === 0 ? [0, 7] : [dow]).order("starts");
+    const per = new Map<string, { t: string; s: string }[]>();
+    const add = (id: string | null, t: string, s: string) => { if (!id || !active.has(id)) return; if (!per.has(id)) per.set(id, []); per.get(id)!.push({ t, s }); };
+    for (const l of (ls || []) as { starts: string; coach_id: string; guest: string | null; md_lesson_dancers: { md_dancers: { first_name: string } | null }[] }[]) {
+      const names = l.md_lesson_dancers.map((x) => x.md_dancers?.first_name).filter(Boolean).concat(l.guest ? [l.guest] : []).join(" & ") || "Lesson";
+      add(l.coach_id, l.starts, t12(l.starts) + " " + names);
+    }
+    for (const c of (cs || []) as { name: string; starts: string; coach_id: string }[]) add(c.coach_id, c.starts, t12(c.starts) + " " + c.name);
+    let sent = 0;
+    for (const [id, items] of per) {
+      items.sort((a, z) => a.t.localeCompare(z.t));
+      const body = items.slice(0, 6).map((i) => i.s).join(" · ") + (items.length > 6 ? " · +" + (items.length - 6) + " more" : "");
+      sent += await send([id], { title: items.length === 1 ? "Your lesson tonight" : "Your " + items.length + " lessons tonight", body: clip(body, 180), url: "#timetable", tag: "today-" + today });
+    }
+    return json({ ok: true, coaches: per.size, sent });
   }
 
   const caller = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: req.headers.get("Authorization") || "" } }, auth: { persistSession: false } });

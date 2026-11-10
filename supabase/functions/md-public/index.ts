@@ -2,8 +2,9 @@
 // Saves each one to the md_ tables, then emails the school so nothing waits for someone to log in.
 // If the email can't be sent the record is still saved and shows in the staff app.
 //
-// Secrets: RESEND_API_KEY; MD_NOTIFY_TO (comma separated, default info@dunnworks.io while in preview);
-// NOTIFY_FROM (a verified sender, default onboarding@resend.dev).
+// RESEND_API_KEY is a secret. Who gets the emails and who they come from live in md_private:
+// notify_to (comma separated) and mail_from (a sender on a domain verified in Resend). Each address is sent
+// separately, so one that can't be reached never stops the others.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
 const ORIGINS = [/^https:\/\/(www\.)?dunnworks\.io$/, /^https:\/\/(www\.)?mddanceacademy\.co\.uk$/, /^https:\/\/anthonygdunn-hub\.github\.io$/, /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/];
@@ -34,7 +35,9 @@ async function tooMany(table: string, ip: string) {
 async function notify(subject: string, heading: string, lines: [string, unknown][], extra: string | null, replyTo: string | null) {
   const key = Deno.env.get("RESEND_API_KEY");
   if (!key) return false;
-  const to = (Deno.env.get("MD_NOTIFY_TO") ?? "info@dunnworks.io").split(",").map((s) => s.trim()).filter(Boolean);
+  const cfg = Object.fromEntries(((await db.from("md_private").select("k,v").in("k", ["notify_to", "mail_from"])).data || []).map((r: { k: string; v: string }) => [r.k, r.v]));
+  const to = (cfg.notify_to ?? Deno.env.get("MD_NOTIFY_TO") ?? "info@dunnworks.io").split(",").map((s: string) => s.trim()).filter(Boolean);
+  const from = cfg.mail_from ?? Deno.env.get("NOTIFY_FROM") ?? "onboarding@resend.dev";
   const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#2B2B2E;max-width:560px">
     <div style="background:linear-gradient(135deg,#C8102E,#D6136F);color:#fff;padding:16px 20px;border-radius:12px 12px 0 0;font-weight:bold;letter-spacing:.06em">MD DANCE ACADEMY</div>
     <div style="border:1px solid #F6D3DC;border-top:0;border-radius:0 0 12px 12px;padding:20px">
@@ -42,17 +45,18 @@ async function notify(subject: string, heading: string, lines: [string, unknown]
     <table style="border-collapse:collapse;margin-bottom:14px">${lines.map(([l, v]) => `<tr><td style="padding:5px 14px 5px 0;color:#66666C;vertical-align:top">${esc(l)}</td><td><strong>${esc(v ?? "not given")}</strong></td></tr>`).join("")}</table>
     ${extra ? `<p style="margin:0 0 14px;padding:12px 14px;background:#FFF5F7;border-radius:8px;white-space:pre-wrap">${esc(extra)}</p>` : ""}
     <p style="margin:0"><a href="${STAFF_URL}" style="display:inline-block;background:#D81B2C;color:#fff;padding:11px 18px;border-radius:999px;text-decoration:none;font-weight:bold">Open the staff app</a></p></div></div>`;
-  try {
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: `MD Dance Academy website <${Deno.env.get("NOTIFY_FROM") ?? "onboarding@resend.dev"}>`, to, reply_to: replyTo ?? undefined, subject, html,
-        text: lines.map(([l, v]) => `${l}: ${v ?? "not given"}`).join("\n") + (extra ? "\n\n" + extra : "") + "\n\nStaff app: " + STAFF_URL,
-      }),
-    });
-    if (!r.ok) console.error("Resend refused", r.status, await r.text());
-    return r.ok;
-  } catch (e) { console.error("send failed", e); return false; }
+  const text = lines.map(([l, v]) => `${l}: ${v ?? "not given"}`).join("\n") + (extra ? "\n\n" + extra : "") + "\n\nStaff app: " + STAFF_URL;
+  let any = false;
+  for (const addr of to) {
+    try {
+      const r = await fetch("https://api.resend.com/emails", {
+        method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ from: `MD Dance Academy website <${from}>`, to: [addr], reply_to: replyTo ?? undefined, subject, html, text }),
+      });
+      if (r.ok) any = true; else console.error("Resend refused", addr, r.status, await r.text());
+    } catch (e) { console.error("send failed", addr, e); }
+  }
+  return any;
 }
 
 // phone alert to staff through md-push; never holds up or fails the form
