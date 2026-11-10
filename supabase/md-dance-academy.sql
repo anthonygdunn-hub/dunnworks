@@ -1,0 +1,26 @@
+-- MD Dance Academy staff back end (applied as migrations md_dance_staff_backend and md_revoke_anon_helpers, 10 Nov 2026).
+-- Full SQL lives in supabase_migrations.schema_migrations; this file records the shape.
+--
+-- Tables (all RLS on, anon revoked):
+--   md_staff       staff logins linked to auth.users; role Principal or Coach; active flag removes access
+--   md_classes     the weekly timetable; code matches the website's class ids (mon-kids, sat-kids, ...); coach_id
+--   md_families    parent or guardian contact details
+--   md_dancers     dancers per family, age, level, medical notes, photo consent
+--   md_enrolments  dancer in class, active or ended
+--   md_attendance  registers: class, dancer, date, present
+--   md_requests    free trial and term enrolment requests from the website
+--   md_charges / md_payments  fees owed and paid per family (balance = charges - payments)
+--   md_orders      shop orders, paid at collection
+--   md_events / md_entries    term dates, medals, shows, competitions and who is entered
+--   md_messages    website contact form
+--
+-- Who sees what:
+--   md_is_principal()  active Principal, or Dunnworks (dw_is_owner): everything
+--   md_teaches(class)  principal, or the class's coach
+--   md_sees_dancer()   principal, or coach of a class the dancer is actively in
+--   Coaches see their classes' dancers, families, registers, trial requests and entries; never fees, orders or messages.
+--   md_clear_demo()    principal only; deletes rows flagged demo (sample families, bookings, orders, events, messages)
+--
+-- Writes from the public website go only through the md-public edge function (service role, rate limited,
+-- honeypot). Staff logins are created by principals through the md-staff edge function.
+-- Demo logins: md.principal@preview.dunnworks.io and md.coach@preview.dunnworks.io (remove before real data).
