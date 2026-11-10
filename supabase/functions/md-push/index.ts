@@ -3,6 +3,7 @@
 //            plus the class's coach for trials and enrolments.
 // 'lesson'  (signed-in staff): a lesson was booked, changed or cancelled for another coach; tells that coach.
 // 'test'    (signed-in staff): a test alert to your own phone.
+// 'parent'  (signed-in parent): an event entry or details change, to principals.
 // 'reminders' (pg_cron md-4pm-reminders, internal key): at 4pm London time, each coach's booked lessons and classes today.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import webpush from "npm:web-push@3.6.7";
@@ -76,6 +77,26 @@ Deno.serve(async (req) => {
 
   const caller = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: req.headers.get("Authorization") || "" } }, auth: { persistSession: false } });
   const { data: who } = await caller.auth.getUser();
+
+  // a parent entered or withdrew from an event, or changed their details: tell the principals
+  if (b.kind === "parent") {
+    if (!who?.user) return json({ error: "not allowed" }, 403);
+    const { data: fams } = await admin.from("md_families").select("id,parent_name").eq("user_id", who.user.id);
+    if (!fams?.length) return json({ error: "not allowed" }, 403);
+    let title = "", body = "";
+    if (b.action === "entry") {
+      const { data: d } = await admin.from("md_dancers").select("first_name,family_id").eq("id", String(b.dancer_id)).maybeSingle();
+      const { data: e } = await admin.from("md_events").select("title,starts_on").eq("id", String(b.event_id)).maybeSingle();
+      if (!d || !e || !fams.some((f: { id: string }) => f.id === d.family_id)) return json({ ok: true, sent: 0 });
+      title = b.enter ? "New event entry" : "Event entry withdrawn";
+      body = d.first_name + (b.enter ? " entered " : " withdrawn from ") + e.title + ", " + day(e.starts_on) + " · by " + clip(fams[0].parent_name, 40);
+    } else if (b.action === "details") {
+      title = "Family details updated"; body = clip(fams[0].parent_name, 40) + " updated their contact or medical details in the parent app";
+    } else return json({ error: "action" }, 400);
+    const { data: ps } = await admin.from("md_staff").select("user_id").eq("active", true).eq("role", "Principal");
+    return json({ ok: true, sent: await send((ps || []).map((p: { user_id: string }) => p.user_id), { title, body: clip(body, 180), url: b.action === "entry" ? "#events" : "#dancers" }) });
+  }
+
   const { data: isStaff } = await caller.rpc("md_is_staff");
   if (!who?.user || !isStaff) return json({ error: "not allowed" }, 403);
   const { data: me } = await admin.from("md_staff").select("name").eq("user_id", who.user.id).maybeSingle();

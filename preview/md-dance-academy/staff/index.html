@@ -372,6 +372,7 @@ async function load(){
   S.ld = ld;
   S.d = { classes: r[0], families: r[1], dancers: r[2], enrol: r[3], requests: r[4], events: r[5], entries: r[6], staff: r[7],
     charges: S.principal ? r[8] : [], payments: S.principal ? r[9] : [], orders: S.principal ? r[10] : [], messages: S.principal ? r[11] : [] };
+  S.mail = S.principal ? await q(sb.from('md_mailings').select('*').order('month', { ascending: false }).limit(3)).catch(function(){ return []; }) : [];
 }
 var by = function(list, key){ var m = {}; (list || []).forEach(function(x){ m[x[key]] = x; }); return m; };
 var cls = function(id){ return S.d.classes.filter(function(c){ return c.id === id; })[0]; };
@@ -738,21 +739,22 @@ VIEWS.dancers = function(){
     var ds = S.d.dancers.filter(function(d){ return d.family_id === f.id; });
     return !qv || (f.parent_name + ' ' + (f.email || '') + ' ' + (f.phone || '') + ' ' + ds.map(function(d){ return d.first_name + ' ' + (d.last_name || ''); }).join(' ')).toLowerCase().indexOf(qv) > -1;
   });
-  var h = '<div class="head"><div><h1>Dancers</h1><p class="muted">' + S.d.dancers.length + ' dancers in ' + S.d.families.length + ' families' + (S.principal ? '' : ' in your classes') + '.</p></div>' + (S.principal ? '<button class="btn" type="button" data-newfam>Add a family</button>' : '') + '</div>' +
+  var toInvite = S.principal ? inviteable() : [];
+  var h = '<div class="head"><div><h1>Dancers</h1><p class="muted">' + S.d.dancers.length + ' dancers in ' + S.d.families.length + ' families' + (S.principal ? '' : ' in your classes') + '.</p></div>' + (S.principal ? '<div class="row">' + (toInvite.length ? '<button class="btn line" type="button" data-inviteall>Invite ' + toInvite.length + ' to the parent app</button>' : '') + '<button class="btn" type="button" data-newfam>Add a family</button></div>' : '') + '</div>' +
     '<label class="search"><span class="sr">Search dancers</span>' + ic('search') + '<input class="in" id="dq" type="search" placeholder="Search by name, parent or phone" value="' + esc(S.f.q) + '"></label>';
   if (!fams.length) return h + '<div class="empty">' + (S.f.q ? 'No matches.' : 'No dancers yet.') + '</div>';
   h += '<div class="list">' + fams.map(function(f){
     var ds = S.d.dancers.filter(function(d){ return d.family_id === f.id; }), bal = S.principal ? balance(f.id) : 0;
     return '<details class="item"><summary><div class="t"><b>' + esc(ds.map(function(d){ return d.first_name; }).join(', ') || 'No dancers') + ' <span class="muted" style="font-weight:400">· ' + esc(f.parent_name) + '</span>' + demoTag(f) + '</b><small>' + esc(ds.map(function(d){ return classesOf(d.id).map(function(c){ return c.name; }).join(', '); }).filter(Boolean).join(' · ') || 'Not in a class yet') + '</small></div>' +
       (ds.some(function(d){ return d.medical; }) ? '<span class="pill bad" title="Medical notes">' + ic('alert') + '</span>' : '') + (S.principal ? (bal > 0 ? '<span class="pill bad">Owes ' + money(bal) + '</span>' : '<span class="pill ok">Paid up</span>') : '') + '</summary>' +
-      '<div class="body"><dl class="kv"><dt>Parent</dt><dd>' + esc(f.parent_name) + '</dd>' + (f.phone ? '<dt>Mobile</dt><dd><a href="tel:' + esc(f.phone) + '">' + esc(f.phone) + '</a> · <a href="' + wa(f.phone) + '" target="_blank" rel="noopener">WhatsApp</a></dd>' : '') + (f.email ? '<dt>Email</dt><dd><a href="mailto:' + esc(f.email) + '">' + esc(f.email) + '</a></dd>' : '') + (f.notes ? '<dt>Notes</dt><dd>' + esc(f.notes) + '</dd>' : '') + '</dl>' +
+      '<div class="body"><dl class="kv"><dt>Parent</dt><dd>' + esc(f.parent_name) + '</dd>' + (f.phone ? '<dt>Mobile</dt><dd><a href="tel:' + esc(f.phone) + '">' + esc(f.phone) + '</a> · <a href="' + wa(f.phone) + '" target="_blank" rel="noopener">WhatsApp</a></dd>' : '') + (f.email ? '<dt>Email</dt><dd><a href="mailto:' + esc(f.email) + '">' + esc(f.email) + '</a></dd>' : '') + (f.notes ? '<dt>Notes</dt><dd>' + esc(f.notes) + '</dd>' : '') + (S.principal ? '<dt>Parent app</dt><dd>' + parentAppState(f) + '</dd>' : '') + '</dl>' +
       ds.map(function(d){
         var ents = S.d.entries.filter(function(x){ return x.dancer_id === d.id; }).map(function(x){ var ev = S.d.events.filter(function(v){ return v.id === x.event_id; })[0]; return ev ? esc(ev.title) + ' (' + nice(ev.starts_on) + ')' : ''; }).filter(Boolean);
         return '<div class="card" style="background:var(--bg)"><div class="row between"><b>' + esc(d.first_name + ' ' + (d.last_name || '')) + '</b>' + (S.principal ? '<button class="btn ghost sm" type="button" data-editdancer="' + d.id + '">Edit</button>' : '') + '</div>' +
           '<dl class="kv small"><dt>Age</dt><dd>' + esc(d.age_band || 'not given') + '</dd><dt>Level</dt><dd>' + esc(d.level || 'not set') + '</dd><dt>Classes</dt><dd>' + (classesOf(d.id).map(function(c){ return esc(c.name); }).join(', ') || 'none') + '</dd><dt>Photos</dt><dd>' + (d.photo_ok ? 'Yes' : '<b>No photos</b>') + '</dd>' +
           (d.medical ? '<dt>Medical</dt><dd><span class="alert">' + ic('alert') + esc(d.medical) + '</span></dd>' : '') + (ents.length ? '<dt>Entered for</dt><dd>' + ents.join(', ') + '</dd>' : '') + '</dl></div>';
       }).join('') +
-      (S.principal ? '<div class="row"><button class="btn sm" type="button" data-newdancer="' + f.id + '">Add a dancer</button><button class="btn ghost sm" type="button" data-editfam="' + f.id + '">Edit family</button><button class="btn ghost sm" type="button" data-pay="' + f.id + '">Record payment</button></div>' : '') + '</div></details>';
+      (S.principal ? '<div class="row"><button class="btn sm" type="button" data-newdancer="' + f.id + '">Add a dancer</button><button class="btn ghost sm" type="button" data-editfam="' + f.id + '">Edit family</button><button class="btn ghost sm" type="button" data-pay="' + f.id + '">Record payment</button>' + (f.email ? '<button class="btn ghost sm" type="button" data-invite="' + f.id + '">' + (f.user_id || f.invited_at ? 'Send parent app link again' : 'Invite to parent app') + '</button>' : '') + '</div>' : '') + '</div></details>';
   }).join('') + '</div>';
   return h;
 };
@@ -794,13 +796,78 @@ document.addEventListener('click', function(e){
       await load(); toast('Family saved'); if (nf) S.f.q = row.parent_name; render(); }); }
 });
 
+
+/* parent app and monthly email */
+var okMail = function(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || '')); };
+function hasDancer(f){ return S.d.dancers.some(function(d){ return d.family_id === f.id && d.active !== false; }); }
+function inviteable(){ return S.d.families.filter(function(f){ return okMail(f.email) && !f.user_id && !f.invited_at && !f.demo && hasDancer(f); }); }
+function parentAppState(f){
+  if (f.last_seen) return '<span class="pill ok">Using it</span> <span class="small muted">last opened ' + nice(f.last_seen) + '</span>';
+  if (f.user_id) return '<span class="pill ok">Log in set up</span>';
+  if (f.invited_at) return '<span class="pill warn">Invited ' + nice(f.invited_at) + '</span>';
+  return f.email ? '<span class="pill grey">Not invited yet</span>' : '<span class="small muted">Add an email to invite them</span>';
+}
+function nextMailMonth(){ var t = today(); if (t.slice(8) === '01') return t; var d = new Date(t.slice(0, 8) + '01T12:00:00Z'); d.setUTCMonth(d.getUTCMonth() + 1); return d.toISOString().slice(0, 10); }
+function mailRecipients(){ return S.d.families.filter(function(f){ return okMail(f.email) && !f.demo && hasDancer(f); }); }
+function monthlyCard(){
+  var m = nextMailMonth(), row = (S.mail || []).filter(function(x){ return x.month === m; })[0] || { status: 'scheduled' };
+  var last = (S.mail || []).filter(function(x){ return x.status === 'sent'; })[0];
+  var n = mailRecipients().length, demo = S.d.families.filter(function(f){ return okMail(f.email) && f.demo && hasDancer(f); }).length;
+  var monthWord = nice(m, { month: 'long' });
+  var state = row.status === 'held' ? '<span class="pill warn">On hold</span>' : row.status === 'sent' ? '<span class="pill ok">Sent</span>' : row.status === 'sending' ? '<span class="pill warn">Sending now</span>' : '<span class="pill ok">Ready to go</span>';
+  var line = row.status === 'held' ? 'The ' + monthWord + ' email is on hold and won’t go out unless you let it.' : row.status === 'sent' ? 'Sent to ' + (row.sent_count || 0) + ' families' + (row.failed_count ? ', ' + row.failed_count + ' couldn’t be sent' : '') + '.' :
+    'Goes to ' + n + ' famil' + (n === 1 ? 'y' : 'ies') + ' on ' + nice(m) + ' at about 8am. Each family sees their own fees, lessons and event entries. You’ll get a preview two days before.';
+  return '<section class="card stack" id="monthly"><div class="row between"><h2>Monthly email · ' + esc(monthWord) + '</h2>' + state + '</div><p class="small">' + line + (demo && !n ? ' Sample families are left out, so nothing goes until real families have an email address.' : '') + '</p>' +
+    '<div class="row"><button class="btn line sm" type="button" data-mailpreview>Preview</button>' + (row.status === 'scheduled' ? '<button class="btn ghost sm" type="button" data-mailhold="held">Hold this month</button>' : row.status === 'held' ? '<button class="btn sm" type="button" data-mailhold="scheduled">Let it go out</button>' : '') + '<button class="btn ghost sm" type="button" data-mailtest>Email me a test</button></div>' +
+    (last && last.month !== m ? '<p class="small muted">' + esc(nice(last.month, { month: 'long' })) + ': sent to ' + (last.sent_count || 0) + ' families.</p>' : '') + '</section>';
+}
+async function mailPreview(fid){
+  var r = await sb.functions.invoke('md-monthly', { body: { kind: 'preview', family_id: fid || null } });
+  var d = r.data;
+  if (!d || !d.ok) return toast('Couldn’t make the preview. Try again shortly.', true);
+  var opts = (d.choices || []).map(function(c){ return '<option value="' + c.id + '"' + (c.id === d.family.id ? ' selected' : '') + '>' + esc(c.parent_name) + (c.demo ? ' (sample)' : '') + '</option>'; }).join('');
+  infoDlg('Preview: ' + nice(d.month, { month: 'long' }) + ' email', '<label class="field">See it as<select class="in" id="mailFam">' + opts + '</select></label><p class="small muted">Subject: ' + esc(d.subject) + '</p><iframe title="Email preview" style="width:100%;height:60vh;border:1px solid var(--line);border-radius:12px;background:#fff" sandbox="" id="mailFrame"></iframe>');
+  $('#mailFrame').srcdoc = d.html;
+  $('#mailFam').addEventListener('change', function(){ mailPreview(this.value); });
+}
+async function invite(f){
+  var r = await sb.functions.invoke('md-reset', { body: { action: 'invite', family_id: f.id } });
+  if (r.error || !r.data || !r.data.ok) throw new Error('invite failed');
+  return r.data.sent;
+}
+document.addEventListener('click', async function(e){
+  var t;
+  try {
+    if ((t = e.target.closest('[data-invite]'))) {
+      var f = fam(t.dataset.invite); t.disabled = true;
+      var sent = await invite(f); await load(); render();
+      toast(sent ? 'Parent app link emailed to ' + f.email : 'Log in made, but the email couldn’t be sent yet. They can use “First time here” on the parent app.', !sent);
+    } else if (e.target.closest('[data-inviteall]')) {
+      var list = inviteable();
+      openDlg('Invite ' + list.length + ' families?', '<p>Each family gets an email with a link to set up their parent app log in. The link works for seven days, and they can always get a new one from the parent app.</p><p class="small muted">' + esc(list.map(function(x){ return x.parent_name; }).join(', ')) + '</p>', 'Send invitations', async function(){
+        var ok = 0, bad = 0;
+        for (var i = 0; i < list.length; i++) { try { (await invite(list[i])) ? ok++ : bad++; } catch (x) { bad++; } }
+        await load(); render(); toast(ok + ' invitation' + (ok === 1 ? '' : 's') + ' sent' + (bad ? ', ' + bad + ' couldn’t be emailed' : ''), !!bad);
+      });
+    } else if (e.target.closest('[data-mailpreview]')) { await mailPreview(); }
+    else if ((t = e.target.closest('[data-mailhold]'))) {
+      var st = t.dataset.mailhold, m = nextMailMonth();
+      await q(sb.from('md_mailings').upsert({ month: m, status: st, held_by: st === 'held' ? S.me.name : null, updated_at: new Date().toISOString() }));
+      await load(); render(); toast(st === 'held' ? 'Held. The ' + nice(m, { month: 'long' }) + ' email won’t go out.' : 'It’ll go out on ' + nice(m));
+    } else if (e.target.closest('[data-mailtest]')) {
+      var r = await sb.functions.invoke('md-monthly', { body: { kind: 'test' } });
+      toast(r.data && r.data.ok ? 'Test sent to ' + r.data.to : 'The test couldn’t be sent. The email sender isn’t set up yet.', !(r.data && r.data.ok));
+    }
+  } catch (err) { fail(err); }
+});
+
 /* money */
 VIEWS.money = function(){
   var rows = S.d.families.map(function(f){ return { f: f, b: balance(f.id), last: S.d.payments.filter(function(p){ return p.family_id === f.id; })[0] }; }).sort(function(a, b){ return b.b - a.b; });
   var owed = rows.reduce(function(s, r){ return s + (r.b > 0 ? r.b : 0); }, 0);
   var month = today().slice(0, 7), inMonth = S.d.payments.filter(function(p){ return String(p.paid_on).slice(0, 7) === month; }).reduce(function(s, p){ return s + p.amount_pence; }, 0);
   var h = '<div class="head"><div><h1>Fees</h1><p class="muted">What each family owes, and payments as they come in.</p></div><div class="row"><button class="btn line" type="button" data-chargeclass>Charge a class</button><button class="btn" type="button" data-pay>Record payment</button></div></div>' +
-    '<div class="grid g4"><div class="card stat"><b>' + money(owed) + '</b><span>owed in total</span></div><div class="card stat"><b>' + money(inMonth) + '</b><span>paid this month</span></div><div class="card stat"><b>' + rows.filter(function(r){ return r.b > 0; }).length + '</b><span>families owing</span></div></div>' +
+    '<div class="grid g4"><div class="card stat"><b>' + money(owed) + '</b><span>owed in total</span></div><div class="card stat"><b>' + money(inMonth) + '</b><span>paid this month</span></div><div class="card stat"><b>' + rows.filter(function(r){ return r.b > 0; }).length + '</b><span>families owing</span></div></div>' + monthlyCard() +
     '<div class="tw"><table><thead><tr><th>Family</th><th class="num">Balance</th><th>Last payment</th><th></th></tr></thead><tbody>' + rows.map(function(r){
       return '<tr><td><b>' + esc(r.f.parent_name) + '</b>' + demoTag(r.f) + '<div class="small muted">' + esc(S.d.dancers.filter(function(d){ return d.family_id === r.f.id; }).map(function(d){ return d.first_name; }).join(', ')) + '</div></td><td class="num">' + (r.b > 0 ? '<span class="pill bad">' + money(r.b) + '</span>' : r.b < 0 ? '<span class="pill ok">' + money(-r.b) + ' credit</span>' : '<span class="pill ok">Paid up</span>') + '</td><td class="small">' + (r.last ? money(r.last.amount_pence) + ' ' + esc(r.last.method) + ', ' + nice(r.last.paid_on) : '<span class="muted">none yet</span>') + '</td><td class="num"><button class="btn ghost sm" type="button" data-pay="' + r.f.id + '">Pay</button> <button class="btn ghost sm" type="button" data-charge="' + r.f.id + '">Charge</button> <button class="btn ghost sm" type="button" data-statement="' + r.f.id + '">History</button></td></tr>';
     }).join('') + '</tbody></table></div>' +

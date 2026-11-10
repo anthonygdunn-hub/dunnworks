@@ -41,4 +41,15 @@
 --   (#reset=token); md_reset_tokens holds only a SHA-256 of each token, has no client access, 3 links per login per hour.
 -- 4pm reminders: cron job md-4pm-reminders calls md-push kind 'reminders' at 15:00 and 16:00 UTC; it only sends when
 --   it is 4pm in London, listing each coach's booked lessons and group classes that day.
--- Demo logins: md.principal@preview.dunnworks.io and md.coach@preview.dunnworks.io (remove before real data).
+-- Parent app (migration md_parent_app_and_monthly, page preview/md-dance-academy/parents/): md_families.user_id links a
+--   family to the login that owns its email. Parents never read tables; md_parent_home() returns their own family's
+--   dancers, classes, lessons, fees, statement and events, md_parent_enter() enters or withdraws a dancer from an open
+--   future event (not once paid), md_parent_update() changes their name, phone, and dancers' medical notes and photo
+--   consent. md-reset 'request' with app 'parent' makes the login the first time; 'invite' lets a principal email a
+--   seven-day set-up link. md-push 'parent' tells principals about entries and detail changes.
+-- Monthly email (md-monthly, cron md-monthly-email daily 08:05 UTC): two days before the 1st principals get a preview
+--   email and phone alert; on the 1st each real family (email, active dancer, not demo) gets fees owed, weekly
+--   classes, that month's lessons, events entered, events open for entries and other dates. md_mailings holds each
+--   month's status (scheduled, held, sending, sent) and principals can hold it from Fees; md_mail_log records sends.
+-- Demo logins: md.principal@preview.dunnworks.io and md.coach@preview.dunnworks.io, and parent md.parent@preview.dunnworks.io
+--   (Sarah Whitfield's sample family). Remove before real data.
