@@ -1063,7 +1063,7 @@ async function loadMoney(){
   for (var i = 0; i < ids.length; i += 100) lines = lines.concat(await safe(sb.from('md_pay_lines').select('*').in('run_id', ids.slice(i, i + 100)).order('on_date')));
   S.m = { rates: r[0], runs: runs, lines: lines, spend: r[2], venues: r[3], hall: r[4], trips: r[5] };
 }
-var staffName = function(id){ var s = S.d.staff.filter(function(x){ return x.user_id === id; })[0]; return s ? s.name : 'Someone no longer on the team'; };
+var payName = function(id){ return staffName(id) || 'Someone no longer on the team'; };
 var rateOf = function(id){ return S.m.rates.filter(function(x){ return x.user_id === id; })[0] || null; };
 function rateText(r){
   if (!r) return 'No pay set';
@@ -1099,7 +1099,7 @@ function claimsHtml(list, mine){
   if (!list.length) return '';
   return '<section class="stack"><h2>' + (mine ? 'Your expense claims' : 'Expense claims to check') + '</h2><div class="list">' + list.map(function(o){
     var st = o.status === 'claimed' ? '<span class="pill warn">Waiting</span>' : o.status === 'approved' ? '<span class="pill">Approved, paid back with your next pay</span>' : o.status === 'paid' ? '<span class="pill ok">Paid back</span>' : '<span class="pill bad">Not approved</span>';
-    return '<div class="item"><div class="sum" style="cursor:default"><div class="t"><b>' + esc(o.label) + ' · ' + money(o.amount_pence) + '</b><small>' + esc(nice(o.on_date)) + (mine ? '' : ' · ' + esc(staffName(o.paid_by))) + ' · ' + esc(o.category) + (o.supplier ? ' · ' + esc(o.supplier) : '') + '</small></div>' + st + '</div>' +
+    return '<div class="item"><div class="sum" style="cursor:default"><div class="t"><b>' + esc(o.label) + ' · ' + money(o.amount_pence) + '</b><small>' + esc(nice(o.on_date)) + (mine ? '' : ' · ' + esc(payName(o.paid_by))) + ' · ' + esc(o.category) + (o.supplier ? ' · ' + esc(o.supplier) : '') + '</small></div>' + st + '</div>' +
       '<div class="row" style="padding:0 16px 14px">' + receiptBtn(o) + (!mine && o.status === 'claimed' ? '<button class="btn sm" type="button" data-claim="approved" data-id="' + o.id + '">Approve</button><button class="btn ghost sm" type="button" data-claim="rejected" data-id="' + o.id + '">Turn down</button>' : '') +
       (mine && o.status === 'claimed' ? '<button class="btn ghost sm" type="button" data-delclaim="' + o.id + '">Withdraw</button>' : '') + '</div></div>';
   }).join('') + '</div></section>';
@@ -1110,7 +1110,7 @@ function payPrincipal(){
   h += claimsHtml(S.m.spend.filter(function(o){ return o.paid_by && o.status === 'claimed'; }), false);
   h += '<section class="stack"><h2>Pay runs</h2>' + (S.m.runs.length ? '<div class="list">' + S.m.runs.map(function(r){
     var ls = runLines(r.id), people = {}; ls.forEach(function(l){ people[l.user_id] = (people[l.user_id] || 0) + l.amount_pence; });
-    return '<button type="button" class="item" style="text-align:left;font:inherit;color:inherit;cursor:pointer" data-run="' + r.id + '"><div class="sum"><div class="t"><b>' + esc(period(r)) + '</b><small>' + Object.keys(people).map(function(u){ return esc(staffName(u).split(' ')[0]) + ' ' + money(people[u]); }).join(' · ') + '</small></div><b>' + money(sum(ls)) + '</b>' + runPill(r.status) + '</div></button>';
+    return '<button type="button" class="item" style="text-align:left;font:inherit;color:inherit;cursor:pointer" data-run="' + r.id + '"><div class="sum"><div class="t"><b>' + esc(period(r)) + '</b><small>' + Object.keys(people).map(function(u){ return esc(payName(u).split(' ')[0]) + ' ' + money(people[u]); }).join(' · ') + '</small></div><b>' + money(sum(ls)) + '</b>' + runPill(r.status) + '</div></button>';
   }).join('') + '</div>' : '<div class="empty">No pay runs yet. Start one for last month to see how it works.</div>') + '</section>';
   h += '<section class="stack"><h2>How each person is paid</h2><div class="card lrows">' + S.d.staff.filter(function(s){ return s.active; }).map(function(s){
     return lrow('<b>' + esc(s.name) + '</b><div class="small muted">' + esc(s.role) + '</div>', '<span class="small">' + esc(rateText(rateOf(s.user_id))) + '</span>', '', '<button class="btn ghost sm" type="button" data-rates="' + s.user_id + '">Set pay</button>');
@@ -1124,10 +1124,10 @@ function runDetail(r){
     '<div class="row">' + (draft ? '<button class="btn ghost" type="button" data-rebuild="' + r.id + '">Update from timetable</button><button class="btn line" type="button" data-adjust="' + r.id + '">Add an extra</button><button class="btn" type="button" data-runst="approved">Approve</button>' : r.status === 'approved' ? '<button class="btn" type="button" data-runst="paid">Mark as paid</button>' : '') + '</div></div>';
   if (draft) h += '<p class="small muted">Check each line. Remove anything that didn’t happen, or add extras such as cover, travel or a bonus. Approving locks it.</p>';
   if (!ls.length) h += '<div class="empty">Nothing to pay in this period.</div>';
-  h += Object.keys(by).sort(function(a, b){ return staffName(a).localeCompare(staffName(b)); }).map(function(u){
+  h += Object.keys(by).sort(function(a, b){ return payName(a).localeCompare(payName(b)); }).map(function(u){
     var mine = by[u], rt = rateOf(u), cls = mine.filter(function(l){ return l.kind === 'class'; }), les = mine.filter(function(l){ return l.kind === 'lesson'; });
-    return '<section class="card stack"><div class="row between"><div><h3>' + esc(staffName(u)) + '</h3><p class="small muted">' + esc(rateText(rt)) + '</p></div><div style="text-align:right"><b style="font:700 1.5rem var(--display)">' + money(sum(mine)) + '</b><div class="small muted">' + plural(cls.length, 'class', 'classes') + ' · ' + plural(les.length, 'lesson', 'lessons') + ' · ' + mins(sum(mine.filter(function(l){ return l.minutes; }), function(l){ return l.minutes; })) + '</div></div></div>' +
-      (!rt && (cls.length || les.length) ? '<p class="warn">No pay set for ' + esc(staffName(u).split(' ')[0]) + ', so these lines are £0. Set their pay, then update from timetable.</p>' : '') +
+    return '<section class="card stack"><div class="row between"><div><h3>' + esc(payName(u)) + '</h3><p class="small muted">' + esc(rateText(rt)) + '</p></div><div style="text-align:right"><b style="font:700 1.5rem var(--display)">' + money(sum(mine)) + '</b><div class="small muted">' + plural(cls.length, 'class', 'classes') + ' · ' + plural(les.length, 'lesson', 'lessons') + ' · ' + mins(sum(mine.filter(function(l){ return l.minutes; }), function(l){ return l.minutes; })) + '</div></div></div>' +
+      (!rt && (cls.length || les.length) ? '<p class="warn">No pay set for ' + esc(payName(u).split(' ')[0]) + ', so these lines are £0. Set their pay, then update from timetable.</p>' : '') +
       '<div class="lrows">' + mine.map(function(l){
         return lrow(esc(nice(l.on_date)), esc(l.label) + (l.minutes ? '<div class="small muted">' + mins(l.minutes) + '</div>' : ''), money(l.amount_pence), draft ? '<button class="btn ghost sm" style="padding:0 10px" type="button" data-delline="' + l.id + '" aria-label="Remove ' + esc(l.label) + ' on ' + esc(nice(l.on_date)) + '">' + ic('x') + '</button>' : '');
       }).join('') + '</div><div class="row"><button class="btn ghost sm" type="button" data-statement-pay="' + u + '">' + (rt && rt.employment === 'employed' ? 'Payslip summary' : 'Statement') + '</button></div></section>';
@@ -1149,7 +1149,7 @@ function payCoach(){
 function statementHtml(u, r){
   var mine = runLines(r.id).filter(function(l){ return l.user_id === u; }), rt = rateOf(u), emp = rt && rt.employment === 'employed';
   return '<div class="stmtdoc"><div class="row between"><div><b style="font:700 1.3rem var(--display)">MD Dance Academy</b><div class="small muted">Bordon, Hampshire · 07810 208765</div></div><div style="text-align:right"><b>' + (emp ? 'Pay summary' : 'Statement of work') + '</b><div class="small">' + esc(period(r)) + '</div></div></div>' +
-    '<p><b>' + esc(staffName(u)) + '</b><br><span class="small muted">' + esc(rateText(rt)) + '</span></p>' +
+    '<p><b>' + esc(payName(u)) + '</b><br><span class="small muted">' + esc(rateText(rt)) + '</span></p>' +
     '<table><thead><tr><th>Date</th><th>Work</th><th class="num">Time</th><th class="num">Amount</th></tr></thead><tbody>' + mine.map(function(l){ return '<tr><td>' + esc(nice(l.on_date)) + '</td><td>' + esc(l.label) + '</td><td class="num">' + mins(l.minutes) + '</td><td class="num">' + money(l.amount_pence) + '</td></tr>'; }).join('') +
     '<tr><td></td><td><b>Total</b></td><td class="num">' + mins(sum(mine.filter(function(l){ return l.minutes; }), function(l){ return l.minutes; })) + '</td><td class="num"><b>' + money(sum(mine)) + '</b></td></tr></tbody></table>' +
     '<p class="small muted">' + (emp ? 'Gross pay before tax and National Insurance. Your payslip from payroll shows deductions.' : 'Self-employed: you are responsible for your own tax and National Insurance.') + ' ' + (r.status === 'paid' ? 'Paid ' + esc(nice(r.paid_at)) + '.' : 'Approved, payment to follow.') + '</p></div>';
@@ -1161,7 +1161,7 @@ function printHtml(html){
 }
 function ratesDlg(u){
   var r = rateOf(u) || {}, pv = function(p){ return p == null ? '' : (p / 100).toFixed(2); };
-  openDlg('Pay for ' + staffName(u), '<label class="field">Employment<select class="in" name="emp"><option value="self_employed"' + (r.employment !== 'employed' ? ' selected' : '') + '>Self-employed (they invoice you)</option><option value="employed"' + (r.employment === 'employed' ? ' selected' : '') + '>Employed (through payroll)</option></select></label>' +
+  openDlg('Pay for ' + payName(u), '<label class="field">Employment<select class="in" name="emp"><option value="self_employed"' + (r.employment !== 'employed' ? ' selected' : '') + '>Self-employed (they invoice you)</option><option value="employed"' + (r.employment === 'employed' ? ' selected' : '') + '>Employed (through payroll)</option></select></label>' +
     '<p class="small muted">Fill in only what applies. A class uses the per-class fee if set, otherwise the hourly rate. A lesson uses the share if set, then the per-lesson fee, then the hourly rate.</p>' +
     '<div class="fgrid"><label class="field">Hourly rate £<input class="in" name="hourly" inputmode="decimal" value="' + pv(r.hourly_pence) + '"></label><label class="field">Per group class £<input class="in" name="perclass" inputmode="decimal" value="' + pv(r.per_class_pence) + '"></label>' +
     '<label class="field">Per private lesson £<input class="in" name="perlesson" inputmode="decimal" value="' + pv(r.per_lesson_pence) + '"></label><label class="field">Share of lesson price %<input class="in" name="share" inputmode="decimal" value="' + (r.lesson_share_pct == null ? '' : +r.lesson_share_pct) + '"></label>' +
@@ -1210,7 +1210,7 @@ VIEWS.spend = function(){
   if (claims) h += '<div class="banner"><span>' + claims + ' expense claim' + (claims > 1 ? 's' : '') + ' waiting for you to check</span><button class="btn sm" type="button" data-go="pay">Check</button></div>';
   h += list.length ? '<div class="card lrows">' + list.slice(0, 80).map(function(o){
     var t = o.trip_id && S.m.trips.filter(function(x){ return x.id === o.trip_id; })[0];
-    return lrow(esc(nice(o.on_date)), '<b>' + esc(o.label) + '</b><div class="small muted">' + esc([o.category, o.supplier, t ? t.title : '', o.paid_by ? 'paid by ' + staffName(o.paid_by).split(' ')[0] : '', o.demo ? 'sample' : ''].filter(Boolean).join(' · ')) + '</div>', money(o.amount_pence), receiptBtn(o) + (o.paid_by ? '' : '<button class="btn ghost sm" type="button" data-spend="' + o.id + '">Edit</button>'));
+    return lrow(esc(nice(o.on_date)), '<b>' + esc(o.label) + '</b><div class="small muted">' + esc([o.category, o.supplier, t ? t.title : '', o.paid_by ? 'paid by ' + payName(o.paid_by).split(' ')[0] : '', o.demo ? 'sample' : ''].filter(Boolean).join(' · ')) + '</div>', money(o.amount_pence), receiptBtn(o) + (o.paid_by ? '' : '<button class="btn ghost sm" type="button" data-spend="' + o.id + '">Edit</button>'));
   }).join('') + '</div>' : '<div class="empty">Nothing spent yet.</div>';
   return h;
 };
@@ -1306,7 +1306,7 @@ function moneyRows(from, to){
   (S.d.orders || []).forEach(function(o){ var d = String(o.created_at).slice(0, 10); if (o.status === 'collected' && o.total_pence && inR(d)) rows.push({ d: d, io: 'In', cat: 'Shop', what: 'Order ' + (o.ref || '') + ' ' + (o.dancer_name || ''), p: o.total_pence }); });
   S.m.spend.forEach(function(o){ if ((o.status === 'paid' || o.status === 'approved') && inR(o.on_date)) rows.push({ d: o.on_date, io: 'Out', cat: o.category, what: o.label + (o.supplier && o.supplier !== o.label ? ', ' + o.supplier : ''), p: -o.amount_pence }); });
   S.m.hall.forEach(function(b){ if (b.status === 'booked' && inR(b.on_date) && b.on_date <= today()) { var v = S.m.venues.filter(function(x){ return x.id === b.venue_id; })[0]; rows.push({ d: b.on_date, io: 'Out', cat: 'Hall hire', what: (v ? v.name : 'Hall') + (b.note ? ', ' + b.note : ''), p: -b.cost_pence }); } });
-  S.m.runs.forEach(function(r){ if (r.status === 'draft') return; runLines(r.id).forEach(function(l){ if (l.kind !== 'expense' && inR(l.on_date)) rows.push({ d: l.on_date, io: 'Out', cat: 'Coach pay', what: staffName(l.user_id) + ': ' + l.label, p: -l.amount_pence }); }); });
+  S.m.runs.forEach(function(r){ if (r.status === 'draft') return; runLines(r.id).forEach(function(l){ if (l.kind !== 'expense' && inR(l.on_date)) rows.push({ d: l.on_date, io: 'Out', cat: 'Coach pay', what: payName(l.user_id) + ': ' + l.label, p: -l.amount_pence }); }); });
   return rows.sort(function(a, b){ return a.d.localeCompare(b.d); });
 }
 VIEWS.report = function(){
@@ -1416,8 +1416,8 @@ async function loadRunning(){
   S.r = { notices: r[0], timeoff: r[1], cover: r[2], incidents: r[3], comp: r[4] };
 }
 NAV.splice(NAV.findIndex(function(n){ return n.k === 'events'; }) + 1, 0, { k: 'board', label: 'Notices', icon: 'msg' }, { k: 'timeoff', label: 'Time off & cover', icon: 'today' }, { k: 'safety', label: 'Safety', icon: 'alert' });
-var whoName = function(id){ return staffName(id); };
-var firstName = function(id){ return staffName(id).split(' ')[0]; };
+var whoName = function(id){ return payName(id); };
+var firstName = function(id){ return payName(id).split(' ')[0]; };
 function needsCover(){
   var t = today(), out = [];
   S.r.timeoff.filter(function(x){ return x.status === 'approved' && x.ends_on >= t; }).forEach(function(x){
@@ -1528,7 +1528,7 @@ function coverDlg(cid, d){
 }
 
 /* safety: accident book, safeguarding, renewals */
-var KINDS = ['Accident', 'Safeguarding concern', 'Near miss', 'Other'];
+var INC_KINDS = ['Accident', 'Safeguarding concern', 'Near miss', 'Other'];
 var COMP = ['DBS check', 'First aid', 'Safeguarding training', 'Insurance', 'Licence', 'Membership', 'Qualification', 'Risk assessment', 'Other'];
 VIEWS.safety = function(){
   var tab = S.f.sf || 'reports', t = today(), me = S.me.user_id;
@@ -1562,7 +1562,7 @@ function reportDlg(){
   var now = new Date(), local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   var places = S.d.classes.map(function(c){ return c.venue; }).filter(function(v, i, a){ return v && a.indexOf(v) === i; });
   var ds = S.d.dancers.slice().sort(function(a, b){ return a.first_name.localeCompare(b.first_name); });
-  openDlg('Report an accident or concern', '<div class="fgrid"><label class="field">Type<select class="in" name="kind">' + KINDS.map(function(k){ return '<option>' + k + '</option>'; }).join('') + '</select></label><label class="field">When<input class="in" type="datetime-local" name="when" required value="' + local + '"></label>' +
+  openDlg('Report an accident or concern', '<div class="fgrid"><label class="field">Type<select class="in" name="kind">' + INC_KINDS.map(function(k){ return '<option>' + k + '</option>'; }).join('') + '</select></label><label class="field">When<input class="in" type="datetime-local" name="when" required value="' + local + '"></label>' +
     '<label class="field full">Where<input class="in" name="place" list="placesList" value="' + esc(places[0] || '') + '"><datalist id="placesList">' + places.map(function(p){ return '<option value="' + esc(p) + '">'; }).join('') + '</datalist></label>' +
     '<label class="field">Dancer<select class="in" name="dancer"><option value="">Someone else</option>' + ds.map(function(d){ return '<option value="' + d.id + '">' + esc(d.first_name + ' ' + (d.last_name || '')) + '</option>'; }).join('') + '</select></label><label class="field">Or their name<input class="in" name="person" placeholder="If not a dancer"></label>' +
     '<label class="field full">What happened<span class="hint">Facts only: what you saw or were told, in their words where you can</span><textarea class="in" name="what" required rows="4"></textarea></label>' +
