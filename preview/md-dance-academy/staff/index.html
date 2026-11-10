@@ -161,6 +161,50 @@ dialog .x{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
 .toast.err{background:var(--bad)}
 @media (min-width:861px){.toast{bottom:24px}}
 .loading{padding:60px 16px;text-align:center;color:var(--ink3)}
+
+/* timetable */
+.ttbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ttbar .lab{font:700 1.05rem/1.2 var(--display);letter-spacing:.02em;min-width:150px;text-align:center}
+.circ{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:20px;line-height:1}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.daystrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.daystrip button{display:flex;flex-direction:column;align-items:center;gap:1px;min-height:58px;border:1px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;font-size:12px;color:var(--ink3);padding:4px 0}
+.daystrip button b{font:700 1.15rem/1 var(--display);color:var(--ink)}
+.daystrip button span.n{font-size:11px;font-weight:600;color:var(--red)}
+.daystrip button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.daystrip button[aria-pressed="true"] b,.daystrip button[aria-pressed="true"] span.n{color:#fff}
+.daystrip button.today b{text-decoration:underline;text-decoration-color:var(--pink);text-underline-offset:4px;text-decoration-thickness:3px}
+.les{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:12px;align-items:start;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;cursor:pointer;font:inherit;color:inherit;position:relative;overflow:hidden}
+.les::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--c)}
+.les:hover{border-color:var(--pink)}
+.les .tm{font-weight:700;font-size:15px;line-height:1.25;padding-left:4px}
+.les .tm small{display:block;font-weight:400;color:var(--ink3);font-size:12.5px}
+.les .who{font-weight:600}
+.les .meta{font-size:13.5px;color:var(--ink3)}
+.les.cancel{opacity:.6}
+.les.cancel .who{text-decoration:line-through}
+.les.grp{background:#F6F6F7;cursor:default;border-style:dashed}
+.les.grp::before{background:#B9B9C0}
+.coachpill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink2)}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;align-items:start}
+.week .col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.week .dh{display:flex;align-items:baseline;justify-content:space-between;gap:4px;padding:6px 8px;border-radius:12px;background:#fff;border:1px solid var(--line);cursor:pointer;font:inherit;color:inherit;text-align:left}
+.week .dh b{font:700 1rem var(--display)}
+.week .dh.today{background:var(--ink);color:#fff;border-color:var(--ink)}
+.week .les{grid-template-columns:1fr;gap:2px;padding:8px 8px 8px 12px;font-size:13px}
+.week .les .tm{font-size:12.5px;padding-left:0}
+.week .les .meta{font-size:12px}
+.week .les .right{display:none}
+@media (max-width:600px){.les{grid-template-columns:64px minmax(0,1fr);gap:4px 10px}.les .right{grid-column:2;display:flex;flex-wrap:wrap;gap:8px;align-items:center;text-align:left!important}.les .right div{margin:0!important}.daystrip{gap:4px}.daystrip button{min-height:54px}}
+@media (max-width:1100px){.week{grid-template-columns:1fr}.week .les{grid-template-columns:88px minmax(0,1fr);font-size:15px}.week .les .tm{font-size:14px}}
+.pick{max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:4px 10px}
+.pick label{display:flex;align-items:center;gap:10px;min-height:42px;border-bottom:1px solid #F7E3E8;font-size:15px}
+.pick label:last-child{border-bottom:0}
+.pick input{width:20px;height:20px;accent-color:var(--red);flex:none}
+.pick small{color:var(--ink3);margin-left:auto;font-size:12.5px;text-align:right}
+.warn{background:var(--warn-l);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:14px;font-weight:500}
+.lens{display:flex;gap:6px;flex-wrap:wrap}
+
 </style>
 </head>
 <body>
@@ -177,6 +221,7 @@ dialog .x{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
   <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17.5v.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
   <symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></symbol>
 </svg>
 
@@ -273,9 +318,16 @@ async function load(){
   ];
   if (S.principal) base.push(q(sb.from('md_charges').select('*').order('created_at', { ascending: false })), q(sb.from('md_payments').select('*').order('paid_on', { ascending: false })),
     q(sb.from('md_orders').select('*').order('created_at', { ascending: false })), q(sb.from('md_messages').select('*').order('created_at', { ascending: false })));
+  var from = addDays(today(), -42), to = addDays(today(), 120);
+  base.push(q(sb.from('md_lessons').select('*').gte('on_date', from).lte('on_date', to).order('on_date').order('starts')), q(sb.rpc('md_dancer_directory')));
   var r = await Promise.all(base);
+  var off = S.principal ? 12 : 8;
+  S.lessons = r[off]; S.dir = r[off + 1] || [];
+  var ids = S.lessons.map(function(l){ return l.id; }), ld = [];
+  for (var i = 0; i < ids.length; i += 150) ld = ld.concat(await q(sb.from('md_lesson_dancers').select('*').in('lesson_id', ids.slice(i, i + 150))));
+  S.ld = ld;
   S.d = { classes: r[0], families: r[1], dancers: r[2], enrol: r[3], requests: r[4], events: r[5], entries: r[6], staff: r[7],
-    charges: r[8] || [], payments: r[9] || [], orders: r[10] || [], messages: r[11] || [] };
+    charges: S.principal ? r[8] : [], payments: S.principal ? r[9] : [], orders: S.principal ? r[10] : [], messages: S.principal ? r[11] : [] };
 }
 var by = function(list, key){ var m = {}; (list || []).forEach(function(x){ m[x[key]] = x; }); return m; };
 var cls = function(id){ return S.d.classes.filter(function(c){ return c.id === id; })[0]; };
@@ -297,6 +349,7 @@ var who = function(){ return S.me ? S.me.name : 'Staff'; };
 /* ---------------- nav */
 var NAV = [
   { k: 'today', label: 'Today', icon: 'today' },
+  { k: 'timetable', label: 'Timetable', icon: 'clock' },
   { k: 'bookings', label: 'Bookings', icon: 'book' },
   { k: 'registers', label: 'Registers', icon: 'reg' },
   { k: 'dancers', label: 'Dancers', icon: 'people' },
@@ -361,10 +414,140 @@ VIEWS.today = function(){
   var rows = todays.length ? todays.map(function(x){ return { c: x, on: t }; }) : next;
   h += rows.length ? rows.map(function(r){ return '<div class="row between" style="border-top:1px solid var(--line);padding-top:10px"><div><b>' + esc(r.c.name) + '</b><div class="small muted">' + (r.on === t ? 'Today' : nice(r.on)) + (r.c.starts ? ', ' + hm(r.c.starts) : '') + ' · ' + esc(r.c.venue) + ' · ' + dancersIn(r.c.id).length + ' dancers</div></div><button class="btn sm" type="button" data-openreg="' + r.c.id + '" data-on="' + r.on + '">Register</button></div>'; }).join('') : '<p class="muted">No classes assigned to you yet. A principal can assign classes on the Team page.</p>';
   h += '</section><section class="card stack"><h2>Coming up</h2>' + (ev.length ? ev.map(function(x){ return '<div class="row between" style="border-top:1px solid var(--line);padding-top:10px"><div><b>' + esc(x.title) + '</b>' + demoTag(x) + '<div class="small muted">' + nice(x.starts_on) + (x.time_label ? ', ' + esc(x.time_label) : '') + (x.venue ? ' · ' + esc(x.venue) : '') + '</div></div><span class="pill">' + esc(x.kind) + '</span></div>'; }).join('') : '<p class="muted">Nothing in the diary yet.</p>') + '<button class="btn ghost sm" type="button" data-go="events" style="align-self:flex-start">All events</button></section></div>';
+  var tl = S.lessons.filter(function(l){ return l.on_date === t && l.status !== 'cancelled'; }).sort(function(a, b){ return a.starts < b.starts ? -1 : 1; });
+  var mineFirst = tl.filter(function(l){ return l.coach_id === S.me.user_id; }).concat(tl.filter(function(l){ return l.coach_id !== S.me.user_id; }));
+  h += '<section class="stack"><div class="head"><h2>Lessons today</h2><button class="btn ghost sm" type="button" data-go="timetable">Full timetable</button></div>' + (mineFirst.length ? '<div class="list">' + mineFirst.map(function(l){ return itemHtml({ l: l, starts: l.starts }); }).join('') + '</div>' : '<div class="empty">No private or pair lessons today.</div>') + '</section>';
   var latest = S.d.requests.filter(function(r){ return r.status === 'new'; }).slice(0, 3);
   if (latest.length) h += '<section class="stack"><h2>Latest bookings</h2><div class="list">' + latest.map(reqCard).join('') + '</div></section>';
   return h;
 };
+
+/* timetable: group classes plus private and pair lessons */
+var COLS = ['#D81B2C', '#2563EB', '#0E7C66', '#B45309', '#7C3AED', '#DB2777', '#0F766E', '#475569'];
+var coachCol = function(id){ var i = S.d.staff.map(function(s){ return s.user_id; }).indexOf(id); return i < 0 ? '#9A9AA2' : COLS[i % COLS.length]; };
+var mondayOf = function(d){ return addDays(d, 1 - dow(d)); };
+var minutes = function(t){ var p = String(t || '0:0').split(':'); return +p[0] * 60 + +p[1]; };
+var hhmm = function(m){ return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+var lessonDancers = function(id){ return S.ld.filter(function(x){ return x.lesson_id === id; }).map(function(x){ return S.dir.filter(function(d){ return d.id === x.dancer_id; })[0]; }).filter(Boolean); };
+var lessonWho = function(l){ var ds = lessonDancers(l.id).map(function(d){ return d.first_name + (d.last_name ? ' ' + d.last_name : ''); }); if (l.guest) ds.push(l.guest); return ds.join(' & ') || 'No dancers yet'; };
+S.tt = { day: null, mode: 'day', coach: 'all' };
+function itemsOn(d){
+  var c = S.tt.coach, mine = function(id){ return c === 'all' || id === c; };
+  var groups = S.d.classes.filter(function(x){ return x.active && x.kind === 'Group' && x.day === dow(d) && mine(x.coach_id); }).map(function(x){ return { grp: true, starts: x.starts || '00:00', ends: x.ends, c: x }; });
+  var ls = S.lessons.filter(function(l){ return l.on_date === d && mine(l.coach_id); }).map(function(l){ return { starts: l.starts, ends: l.ends, l: l }; });
+  return groups.concat(ls).sort(function(a, b){ return a.starts < b.starts ? -1 : a.starts > b.starts ? 1 : 0; });
+}
+function itemHtml(it){
+  if (it.grp) { var c = it.c; return '<div class="les grp" style="--c:#B9B9C0"><div class="tm">' + hm(it.starts) + (it.ends ? '<small>to ' + hm(it.ends) + '</small>' : '') + '</div><div><div class="who">' + esc(c.name) + '</div><div class="meta">Group class · ' + dancersIn(c.id).length + (dancersIn(c.id).length === 1 ? ' dancer · ' : ' dancers · ') + esc(c.venue) + '</div><div class="meta"><span class="coachpill"><span class="dot" style="--c:' + coachCol(c.coach_id) + '"></span>' + esc(staffName(c.coach_id) || 'No coach') + '</span></div></div><span class="right"></span></div>'; }
+  var l = it.l, st = l.status === 'taught' ? '<span class="pill ok">Taught</span>' : l.status === 'cancelled' ? '<span class="pill grey">Cancelled' + (l.keep_charge ? ', charged' : '') + '</span>' : '';
+  var med = lessonDancers(l.id).some(function(d){ return d.medical; });
+  return '<button type="button" class="les' + (l.status === 'cancelled' ? ' cancel' : '') + '" style="--c:' + coachCol(l.coach_id) + '" data-lesson="' + l.id + '"><div class="tm">' + hm(l.starts) + '<small>to ' + hm(l.ends) + '</small></div><div style="min-width:0"><div class="who">' + esc(lessonWho(l)) + (l.demo ? ' <span class="pill demo">Sample</span>' : '') + (med ? ' <span class="pill bad" title="Medical notes">' + ic('alert') + '</span>' : '') + '</div>' +
+    '<div class="meta"><span class="coachpill"><span class="dot" style="--c:' + coachCol(l.coach_id) + '"></span>' + esc(staffName(l.coach_id) || 'No coach') + '</span>' + (l.venue ? ' · ' + esc(l.venue) : '') + (l.series_id ? ' · Weekly' : '') + '</div>' + (l.note ? '<div class="meta">' + esc(l.note) + '</div>' : '') + '</div><span class="right" style="text-align:right">' + st + (l.price_pence ? '<div class="small muted" style="margin-top:4px">' + money(l.price_pence) + '</div>' : '') + '</span></button>';
+}
+VIEWS.timetable = function(){
+  if (!S.tt.day) S.tt.day = today();
+  var t = today(), d = S.tt.day, wk = mondayOf(d), week = S.tt.mode === 'week';
+  var staff = S.d.staff.filter(function(s){ return s.active; });
+  var lab = week ? nice(wk, { day: 'numeric', month: 'short' }) + ' to ' + nice(addDays(wk, 6), { day: 'numeric', month: 'short' }) : (d === t ? 'Today, ' : '') + nice(d, { weekday: 'long', day: 'numeric', month: 'long' });
+  var h = '<div class="head"><div><h1>Timetable</h1><p class="muted">Group classes and every private and pair lesson, for all staff.</p></div><button class="btn" type="button" data-newlesson>Add a lesson</button></div>' +
+    '<div class="ttbar"><button class="circ" type="button" data-ttmove="-1" aria-label="Previous">&#8249;</button><span class="lab">' + lab + '</span><button class="circ" type="button" data-ttmove="1" aria-label="Next">&#8250;</button>' +
+    '<button class="btn ghost sm" type="button" data-tttoday>Today</button><span style="flex:1"></span><div class="chips"><button type="button" class="chip" data-ttmode="day" aria-pressed="' + !week + '">Day</button><button type="button" class="chip" data-ttmode="week" aria-pressed="' + week + '">Week</button></div></div>' +
+    '<div class="chips"><button type="button" class="chip" data-ttcoach="all" aria-pressed="' + (S.tt.coach === 'all') + '">All staff</button>' + staff.map(function(s){ return '<button type="button" class="chip" data-ttcoach="' + s.user_id + '" aria-pressed="' + (S.tt.coach === s.user_id) + '"><span class="dot" style="--c:' + coachCol(s.user_id) + ';margin-right:6px"></span>' + esc(s.user_id === S.me.user_id ? 'Me' : s.name) + '</button>'; }).join('') + '</div>';
+  if (!week) {
+    h += '<div class="daystrip">' + [0, 1, 2, 3, 4, 5, 6].map(function(i){ var x = addDays(wk, i), n = S.lessons.filter(function(l){ return l.on_date === x && l.status !== 'cancelled' && (S.tt.coach === 'all' || l.coach_id === S.tt.coach); }).length;
+      return '<button type="button" data-ttday="' + x + '" aria-pressed="' + (x === d) + '" aria-label="' + nice(x, { weekday: 'long', day: 'numeric', month: 'long' }) + (n ? ', ' + n + (n === 1 ? ' lesson' : ' lessons') : '') + '"' + (x === t ? ' class="today"' : '') + '>' + DAYS[i + 1].slice(0, 3) + '<b>' + new Date(x + 'T12:00:00Z').getUTCDate() + '</b><span class="n">' + (n ? n : '&nbsp;') + '</span></button>'; }).join('') + '</div>';
+    var its = itemsOn(d);
+    h += its.length ? '<div class="list">' + its.map(itemHtml).join('') + '</div>' : '<div class="empty">Nothing on ' + (d === t ? 'today' : 'this day') + (S.tt.coach !== 'all' ? ' for ' + esc(staffName(S.tt.coach)) : '') + '. <button class="btn sm" type="button" data-newlesson>Add a lesson</button></div>';
+  } else {
+    h += '<div class="week">' + [0, 1, 2, 3, 4, 5, 6].map(function(i){ var x = addDays(wk, i), its = itemsOn(x);
+      return '<div class="col"><button type="button" class="dh' + (x === t ? ' today' : '') + '" data-ttday="' + x + '" data-ttmode="day"><b>' + DAYS[i + 1].slice(0, 3) + ' ' + new Date(x + 'T12:00:00Z').getUTCDate() + '</b><span class="small">' + its.filter(function(z){ return !z.grp && z.l.status !== 'cancelled'; }).length + '</span></button>' + its.map(itemHtml).join('') + '</div>'; }).join('') + '</div>';
+  }
+  var latest = S.lessons.filter(function(l){ return l.on_date >= t; });
+  if (!latest.length && S.lessons.length === 0) h += '<p class="small muted">Lessons from six weeks ago to four months ahead are shown.</p>';
+  return h;
+};
+document.addEventListener('click', function(e){
+  var m = e.target.closest('[data-ttmove]'); if (m) { S.tt.day = addDays(S.tt.day, (+m.dataset.ttmove) * (S.tt.mode === 'week' ? 7 : 1)); render(); return; }
+  if (e.target.closest('[data-tttoday]')) { S.tt.day = today(); render(); return; }
+  var dd = e.target.closest('[data-ttday]'); if (dd) { S.tt.day = dd.dataset.ttday; if (dd.dataset.ttmode) S.tt.mode = 'day'; render(); return; }
+  var md = e.target.closest('[data-ttmode]'); if (md) { S.tt.mode = md.dataset.ttmode; render(); return; }
+  var co = e.target.closest('[data-ttcoach]'); if (co) { S.tt.coach = co.dataset.ttcoach; render(); return; }
+  if (e.target.closest('[data-newlesson]')) { lessonDlg(null); return; }
+  var ls = e.target.closest('[data-lesson]'); if (ls) lessonDlg(S.lessons.filter(function(l){ return l.id === ls.dataset.lesson; })[0]);
+});
+function lessonDlg(l){
+  var isNew = !l, d0 = l || { on_date: S.tt.day || today(), starts: '18:00:00', ends: '18:30:00', coach_id: S.me.user_id, status: 'booked' };
+  var picked = l ? lessonDancers(l.id).map(function(x){ return x.id; }) : [];
+  var venues = S.d.classes.map(function(c){ return c.venue; }).filter(function(v, i, a){ return v && a.indexOf(v) === i; });
+  var staff = S.d.staff.filter(function(s){ return s.active || s.user_id === d0.coach_id; });
+  var dirSorted = S.dir.slice().sort(function(a, b){ return (picked.indexOf(b.id) > -1) - (picked.indexOf(a.id) > -1); });
+  var html = '<div class="fgrid">' +
+    '<label class="field">Date<input class="in" type="date" name="on" required value="' + esc(d0.on_date) + '"></label>' +
+    '<label class="field">Coach<select class="in" name="coach"><option value="">No coach yet</option>' + staff.map(function(s){ return '<option value="' + s.user_id + '"' + (s.user_id === d0.coach_id ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') + '</select></label>' +
+    '<label class="field">Starts<input class="in" type="time" name="starts" required step="300" value="' + esc(String(d0.starts).slice(0, 5)) + '"></label>' +
+    '<label class="field">Ends<input class="in" type="time" name="ends" required step="300" value="' + esc(String(d0.ends).slice(0, 5)) + '"></label>' +
+    '<div class="full lens"><span class="small muted" style="align-self:center">Length:</span>' + [20, 30, 45, 60, 90].map(function(n){ return '<button type="button" class="chip" data-len="' + n + '">' + n + ' min</button>'; }).join('') + '</div>' +
+    '<div class="field full">Dancers<span class="hint">Tick one for a private lesson, two for a pair</span><input class="in" type="search" data-pickq placeholder="Search dancers" style="margin-top:4px"><div class="pick" data-pick>' +
+      (dirSorted.length ? dirSorted.map(function(x){ return '<label data-name="' + esc((x.first_name + ' ' + (x.last_name || '') + ' ' + (x.parent_name || '')).toLowerCase()) + '"><input type="checkbox" name="dancer" value="' + x.id + '"' + (picked.indexOf(x.id) > -1 ? ' checked' : '') + '>' + esc(x.first_name + ' ' + (x.last_name || '')) + (x.medical ? ' <span class="alert" title="' + esc(x.medical) + '">' + ic('alert') + '</span>' : '') + '<small>' + esc(x.age_band ? 'Age ' + x.age_band : '') + (x.parent_name ? '<br>' + esc(x.parent_name) : '') + '</small></label>'; }).join('') : '<p class="small muted" style="padding:8px 0">No dancers on the list yet. Use the name box below.</p>') + '</div></div>' +
+    '<label class="field full">Or names of people not on the list<span class="hint">e.g. a wedding couple trying a lesson. Nobody is charged for these.</span><input class="in" name="guest" value="' + esc(d0.guest || '') + '"></label>' +
+    '<label class="field">Venue<input class="in" name="venue" list="mdvenues" value="' + esc(d0.venue || venues[0] || '') + '"><datalist id="mdvenues">' + venues.map(function(v){ return '<option value="' + esc(v) + '">'; }).join('') + '</datalist></label>' +
+    '<label class="field">Price (£)<span class="hint">Charged to the family on the day</span><input class="in" name="price" inputmode="decimal" value="' + (d0.price_pence ? (d0.price_pence / 100).toFixed(2) : '') + '"></label>' +
+    '<label class="field full">Note<input class="in" name="note" placeholder="e.g. Competition Latin, Samba and Jive" value="' + esc(d0.note || '') + '"></label>';
+  if (isNew) html += '<div class="field full">Repeat<div class="row"><label class="check"><input type="radio" name="rep" value="no" checked> Just this once</label><label class="check"><input type="radio" name="rep" value="weekly"> Every week until</label><input class="in" type="date" name="until" style="width:auto" value="' + addDays(d0.on_date, 7 * 11) + '"></div></div>';
+  else {
+    html += '<div class="field full">Status<div class="row"><label class="check"><input type="radio" name="status" value="booked"' + (l.status === 'booked' ? ' checked' : '') + '> Booked</label><label class="check"><input type="radio" name="status" value="taught"' + (l.status === 'taught' ? ' checked' : '') + '> Taught</label><label class="check"><input type="radio" name="status" value="cancelled"' + (l.status === 'cancelled' ? ' checked' : '') + '> Cancelled</label></div>' +
+      '<label class="check" data-keep' + (l.status === 'cancelled' ? '' : ' hidden') + '><input type="checkbox" name="keep"' + (l.keep_charge ? ' checked' : '') + '> Still charge for it (late cancellation)</label></div>';
+    if (l.series_id) html += '<div class="field full">This is a weekly lesson. Apply changes to<div class="row"><label class="check"><input type="radio" name="scope" value="one" checked> This lesson only</label><label class="check"><input type="radio" name="scope" value="future"> This and all later weeks</label></div></div>';
+  }
+  html += '<div class="warn full" data-clash hidden></div></div>' + (l ? '<button class="btn ghost sm" type="button" data-dellesson="' + l.id + '" style="align-self:flex-start">Delete lesson</button>' : '');
+  var clashOk = false;
+  openDlg(isNew ? 'Add a lesson' : 'Lesson ' + nice(l.on_date), html, isNew ? 'Book lesson' : 'Save', async function(fd){
+    var row = { on_date: fd.get('on'), starts: fd.get('starts'), ends: fd.get('ends'), coach_id: fd.get('coach') || null, venue: fd.get('venue') || null, guest: (fd.get('guest') || '').trim() || null, note: fd.get('note') || null, price_pence: pence(fd.get('price')) || null, updated_by: who(), updated_at: new Date().toISOString() };
+    var ds = fd.getAll('dancer');
+    if (!row.on_date || !row.starts || !row.ends) { toast('Add a date, start and end time', true); return false; }
+    if (minutes(row.ends) <= minutes(row.starts)) { toast('The end time needs to be after the start', true); return false; }
+    if (!ds.length && !row.guest) { toast('Tick at least one dancer, or add a name', true); return false; }
+    if (!isNew) { row.status = fd.get('status') || l.status; row.keep_charge = row.status === 'cancelled' && !!fd.get('keep'); }
+    var clash = row.coach_id && row.status !== 'cancelled' && S.lessons.filter(function(x){ return x.coach_id === row.coach_id && x.on_date === row.on_date && x.status !== 'cancelled' && (!l || x.id !== l.id) && minutes(x.starts) < minutes(row.ends) && minutes(row.starts) < minutes(x.ends); })[0];
+    if (clash && !clashOk) { var w = dlgForm.querySelector('[data-clash]'); w.hidden = false; w.textContent = staffName(row.coach_id) + ' already has ' + lessonWho(clash) + ' from ' + hm(clash.starts) + ' to ' + hm(clash.ends) + '. Press ' + (isNew ? 'Book lesson' : 'Save') + ' again to book anyway.'; clashOk = true; return false; }
+    if (isNew) {
+      var dates = [row.on_date];
+      if (fd.get('rep') === 'weekly') { var until = fd.get('until') || row.on_date; for (var dt = addDays(row.on_date, 7); dt <= until && dates.length < 52; dt = addDays(dt, 7)) dates.push(dt); }
+      var sid = dates.length > 1 ? (crypto.randomUUID ? crypto.randomUUID() : null) : null;
+      var made = await q(sb.from('md_lessons').insert(dates.map(function(x){ return Object.assign({}, row, { on_date: x, series_id: sid, created_by: who() }); })).select());
+      if (ds.length) await q(sb.from('md_lesson_dancers').insert([].concat.apply([], made.map(function(m){ return ds.map(function(id){ return { lesson_id: m.id, dancer_id: id }; }); }))));
+      toast(dates.length > 1 ? dates.length + ' weekly lessons booked' : 'Lesson booked');
+    } else {
+      var targets = [l];
+      if (l.series_id && fd.get('scope') === 'future') targets = S.lessons.filter(function(x){ return x.series_id === l.series_id && x.on_date >= l.on_date; });
+      var shift = Math.round((new Date(row.on_date + 'T12:00:00Z') - new Date(l.on_date + 'T12:00:00Z')) / 864e5);
+      for (var i = 0; i < targets.length; i++) {
+        var t = targets[i], upd = Object.assign({}, row, { on_date: addDays(t.on_date, shift) });
+        if (t.id !== l.id) { if (row.status === 'cancelled') { upd.status = 'cancelled'; upd.keep_charge = row.keep_charge; } else { delete upd.status; delete upd.keep_charge; } }
+        await q(sb.from('md_lessons').update(upd).eq('id', t.id));
+      }
+      var tids = targets.map(function(x){ return x.id; });
+      var same = targets.every(function(x){ var cur = lessonDancers(x.id).map(function(z){ return z.id; }).sort().join(); return cur === ds.slice().sort().join(); });
+      if (!same) {
+        await q(sb.from('md_lesson_dancers').delete().in('lesson_id', tids));
+        if (ds.length) await q(sb.from('md_lesson_dancers').insert([].concat.apply([], tids.map(function(id){ return ds.map(function(x){ return { lesson_id: id, dancer_id: x }; }); }))));
+      }
+      toast(targets.length > 1 ? targets.length + ' lessons updated' : 'Lesson saved');
+    }
+    S.tt.day = row.on_date; await load(); render();
+  });
+  var f = dlgForm;
+  f.querySelectorAll('[data-len]').forEach(function(b){ b.addEventListener('click', function(){ var st = f.querySelector('[name=starts]').value; if (!st) return; f.querySelector('[name=ends]').value = hhmm(Math.min(minutes(st) + (+b.dataset.len), 1439)); }); });
+  var pq = f.querySelector('[data-pickq]'); if (pq) pq.addEventListener('input', function(){ var v = pq.value.toLowerCase(); f.querySelectorAll('[data-pick] label').forEach(function(lb){ lb.style.display = !v || lb.dataset.name.indexOf(v) > -1 || lb.querySelector('input').checked ? '' : 'none'; }); });
+  f.querySelectorAll('[name=status]').forEach(function(r){ r.addEventListener('change', function(){ var k = f.querySelector('[data-keep]'); if (k) k.hidden = r.value !== 'cancelled' || !r.checked; }); });
+}
+document.addEventListener('click', async function(e){
+  var d = e.target.closest('[data-dellesson]'); if (!d) return;
+  var l = S.lessons.filter(function(x){ return x.id === d.dataset.dellesson; })[0];
+  closeDlg();
+  if (!(await confirmDlg('Delete this lesson?', 'Use this for mistakes. To keep a record, mark it as cancelled instead. Any charge for it is removed.', 'Delete'))) return;
+  try { await q(sb.from('md_lessons').delete().eq('id', l.id)); await load(); toast('Lesson deleted'); render(); } catch (err) { fail(err); }
+});
 
 /* bookings */
 var RSTAT = { new: ['New', 'bad'], contacted: ['Contacted', 'warn'], booked: ['Trial booked', 'warn'], attended: ['Came to trial', 'ok'], joined: ['Joined', 'ok'], declined: ['Not going ahead', 'grey'] };

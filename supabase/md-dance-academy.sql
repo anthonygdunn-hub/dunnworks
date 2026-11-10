@@ -13,6 +13,8 @@
 --   md_orders      shop orders, paid at collection
 --   md_events / md_entries    term dates, medals, shows, competitions and who is entered
 --   md_messages    website contact form
+--   md_lessons / md_lesson_dancers  private and pair lessons: date, start, end, coach, venue, typed price, status
+--                  (booked, taught, cancelled), keep_charge for late cancellations; series_id links weekly repeats
 --
 -- Who sees what:
 --   md_is_principal()  active Principal, or Dunnworks (dw_is_owner): everything
@@ -20,6 +22,12 @@
 --   md_sees_dancer()   principal, or coach of a class the dancer is actively in
 --   Coaches see their classes' dancers, families, registers, trial requests and entries; never fees, orders or messages.
 --   md_clear_demo()    principal only; deletes rows flagged demo (sample families, bookings, orders, events, messages)
+--
+-- Lessons (migrations md_lessons_timetable, md_staff_visible_to_staff): every active staff member sees and edits
+--   the whole timetable and all staff names. md_sync_lesson() keeps md_charges in step: once a lesson's day
+--   arrives its price is charged, split evenly across the dancers' families; cancelled lessons only if keep_charge.
+--   Cron job md-lesson-charges runs md_charge_due_lessons() daily at 00:10 UTC. md_dancer_directory() gives staff
+--   every active dancer's name, age, medical note and parent contact for picking dancers into lessons.
 --
 -- Writes from the public website go only through the md-public edge function (service role, rate limited,
 -- honeypot). Staff logins are created by principals through the md-staff edge function.
