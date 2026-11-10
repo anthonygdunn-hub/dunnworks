@@ -237,7 +237,7 @@ html.text-xl main,html.text-xl dialog form{zoom:1.25}
 .lrow .lw{flex:none;width:96px;font-size:13.5px;color:var(--ink2);line-height:1.35}
 .lrow .grow{flex:1;min-width:140px}
 .lrow .amt{flex:none;font-weight:600;text-align:right;white-space:nowrap}
-.lrow .acts{flex:none;display:flex;gap:6px;margin-left:auto}
+.lrow .acts{flex:none;display:flex;flex-wrap:wrap;gap:6px;margin-left:auto;justify-content:flex-end}
 @media (max-width:600px){.lrow .lw{width:72px}.lrow .acts{width:100%;justify-content:flex-end}}
 .stmtdoc{display:flex;flex-direction:column;gap:12px}
 .stmtdoc table{width:100%;border-collapse:collapse;font-size:14px}
@@ -393,6 +393,7 @@ async function load(){
     charges: S.principal ? r[8] : [], payments: S.principal ? r[9] : [], orders: S.principal ? r[10] : [], messages: S.principal ? r[11] : [] };
   await loadMoney();
   await loadRunning();
+  await loadShop();
   S.mail = S.principal ? await q(sb.from('md_mailings').select('*').order('month', { ascending: false }).limit(3)).catch(function(){ return []; }) : [];
 }
 var by = function(list, key){ var m = {}; (list || []).forEach(function(x){ m[x[key]] = x; }); return m; };
@@ -965,7 +966,7 @@ VIEWS.events = function(){
     var ents = S.d.entries.filter(function(n){ return n.event_id === x.id; });
     return '<details class="item"><summary><div style="flex:none;width:58px;text-align:center"><b style="font:700 1.5rem/1 var(--display);display:block">' + new Date(x.starts_on + 'T12:00:00Z').getUTCDate() + '</b><span class="small muted">' + nice(x.starts_on, { month: 'short' }) + '</span></div><div class="t"><b>' + esc(x.title) + demoTag(x) + '</b><small>' + esc(x.kind) + (x.time_label ? ' · ' + esc(x.time_label) : '') + (x.venue ? ' · ' + esc(x.venue) : '') + (x.ends_on ? ' · until ' + nice(x.ends_on) : '') + '</small></div>' + (x.open ? '<span class="pill ok">Open to families</span>' : '') + (ents.length ? '<span class="pill">' + ents.length + ' entered</span>' : '') + '</summary>' +
       '<div class="body">' + (x.details ? '<p>' + esc(x.details) + '</p>' : '') + tripNote(x.id) + '<h3>Entries</h3>' + (ents.length ? '<div class="stack">' + ents.map(function(n){ var d = dancer(n.dancer_id); return d ? '<div class="row between"><span>' + esc(d.first_name + ' ' + (d.last_name || '')) + '</span><span class="row">' + (S.principal ? '<select class="in" style="min-height:38px;width:auto" data-entry="' + n.id + '">' + ['entered', 'paid', 'withdrawn'].map(function(k){ return '<option' + (k === n.status ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select>' : '<span class="pill ' + (n.status === 'paid' ? 'ok' : n.status === 'withdrawn' ? 'grey' : '') + '">' + esc(n.status) + '</span>') + '</span></div>' : ''; }).join('') + '</div>' : '<p class="muted small">No dancers entered.</p>') +
-      (S.principal ? '<div class="row"><button class="btn sm" type="button" data-enter="' + x.id + '">Enter dancers</button><button class="btn ghost sm" type="button" data-event="' + x.id + '">Edit</button></div>' : '') + '</div></details>';
+      ((x.ticket_adult_pence != null || x.kind === 'Show') ? '<div class="row"><button class="btn line sm" type="button" data-tix="' + x.id + '">Tickets' + (S.x ? ' (' + S.x.tickets.filter(function(t){ return t.event_id === x.id && t.status !== 'cancelled'; }).length + ')' : '') + '</button></div>' : '') + (S.principal ? '<div class="row"><button class="btn sm" type="button" data-enter="' + x.id + '">Enter dancers</button><button class="btn ghost sm" type="button" data-event="' + x.id + '">Edit</button></div>' : '') + '</div></details>';
   }).join('') + '</div>';
 };
 document.addEventListener('change', async function(e){
@@ -1615,6 +1616,288 @@ document.addEventListener('click', async function(e){
   } catch (err) { fail(err); }
 });
 
+/* ---------------- shop stock, waiting lists, tickets, gift vouchers, review emails */
+var PASS_URL = 'https://dunnworks.io/preview/md-dance-academy/pass/#';
+async function loadShop(){
+  var safe = function(p){ return q(p).catch(function(){ return []; }); };
+  var r = await Promise.all([
+    safe(sb.from('md_stock').select('*').order('product').order('size')),
+    safe(sb.from('md_tickets').select('*').order('created_at', { ascending: false })),
+    S.principal ? safe(sb.from('md_vouchers').select('*').order('created_at', { ascending: false })) : [],
+    S.principal ? safe(sb.from('md_voucher_uses').select('*').order('created_at', { ascending: false })) : [],
+    safe(sb.from('md_waitlist').select('*').order('created_at')),
+    safe(sb.from('md_settings').select('*'))
+  ]);
+  S.x = { stock: r[0], tickets: r[1], vouchers: r[2], uses: r[3], wait: r[4], settings: {} };
+  r[5].forEach(function(s){ S.x.settings[s.k] = s.v; });
+}
+var lowStock = function(){ return (S.x ? S.x.stock : []).filter(function(s){ return s.on_hand <= s.low_at; }); };
+var isTicketItem = function(i){ return /ticket/i.test(i.name || ''); };
+var isVoucherItem = function(i){ return /voucher/i.test(i.name || '') && /£\s*\d/.test(i.size || ''); };
+function passItemsPending(){
+  return (S.d.orders || []).filter(function(o){
+    if (o.status === 'cancelled') return false;
+    var items = o.items || [], wantT = 0, wantV = 0;
+    items.forEach(function(i){ if (isTicketItem(i)) wantT += i.qty || 1; if (isVoucherItem(i)) wantV += i.qty || 1; });
+    var haveT = S.x.tickets.filter(function(t){ return t.order_id === o.id; }).length, haveV = S.x.vouchers.filter(function(v){ return v.order_id === o.id; }).length;
+    return wantT > haveT || wantV > haveV;
+  });
+}
+function tickEvents(){ return S.d.events.filter(function(e){ return (e.ends_on || e.starts_on) >= today() && (e.ticket_adult_pence != null || e.kind === 'Show'); }); }
+
+/* shop: tabs for orders, stock and vouchers */
+var shopOrdersView = VIEWS.shop;
+VIEWS.shop = function(){
+  var tab = S.principal ? (S.f.shop || 'orders') : 'orders', low = lowStock().length;
+  var tabs = '<div class="chips">' + [['orders', 'Orders'], ['stock', 'Stock' + (low ? ' (' + low + ' low)' : '')], ['vouchers', 'Gift vouchers']].map(function(x){ return '<button type="button" class="chip" data-chip="shop" data-val="' + x[0] + '" aria-pressed="' + (tab === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  if (tab === 'stock') return stockView(tabs);
+  if (tab === 'vouchers') return vouchersView(tabs);
+  var h = shopOrdersView(), i = h.indexOf('</p></div></div>');
+  var pend = passItemsPending();
+  var extra = tabs + (pend.length ? '<div class="banner"><span>' + plural(pend.length, 'order has', 'orders have') + ' tickets or gift vouchers to send: ' + esc(pend.map(function(o){ return o.ref; }).join(', ')) + '</span><button class="btn sm" type="button" data-issue="' + pend[0].id + '">Send ' + esc(pend[0].ref) + '</button></div>' : '');
+  return i > -1 ? h.slice(0, i + 16) + extra + h.slice(i + 16) : extra + h;
+};
+function stockView(tabs){
+  var by = {};
+  S.x.stock.forEach(function(s){ (by[s.product] = by[s.product] || []).push(s); });
+  var low = lowStock();
+  var h = '<div class="head"><div><h1>Shop stock</h1><p class="muted">What’s on the shelf. Orders marked collected take it off automatically.</p></div><button class="btn line" type="button" data-stockadd>Add an item</button></div>' + tabs;
+  if (low.length) h += '<div class="banner"><span>' + plural(low.length, 'size is', 'sizes are') + ' low or out: ' + esc(low.slice(0, 6).map(function(s){ return s.product + (s.size ? ' ' + s.size : ''); }).join(', ')) + (low.length > 6 ? ' and more' : '') + '</span></div>';
+  h += Object.keys(by).map(function(p){
+    var rows = by[p], tot = sum(rows, function(s){ return Math.max(0, s.on_hand); }), lows = rows.filter(function(s){ return s.on_hand <= s.low_at; }).length;
+    return '<details class="item"' + (lows ? ' open' : '') + '><summary><div class="t"><b>' + esc(p) + '</b><small>' + tot + ' in stock' + (rows.length > 1 ? ' across ' + rows.length + ' sizes' : '') + '</small></div>' + (lows ? '<span class="pill bad">' + lows + ' low</span>' : '<span class="pill ok">OK</span>') + '</summary><div class="body"><div class="lrows">' +
+      rows.map(function(s){ var st = s.on_hand < 0 ? '<span class="pill bad">Short by ' + (-s.on_hand) + '</span>' : s.on_hand <= 0 ? '<span class="pill bad">Out</span>' : s.on_hand <= s.low_at ? '<span class="pill warn">Low</span>' : ''; return lrow(esc(s.size || 'One size'), st, '<b style="font-size:1.1rem">' + Math.max(0, s.on_hand) + '</b>', '<button class="btn ghost sm" type="button" data-stk="' + s.id + '" data-d="-1" aria-label="One less ' + esc(p + ' ' + (s.size || '')) + '">−</button><button class="btn ghost sm" type="button" data-stk="' + s.id + '" data-d="1" aria-label="One more ' + esc(p + ' ' + (s.size || '')) + '">+</button>'); }).join('') +
+      '</div><div class="row"><button class="btn line sm" type="button" data-stocktake="' + esc(p) + '">Count all sizes</button></div></div></details>';
+  }).join('') || '<div class="empty">No stock items yet.</div>';
+  return h;
+}
+function vouchersView(tabs){
+  var t = today(), act = S.x.vouchers.filter(function(v){ return v.status === 'active' && (!v.expires_on || v.expires_on >= t); });
+  var h = '<div class="head"><div><h1>Gift vouchers</h1><p class="muted">Each voucher has a code and QR. Use it against fees or the shop, in part or in full.</p></div><div class="row"><button class="btn line" type="button" data-vuse="">Use a voucher</button><button class="btn" type="button" data-vsell>Sell a voucher</button></div></div>' + tabs;
+  h += '<div class="grid g4"><div class="card stat"><b>' + act.length + '</b><span>vouchers live</span></div><div class="card stat"><b>' + money(sum(act, function(v){ return v.balance_pence; })) + '</b><span>still to be spent</span></div></div>';
+  h += S.x.vouchers.length ? '<div class="card lrows">' + S.x.vouchers.map(function(v){
+    var st = v.status !== 'active' ? '<span class="pill grey">' + (v.status === 'used' ? 'All used' : 'Cancelled') + '</span>' : v.expires_on && v.expires_on < t ? '<span class="pill bad">Ran out</span>' : '<span class="pill ok">' + money(v.balance_pence) + ' left</span>';
+    return lrow('<b style="font-size:1.05rem">' + money(v.value_pence) + '</b>', '<b>' + (v.for_name ? 'For ' + esc(v.for_name) : 'Gift voucher') + '</b><div class="small muted"><span style="letter-spacing:.06em;font-weight:600">' + esc(v.code) + '</span> · ' + esc([v.from_name ? 'from ' + v.from_name : '', v.buyer_email, v.expires_on ? 'use by ' + nice(v.expires_on, { day: 'numeric', month: 'short', year: 'numeric' }) : '', v.emailed_at ? 'emailed' : ''].filter(Boolean).join(' · ')) + '</div>', st,
+      '<a class="btn ghost sm" href="' + PASS_URL + esc(v.code) + '" target="_blank" rel="noopener">QR</a>' + (v.status === 'active' ? '<button class="btn ghost sm" type="button" data-vuse="' + esc(v.code) + '">Use</button>' : '') + (v.buyer_email ? '<button class="btn ghost sm" type="button" data-vsend="' + v.id + '">Email</button>' : ''));
+  }).join('') + '</div>' : '<div class="empty">No gift vouchers yet. Vouchers bought in the website shop appear on the Orders tab to send.</div>';
+  return h;
+}
+function stockTakeDlg(p){
+  var rows = S.x.stock.filter(function(s){ return s.product === p; });
+  openDlg('Count: ' + p, '<p class="small">Type what’s on the shelf for each size.</p><div class="fgrid">' + rows.map(function(s){ return '<label class="field">' + esc(s.size || 'One size') + '<input class="in" type="number" min="0" inputmode="numeric" name="s-' + s.id + '" value="' + s.on_hand + '"></label>'; }).join('') + '</div><label class="field">Warn me when a size gets down to<input class="in" type="number" min="0" name="low" value="' + (rows[0] ? rows[0].low_at : 2) + '"></label>', 'Save count', async function(fd){
+    for (var i = 0; i < rows.length; i++) { var v = Math.max(0, parseInt(fd.get('s-' + rows[i].id), 10) || 0); await q(sb.from('md_stock').update({ on_hand: v, low_at: Math.max(0, parseInt(fd.get('low'), 10) || 0), updated_at: new Date().toISOString() }).eq('id', rows[i].id)); }
+    await loadShop(); render(); toast('Stock saved');
+  });
+}
+function stockAddDlg(){
+  openDlg('Add a stock item', '<div class="fgrid"><label class="field full">Item<span class="hint">Use the same name as the website shop so orders take stock off</span><input class="in" name="p" required list="prodList"><datalist id="prodList">' + Object.keys(S.x.stock.reduce(function(a, s){ a[s.product] = 1; return a; }, {})).map(function(p){ return '<option value="' + esc(p) + '">'; }).join('') + '</datalist></label><label class="field full">Sizes<span class="hint">Separate with commas, or leave empty for one size</span><input class="in" name="sizes" placeholder="Age 5–6, Age 7–8, Adult S"></label><label class="field">How many of each<input class="in" type="number" min="0" name="n" value="0"></label></div>', 'Add', async function(fd){
+    var sizes = String(fd.get('sizes') || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean); if (!sizes.length) sizes = [''];
+    for (var i = 0; i < sizes.length; i++) await q(sb.from('md_stock').upsert({ product: fd.get('p').trim(), size: sizes[i], on_hand: Math.max(0, parseInt(fd.get('n'), 10) || 0) }, { onConflict: 'product,size' }));
+    await loadShop(); render(); toast('Added');
+  });
+}
+function voucherSellDlg(pre){
+  pre = pre || {};
+  openDlg('Sell a gift voucher', '<div class="fgrid"><label class="field">Value £<input class="in" name="v" required inputmode="decimal" value="' + esc(pre.value || '') + '"></label><label class="field">Use by<input class="in" type="date" name="exp" value="' + addDays(today(), 365) + '"></label><label class="field">For<input class="in" name="for" value="' + esc(pre.for_name || '') + '"></label><label class="field">From<input class="in" name="from" value="' + esc(pre.from_name || '') + '"></label><label class="field full">Message<input class="in" name="msg" maxlength="200" placeholder="e.g. Happy birthday!"></label><label class="field full">Email it to<span class="hint">Usually the person who bought it</span><input class="in" type="email" name="email" value="' + esc(pre.email || '') + '"></label></div>', 'Create and email', async function(fd){
+    var v = pence(fd.get('v')); if (!v) { toast('Add the value', true); return false; }
+    var row = await q(sb.from('md_vouchers').insert({ value_pence: v, balance_pence: v, for_name: fd.get('for') || null, from_name: fd.get('from') || null, message: fd.get('msg') || null, buyer_email: fd.get('email') || null, expires_on: fd.get('exp') || null, order_id: pre.order_id || null }).select().single());
+    var sent = row.buyer_email ? await sendPasses('voucher', [row.id]) : null;
+    await loadShop(); S.f.shop = 'vouchers'; render(); toast('Voucher ' + row.code + ' created' + (sent === null ? '' : sent ? ' and emailed' : '. The email couldn’t be sent yet'));
+  });
+}
+function voucherUseDlg(code){
+  openDlg('Use a gift voucher', '<div class="fgrid"><label class="field">Voucher code<input class="in" name="c" required value="' + esc(code || '') + '" style="text-transform:uppercase;letter-spacing:.08em"></label><label class="field">Amount £<input class="in" name="a" required inputmode="decimal"></label><label class="field full">Against<select class="in" name="f"><option value="">Shop or something else (no fee payment)</option>' + famOptions('') + '</select></label><label class="field full">Note<input class="in" name="n" placeholder="e.g. 2 private lessons"></label></div><p class="small muted">Against a family, it’s recorded as a payment off their fees.</p>', 'Use voucher', async function(fd){
+    var r = await sb.rpc('md_voucher_redeem', { p_code: fd.get('c'), p_amount: pence(fd.get('a')), p_family: fd.get('f') || null, p_note: fd.get('n') || null });
+    if (r.error) { toast(r.error.message, true); return false; }
+    await load(); render(); toast(money(r.data.left) + ' left on the voucher');
+  });
+}
+async function sendPasses(type, ids){ try { var r = await sb.functions.invoke('md-passes', { body: { type: type, ids: ids } }); return !!(r.data && r.data.sent); } catch (e) { return false; } }
+function issueDlg(oid){
+  var o = S.d.orders.filter(function(x){ return x.id === oid; })[0]; if (!o) return;
+  var tItems = (o.items || []).filter(isTicketItem), vItems = (o.items || []).filter(isVoucherItem), evs = tickEvents();
+  openDlg('Send tickets and vouchers for ' + o.ref, '<p class="small">' + esc(o.dancer_name) + ' · ' + esc(o.email || 'no email') + (o.paid ? ' · paid' : ' · <b>not marked paid yet</b>') + '</p>' +
+    (tItems.length ? '<label class="field">Event<select class="in" name="ev">' + evs.map(function(e){ return '<option value="' + e.id + '">' + esc(e.title + ', ' + nice(e.starts_on)) + '</option>'; }).join('') + '</select></label><p class="small">' + esc(tItems.map(function(i){ return i.qty + ' x ' + (i.size || 'ticket'); }).join(', ')) + '</p>' : '') +
+    (vItems.length ? '<p class="small">' + esc(vItems.map(function(i){ return i.qty + ' x ' + i.size + ' voucher'; }).join(', ')) + '</p><label class="field">Voucher for<input class="in" name="for"></label>' : '') +
+    '<label class="check"><input type="checkbox" name="paid"' + (o.paid ? ' checked' : '') + '> Paid</label>', 'Create and email', async function(fd){
+    var ev = S.d.events.filter(function(e){ return e.id === fd.get('ev'); })[0], tIds = [], vIds = [];
+    if (tItems.length) {
+      if (!ev) { toast('Add the event first, with ticket prices', true); return false; }
+      var rows = [];
+      tItems.forEach(function(i){ var child = /child/i.test(i.size || ''); for (var k = 0; k < (i.qty || 1); k++) rows.push({ event_id: ev.id, kind: child ? 'Child' : 'Adult', price_pence: (child ? ev.ticket_child_pence : ev.ticket_adult_pence) || 0, buyer_name: o.dancer_name, buyer_email: o.email, paid: !!fd.get('paid'), order_id: o.id }); });
+      tIds = (await q(sb.from('md_tickets').insert(rows).select())).map(function(t){ return t.id; });
+    }
+    for (var j = 0; j < vItems.length; j++) for (var k2 = 0; k2 < (vItems[j].qty || 1); k2++) {
+      var val = pence(vItems[j].size); var v = await q(sb.from('md_vouchers').insert({ value_pence: val, balance_pence: val, for_name: fd.get('for') || null, buyer_email: o.email, order_id: o.id }).select().single()); vIds.push(v.id);
+    }
+    if (fd.get('paid') && !o.paid) await q(sb.from('md_orders').update({ paid: true }).eq('id', o.id));
+    var ok = true; if (tIds.length) ok = await sendPasses('ticket', tIds) && ok; if (vIds.length) ok = await sendPasses('voucher', vIds) && ok;
+    await load(); render(); toast((tIds.length ? plural(tIds.length, 'ticket', 'tickets') : '') + (tIds.length && vIds.length ? ' and ' : '') + (vIds.length ? plural(vIds.length, 'voucher', 'vouchers') : '') + ' created' + (ok ? ' and emailed' : '. The email couldn’t be sent yet'));
+  });
+}
+
+/* tickets for an event, and checking in at the door */
+VIEWS.tickets = function(){
+  var ev = S.d.events.filter(function(e){ return e.id === S.f.tix; })[0];
+  if (!ev) { S.view = 'events'; return VIEWS.events(); }
+  var ts = S.x.tickets.filter(function(t){ return t.event_id === ev.id; }), live = ts.filter(function(t){ return t.status !== 'cancelled'; });
+  var inn = live.filter(function(t){ return t.status === 'used'; }).length, unpaid = live.filter(function(t){ return !t.paid; });
+  var h = '<div class="head"><div><button class="btn ghost sm" type="button" data-go="events">‹ Events</button><h1 style="margin-top:8px">Tickets: ' + esc(ev.title) + '</h1><p class="muted">' + esc(nice(ev.starts_on) + (ev.time_label ? ', ' + ev.time_label : '') + (ev.venue ? ' · ' + ev.venue : '')) + '</p></div><div class="row"><button class="btn" type="button" data-scan="' + ev.id + '">Check in at the door</button>' + (S.principal ? '<button class="btn line" type="button" data-tsell="' + ev.id + '">Sell tickets</button><button class="btn ghost" type="button" data-tprice="' + ev.id + '">Prices</button>' : '') + '</div></div>';
+  h += '<div class="grid g4"><div class="card stat"><b>' + live.length + (ev.ticket_limit ? ' / ' + ev.ticket_limit : '') + '</b><span>tickets sold</span></div><div class="card stat"><b>' + inn + '</b><span>checked in</span></div>' + (S.principal ? '<div class="card stat"><b>' + money(sum(live.filter(function(t){ return t.paid; }), function(t){ return t.price_pence; })) + '</b><span>paid</span></div><div class="card stat"><b>' + money(sum(unpaid, function(t){ return t.price_pence; })) + '</b><span>to collect (' + unpaid.length + ')</span></div>' : '') + '</div>';
+  if (S.principal) h += '<p class="small muted">' + (ev.ticket_adult_pence != null ? 'Adult ' + money(ev.ticket_adult_pence) + ' · child ' + money(ev.ticket_child_pence || 0) : 'No prices set yet') + '</p>';
+  var by = {};
+  ts.forEach(function(t){ var k = (t.buyer_name || 'No name') + '|' + (t.buyer_email || ''); (by[k] = by[k] || []).push(t); });
+  h += Object.keys(by).length ? '<div class="list">' + Object.keys(by).map(function(k){
+    var g = by[k];
+    return '<details class="item"><summary><div class="t"><b>' + esc(k.split('|')[0]) + '</b><small>' + esc(g.length + ' · ' + g.map(function(t){ return t.kind; }).join(', ') + (k.split('|')[1] ? ' · ' + k.split('|')[1] : '')) + '</small></div>' + (g.every(function(t){ return t.status === 'used'; }) ? '<span class="pill ok">In</span>' : g.some(function(t){ return !t.paid && t.status !== 'cancelled'; }) ? '<span class="pill warn">To pay</span>' : '') + '</summary><div class="body"><div class="lrows">' +
+      g.map(function(t){ var st = t.status === 'used' ? '<span class="pill ok">In ' + new Date(t.checked_in_at).toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', timeZone: 'Europe/London' }) + '</span>' : t.status === 'cancelled' ? '<span class="pill grey">Cancelled</span>' : t.paid ? '<span class="pill">Paid</span>' : '<span class="pill warn">To pay ' + money(t.price_pence) + '</span>';
+        return lrow(esc(t.kind), (t.holder ? esc(t.holder) + '<br>' : '') + '<span class="small muted" style="letter-spacing:.06em">' + esc(t.code) + '</span>', st, '<a class="btn ghost sm" href="' + PASS_URL + esc(t.code) + '" target="_blank" rel="noopener">QR</a>' + (t.status === 'valid' ? '<button class="btn ghost sm" type="button" data-tin="' + esc(t.code) + '">Check in</button>' : '') + (S.principal && !t.paid && t.status !== 'cancelled' ? '<button class="btn ghost sm" type="button" data-tpaid="' + t.id + '">Paid</button>' : '') + (S.principal && t.status === 'valid' ? '<button class="btn ghost sm" type="button" data-tcancel="' + t.id + '">Cancel</button>' : '')); }).join('') +
+      '</div>' + (S.principal && g[0].buyer_email ? '<div class="row"><button class="btn ghost sm" type="button" data-tsend="' + g.map(function(t){ return t.id; }).join(',') + '">Email the tickets again</button></div>' : '') + '</div></details>';
+  }).join('') + '</div>' : '<div class="empty">No tickets sold yet.</div>';
+  return h;
+};
+function sellDlg(evId){
+  var ev = S.d.events.filter(function(e){ return e.id === evId; })[0];
+  openDlg('Sell tickets', '<div class="fgrid"><label class="field">Adults<input class="in" type="number" min="0" name="a" value="2"></label><label class="field">Children<input class="in" type="number" min="0" name="c" value="0"></label><label class="field">Buyer’s name<input class="in" name="n" required></label><label class="field">Email the tickets to<input class="in" type="email" name="e"></label><label class="check full"><input type="checkbox" name="paid" checked> Paid</label></div><p class="small muted">Adult ' + money(ev.ticket_adult_pence || 0) + ', child ' + money(ev.ticket_child_pence || 0) + '. Each ticket gets its own QR code.</p>', 'Create tickets', async function(fd){
+    var a = Math.max(0, +fd.get('a') || 0), c = Math.max(0, +fd.get('c') || 0), rows = [];
+    if (!a && !c) { toast('Add how many tickets', true); return false; }
+    if (ev.ticket_limit && S.x.tickets.filter(function(t){ return t.event_id === ev.id && t.status !== 'cancelled'; }).length + a + c > ev.ticket_limit) { toast('That’s more than the ' + ev.ticket_limit + ' tickets available', true); return false; }
+    for (var i = 0; i < a; i++) rows.push({ event_id: ev.id, kind: 'Adult', price_pence: ev.ticket_adult_pence || 0, buyer_name: fd.get('n'), buyer_email: fd.get('e') || null, paid: !!fd.get('paid') });
+    for (var j = 0; j < c; j++) rows.push({ event_id: ev.id, kind: 'Child', price_pence: ev.ticket_child_pence || 0, buyer_name: fd.get('n'), buyer_email: fd.get('e') || null, paid: !!fd.get('paid') });
+    var made = await q(sb.from('md_tickets').insert(rows).select());
+    var sent = fd.get('e') ? await sendPasses('ticket', made.map(function(t){ return t.id; })) : null;
+    await loadShop(); render(); toast(plural(made.length, 'ticket', 'tickets') + ' created' + (sent === null ? '' : sent ? ' and emailed' : '. The email couldn’t be sent yet'));
+  });
+}
+var scanStop = null;
+function scanDlg(evId){
+  openDlg('Check in', '<div class="stack"><div id="scanBox" style="position:relative;border-radius:16px;overflow:hidden;background:#111;aspect-ratio:1/1;max-height:50vh"><video id="scanVid" playsinline muted style="width:100%;height:100%;object-fit:cover"></video><div style="position:absolute;inset:18%;border:3px solid rgba(255,255,255,.85);border-radius:18px"></div></div><div id="scanMsg" class="small muted">Point the camera at the QR code on the ticket.</div><div id="scanRes" aria-live="assertive"></div>' +
+    '<div class="row" style="flex-wrap:nowrap"><input class="in" id="scanCode" placeholder="Or type the code" style="text-transform:uppercase;letter-spacing:.08em" autocomplete="off"><button class="btn" type="button" data-tin-typed>Check in</button></div><p class="small muted"><span id="scanCount"></span></p></div>', 'Done', null);
+  dlgForm.querySelector('button[type=submit]').classList.add('hide');
+  var count = function(){ var ts = S.x.tickets.filter(function(t){ return t.event_id === evId && t.status !== 'cancelled'; }); var el = $('#scanCount'); if (el) el.textContent = ts.filter(function(t){ return t.status === 'used'; }).length + ' of ' + ts.length + ' checked in'; };
+  count();
+  startScanner(function(text){ var m = String(text).match(/MD[TV]:([A-Z0-9]{8,16})/) || String(text).match(/#([A-Z0-9]{8,16})$/) || [null, text]; checkIn(m[1], count); });
+  dlg.addEventListener('close', function c(){ dlg.removeEventListener('close', c); if (scanStop) { scanStop(); scanStop = null; } });
+}
+var lastScan = { code: '', at: 0 };
+async function checkIn(code, after){
+  code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!code || (code === lastScan.code && Date.now() - lastScan.at < 4000)) return;
+  lastScan = { code: code, at: Date.now() };
+  var r = await sb.rpc('md_checkin', { p_code: code }), d = r.data || {}, box = $('#scanRes');
+  var html = r.error ? '<div class="banner" style="background:var(--bad-l);color:var(--bad)"><b>' + esc(r.error.message) + '</b></div>' : d.ok ? '<div class="banner" style="background:var(--ok-l);color:var(--ok);font-size:18px"><span><b>✓ In</b> · ' + esc((d.holder ? d.holder + ', ' : '') + d.kind) + (d.paid ? '' : ' · <b>to pay on the door</b>') + '</span></div>' : '<div class="banner" style="background:var(--bad-l);color:var(--bad);font-size:17px"><span><b>✗ ' + esc(d.reason) + '</b>' + (d.holder ? '<br>' + esc(d.holder) : '') + '</span></div>';
+  if (box) box.innerHTML = html; else toast(d.ok ? 'Checked in' : (d.reason || 'Not valid'), !d.ok);
+  if (navigator.vibrate) navigator.vibrate(d.ok ? 80 : [60, 60, 60]);
+  await loadShop(); if (after) after(); if (!dlg.open) render();
+}
+function loadScript(src){ return new Promise(function(res, rej){ var s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+async function startScanner(onCode){
+  var vid = $('#scanVid'), msg = $('#scanMsg');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg.textContent = 'This phone can’t use the camera here. Type the code instead.'; $('#scanBox').classList.add('hide'); return; }
+  var stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }); }
+  catch (e) { msg.textContent = 'Camera not allowed. Allow it in your browser settings, or type the code.'; $('#scanBox').classList.add('hide'); return; }
+  vid.srcObject = stream; await vid.play().catch(function(){});
+  var running = true; scanStop = function(){ running = false; stream.getTracks().forEach(function(t){ t.stop(); }); };
+  var det = ('BarcodeDetector' in window) ? new window.BarcodeDetector({ formats: ['qr_code'] }) : null;
+  if (!det) { try { await loadScript('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js'); } catch (e) { msg.textContent = 'Couldn’t start the scanner. Type the code instead.'; return; } }
+  var cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+  (async function loop(){
+    if (!running) return;
+    try {
+      if (vid.readyState >= 2) {
+        if (det) { var codes = await det.detect(vid); if (codes[0]) onCode(codes[0].rawValue); }
+        else { var w = vid.videoWidth, hh = vid.videoHeight, sc = Math.min(1, 640 / Math.max(w, hh)); cv.width = w * sc; cv.height = hh * sc; cx.drawImage(vid, 0, 0, cv.width, cv.height); var img = cx.getImageData(0, 0, cv.width, cv.height), res = window.jsQR && window.jsQR(img.data, img.width, img.height); if (res && res.data) onCode(res.data); }
+      }
+    } catch (e) {}
+    setTimeout(loop, 250);
+  })();
+}
+
+/* waiting lists, on the Bookings page */
+var bookingsBase = VIEWS.bookings;
+VIEWS.bookings = function(){
+  var h = bookingsBase(), i = h.indexOf('</p></div></div>');
+  var w = (S.x ? S.x.wait : []).filter(function(x){ return x.status === 'waiting' || x.status === 'offered'; });
+  var cls = S.d.classes.filter(function(c){ return c.capacity; });
+  var full = function(c){ return S.d.enrol.filter(function(e){ return e.class_id === c.id && e.status === 'active'; }).length; };
+  var sec = '';
+  if (w.length || (S.principal && cls.length)) {
+    sec = '<section class="card stack"><div class="row between"><h2>Waiting lists</h2>' + (S.principal ? '<button class="btn ghost sm" type="button" data-sizes>Class sizes</button>' : '') + '</div>' +
+      (cls.length ? '<p class="small muted">' + cls.map(function(c){ var n = full(c); return esc(c.name) + ': ' + n + ' of ' + c.capacity + (n >= c.capacity ? ' (full, new bookings go on the waiting list)' : ''); }).join('<br>') + '</p>' : '') +
+      (w.length ? '<div class="lrows">' + w.map(function(x){ var c = S.d.classes.filter(function(k){ return k.id === x.class_id; })[0];
+        return lrow(esc(nice(x.created_at)), '<b>' + esc(x.dancer_name) + (x.dancer_age ? ', ' + esc(x.dancer_age) : '') + '</b><div class="small muted">' + esc([c ? c.name : '', x.parent_name, x.phone].filter(Boolean).join(' · ')) + '</div>', x.status === 'offered' ? '<span class="pill">Place offered</span>' : '<span class="pill warn">Waiting</span>',
+          (x.phone ? '<a class="btn ghost sm" href="tel:' + esc(x.phone) + '">Call</a>' : '') + (S.principal ? (x.status === 'waiting' ? '<button class="btn ghost sm" type="button" data-wst="offered" data-id="' + x.id + '">Offered</button>' : '') + '<button class="btn sm" type="button" data-wjoin="' + x.id + '">Move to bookings</button><button class="btn ghost sm" type="button" data-wst="removed" data-id="' + x.id + '">Remove</button>' : '')); }).join('') + '</div>' : '<p class="small muted">Nobody waiting.</p>') + '</section>';
+  }
+  return i > -1 ? h.slice(0, i + 16) + sec + h.slice(i + 16) : sec + h;
+};
+function sizesDlg(){
+  var cls = S.d.classes.filter(function(c){ return c.active !== false && c.kind !== 'Private'; });
+  openDlg('Class sizes', '<p class="small">When a class reaches its size, new bookings from the website go on the waiting list. Leave empty for no limit.</p><div class="fgrid">' + cls.map(function(c){ return '<label class="field">' + esc(c.name) + '<span class="hint">' + esc(classTime(c)) + '</span><input class="in" type="number" min="1" name="c-' + c.id + '" value="' + (c.capacity || '') + '"></label>'; }).join('') + '</div>', 'Save', async function(fd){
+    for (var i = 0; i < cls.length; i++) { var v = parseInt(fd.get('c-' + cls[i].id), 10); await q(sb.from('md_classes').update({ capacity: v > 0 ? v : null }).eq('id', cls[i].id)); }
+    await load(); render(); toast('Class sizes saved');
+  });
+}
+
+/* review emails setting, on the Team page */
+var teamBase = VIEWS.team;
+VIEWS.team = function(){
+  var st = (S.x && S.x.settings) || {}, on = st.reviews_on === 'yes';
+  return teamBase() + '<section class="card stack"><h2>Review emails</h2><p class="small">The day after a free trial marked <b>attended</b> or <b>joined</b>, the family gets a thank-you email with a link to leave a review.</p><div class="fgrid"><label class="check"><input type="checkbox" id="revOn"' + (on ? ' checked' : '') + '> Send review emails</label><label class="field full">Review link<span class="hint">Your Google review link, from Google Business Profile, “Ask for reviews”</span><input class="in" id="revUrl" type="url" placeholder="https://g.page/r/…/review" value="' + esc(st.review_url || '') + '"></label></div><div class="row"><button class="btn sm" type="button" data-revsave>Save</button>' + (on && !/^https:\/\//.test(st.review_url || '') ? '<span class="small" style="color:var(--bad)">Add the review link, or nothing is sent</span>' : '') + '</div></section>';
+};
+
+document.addEventListener('click', async function(e){
+  var t;
+  try {
+    if ((t = e.target.closest('[data-stk]'))) { var s = S.x.stock.filter(function(x){ return x.id === t.dataset.stk; })[0], nv = Math.max(0, s.on_hand + (+t.dataset.d)); s.on_hand = nv; render(); await q(sb.from('md_stock').update({ on_hand: nv, updated_at: new Date().toISOString() }).eq('id', s.id)); }
+    else if ((t = e.target.closest('[data-stocktake]'))) stockTakeDlg(t.dataset.stocktake);
+    else if (e.target.closest('[data-stockadd]')) stockAddDlg();
+    else if (e.target.closest('[data-vsell]')) voucherSellDlg();
+    else if ((t = e.target.closest('[data-vuse]'))) voucherUseDlg(t.dataset.vuse);
+    else if ((t = e.target.closest('[data-vsend]'))) { var ok = await sendPasses('voucher', [t.dataset.vsend]); await loadShop(); render(); toast(ok ? 'Emailed' : 'The email couldn’t be sent yet', !ok); }
+    else if ((t = e.target.closest('[data-issue]'))) issueDlg(t.dataset.issue);
+    else if ((t = e.target.closest('[data-tix]'))) { S.f.tix = t.dataset.tix; go('tickets'); }
+    else if ((t = e.target.closest('[data-tsell]'))) sellDlg(t.dataset.tsell);
+    else if ((t = e.target.closest('[data-tprice]'))) {
+      var ev = S.d.events.filter(function(x){ return x.id === t.dataset.tprice; })[0], pv = function(p){ return p == null ? '' : (p / 100).toFixed(2); };
+      openDlg('Ticket prices', '<div class="fgrid"><label class="field">Adult £<input class="in" name="a" inputmode="decimal" value="' + pv(ev.ticket_adult_pence) + '"></label><label class="field">Child £<input class="in" name="c" inputmode="decimal" value="' + pv(ev.ticket_child_pence) + '"></label><label class="field">Tickets available<span class="hint">Leave empty for no limit</span><input class="in" type="number" min="1" name="l" value="' + (ev.ticket_limit || '') + '"></label></div>', 'Save', async function(fd){
+        var up = { ticket_adult_pence: String(fd.get('a')).trim() ? pence(fd.get('a')) : null, ticket_child_pence: String(fd.get('c')).trim() ? pence(fd.get('c')) : null, ticket_limit: parseInt(fd.get('l'), 10) > 0 ? parseInt(fd.get('l'), 10) : null };
+        await q(sb.from('md_events').update(up).eq('id', ev.id)); Object.assign(ev, up); render(); toast('Prices saved');
+      });
+    }
+    else if ((t = e.target.closest('[data-scan]'))) scanDlg(t.dataset.scan);
+    else if (e.target.closest('[data-tin-typed]')) { var inp = $('#scanCode'); await checkIn(inp.value, function(){}); inp.value = ''; }
+    else if ((t = e.target.closest('[data-tin]'))) { lastScan = { code: '', at: 0 }; await checkIn(t.dataset.tin); render(); }
+    else if ((t = e.target.closest('[data-tpaid]'))) { await q(sb.from('md_tickets').update({ paid: true }).eq('id', t.dataset.tpaid)); await loadShop(); render(); }
+    else if ((t = e.target.closest('[data-tcancel]'))) { if (!(await confirmDlg('Cancel this ticket?', 'Its QR code stops working at the door.', 'Cancel ticket'))) return; await q(sb.from('md_tickets').update({ status: 'cancelled' }).eq('id', t.dataset.tcancel)); await loadShop(); render(); }
+    else if ((t = e.target.closest('[data-tsend]'))) { var ok2 = await sendPasses('ticket', t.dataset.tsend.split(',')); await loadShop(); render(); toast(ok2 ? 'Tickets emailed' : 'The email couldn’t be sent yet', !ok2); }
+    else if (e.target.closest('[data-sizes]')) sizesDlg();
+    else if ((t = e.target.closest('[data-wst]'))) { await q(sb.from('md_waitlist').update({ status: t.dataset.wst, offered_at: t.dataset.wst === 'offered' ? new Date().toISOString() : null, updated_by: S.me.name }).eq('id', t.dataset.id)); await loadShop(); render(); }
+    else if ((t = e.target.closest('[data-wjoin]'))) {
+      var w = S.x.wait.filter(function(x){ return x.id === t.dataset.wjoin; })[0], c = S.d.classes.filter(function(k){ return k.id === w.class_id; })[0];
+      await q(sb.from('md_requests').insert({ kind: 'enrol', status: 'new', dancer_name: w.dancer_name, dancer_age: w.dancer_age, parent_name: w.parent_name || w.dancer_name, phone: w.phone || '', email: w.email, notes: 'From the waiting list. ' + (w.notes || ''), class_id: w.class_id, class_label: c ? c.name : null }));
+      await q(sb.from('md_waitlist').update({ status: 'joined', updated_by: S.me.name }).eq('id', w.id));
+      await load(); S.f.req = 'new'; render(); toast('Moved to bookings. Add them to a family from there');
+    }
+    else if (e.target.closest('[data-revsave]')) {
+      var url = $('#revUrl').value.trim(), on = $('#revOn').checked;
+      if (on && url && !/^https:\/\//.test(url)) { toast('The link should start with https://', true); return; }
+      await q(sb.from('md_settings').upsert([{ k: 'reviews_on', v: on ? 'yes' : 'no' }, { k: 'review_url', v: url }], { onConflict: 'k' }));
+      await loadShop(); render(); toast('Saved');
+    }
+  } catch (err) { fail(err); }
+});
+var todayAlertsBase = todayAlerts;
+todayAlerts = function(){
+  var h = todayAlertsBase();
+  if (S.principal && S.x) {
+    var low = lowStock().length, w = S.x.wait.filter(function(x){ return x.status === 'waiting'; }).length, pend = passItemsPending().length;
+    if (low || w || pend) h += '<div class="row">' + (pend ? '<button class="btn line sm" type="button" data-go="shop">' + plural(pend, 'order needs', 'orders need') + ' tickets or vouchers sent</button>' : '') + (w ? '<button class="btn line sm" type="button" data-go="bookings">' + plural(w, 'on the waiting list', 'on waiting lists') + '</button>' : '') + (low ? '<button class="btn line sm" type="button" data-shopstock>' + plural(low, 'shop size low', 'shop sizes low') + '</button>' : '') + '</div>';
+  }
+  return h;
+};
+document.addEventListener('click', function(e){ if (e.target.closest('[data-shopstock]')) { S.f.shop = 'stock'; go('shop'); } });
+
 /* ---------------- settings: home screen, notifications, text size */
 var store = { get: function(k, d){ try { var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }, set: function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
 var SETTINGS = [['push', 'Notifications', 'bell'], ['text', 'Text size', 'text'], ['install', 'Add to home screen', 'phone']];
@@ -1706,7 +1989,7 @@ dlg.addEventListener('close', function(){ if (pendingRefresh) { pendingRefresh =
 function startLive(){
   if (live || !sb.channel) return;
   live = sb.channel('md-staff-live');
-  ['md_requests', 'md_lessons', 'md_orders', 'md_messages', 'md_notices'].forEach(function(t){
+  ['md_requests', 'md_lessons', 'md_orders', 'md_messages', 'md_notices', 'md_tickets'].forEach(function(t){
     live.on('postgres_changes', { event: '*', schema: 'public', table: t }, function(p){
       var n = p && p.new || {};
       var msg = p.eventType === 'INSERT' && t === 'md_requests' ? 'New booking: ' + (n.dancer_name || '') : p.eventType === 'INSERT' && t === 'md_orders' ? 'New shop order ' + (n.ref || '') : p.eventType === 'INSERT' && t === 'md_messages' ? 'New website message' : null;

@@ -4,6 +4,7 @@
 //           unless a principal has held that month in the staff app. Each month is sent once (md_mailings, md_mail_log).
 // 'preview' (signed-in principal) {family_id?}: the email as a family would see it, plus how many families get it.
 // 'test'    (signed-in principal) {family_id?}: sends that preview to the principal's own email.
+// Every tick also sends review emails the day after a free trial marked attended or joined (md_settings reviews_on, review_url).
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import webpush from "npm:web-push@3.6.7";
 
@@ -127,8 +128,28 @@ ${dates.length ? sec("Other dates this month", rows(dates.map((e: Row) => [esc(d
     return (familyId && d.fam.find((f: Row) => f.id === familyId)) || list.find((f: Row) => !f.demo) || list[0] || null;
   };
 
+  // the day after a free trial, families get a thank-you with a link to leave a review
+  const reviews = async () => {
+    const cfg = Object.fromEntries(((await db.from("md_settings").select("k,v")).data || []).map((r: Row) => [r.k, r.v]));
+    if (cfg.reviews_on !== "yes" || !/^https:\/\//.test(cfg.review_url || "")) return 0;
+    const t = londonToday();
+    const { data: rs } = await db.from("md_requests").select("id,parent_name,dancer_name,email,class_label").eq("kind", "trial").in("status", ["attended", "joined"])
+      .gte("trial_on", addDays(t, -3)).lte("trial_on", addDays(t, -1)).is("review_sent_at", null).eq("demo", false);
+    let n = 0;
+    for (const r of (rs || []) as Row[]) {
+      if (!okEmail(r.email)) continue;
+      const first = esc(String(r.parent_name || "").split(" ")[0] || "there"), dancer = esc(String(r.dancer_name || "").split(" ")[0]);
+      const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#2B2B2E;max-width:540px;margin:0 auto"><div style="background:linear-gradient(135deg,#C8102E,#D6136F);color:#fff;padding:18px 22px;border-radius:14px 14px 0 0;font-weight:bold;letter-spacing:.12em;font-size:13px">MD DANCE ACADEMY</div><div style="border:1px solid #F6D3DC;border-top:0;border-radius:0 0 14px 14px;padding:20px 22px"><p>Hi ${first},</p><p>Thank you for bringing ${dancer || "your dancer"} to try ${esc(r.class_label || "a class")}. We hope they loved it.</p><p>If you have a minute, a short review really helps other families find us.</p><p><a href="${esc(cfg.review_url)}" style="display:inline-block;background:#D81B2C;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:bold">Leave a review</a></p><p style="font-size:14px;color:#66666C">Any questions about joining, just reply to this email or call 07810 208765.</p></div></div>`;
+      const r2 = await sendOne(String(r.email).trim(), { subject: `How was ${dancer ? dancer + "’s" : "your"} free trial?`, html, text: `Thank you for coming to try ${r.class_label || "a class"}. A short review really helps: ${cfg.review_url}` });
+      if (r2.ok) { n++; await db.from("md_requests").update({ review_sent_at: new Date().toISOString() }).eq("id", r.id); }
+    }
+    return n;
+  };
+
   if (b.kind === "tick") {
     if (!keys.internal || req.headers.get("x-internal") !== keys.internal) return json({ error: "not allowed" }, 403);
+    const reviewed = await reviews().catch((e) => { console.error("reviews", e); return 0; });
+    if (reviewed) console.log("review emails sent", reviewed);
     const today = b.today && b.force ? String(b.today) : londonToday();
     // preview, two days before the 1st
     if (addDays(today, 2).endsWith("-01")) {

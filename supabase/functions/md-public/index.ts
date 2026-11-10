@@ -1,4 +1,6 @@
 // md-public: the MD Dance Academy website forms (free trial, term enrolment, shop order, contact).
+// A trial or enrolment for a full class (capacity reached) goes on the class waiting list instead.
+// kind 'pass' looks up a ticket or gift voucher code for the pass page (rate limited).
 // Saves each one to the md_ tables, then emails the school so nothing waits for someone to log in.
 // If the email can't be sent the record is still saved and shows in the staff app.
 //
@@ -79,6 +81,21 @@ Deno.serve(async (req) => {
 
   let b: Record<string, unknown> = {};
   try { b = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
+  // a ticket or gift voucher page looks up its code (rate limited, no personal details beyond the names printed on it)
+  if (b.kind === "pass") {
+    const ip0 = await sha(req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown");
+    const { count } = await db.from("md_pass_lookups").select("id", { count: "exact", head: true }).eq("ip_hash", ip0).gte("created_at", new Date(Date.now() - 3600_000).toISOString());
+    if ((count ?? 0) >= 40) return json({ error: "Too many lookups. Please try again later." }, 429);
+    await db.from("md_pass_lookups").insert({ ip_hash: ip0 });
+    const code = String(b.code ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16);
+    if (code.length < 8) return json({ error: "Not found" }, 404);
+    const { data: t } = await db.from("md_tickets").select("code,kind,holder,status,paid,md_events(title,starts_on,time_label,venue)").eq("code", code).maybeSingle();
+    if (t) return json({ ok: true, type: "ticket", code: t.code, kind: t.kind, holder: t.holder, status: t.status, paid: t.paid, event: t.md_events });
+    const { data: v } = await db.from("md_vouchers").select("code,value_pence,balance_pence,for_name,from_name,message,expires_on,status").eq("code", code).maybeSingle();
+    if (v) return json({ ok: true, type: "voucher", ...v });
+    return json({ error: "Not found" }, 404);
+  }
+
   // a hidden field people never fill in, and forms sent faster than a person can fill them
   if (clip(b.website, 200) || Number(b.ms ?? 0) < 2500) return json({ ok: true });
   const ip = await sha(req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown");
@@ -100,6 +117,21 @@ Deno.serve(async (req) => {
       const { data: c } = await db.from("md_classes").select("id,name").eq("code", code).maybeSingle();
       if (c) { row.class_id = c.id; row.class_label = row.class_label ?? c.name; }
       else row.class_label = row.class_label ?? ({ private: "Private lesson", wedding: "Wedding first dance", unsure: "Not sure, please recommend" } as Record<string, string>)[code] ?? code;
+    }
+    if (row.class_id) {
+      const { data: cl } = await db.from("md_classes").select("capacity,name").eq("id", row.class_id).maybeSingle();
+      if (cl?.capacity) {
+        const { count: taken } = await db.from("md_enrolments").select("id", { count: "exact", head: true }).eq("class_id", row.class_id).eq("status", "active");
+        if ((taken ?? 0) >= cl.capacity) {
+          if (await tooMany("md_waitlist", ip)) return json({ error: "We've had a few requests from you already. Please call 07810 208765." }, 429);
+          const { error: we } = await db.from("md_waitlist").insert({ class_id: row.class_id, dancer_name: row.dancer_name, dancer_age: row.dancer_age, parent_name: row.parent_name, phone: row.phone, email: row.email, notes: row.notes, ip_hash: ip });
+          if (we) { console.error("waitlist insert failed", we); return json({ error: "Could not save your details. Please call 07810 208765." }, 500); }
+          const emailed = await notify(`Waiting list: ${row.dancer_name} (${cl.name})`, "New waiting list request",
+            [["Dancer", row.dancer_name], ["Age", row.dancer_age], ["Parent or dancer", row.parent_name], ["Mobile", row.phone], ["Email", row.email], ["Class", cl.name + " (full)"]], row.notes, row.email);
+          await push({ type: "enrol", class_id: row.class_id, title: "Waiting list: " + row.dancer_name, body: cl.name + " is full · " + row.parent_name });
+          return json({ ok: true, waitlist: true, emailed });
+        }
+      }
     }
     const { data: saved, error } = await db.from("md_requests").insert(row).select("id").single();
     if (error) { console.error("insert failed", error); return json({ error: "Could not save your booking. Please call 07810 208765." }, 500); }

@@ -71,5 +71,16 @@
 --   md_class_cover   cover coach or "no class" for one class date; md_offer_cover() lets any coach take an uncovered class.
 --                  Pay runs and the 4pm reminder follow the cover.
 --   md_notices       notice board (principals) and handover notes (any staff), pinned notices on Today, realtime.
+-- Shop, waiting lists, tickets and vouchers (migrations md_shop_tickets_vouchers, md_voucher_payments_and_realtime):
+--   md_stock         shop stock by item and size; md_orders_stock() takes stock off when an order is marked collected
+--                  and puts it back if undone (names matched loosely by md_norm()).
+--   md_classes.capacity and md_waitlist  md-public puts trials and enrolments for a full class on its waiting list;
+--                  principals offer places and move them to bookings.
+--   md_tickets       event tickets (prices and limit on md_events), each with a 10 character code; md_checkin() for any
+--                  staff member on the door. md_vouchers / md_voucher_uses gift vouchers; md_voucher_redeem() spends
+--                  part or all, as a 'voucher' payment off a family's fees. md-passes emails them; the pass page
+--                  (preview/md-dance-academy/pass/#CODE) shows the QR via md-public kind 'pass' (rate limited, md_pass_lookups).
+--   md_settings      reviews_on, review_url: md-monthly's daily tick emails a review request the day after a trial
+--                  marked attended or joined (md_requests.review_sent_at).
 -- Demo logins: md.principal@preview.dunnworks.io and md.coach@preview.dunnworks.io, and parent md.parent@preview.dunnworks.io
 --   (Sarah Whitfield's sample family). Remove before real data.
