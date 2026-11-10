@@ -29,6 +29,10 @@
 --   Cron job md-lesson-charges runs md_charge_due_lessons() daily at 00:10 UTC. md_dancer_directory() gives staff
 --   every active dancer's name, age, medical note and parent contact for picking dancers into lessons.
 --
+-- Notifications (migration md_push_and_realtime): md_push_subs holds each staff phone's push subscription (own rows only);
+--   md_private (no client access) holds the VAPID keys and the internal key md-public uses to call md-push.
+--   md_requests, md_lessons, md_orders and md_messages are in the realtime publication so the app refreshes itself.
+--
 -- Writes from the public website go only through the md-public edge function (service role, rate limited,
 -- honeypot). Staff logins are created by principals through the md-staff edge function.
 -- Demo logins: md.principal@preview.dunnworks.io and md.coach@preview.dunnworks.io (remove before real data).

@@ -55,6 +55,18 @@ async function notify(subject: string, heading: string, lines: [string, unknown]
   } catch (e) { console.error("send failed", e); return false; }
 }
 
+// phone alert to staff through md-push; never holds up or fails the form
+async function push(payload: Record<string, unknown>) {
+  try {
+    const { data } = await db.from("md_private").select("v").eq("k", "internal").maybeSingle();
+    if (!data) return;
+    await fetch(Deno.env.get("SUPABASE_URL") + "/functions/v1/md-push", {
+      method: "POST", headers: { "Content-Type": "application/json", "x-internal": data.v, Authorization: "Bearer " + Deno.env.get("SUPABASE_ANON_KEY") },
+      body: JSON.stringify(Object.assign({ kind: "website" }, payload)),
+    });
+  } catch (e) { console.error("push failed", e); }
+}
+
 Deno.serve(async (req) => {
   const cors = corsFor(req.headers.get("origin"));
   const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...cors, "Content-Type": "application/json" } });
@@ -94,6 +106,7 @@ Deno.serve(async (req) => {
         ...(kind === "enrol" ? [["Paying", row.pay], ["Photo consent", row.photo_ok ? "Yes" : "No"], ["Medical", row.medical]] as [string, unknown][] : [])],
       row.notes, row.email);
     if (emailed) await db.from("md_requests").update({ emailed: true }).eq("id", saved.id);
+    await push({ type: kind, class_id: row.class_id, title: kind === "trial" ? "New free trial: " + row.dancer_name : "New enrolment: " + row.dancer_name, body: (row.class_label ?? "Class not chosen") + " · " + row.parent_name });
     return json({ ok: true, emailed });
   }
 
@@ -115,6 +128,7 @@ Deno.serve(async (req) => {
       [["Dancer", row.dancer_name], ["Collect at", row.collect], ["Email", row.email], ["Mobile", row.phone],
         ["Items", items.map((i) => `${i.qty} x ${i.name}${i.size ? " (" + i.size + ")" : ""}`).join(", ")]], "To be paid at collection.", row.email);
     if (emailed) await db.from("md_orders").update({ emailed: true }).eq("id", saved.id);
+    await push({ type: "order", title: "Shop order " + saved.ref, body: row.dancer_name + " · " + items.map((i) => i.qty + " x " + i.name).join(", ") });
     return json({ ok: true, emailed, ref: saved.ref });
   }
 
@@ -127,6 +141,7 @@ Deno.serve(async (req) => {
     const emailed = await notify(`Website message: ${row.topic ?? "general"} (${row.name})`, "New message from the website",
       [["Name", row.name], ["Email", row.email], ["Mobile", row.phone], ["About", row.topic]], row.message, row.email);
     if (emailed) await db.from("md_messages").update({ emailed: true }).eq("id", saved.id);
+    await push({ type: "message", title: "Website message from " + row.name, body: (row.message ?? "").slice(0, 120) });
     return json({ ok: true, emailed });
   }
 
