@@ -314,8 +314,8 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 </section>
 
 <section id="v-bookings" hidden>
-  <h1 style="font-size:32px">Bookings</h1>
-  <p class="help">Every booking from the website lands here, as well as in your email.</p>
+  <div class="row" style="justify-content:space-between"><h1 style="font-size:32px">Bookings</h1><button class="btn gold" type="button" data-go="booking/new">+ New booking</button></div>
+  <p class="help">Website bookings land here (and in your email). Add phone, WhatsApp or word-of-mouth bookings with + New booking.</p>
   <div class="chips" id="bkf"><button type="button" data-f="open" aria-pressed="true">To deal with</button><button type="button" data-f="all" aria-pressed="false">All</button></div>
   <div class="list" id="bkl"></div>
 </section>
@@ -325,14 +325,32 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
   <div class="row" style="justify-content:space-between;margin-top:10px"><h1 style="font-size:30px" id="bkn"></h1><span class="st" id="bks"></span></div>
   <p class="help" id="bkw"></p>
   <div class="quick" id="bkq"></div>
-  <dl class="kv" id="bkd"></dl>
   <div class="note" id="bkm" hidden></div>
+  <label for="bf-name">Name</label><input id="bf-name" type="text" maxlength="120">
+  <div class="grid2">
+    <div><label for="bf-phone">Phone</label><input id="bf-phone" type="text" inputmode="tel" maxlength="40"></div>
+    <div><label for="bf-email">Email</label><input id="bf-email" type="email" maxlength="200"></div>
+  </div>
+  <div class="grid2">
+    <div><label for="bf-postcode">Postcode</label><input id="bf-postcode" type="text" maxlength="12" style="text-transform:uppercase"></div>
+    <div><label for="bf-service">What's it for?</label><input id="bf-service" type="text" list="svcs" maxlength="80" placeholder="e.g. Regrips"></div>
+  </div>
+  <div class="grid2">
+    <div><label for="bf-clubs">Number of clubs</label><input id="bf-clubs" type="number" inputmode="numeric" min="0" max="30" style="width:100%;max-width:none"></div>
+    <div><label for="bf-day">Collect on</label><input id="bf-day" type="date"></div>
+  </div>
+  <label for="bf-grip">Grips or parts</label><input id="bf-grip" type="text" maxlength="200">
+  <label for="bf-discount">Discount</label><input id="bf-discount" type="text" maxlength="60" placeholder="e.g. Black Friday 20%">
+  <label for="bf-status">Where it's at</label>
+  <select id="bf-status"><option value="new">New</option><option value="contacted">Contacted</option><option value="booked">Booked in (job made)</option><option value="done">Done</option><option value="declined">Not going ahead</option><option value="spam">Spam</option></select>
   <label for="bknote">Your notes <small>(only you see these)</small></label>
   <textarea id="bknote" style="min-height:90px" maxlength="2000"></textarea>
-  <div class="row" style="margin-top:14px">
-    <button class="btn gold" type="button" id="bkjob">Make it a job</button>
-    <button class="btn line" type="button" id="bkcon">Mark as contacted</button>
+  <div class="row" style="margin-top:16px">
+    <button class="btn gold" type="button" id="bksave">Save booking</button>
+    <button class="btn line" type="button" id="bkjob">Make it a job</button>
+    <button class="btn line sm" type="button" id="bkcon">Mark as contacted</button>
     <button class="btn bad sm" type="button" id="bkno">Not going ahead</button>
+    <button class="btn bad sm" type="button" id="bkdel">Delete</button>
   </div>
 </section>
 
@@ -958,37 +976,74 @@ function drawBk(){
     : '<div class="empty">' + (BKF === 'all' ? 'No bookings yet.' : 'Nothing waiting. New website bookings will show here.') + '</div>';
 }
 $('bkf').addEventListener('click', function(e){ var b = e.target.closest('button[data-f]'); if (!b) return; BKF = b.getAttribute('data-f'); [].forEach.call(this.children, function(x){ x.setAttribute('aria-pressed', x === b); }); drawBk(); });
+var BF = ['name','phone','email','postcode','service','clubs','day','grip','discount','status'];
+function bfill(b){
+  b = b || {};
+  var v = { name: b.name, phone: b.phone, email: b.email, postcode: b.postcode, service: b.service, clubs: b.clubs, day: b.collection_day, grip: b.grip, discount: b.discount, status: bkStatus(b) };
+  BF.forEach(function(k){ $('bf-' + k).value = v[k] == null ? '' : v[k]; });
+  $('bknote').value = b.notes || '';
+}
+function bread(){
+  var t = function(k){ var x = $('bf-' + k).value.trim(); return x || null; }, n = $('bf-clubs').value.trim();
+  return { name: t('name'), phone: t('phone'), email: t('email'), postcode: t('postcode') ? t('postcode').toUpperCase() : null, service: t('service'),
+    clubs: n === '' ? null : Math.max(0, Math.min(30, Math.round(+n))), collection_day: t('day'), grip: t('grip'), discount: t('discount'),
+    status: $('bf-status').value, notes: $('bknote').value.trim() || null };
+}
+function bkButtons(){
+  var isNew = !BCUR, st = BCUR ? bkStatus(BCUR) : 'new';
+  $('bkjob').hidden = isNew; $('bkjob').textContent = st === 'booked' ? 'Open the job' : 'Make it a job';
+  $('bkcon').hidden = isNew || st !== 'new'; $('bkno').hidden = isNew || ['declined', 'booked', 'done'].indexOf(st) >= 0; $('bkdel').hidden = isNew;
+  $('bksave').textContent = isNew ? 'Add booking' : 'Save changes';
+}
 function loadBooking(id){
-  show('booking'); $('bkn').textContent = 'Loading…'; $('bkd').innerHTML = ''; $('bkq').innerHTML = '';
+  show('booking'); BCUR = null; ADIRTY = false; $('bkq').innerHTML = ''; $('bkm').hidden = true; $('bks').textContent = ''; $('bks').className = 'st'; $('bks').hidden = true;
+  if (!id || id === 'new') {
+    $('bkn').textContent = 'New booking'; $('bkw').textContent = 'For bookings that come in by phone, WhatsApp or word of mouth.';
+    bfill({}); bkButtons(); setTimeout(function(){ $('bf-name').focus(); }, 50); return Promise.resolve();
+  }
+  $('bkn').textContent = 'Loading…';
   return api('/rest/v1/cgc_bookings?id=eq.' + encodeURIComponent(id) + '&select=*').then(function(rows){
     var b = BCUR = rows && rows[0]; if (!b) { $('bkn').textContent = 'Booking not found'; return; }
     var st = bkStatus(b);
-    $('bkn').textContent = b.name; $('bks').textContent = st; $('bks').className = 'st ' + stc(st);
-    $('bkw').textContent = 'Booked ' + ago(b.created_at) + (b.page ? ' from ' + b.page : '');
+    $('bkn').textContent = b.name; $('bks').hidden = false; $('bks').textContent = st === 'declined' ? 'not going ahead' : st; $('bks').className = 'st ' + stc(st);
+    $('bkw').textContent = (b.page === 'app' ? 'Added ' : 'Booked ') + ago(b.created_at) + (b.page && b.page !== 'app' ? ' from ' + b.page : b.page === 'app' ? ' in the app' : '');
     $('bkq').innerHTML = quick(b.phone, b.email);
-    var kv = [['Phone', b.phone], ['Email', b.email], ['Postcode', b.postcode], ['Service', b.service], ['Clubs', b.clubs], ['Collect on', b.collection_day ? ukDate(b.collection_day, true) : ''], ['Grips', b.grip], ['Discount', b.discount]];
-    $('bkd').innerHTML = kv.filter(function(x){ return x[1] != null && x[1] !== ''; }).map(function(x){ return '<dt>' + x[0] + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('');
-    $('bkm').hidden = !b.message; $('bkm').textContent = b.message || '';
-    $('bknote').value = b.notes || '';
-    $('bkjob').textContent = st === 'booked' ? 'Open the job' : 'Make it a job'; $('bkcon').hidden = st !== 'new'; $('bkno').hidden = st === 'declined' || st === 'booked';
+    $('bkm').hidden = !b.message; $('bkm').textContent = b.message ? 'Their message: ' + b.message : '';
+    bfill(b); bkButtons(); ADIRTY = false;
   }).catch(function(e){ toast(e.message, true); });
 }
+BF.concat(['note']).forEach(function(k){ var el = $(k === 'note' ? 'bknote' : 'bf-' + k); el.addEventListener('input', adirty); el.addEventListener('change', adirty); });
 function bkSet(patch){ if (!BCUR) return Promise.resolve(); patch.handled_at = new Date().toISOString(); return api('/rest/v1/cgc_bookings?id=eq.' + BCUR.id, { method: 'PATCH', json: patch, headers: { Prefer: 'return=minimal' } }); }
-$('bknote').addEventListener('change', function(){ bkSet({ notes: this.value.trim() || null }).then(function(){ toast('Notes saved'); }).catch(function(e){ toast(e.message, true); }); });
-$('bkcon').addEventListener('click', function(){ bkSet({ status: 'contacted' }).then(function(){ toast('Marked as contacted'); loadBooking(BCUR.id); }).catch(function(e){ toast(e.message, true); }); });
-$('bkno').addEventListener('click', function(){ if (!confirm('Mark this booking as not going ahead?')) return; bkSet({ status: 'declined' }).then(function(){ toast('Done'); go('bookings', true); }).catch(function(e){ toast(e.message, true); }); });
+$('bksave').addEventListener('click', function(){
+  var d = bread(), btn = this;
+  if (!d.name) { toast('Add their name', true); return $('bf-name').focus(); }
+  if (!d.phone || d.phone.replace(/\D/g, '').length < 7) { toast('Add a phone number', true); return $('bf-phone').focus(); }
+  btn.disabled = true;
+  var req = BCUR ? bkSet(d).then(function(){ return BCUR.id; })
+    : api('/rest/v1/cgc_bookings', { method: 'POST', json: [Object.assign(d, { page: 'app', handled_at: new Date().toISOString() })], headers: { Prefer: 'return=representation' } }).then(function(r){ return r[0].id; });
+  req.then(function(id){ ADIRTY = false; toast(BCUR ? 'Booking saved' : 'Booking added'); go('booking/' + id, true); })
+    .catch(function(e){ toast(e.message, true); }).then(function(){ btn.disabled = false; });
+});
+$('bkcon').addEventListener('click', function(){ bkSet({ status: 'contacted' }).then(function(){ ADIRTY = false; toast('Marked as contacted'); loadBooking(BCUR.id); }).catch(function(e){ toast(e.message, true); }); });
+$('bkno').addEventListener('click', function(){ if (!confirm('Mark this booking as not going ahead?')) return; bkSet({ status: 'declined' }).then(function(){ ADIRTY = false; toast('Done'); go('bookings', true); }).catch(function(e){ toast(e.message, true); }); });
+$('bkdel').addEventListener('click', function(){ if (!BCUR || !confirm('Delete this booking? This can\'t be undone.')) return; api('/rest/v1/cgc_bookings?id=eq.' + BCUR.id, { method: 'DELETE' }).then(function(){ ADIRTY = false; toast('Booking deleted'); go('bookings', true); }).catch(function(e){ toast(e.message, true); }); });
 $('bkjob').addEventListener('click', function(){
-  var b = BCUR; if (!b) return;
-  if (bkStatus(b) === 'booked') return api('/rest/v1/cgc_jobs?booking_id=eq.' + b.id + '&select=id').then(function(r){ go(r && r[0] ? 'job/' + r[0].id : 'jobs', true); });
-  var digits = String(b.phone || '').replace(/\D/g, '');
-  // reuse the customer if we already have their phone number
-  api('/rest/v1/cgc_customers?select=id,phone').then(function(cs){
-    var hit = (cs || []).filter(function(c){ return digits && String(c.phone || '').replace(/\D/g, '') === digits; })[0];
-    return hit ? hit.id : api('/rest/v1/cgc_customers', { method: 'POST', json: [{ name: b.name, phone: b.phone, email: b.email, postcode: b.postcode }], headers: { Prefer: 'return=representation' } }).then(function(r){ return r[0].id; });
-  }).then(function(cid){
-    return api('/rest/v1/cgc_jobs', { method: 'POST', json: [{ customer_id: cid, booking_id: b.id, service: b.service, clubs: b.clubs, grip: b.grip, collect_on: b.collection_day, notes: [b.discount ? 'Discount: ' + b.discount : '', b.message || ''].filter(Boolean).join('\n') || null }], headers: { Prefer: 'return=representation' } });
-  }).then(function(r){ return bkSet({ status: 'booked' }).then(function(){ toast('Job made. Add the price when you know it.'); go('job/' + r[0].id, true); }); })
-  .catch(function(e){ toast(e.message, true); });
+  if (!BCUR) return;
+  var go2 = function(){
+    var b = BCUR;
+    if (bkStatus(b) === 'booked') return api('/rest/v1/cgc_jobs?booking_id=eq.' + b.id + '&select=id').then(function(r){ go(r && r[0] ? 'job/' + r[0].id : 'jobs', true); });
+    var digits = String(b.phone || '').replace(/\D/g, '');
+    // reuse the customer if we already have their phone number
+    return api('/rest/v1/cgc_customers?select=id,phone').then(function(cs){
+      var hit = (cs || []).filter(function(c){ return digits && String(c.phone || '').replace(/\D/g, '') === digits; })[0];
+      return hit ? hit.id : api('/rest/v1/cgc_customers', { method: 'POST', json: [{ name: b.name, phone: b.phone, email: b.email, postcode: b.postcode }], headers: { Prefer: 'return=representation' } }).then(function(r){ return r[0].id; });
+    }).then(function(cid){
+      return api('/rest/v1/cgc_jobs', { method: 'POST', json: [{ customer_id: cid, booking_id: b.id, service: b.service, clubs: b.clubs, grip: b.grip, collect_on: b.collection_day, notes: [b.discount ? 'Discount: ' + b.discount : '', b.message || ''].filter(Boolean).join('\n') || null }], headers: { Prefer: 'return=representation' } });
+    }).then(function(r){ return bkSet({ status: 'booked' }).then(function(){ ADIRTY = false; toast('Job made. Add the price when you know it.'); go('job/' + r[0].id, true); }); });
+  };
+  // save any edits first so the job gets the latest details
+  var p = ADIRTY ? (function(){ var d = bread(); return bkSet(d).then(function(){ Object.assign(BCUR, d); ADIRTY = false; }); })() : Promise.resolve();
+  p.then(go2).catch(function(e){ toast(e.message, true); });
 });
 
 /* ---- jobs ---- */

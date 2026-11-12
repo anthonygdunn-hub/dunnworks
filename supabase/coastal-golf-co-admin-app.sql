@@ -74,3 +74,9 @@ begin
 end $$;
 revoke all on function public.cgc_app_stats() from public, anon;
 grant execute on function public.cgc_app_stats() to authenticated;
+
+-- Added 12 Nov 2026 (migration cgc_admin_manual_bookings): add and delete bookings by hand; allow "not going ahead"
+alter table public.cgc_bookings drop constraint cgc_bookings_status_check;
+alter table public.cgc_bookings add constraint cgc_bookings_status_check check (status in ('new','contacted','booked','done','spam','declined'));
+create policy "editors add bookings" on public.cgc_bookings for insert with check (public.cgc_is_editor());
+create policy "editors delete bookings" on public.cgc_bookings for delete using (public.cgc_is_editor());
