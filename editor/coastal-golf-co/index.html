@@ -1253,15 +1253,15 @@ $('jdel').addEventListener('click', function(){ if (!JCUR || !confirm('Delete th
 /* ================= round, diary, prices, messages, photos, takings, reminders ================= */
 var REVIEW = 'https://www.coastalgolfco.co.uk/review/';
 /* normal prices per club, fitted (the sale knocks its percentage off these) */
-var CAT = [
-  ['Golf Pride', [['Tour Velvet', 11], ['Tour Velvet 360', 11], ['Tour Velvet Plus 4', 11], ['Tour Velvet Cord', 16], ['Tour Velvet Align', 16], ['CP2 Pro', 13], ['CPx', 13], ['CP Stealth Grey', 13], ['Tour Wrap 2G', 13], ['MCC Plus 4', 16], ['MCC Classic Align', 16], ['New Decade MCC', 16], ['Z-Grip Cord', 16], ['Align Z-Grip Cord', 16], ['Align MCC', 18], ['Align MCC Plus 4', 18]]],
+var CAT = [ /* Stuart's Grip Price List 2026 */
+  ['Golf Pride', [['Tour Velvet', 11], ['Tour Velvet 360 Black', 11], ['Tour Velvet 360 White', 11], ['Tour Velvet Plus 4', 11], ['Tour Wrap White', 11], ['CP Stealth Grey', 13], ['CP2 Pro', 13], ['CPx', 13], ['Tour Wrap 2G', 13], ['MCC Plus 4', 16], ['MCC Classic Align', 16], ['New Decade MultiCompound', 16], ['Tour Velvet Cord', 16], ['Z-Grip Cord', 16], ['Align Z-Grip Cord', 16], ['Tour Velvet Align', 16], ['Align MCC', 18], ['Align MCC +4', 18]]],
   ['G-Rip', [['GR 20', 8], ['A-TAC', 8], ['GR360', 9]]],
   ['SuperStroke', [['Crossline', 10], ['Revl Player / Comfort', 11]]],
   ['Winn', [['Dri-Tac', 13], ['Dri-Tac 2.0', 13], ['Dri-Tac Lite', 15]]],
-  ['JumboMax', [['Comfort Wrap', 16], ['Tour Series', 19], ['STR8-Tech', 19], ['JMX Ultralite', 19], ['JMX Zenlight', 19]]]
+  ['JumboMax', [['Comfort Wrap', 16], ['Tour Series', 19], ['STR8-Tech', 19], ['STR8-Tech UL Ultralite', 19], ['JMX Ultralite', 19], ['JMX Zenlight', 19]]]
 ];
-var CATP = [['Golf Pride Pro Only', 19], ['Golf Pride Pro Only Cord', 23], ['Golf Pride Reverse Taper', 28], ['Golf Pride Zero Taper Straight', 28], ['G-Rip MP-1', 12], ['G-Rip ST-1', 20], ['SuperStroke 100 Deep Etched', 18], ['SuperStroke Zenergy', 37], ['SuperStroke Speciality', 42], ['Winn Dri-Tac putter', 18], ['Winn Midsize Pistol', 22], ['JumboMax JMX Mid Jumbo', 20]];
-var CATX = [['Fitting only, their own grips', 4, 'own'], ['Re-glue a loose head', 10], ['Ferrule replacement', 5], ['Lengthen or shorten a club', 8], ['Reshaft, labour', 15], ['Adjustable adaptor', 20], ['Club MOT, full bag', 30], ['Loft and lie, per club', 5]];
+var CATP = [['Golf Pride Pro Only', 19], ['Golf Pride Pro Only Cord', 23], ['Golf Pride Reverse Taper', 28], ['Golf Pride Zero Taper Straight', 28], ['G-Rip MP-1 Midsize', 12], ['G-Rip ST-1 Oversize', 20], ['SuperStroke 100 Deep Etched', 18], ['SuperStroke Zenergy', 37], ['SuperStroke Speciality', 42], ['Winn Dri-Tac putter', 18], ['Winn Midsize Pistol', 22], ['JumboMax JMX Mid Jumbo', 20], ['JumboMax JMX ST 1.2 / 1.3', 22], ['JumboMax JMX Jumbo Flat 13/17', 36], ['JumboMax JMX Arm Lock', 36]];
+var CATX = [['Fitting only, their own grips', 3, 'own'], ['Re-glue a loose head', 10], ['Ferrule replacement', 5], ['Lengthen or shorten a club', 8], ['Reshaft, labour', 15], ['Adjustable adaptor', 20], ['Club MOT, full bag', 30], ['Loft and lie, per club', 5]];
 var ITEMS = {};
 (function(){
   var o = '<option value="">Choose a grip or service…</option>';
