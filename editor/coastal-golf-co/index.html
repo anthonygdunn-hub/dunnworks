@@ -37,7 +37,7 @@ main{max-width:900px;margin:0 auto;padding:22px 16px 120px}
 .btn.sm{min-height:40px;padding:0 14px;font-size:14px}
 label{display:block;font-weight:800;font-size:14px;margin:18px 0 6px}
 label small{font-weight:600;color:var(--body)}
-input[type=text],input[type=email],input[type=date],select,textarea{width:100%;border:1px solid #cdbf9c;border-radius:10px;background:#fff;padding:12px 14px;font-size:16px}
+input[type=text],input[type=email],input[type=date],select,textarea{width:100%;min-width:0;max-width:100%;display:block;border:1px solid #cdbf9c;border-radius:10px;background:#fff;padding:12px 14px;font-size:16px}
 textarea{min-height:360px;line-height:1.6;resize:vertical}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .msg{min-height:1.4em;margin:10px 0 0;font-weight:700}
@@ -195,6 +195,9 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 .sstat{margin-top:16px;padding:14px 16px;border-radius:12px;font-weight:800;background:#ece4cf;color:var(--body)}
 .sstat.live{background:#d7eedd;color:var(--green)}.sstat.soon{background:#f6e7c1;color:var(--bronze)}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;z-index:9;max-width:calc(100vw - 32px)}
+input[type=date]{-webkit-appearance:none;appearance:none;min-height:48px;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+.grid2>div{min-width:0}
 </style>
 </head>
 <body>
@@ -292,7 +295,8 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
   <h1 style="font-size:32px">Sale</h1>
   <p class="help">Set a sale and the website handles the rest. Between the dates it shows the sale banner and panel and knocks the percentage off grip prices and the price calculator. Afterwards everything goes back to normal by itself.</p>
   <label class="chk"><input type="checkbox" id="son"><span>Sale switched on<small>Untick to cancel the sale, even between the dates.</small></span></label>
-  <label for="sn">Sale name <small>(shown in the banner, e.g. Black Friday, Christmas, Spring)</small></label><input id="sn" type="text" maxlength="24">
+  <label for="snsel">Sale name <small>(shown in the banner)</small></label><select id="snsel"></select>
+  <div class="row" id="snadd" hidden style="margin-top:8px;flex-wrap:nowrap"><input id="sn" type="text" maxlength="24" placeholder="e.g. Christmas" style="flex:1;min-width:0"><button class="btn gold sm" type="button" id="snok">Add</button></div>
   <div class="grid2">
     <div><label for="ss">First day</label><input id="ss" type="date"></div>
     <div><label for="se">Last day</label><input id="se" type="date"></div>
@@ -861,7 +865,25 @@ $('ocopy').addEventListener('click', function(){ var t = otext(); (navigator.cli
 /* ---- sale: cgc_content key "sale" = {on, name, start, end, g, p, pause}; until it's saved the website uses the built-in Black Friday sale ---- */
 var SD = { on: true, name: 'Black Friday', start: '2026-11-23', end: '2026-12-04', g: 20, p: 10, pause: true }, SV = null, SDIRTY = false;
 function sdirty(d){ SDIRTY = d; $('sst').textContent = d ? 'Changes not saved yet' : 'Saved'; $('ssave').disabled = !d; }
-function sread(){ return { on: $('son').checked, name: $('sn').value.trim(), start: $('ss').value, end: $('se').value, g: parseFloat($('sg').value), p: parseFloat($('sp').value), pause: $('spause').checked }; }
+var SNAMES = ['Black Friday'];
+function snDraw(sel){
+  if (sel && SNAMES.indexOf(sel) < 0) SNAMES.push(sel);
+  $('snsel').innerHTML = SNAMES.map(function(n){ return '<option>' + esc(n) + '</option>'; }).join('') + '<option value="__add">+ Add a new sale name…</option>';
+  $('snsel').value = sel || SNAMES[0]; $('snadd').hidden = true; $('sn').value = '';
+}
+$('snsel').addEventListener('change', function(){
+  if (this.value === '__add') { $('snadd').hidden = false; $('sn').focus(); return; }
+  $('snadd').hidden = true; sdirty(true); sstat();
+});
+function snAdd(){
+  var n = $('sn').value.trim().replace(/\s+/g, ' ');
+  if (!n) { toast('Type the new sale name first.', true); return $('sn').focus(); }
+  var hit = SNAMES.filter(function(x){ return x.toLowerCase() === n.toLowerCase(); })[0];
+  snDraw(hit || n); sdirty(true); sstat(); toast(hit ? 'That name is already in the list' : 'Added "' + n + '" to the list');
+}
+$('snok').addEventListener('click', snAdd);
+$('sn').addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); snAdd(); } });
+function sread(){ return { on: $('son').checked, name: $('snsel').value === '__add' ? '' : $('snsel').value, names: SNAMES.slice(), start: $('ss').value, end: $('se').value, g: parseFloat($('sg').value), p: parseFloat($('sp').value), pause: $('spause').checked }; }
 function ldate(iso){ var d = new Date(iso + 'T12:00:00Z'); return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getUTCMonth()]; }
 function sstat(){
   var v = sread(), e = $('sstat'), today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -877,14 +899,15 @@ function loadSale(){
   return api('/rest/v1/cgc_content?key=eq.sale&select=value').then(function(rows){
     var o = {}; try { o = rows && rows[0] ? JSON.parse(rows[0].value) : {}; } catch(e){}
     SV = {}; for (var k in SD) SV[k] = k in o ? o[k] : SD[k];
-    $('son').checked = !!SV.on; $('sn').value = SV.name; $('ss').value = SV.start; $('se').value = SV.end; $('sg').value = SV.g; $('sp').value = SV.p; $('spause').checked = !!SV.pause;
+    SNAMES = Array.isArray(o.names) && o.names.length ? o.names.filter(function(x){ return typeof x === 'string' && x.trim(); }) : ['Black Friday']; snDraw(SV.name);
+    $('son').checked = !!SV.on; $('ss').value = SV.start; $('se').value = SV.end; $('sg').value = SV.g; $('sp').value = SV.p; $('spause').checked = !!SV.pause;
     sdirty(false); sstat();
   }).catch(function(e){ $('sstat').textContent = e.message || 'Could not load.'; });
 }
-['son','sn','ss','se','sg','sp','spause'].forEach(function(id){ $(id).addEventListener(/^s(on|pause)$/.test(id) ? 'change' : 'input', function(){ sdirty(true); sstat(); }); });
+['son','ss','se','sg','sp','spause'].forEach(function(id){ $(id).addEventListener(/^s(on|pause)$/.test(id) ? 'change' : 'input', function(){ sdirty(true); sstat(); }); });
 $('ssave').addEventListener('click', function(){
   var v = sread();
-  if (!v.name) { toast('Give the sale a name, e.g. Black Friday.', true); return; }
+  if (!v.name) { toast('Choose a sale name, or add a new one.', true); return; }
   if (!v.start || !v.end || v.end < v.start) { toast('Check the first and last day.', true); return; }
   if (!(v.g >= 0 && v.g <= 90) || !(v.p >= 0 && v.p <= 90)) { toast('Percentages need to be between 0 and 90.', true); return; }
   $('ssave').disabled = true;
