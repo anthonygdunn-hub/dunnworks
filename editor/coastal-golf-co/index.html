@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#022042">
 <link rel="icon" href="https://www.coastalgolfco.co.uk/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Mulish:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Mulish:wght@400;600;700;800&family=Kaushan+Script&display=swap">
 <style>
 :root{--navy:#022042;--navy2:#01162e;--gold:#cb9a31;--gold2:#ddb04f;--bronze:#8a5a12;--cream:#f8f2e2;--card:#fffdf7;--line:#e6dcc3;--body:#3b4863;--green:#1d6b3a;--bad:#b3261e;--r:14px}
 *{box-sizing:border-box}
@@ -72,7 +72,7 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 .prose img{display:block;width:100%;height:auto;border-radius:12px;margin:22px 0 0}
 .prose a{color:var(--bronze);font-weight:700}
 .nav{display:flex;gap:6px;background:var(--navy2)}
-.nav .in{max-width:900px;margin:0 auto;padding:0 16px;display:flex;gap:4px;width:100%}
+.nav .in{max-width:900px;margin:0 auto;padding:0 16px;display:flex;gap:4px;width:100%;overflow-x:auto}
 .nav button{background:none;border:0;color:#cdd7e6;font-weight:800;padding:12px 14px;border-bottom:3px solid transparent;cursor:pointer;font-size:15px}
 .nav button[aria-current=page]{color:#fff;border-color:var(--gold)}
 .sec{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-top:12px}
@@ -96,12 +96,33 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 .badge{font:800 12px/1 'Mulish',sans-serif;background:var(--gold);color:var(--navy2);border-radius:999px;padding:4px 8px}
 .search{margin:14px 0 4px}
 [hidden]{display:none!important}
+/* offers and sale */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+.orow{border:1px solid var(--line);border-left:5px solid var(--gold);background:var(--card);border-radius:12px;padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.orow .p{grid-column:1/-1;display:flex;gap:8px}
+.orow .p input{flex:1}
+.orow label{margin:0 0 4px;font-size:12.5px}
+.orow input{width:100%;border:1px solid #cdbf9c;border-radius:10px;background:#fff;padding:11px 12px;font-size:16px}
+.orow .x{flex:none;width:46px;border:0;border-radius:10px;background:#f3e6e4;color:var(--bad);font-weight:800;font-size:20px;cursor:pointer}
+.chk{display:flex;gap:10px;align-items:flex-start;font-weight:800;font-size:15px;margin:18px 0 0;cursor:pointer}
+.chk input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--navy);flex:none}
+.chk small{display:block;font-weight:600;color:var(--body);font-size:13.5px}
+.ocv{width:100%;height:auto;border-radius:12px;box-shadow:0 8px 24px rgba(1,22,46,.15);display:block;margin-top:10px}
+.oacts{display:grid;gap:10px;margin-top:12px}
+@media(min-width:620px){.oacts{grid-template-columns:1fr 1fr 1fr}}
+.btn.wa{background:#25d366;border-color:#25d366;color:#073b1e}
+.pct{display:flex;align-items:center;gap:6px;max-width:160px}
+.pct input{width:100%;border:1px solid #cdbf9c;border-radius:10px;background:#fff;padding:12px 14px;font-size:16px}
+.pct span{font-weight:800;font-size:18px}
+.sstat{margin-top:16px;padding:14px 16px;border-radius:12px;font-weight:800;background:#ece4cf;color:var(--body)}
+.sstat.live{background:#d7eedd;color:var(--green)}.sstat.soon{background:#f6e7c1;color:var(--bronze)}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;z-index:9;max-width:calc(100vw - 32px)}
 </style>
 </head>
 <body>
 <header class="top"><div class="in"><div><b>Coastal Golf Co</b><small>Website editor</small></div><button type="button" id="out" hidden>Sign out</button></div></header>
-<nav class="nav" id="nav" hidden aria-label="Editor"><div class="in"><button type="button" data-v="list" aria-current="page">Journal</button><button type="button" data-v="words">Prices &amp; FAQs</button></div></nav>
+<nav class="nav" id="nav" hidden aria-label="Editor"><div class="in"><button type="button" data-v="list" aria-current="page">Journal</button><button type="button" data-v="words">Prices &amp; FAQs</button><button type="button" data-v="offers">Offers</button><button type="button" data-v="sale">Sale</button></div></nav>
 <main id="main">
 
 <section id="v-gate" class="gate" hidden>
@@ -159,7 +180,47 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
   <input class="search" id="wq" type="text" placeholder="Search, e.g. putter or collection" aria-label="Search prices and FAQs">
   <div id="words"><p class="help">Loading…</p></div>
 </section>
+<section id="v-offers" hidden>
+  <h1 style="font-size:32px">Offers</h1>
+  <p class="help">Your weekly offers. Save them and they appear on the website's home page, then share the picture to WhatsApp. They're kept with your account, so they're the same on your phone and computer.</p>
+  <div class="grid2">
+    <div><label for="ot">Title</label><input id="ot" type="text" maxlength="40" placeholder="Special offers"></div>
+    <div><label for="os">Week or dates <small>(optional)</small></label><input id="os" type="text" maxlength="40" placeholder="e.g. w/c 16 November"></div>
+  </div>
+  <div id="orows"></div>
+  <button class="btn line" type="button" id="oadd" style="width:100%;margin-top:12px">+ Add product</button>
+  <p class="help">Leave "Was" empty to show one price. Leave "Stock left" empty to hide it. Stock of 2 or less shows in red.</p>
+  <label for="on">Line under the offers <small>(optional)</small></label><input id="on" type="text" maxlength="80" placeholder="While stocks last">
+  <label class="chk"><input type="checkbox" id="oshow" checked><span>Show these offers on the website<small>Untick to keep the list here without showing it. An empty list never shows.</small></span></label>
+  <h2 style="font-size:22px;margin-top:28px">WhatsApp picture</h2>
+  <canvas class="ocv" id="ocv" width="1080" height="1080"></canvas>
+  <div class="oacts">
+    <button class="btn wa" type="button" id="oshare">Share to WhatsApp</button>
+    <button class="btn" type="button" id="odl">Download picture</button>
+    <button class="btn gold" type="button" id="ocopy">Copy as text</button>
+  </div>
+  <button class="btn bad sm" type="button" id="oclear" style="margin-top:18px">Clear all products</button>
+</section>
+<section id="v-sale" hidden>
+  <h1 style="font-size:32px">Sale</h1>
+  <p class="help">Set a sale and the website handles the rest. Between the dates it shows the sale banner and panel and knocks the percentage off grip prices and the price calculator. Afterwards everything goes back to normal by itself.</p>
+  <label class="chk"><input type="checkbox" id="son"><span>Sale switched on<small>Untick to cancel the sale, even between the dates.</small></span></label>
+  <label for="sn">Sale name <small>(shown in the banner, e.g. Black Friday, Christmas, Spring)</small></label><input id="sn" type="text" maxlength="24">
+  <div class="grid2">
+    <div><label for="ss">First day</label><input id="ss" type="date"></div>
+    <div><label for="se">Last day</label><input id="se" type="date"></div>
+  </div>
+  <div class="grid2">
+    <div><label for="sg">Off all grips</label><div class="pct"><input id="sg" type="number" inputmode="numeric" min="0" max="90" step="1"><span>%</span></div></div>
+    <div><label for="sp">Off putter grips</label><div class="pct"><input id="sp" type="number" inputmode="numeric" min="0" max="90" step="1"><span>%</span></div></div>
+  </div>
+  <label class="chk"><input type="checkbox" id="spause"><span>Pause the 7th grip free and the under-17s discount during the sale<small>Ticked: the website hides those offers while the sale is on. Unticked: they add on top of the sale.</small></span></label>
+  <div class="sstat" id="sstat"></div>
+  <p class="help" style="margin-top:14px"><a href="https://www.coastalgolfco.co.uk/?bf=1" target="_blank" rel="noopener" style="font-weight:800;color:var(--bronze)">Preview the sale on the website</a> (shows your saved settings even before the first day). Flyers, posters and social posts don't change with this, so message Tony for those.</p>
+</section>
 </main>
+<div class="bar" id="obar" hidden><div class="in"><span class="st" id="ost">No changes yet</span><button class="btn gold sm" type="button" id="osave" disabled>Save offers</button></div></div>
+<div class="bar" id="sbar" hidden><div class="in"><span class="st" id="sst">No changes yet</span><button class="btn gold sm" type="button" id="ssave" disabled>Save sale</button></div></div>
 <div class="bar" id="bar" hidden><div class="in"><span class="st" id="st"></span>
   <button class="btn bad sm" type="button" id="del">Delete</button>
   <button class="btn line sm" type="button" id="unp" hidden>Unpublish</button>
@@ -178,7 +239,7 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 var URL0 = 'https://acdpgarasgfhvupzsbxf.supabase.co', KEY = 'sb_publishable_OWTVpDyadL1lITnCp4gfAQ_EZxVHldY';
 var SITE = 'https://www.coastalgolfco.co.uk/', BUCKET = 'cgc-journal', AUTH = 'cgc-editor-auth';
 var $ = function(id){ return document.getElementById(id); };
-function show(v){ ['gate','list','edit','words'].forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
+function show(v){ ['gate','list','edit','words','offers','sale'].forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('obar').hidden = v !== 'offers'; $('sbar').hidden = v !== 'sale'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
   [].forEach.call(document.querySelectorAll('#nav button'), function(b){ if (b.getAttribute('data-v') === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); window.scrollTo(0, 0); }
 function toast(t, bad){ var e = $('toast'); e.textContent = t; e.style.background = bad ? 'var(--bad)' : 'var(--navy)'; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function(){ e.hidden = true; }, 3500); }
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -457,12 +518,160 @@ $('wsave').addEventListener('click', function(){
     EDIT = {}; drawWords(); wcount(); toast('Saved. The website shows your changes now.');
   }).catch(function(e){ toast(e.message, true); $('wsave').disabled = false; });
 });
-addEventListener('beforeunload', function(e){ if (Object.keys(EDIT).length) { e.preventDefault(); e.returnValue = ''; } });
+addEventListener('beforeunload', function(e){ if (Object.keys(EDIT).length || ODIRTY || SDIRTY) { e.preventDefault(); e.returnValue = ''; } });
 $('nav').addEventListener('click', function(e){
   var b = e.target.closest('button[data-v]'); if (!b) return; var v = b.getAttribute('data-v');
-  if (v === 'words') loadWords(); else { if (Object.keys(EDIT).length && !confirm('Leave without saving your price and FAQ changes?')) return; EDIT = {}; loadList(); }
+  if (Object.keys(EDIT).length && v !== 'words' && !confirm('Leave without saving your price and FAQ changes?')) return;
+  if (ODIRTY && v !== 'offers' && !confirm('Leave without saving your offers?')) return;
+  if (SDIRTY && v !== 'sale' && !confirm('Leave without saving your sale settings?')) return;
+  if (v !== 'words') EDIT = {}; if (v !== 'offers') ODIRTY = false; if (v !== 'sale') SDIRTY = false;
+  if (v === 'words') loadWords(); else if (v === 'offers') loadOffers(); else if (v === 'sale') loadSale(); else loadList();
 });
 
+
+/* ---- offers: cgc_content key "offers" = {title, sub, note, show, items:[{p,q,w,n}]} ---- */
+var OF = null, ODIRTY = false, OBADGE = new Image(); OBADGE.src = 'badge.svg';
+function oblank(){ return { p: '', q: '', w: '', n: '' }; }
+function odirty(d){ ODIRTY = d; $('ost').textContent = d ? 'Changes not saved yet' : 'Saved'; $('osave').disabled = !d; }
+function loadOffers(imp){
+  show('offers'); $('orows').innerHTML = '<p class="help">Loading…</p>';
+  return api('/rest/v1/cgc_content?key=eq.offers&select=value').then(function(rows){
+    var o = null; try { o = rows && rows[0] ? JSON.parse(rows[0].value) : null; } catch(e){}
+    OF = o || { title: 'Special offers', sub: '', note: 'While stocks last', show: true, items: [oblank(), oblank(), oblank()] };
+    if (imp) { OF.title = imp.title || OF.title; OF.sub = imp.sub || ''; OF.note = imp.note || ''; OF.items = (imp.rows || imp.items || []).filter(function(x){ return x && (x.p || '').trim(); }); if (!OF.items.length) OF.items = [oblank()]; }
+    if (!OF.items || !OF.items.length) OF.items = [oblank()];
+    $('ot').value = OF.title || ''; $('os').value = OF.sub || ''; $('on').value = OF.note || ''; $('oshow').checked = OF.show !== false;
+    drawOrows(); odraw(); odirty(!!imp); if (imp) toast('Your list from the old offers page is here. Tap Save offers to keep it.');
+    if (!rows || !rows.length) $('ost').textContent = 'Not saved yet';
+  }).catch(function(e){ $('orows').innerHTML = '<p class="msg bad">' + esc(e.message || 'Could not load.') + '</p>'; });
+}
+function drawOrows(){
+  $('orows').innerHTML = OF.items.map(function(r, i){
+    return '<div class="orow" data-i="' + i + '"><div class="p"><input data-k="p" type="text" maxlength="70" placeholder="Product, e.g. Golf Pride Tour Velvet" aria-label="Product" value="' + esc(r.p) + '"><button class="x" type="button" aria-label="Remove">×</button></div>' +
+      '<div><label>Stock left</label><input data-k="q" type="text" inputmode="numeric" placeholder="e.g. 3" value="' + esc(r.q) + '"></div>' +
+      '<div><label>Was £</label><input data-k="w" type="text" inputmode="decimal" placeholder="e.g. 11" value="' + esc(r.w) + '"></div>' +
+      '<div><label>Now £</label><input data-k="n" type="text" inputmode="decimal" placeholder="e.g. 8.80" value="' + esc(r.n) + '"></div></div>';
+  }).join('');
+}
+$('orows').addEventListener('input', function(e){ var k = e.target.getAttribute('data-k'); if (!k) return; OF.items[+e.target.closest('.orow').getAttribute('data-i')][k] = e.target.value; odirty(true); odraw(); });
+$('orows').addEventListener('click', function(e){ if (!e.target.classList.contains('x')) return; OF.items.splice(+e.target.closest('.orow').getAttribute('data-i'), 1); if (!OF.items.length) OF.items.push(oblank()); drawOrows(); odirty(true); odraw(); });
+$('oadd').addEventListener('click', function(){ OF.items.push(oblank()); drawOrows(); odirty(true); var r = $('orows').querySelectorAll('.orow'); r[r.length - 1].querySelector('input').focus(); });
+$('oclear').addEventListener('click', function(){ if (!confirm('Clear all products?')) return; OF.items = [oblank()]; drawOrows(); odirty(true); odraw(); });
+[['ot','title'],['os','sub'],['on','note']].forEach(function(a){ $(a[0]).addEventListener('input', function(){ OF[a[1]] = this.value; odirty(true); odraw(); }); });
+$('oshow').addEventListener('change', function(){ OF.show = this.checked; odirty(true); });
+function ofilled(){ return OF.items.filter(function(r){ return (r.p || '').trim(); }); }
+function omoney(v){ v = String(v || '').replace(/[£,\s]/g, ''); if (v === '') return ''; var n = parseFloat(v); if (isNaN(n)) return ''; return '£' + (n % 1 ? n.toFixed(2) : String(n)); }
+$('osave').addEventListener('click', function(){
+  var bad = ofilled().filter(function(r){ return (r.n && !omoney(r.n)) || (r.w && !omoney(r.w)); });
+  if (bad.length) { toast('Check the prices for "' + bad[0].p.trim() + '". Numbers only, e.g. 8.50', true); return; }
+  var v = { title: (OF.title || '').trim() || 'Special offers', sub: (OF.sub || '').trim(), note: (OF.note || '').trim(), show: OF.show !== false,
+            items: ofilled().map(function(r){ return { p: r.p.trim(), q: String(r.q || '').trim(), w: String(r.w || '').trim(), n: String(r.n || '').trim() }; }) };
+  $('osave').disabled = true;
+  api('/rest/v1/cgc_content', { method: 'POST', json: [{ key: 'offers', value: JSON.stringify(v) }], headers: { Prefer: 'resolution=merge-duplicates,return=minimal' } })
+    .then(function(){ odirty(false); toast(v.show && v.items.length ? 'Saved. Your offers are on the website now.' : 'Saved. Your offers are not showing on the website.'); })
+    .catch(function(e){ toast(e.message, true); $('osave').disabled = false; });
+});
+var OC = $('ocv'), OX = OC.getContext('2d');
+function orr(x, y, w, h, r){ OX.beginPath(); OX.moveTo(x + r, y); OX.arcTo(x + w, y, x + w, y + h, r); OX.arcTo(x + w, y + h, x, y + h, r); OX.arcTo(x, y + h, x, y, r); OX.arcTo(x, y, x + w, y, r); OX.closePath(); }
+function owrap(t, mw){ var ws = String(t).split(/\s+/), ls = [], c = ''; ws.forEach(function(w){ var s = c ? c + ' ' + w : w; if (OX.measureText(s).width > mw && c) { ls.push(c); c = w; } else c = s; }); if (c) ls.push(c); return ls; }
+function odraw(){
+  if (!OF) return;
+  var W = 1080, rows = ofilled(); if (!rows.length) rows = [{ p: 'Your first offer', q: '', w: '', n: '' }];
+  OX.font = '800 40px Mulish'; var L = rows.map(function(r){ var ls = owrap(r.p, 530).slice(0, 3); return { r: r, ls: ls, h: Math.max(112, 40 + ls.length * 48) }; });
+  var hH = 330, tH = 72, fH = 250, bH = L.reduce(function(a, x){ return a + x.h; }, 0), H = Math.max(1080, hH + tH + bH + 120 + fH); OC.height = H;
+  OX.fillStyle = '#F8F2E2'; OX.fillRect(0, 0, W, H); OX.fillStyle = '#022042'; OX.fillRect(0, 0, W, hH); OX.fillStyle = '#CB9A31'; OX.fillRect(0, hH - 10, W, 10);
+  OX.beginPath(); OX.arc(170, 165, 118, 0, Math.PI * 2); OX.fillStyle = '#F8F2E2'; OX.fill();
+  if (OBADGE.complete && OBADGE.naturalWidth) OX.drawImage(OBADGE, 57, 52, 226, 226);
+  OX.textAlign = 'left'; OX.textBaseline = 'alphabetic'; OX.fillStyle = '#E3C27A';
+  var t = (OF.title || 'Special offers').toUpperCase(), fs = 104; OX.font = '700 ' + fs + 'px Oswald'; while (OX.measureText(t).width > 720 && fs > 56) { fs -= 4; OX.font = '700 ' + fs + 'px Oswald'; }
+  OX.fillText(t, 320, OF.sub ? 170 : 200);
+  if (OF.sub) { OX.fillStyle = '#fff'; var f2 = 52; OX.font = f2 + 'px "Kaushan Script"'; while (OX.measureText(OF.sub).width > 720 && f2 > 30) { f2 -= 2; OX.font = f2 + 'px "Kaushan Script"'; } OX.fillText(OF.sub, 322, 245); }
+  var y = hH + 40, X0 = 50, X1 = W - 50, cP = 80, cQ = 690, cW = 820, cN = X1 - 30;
+  OX.fillStyle = '#022042'; orr(X0, y, X1 - X0, tH, 16); OX.fill(); OX.fillStyle = '#E3C27A'; OX.font = '700 34px Oswald'; OX.textBaseline = 'middle';
+  OX.textAlign = 'left'; OX.fillText('PRODUCT', cP, y + tH / 2); OX.textAlign = 'center'; OX.fillText('STOCK', cQ, y + tH / 2); OX.fillText('WAS', cW, y + tH / 2); OX.textAlign = 'right'; OX.fillText('NOW', cN, y + tH / 2);
+  y += tH + 8;
+  L.forEach(function(l, i){
+    var r = l.r, mid = y + (l.h - 8) / 2; OX.fillStyle = i % 2 ? '#FCFAF4' : '#FFFFFF'; orr(X0, y, X1 - X0, l.h - 8, 14); OX.fill(); OX.fillStyle = '#CB9A31'; OX.fillRect(X0, y + 12, 8, l.h - 32);
+    OX.textAlign = 'left'; OX.fillStyle = '#1E2433'; OX.font = '800 40px Mulish'; l.ls.forEach(function(s, k){ OX.fillText(s, cP, mid - (l.ls.length - 1) * 24 + k * 48); });
+    var q = String(r.q || '').trim(); if (q) { OX.textAlign = 'center'; OX.fillStyle = parseFloat(q) <= 2 ? '#B3261E' : '#022042'; OX.font = '700 36px Oswald'; OX.fillText(q + ' LEFT', cQ, mid); }
+    var w = omoney(r.w), n = omoney(r.n);
+    if (w && n) { OX.textAlign = 'center'; OX.fillStyle = '#8A93A6'; OX.font = '800 36px Mulish'; OX.fillText(w, cW, mid); var ww = OX.measureText(w).width; OX.fillStyle = '#B3261E'; OX.fillRect(cW - ww / 2 - 6, mid - 3, ww + 12, 6); }
+    if (n || w) { OX.textAlign = 'right'; OX.fillStyle = '#B3261E'; OX.font = '700 58px Oswald'; OX.fillText(n || w, cN, mid + 2); }
+    y += l.h;
+  });
+  if (OF.note) { OX.textAlign = 'center'; OX.fillStyle = '#8a5a12'; OX.font = '800 34px Mulish'; OX.fillText(OF.note, W / 2, y + 46); }
+  var fy = H - fH; OX.fillStyle = '#022042'; OX.fillRect(0, fy, W, fH); OX.fillStyle = '#CB9A31'; OX.fillRect(0, fy, W, 10);
+  OX.textAlign = 'center'; OX.fillStyle = '#E3C27A'; OX.font = '500 32px Oswald'; OX.fillText('CALL OR TEXT STUART', W / 2, fy + 62);
+  OX.fillStyle = '#fff'; OX.font = '700 76px Oswald'; OX.fillText('07792 554989', W / 2, fy + 130);
+  OX.font = '800 32px Mulish'; OX.fillStyle = '#D6DEE8'; OX.fillText('coastalgolfco.co.uk · hello@coastalgolfco.co.uk', W / 2, fy + 200);
+  OX.textBaseline = 'alphabetic';
+}
+OBADGE.onload = odraw;
+if (document.fonts) { document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', odraw); ['700 40px Oswald','500 32px Oswald','800 40px Mulish','40px "Kaushan Script"'].forEach(function(f){ document.fonts.load(f).then(odraw, function(){}); }); }
+function otext(){
+  var o = '*' + (OF.title || 'Special offers').toUpperCase() + '*' + (OF.sub ? ' – ' + OF.sub : '') + '\n\n';
+  ofilled().forEach(function(r){ var w = omoney(r.w), n = omoney(r.n), q = String(r.q || '').trim(); o += '• ' + r.p.trim() + (n && w ? ' – ~' + w + '~ *' + n + '*' : (n || w ? ' – *' + (n || w) + '*' : '')) + (q ? ' (' + q + ' left)' : '') + '\n'; });
+  if (OF.note) o += '\n_' + OF.note + '_\n';
+  return o + '\nCall or text Stuart on 07792 554989\ncoastalgolfco.co.uk';
+}
+function ofile(){ return 'CGC ' + (OF.title || 'offers') + (OF.sub ? ' ' + OF.sub : '') + '.png'; }
+function oblob(){ return new Promise(function(res){ OC.toBlob(res, 'image/png'); }); }
+function osave(b){ var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = ofile(); a.click(); }
+$('odl').addEventListener('click', function(){ oblob().then(function(b){ osave(b); toast('Picture saved'); }); });
+$('oshare').addEventListener('click', function(){
+  if (!ofilled().length) { toast('Add at least one product first', true); return; }
+  oblob().then(function(b){ var f = new File([b], ofile(), { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f] }).catch(function(){});
+    else { osave(b); toast('Picture saved. Drag it into WhatsApp Web'); } });
+});
+$('ocopy').addEventListener('click', function(){ var t = otext(); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ toast('Copied. Paste it into WhatsApp'); }, function(){ window.prompt('Copy this text:', t); }); });
+
+/* ---- sale: cgc_content key "sale" = {on, name, start, end, g, p, pause}; until it's saved the website uses the built-in Black Friday sale ---- */
+var SD = { on: true, name: 'Black Friday', start: '2026-11-23', end: '2026-12-04', g: 20, p: 10, pause: true }, SV = null, SDIRTY = false;
+function sdirty(d){ SDIRTY = d; $('sst').textContent = d ? 'Changes not saved yet' : 'Saved'; $('ssave').disabled = !d; }
+function sread(){ return { on: $('son').checked, name: $('sn').value.trim(), start: $('ss').value, end: $('se').value, g: parseFloat($('sg').value), p: parseFloat($('sp').value), pause: $('spause').checked }; }
+function ldate(iso){ var d = new Date(iso + 'T12:00:00Z'); return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getUTCMonth()]; }
+function sstat(){
+  var v = sread(), e = $('sstat'), today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  if (!v.on) { e.className = 'sstat'; e.textContent = 'The sale is switched off. The website shows normal prices.'; return; }
+  if (!v.start || !v.end) { e.className = 'sstat'; e.textContent = 'Choose the first and last day.'; return; }
+  if (v.end < v.start) { e.className = 'sstat'; e.textContent = 'The last day is before the first day.'; return; }
+  if (today < v.start) { e.className = 'sstat soon'; e.textContent = 'Starts ' + ldate(v.start) + ' and runs until ' + ldate(v.end) + '.'; return; }
+  if (today <= v.end) { e.className = 'sstat live'; e.textContent = 'On now: the website is showing the sale until the end of ' + ldate(v.end) + '.'; return; }
+  e.className = 'sstat'; e.textContent = 'Finished on ' + ldate(v.end) + '. The website is back to normal prices.';
+}
+function loadSale(){
+  show('sale'); $('sstat').textContent = 'Loading…';
+  return api('/rest/v1/cgc_content?key=eq.sale&select=value').then(function(rows){
+    var o = {}; try { o = rows && rows[0] ? JSON.parse(rows[0].value) : {}; } catch(e){}
+    SV = {}; for (var k in SD) SV[k] = k in o ? o[k] : SD[k];
+    $('son').checked = !!SV.on; $('sn').value = SV.name; $('ss').value = SV.start; $('se').value = SV.end; $('sg').value = SV.g; $('sp').value = SV.p; $('spause').checked = !!SV.pause;
+    sdirty(false); sstat();
+  }).catch(function(e){ $('sstat').textContent = e.message || 'Could not load.'; });
+}
+['son','sn','ss','se','sg','sp','spause'].forEach(function(id){ $(id).addEventListener(/^s(on|pause)$/.test(id) ? 'change' : 'input', function(){ sdirty(true); sstat(); }); });
+$('ssave').addEventListener('click', function(){
+  var v = sread();
+  if (!v.name) { toast('Give the sale a name, e.g. Black Friday.', true); return; }
+  if (!v.start || !v.end || v.end < v.start) { toast('Check the first and last day.', true); return; }
+  if (!(v.g >= 0 && v.g <= 90) || !(v.p >= 0 && v.p <= 90)) { toast('Percentages need to be between 0 and 90.', true); return; }
+  $('ssave').disabled = true;
+  api('/rest/v1/cgc_content', { method: 'POST', json: [{ key: 'sale', value: JSON.stringify(v) }], headers: { Prefer: 'resolution=merge-duplicates,return=minimal' } })
+    .then(function(){ SV = v; sdirty(false); sstat(); toast('Saved. The website uses these sale settings now.'); })
+    .catch(function(e){ toast(e.message, true); $('ssave').disabled = false; });
+});
+
+/* the old offers page (coastalgolfco.co.uk/offers/) sends its list here once; #offers / #sale open those tabs */
+var OIMP = null;
+try {
+  var hm = /^#offers-import=(.+)$/.exec(location.hash);
+  if (hm) { localStorage.setItem('cgc-offers-import', decodeURIComponent(hm[1])); localStorage.setItem('cgc-editor-tab', 'offers'); history.replaceState(null, '', location.pathname + location.search); }
+  else if (/^#(offers|sale)$/.test(location.hash)) { localStorage.setItem('cgc-editor-tab', location.hash.slice(1)); history.replaceState(null, '', location.pathname + location.search); }
+} catch(e){}
+function firstView(){
+  var tab = null; try { tab = localStorage.getItem('cgc-editor-tab'); localStorage.removeItem('cgc-editor-tab'); var ij = localStorage.getItem('cgc-offers-import'); localStorage.removeItem('cgc-offers-import'); if (ij) OIMP = JSON.parse(ij); } catch(e){}
+  if (tab === 'offers') return loadOffers(OIMP); if (tab === 'sale') return loadSale(); return loadList();
+}
 /* ---- start: a sign-in link lands here with a one-time token ---- */
 var q = new URLSearchParams(location.search), th = q.get('token_hash');
 function verify(type){
@@ -475,7 +684,7 @@ var start = th
       .catch(function(e){ show('gate'); $('gmsg').className = 'msg bad'; $('gmsg').textContent = e.message; throw e; })
       .then(function(){ history.replaceState(null, '', location.pathname); })
   : Promise.resolve();
-start.then(session).then(function(t){ t ? loadList() : show('gate'); }).catch(function(){});
+start.then(session).then(function(t){ t ? firstView() : show('gate'); }).catch(function(){});
 })();
 </script>
 </body>
