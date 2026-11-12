@@ -110,8 +110,16 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
   .nav .in{padding:0;gap:0;justify-content:space-around;overflow:visible}
   .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;padding:8px 2px 9px;border-bottom:0;border-top:3px solid transparent;position:relative}
   .nav button[aria-current=page]{border-top-color:var(--gold)}
-  body.hasnav main{padding-bottom:150px}
-  body.hasnav .bar{bottom:calc(62px + env(safe-area-inset-bottom))}
+  /* app shell: the page never scrolls, only the middle does, so the tab bar can't drift up */
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{display:flex;flex-direction:column;height:100vh;height:100dvh}
+  body>header.top{flex:none}
+  body>main{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;width:100%}
+  .nav{position:static;flex:none;order:9}
+  body.typing .nav{display:none}
+  body.hasnav main{padding-bottom:40px}
+  body.hasnav .bar{bottom:calc(64px + env(safe-area-inset-bottom))}
+  body.typing .bar{bottom:0}
   body.hasnav .toast{bottom:150px}
 }
 .nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -443,7 +451,7 @@ var GROUP = { home: 'home', bookings: 'bookings', booking: 'bookings', jobs: 'jo
 function show(v){ VIEWS.forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('obar').hidden = v !== 'offers'; $('sbar').hidden = v !== 'sale'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
   document.body.classList.toggle('hasnav', !$('nav').hidden);
   var g = GROUP[v] || 'website';
-  [].forEach.call(document.querySelectorAll('#nav button'), function(b){ if (b.getAttribute('data-v') === g) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); window.scrollTo(0, 0); }
+  [].forEach.call(document.querySelectorAll('#nav button'), function(b){ if (b.getAttribute('data-v') === g) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); window.scrollTo(0, 0); $('main').scrollTop = 0; }
 function toast(t, bad){ var e = $('toast'); e.textContent = t; e.style.background = bad ? 'var(--bad)' : 'var(--navy)'; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function(){ e.hidden = true; }, 3500); }
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -957,6 +965,9 @@ function installUi(){
   $('instbtn').hidden = !DEFER;
 }
 $('instbtn').addEventListener('click', function(){ if (!DEFER) return; DEFER.prompt(); DEFER.userChoice.then(function(){ DEFER = null; installUi(); }); });
+/* hide the tab bar while the keyboard is up (phones), so it never floats mid-screen */
+document.addEventListener('focusin', function(e){ if (innerWidth < 760 && e.target.matches('input:not([type=checkbox]):not([type=radio]),textarea,select')) document.body.classList.add('typing'); });
+document.addEventListener('focusout', function(){ setTimeout(function(){ var a = document.activeElement; if (!a || !a.matches('input,textarea,select')) document.body.classList.remove('typing'); }, 80); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 addEventListener('hashchange', function(){ if (store.get() && location.hash && location.hash.indexOf('#offers-import') !== 0) go(location.hash, true); });
 
