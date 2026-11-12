@@ -2,11 +2,17 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Website editor | Coastal Golf Co</title>
+<title>CGC Admin | Coastal Golf Co</title>
 <meta name="theme-color" content="#022042">
-<link rel="icon" href="https://www.coastalgolfco.co.uk/favicon.ico">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CGC Admin">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Mulish:wght@400;600;700;800&family=Kaushan+Script&display=swap">
 <style>
@@ -96,6 +102,69 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 .badge{font:800 12px/1 'Mulish',sans-serif;background:var(--gold);color:var(--navy2);border-radius:999px;padding:4px 8px}
 .search{margin:14px 0 4px}
 [hidden]{display:none!important}
+/* app shell */
+.top{padding-top:env(safe-area-inset-top)}
+.brand{display:flex;gap:10px;align-items:center}.brand img{width:40px;height:40px;border-radius:50%;background:var(--cream)}
+@media(max-width:759px){
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:6;border-top:2px solid var(--gold);padding-bottom:env(safe-area-inset-bottom)}
+  .nav .in{padding:0;gap:0;justify-content:space-around;overflow:visible}
+  .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;padding:8px 2px 9px;border-bottom:0;border-top:3px solid transparent;position:relative}
+  .nav button[aria-current=page]{border-top-color:var(--gold)}
+  body.hasnav main{padding-bottom:150px}
+  body.hasnav .bar{bottom:calc(62px + env(safe-area-inset-bottom))}
+  body.hasnav .toast{bottom:150px}
+}
+.nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+@media(min-width:760px){.nav button{display:inline-flex;align-items:center;gap:7px}}
+.nav .dot{position:absolute;top:6px;right:calc(50% - 18px);width:9px;height:9px;border-radius:50%;background:#e8473c;box-shadow:0 0 0 2px var(--navy2)}
+@media(min-width:760px){.nav .dot{position:static;margin-left:2px}}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+@media(min-width:700px){.tiles{grid-template-columns:repeat(4,1fr)}}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 14px 12px;text-align:left;cursor:pointer;width:100%}
+.tile b{display:block;font:700 34px/1 'Oswald',Impact,sans-serif}
+.tile span{display:block;font-size:13.5px;font-weight:700;color:var(--body);margin-top:6px}
+.tile.hot{border-color:var(--gold);background:#fff6df}
+.tile small{display:block;font-size:12px;font-weight:800;margin-top:4px}
+.up{color:var(--green)}.down{color:var(--bad)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-top:14px}
+.panel h2{font-size:20px;margin-bottom:10px}
+.bars{display:flex;gap:6px;align-items:flex-end;height:110px;padding-top:6px}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--body)}
+.bars i{display:block;width:100%;background:var(--gold);border-radius:6px 6px 2px 2px;min-height:3px}
+.bars em{font-style:normal;color:var(--navy);font-weight:800}
+.tp{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}
+.tp:first-of-type{border-top:0}
+.tp b{font-weight:800}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 4px}
+.chips button{border:1px solid #cdbf9c;background:#fff;border-radius:999px;padding:7px 13px;font-weight:800;font-size:14px;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.rec{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.rec:hover{border-color:var(--gold)}
+.rec.new{border-left-color:#e8473c}.rec.contacted{border-left-color:var(--gold)}.rec.booked{border-left-color:var(--green)}
+.rec .h{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.rec b{font-size:17px}.rec .w{font-size:13px;color:var(--body);white-space:nowrap}
+.rec .d{font-size:14px;color:var(--body);margin-top:3px}
+.st{display:inline-block;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;background:#ece4cf;color:var(--body)}
+.st.s-new{background:#fde4e2;color:var(--bad)}.st.s-contacted,.st.s-collected,.st.s-workshop{background:#f6e7c1;color:var(--bronze)}
+.st.s-booked,.st.s-ready{background:#d7eedd;color:var(--green)}.st.s-returned,.st.s-declined{background:#ece4cf;color:var(--body)}
+.st.s-unpaid{background:#fde4e2;color:var(--bad)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:15.5px;margin:14px 0 0}
+.kv dt{color:var(--body);font-weight:700}.kv dd{margin:0;font-weight:800;word-break:break-word}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.quick a{text-decoration:none;font-size:15px}
+.steps{display:flex;gap:4px;margin:16px 0 4px;flex-wrap:wrap}
+.steps button{flex:1 1 90px;border:2px solid var(--line);background:#fff;border-radius:10px;padding:9px 4px;font-weight:800;font-size:13px;cursor:pointer;color:var(--body)}
+.steps button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.steps button.done{border-color:var(--green);color:var(--green)}
+.hub{display:grid;gap:10px;margin-top:16px}
+@media(min-width:620px){.hub{grid-template-columns:1fr 1fr}}
+.hub button{display:flex;gap:14px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer}
+.hub button:hover{border-color:var(--gold)}
+.hub b{display:block;font:700 19px/1.1 'Oswald',Impact,sans-serif;text-transform:uppercase}
+.hub span{font-size:14px;color:var(--body)}
+.hub i{flex:none;width:46px;height:46px;border-radius:12px;background:var(--navy);color:var(--gold2);display:grid;place-items:center;font:700 22px 'Oswald';font-style:normal}
+.back{margin-bottom:6px}
+.note{background:#fff6df;border:1px solid #f0d99a;border-radius:12px;padding:12px 14px;font-size:14.5px;margin-top:14px}
 /* offers and sale */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
 @media(max-width:560px){.grid2{grid-template-columns:1fr}}
@@ -121,8 +190,8 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 </style>
 </head>
 <body>
-<header class="top"><div class="in"><div><b>Coastal Golf Co</b><small>Website editor</small></div><button type="button" id="out" hidden>Sign out</button></div></header>
-<nav class="nav" id="nav" hidden aria-label="Editor"><div class="in"><button type="button" data-v="list" aria-current="page">Journal</button><button type="button" data-v="words">Prices &amp; FAQs</button><button type="button" data-v="offers">Offers</button><button type="button" data-v="sale">Sale</button></div></nav>
+<header class="top"><div class="in"><div class="brand"><img src="badge.svg" alt=""><div><b>Coastal Golf Co</b><small>Admin</small></div></div><button type="button" id="out" hidden>Sign out</button></div></header>
+<nav class="nav" id="nav" hidden aria-label="Editor"><div class="in"><button type="button" data-v="home" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home<i class="dot" id="nbk" hidden></i></button><button type="button" data-v="bookings"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 9h16M9 4v5"/></svg>Bookings</button><button type="button" data-v="jobs"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>Jobs</button><button type="button" data-v="customers"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 0 1 0 8M22 21c0-3-2-5-4-6"/></svg>Customers</button><button type="button" data-v="website"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Website</button></div></nav>
 <main id="main">
 
 <section id="v-gate" class="gate" hidden>
@@ -134,9 +203,16 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
     <button class="btn" type="submit" style="margin-top:14px;width:100%">Email me a sign-in link</button>
     <p class="msg" id="gmsg" role="status"></p>
   </form>
+  <form id="f-code" novalidate hidden>
+    <label for="code">Or type the 6-digit code from the email <small>(handy on the home screen app)</small></label>
+    <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" style="letter-spacing:.3em;font-size:22px;text-align:center">
+    <button class="btn gold" type="submit" style="margin-top:12px;width:100%">Sign in with the code</button>
+    <p class="msg" id="cmsg" role="status"></p>
+  </form>
 </section>
 
 <section id="v-list" hidden>
+  <button class="btn line sm back" type="button" data-go="website">‹ Website</button>
   <div class="row" style="justify-content:space-between"><h1 style="font-size:32px">Your posts</h1><button class="btn gold" type="button" id="new">+ New post</button></div>
   <p class="help">Drafts are only visible to you. Published posts appear on the website's Journal straight away (or on the date you choose).</p>
   <div class="list" id="posts"></div>
@@ -174,6 +250,7 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 </section>
 
 <section id="v-words" hidden>
+  <button class="btn line sm back" type="button" data-go="website">‹ Website</button>
   <h1 style="font-size:32px">Prices &amp; FAQs</h1>
   <p class="help">Change a price or an answer, then tap <b>Save changes</b>. The website updates straight away, everywhere that wording appears. <b>Use original</b> puts back the wording from launch.</p>
   <p class="help">Some prices also appear inside sentences (for example the page descriptions Google shows). Tony updates those; message him if a price changes for good.</p>
@@ -181,6 +258,7 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
   <div id="words"><p class="help">Loading…</p></div>
 </section>
 <section id="v-offers" hidden>
+  <button class="btn line sm back" type="button" data-go="website">‹ Website</button>
   <h1 style="font-size:32px">Offers</h1>
   <p class="help">Your weekly offers. Save them and they appear on the website's home page, then share the picture to WhatsApp. They're kept with your account, so they're the same on your phone and computer.</p>
   <div class="grid2">
@@ -202,6 +280,7 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
   <button class="btn bad sm" type="button" id="oclear" style="margin-top:18px">Clear all products</button>
 </section>
 <section id="v-sale" hidden>
+  <button class="btn line sm back" type="button" data-go="website">‹ Website</button>
   <h1 style="font-size:32px">Sale</h1>
   <p class="help">Set a sale and the website handles the rest. Between the dates it shows the sale banner and panel and knocks the percentage off grip prices and the price calculator. Afterwards everything goes back to normal by itself.</p>
   <label class="chk"><input type="checkbox" id="son"><span>Sale switched on<small>Untick to cancel the sale, even between the dates.</small></span></label>
@@ -217,6 +296,108 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
   <label class="chk"><input type="checkbox" id="spause"><span>Pause the 7th grip free and the under-17s discount during the sale<small>Ticked: the website hides those offers while the sale is on. Unticked: they add on top of the sale.</small></span></label>
   <div class="sstat" id="sstat"></div>
   <p class="help" style="margin-top:14px"><a href="https://www.coastalgolfco.co.uk/?bf=1" target="_blank" rel="noopener" style="font-weight:800;color:var(--bronze)">Preview the sale on the website</a> (shows your saved settings even before the first day). Flyers, posters and social posts don't change with this, so message Tony for those.</p>
+</section>
+<section id="v-home" hidden>
+  <h1 style="font-size:32px" id="hi">Hello</h1>
+  <p class="help" id="hdate"></p>
+  <div class="tiles">
+    <button class="tile" type="button" data-go="bookings" id="t-new"><b id="s-new">–</b><span>New bookings</span></button>
+    <button class="tile" type="button" data-go="jobs" id="t-open"><b id="s-open">–</b><span>Jobs on the go</span></button>
+    <button class="tile" type="button" data-go="jobs:ready" id="t-ready"><b id="s-ready">–</b><span>Ready to go back</span></button>
+    <button class="tile" type="button" data-go="website"><b id="s-vis">–</b><span>Website visitors, 7 days</span><small id="s-vch"></small></button>
+  </div>
+  <div class="panel"><h2>Visitors this week</h2><div class="bars" id="bars"></div></div>
+  <div class="panel"><h2>Most viewed pages</h2><div id="tops"><p class="help">Loading…</p></div></div>
+  <div class="panel" id="alerts"><h2>Phone alerts</h2><p class="help" id="altxt">Get a ping on this phone the moment someone books on the website.</p>
+    <div class="row" style="margin-top:12px"><button class="btn gold sm" type="button" id="alon">Turn on alerts</button><button class="btn line sm" type="button" id="altest" hidden>Send a test</button></div></div>
+  <div class="panel" id="install" hidden><h2>Put it on your home screen</h2><p class="help" id="instxt"></p><button class="btn sm" type="button" id="instbtn" hidden style="margin-top:10px">Add to home screen</button></div>
+</section>
+
+<section id="v-bookings" hidden>
+  <h1 style="font-size:32px">Bookings</h1>
+  <p class="help">Every booking from the website lands here, as well as in your email.</p>
+  <div class="chips" id="bkf"><button type="button" data-f="open" aria-pressed="true">To deal with</button><button type="button" data-f="all" aria-pressed="false">All</button></div>
+  <div class="list" id="bkl"></div>
+</section>
+
+<section id="v-booking" hidden>
+  <button class="btn line sm back" type="button" data-go="bookings">‹ Bookings</button>
+  <div class="row" style="justify-content:space-between;margin-top:10px"><h1 style="font-size:30px" id="bkn"></h1><span class="st" id="bks"></span></div>
+  <p class="help" id="bkw"></p>
+  <div class="quick" id="bkq"></div>
+  <dl class="kv" id="bkd"></dl>
+  <div class="note" id="bkm" hidden></div>
+  <label for="bknote">Your notes <small>(only you see these)</small></label>
+  <textarea id="bknote" style="min-height:90px" maxlength="2000"></textarea>
+  <div class="row" style="margin-top:14px">
+    <button class="btn gold" type="button" id="bkjob">Make it a job</button>
+    <button class="btn line" type="button" id="bkcon">Mark as contacted</button>
+    <button class="btn bad sm" type="button" id="bkno">Not going ahead</button>
+  </div>
+</section>
+
+<section id="v-jobs" hidden>
+  <div class="row" style="justify-content:space-between"><h1 style="font-size:32px">Jobs</h1><button class="btn gold" type="button" data-go="job/new">+ New job</button></div>
+  <div class="chips" id="jbf"><button type="button" data-f="open" aria-pressed="true">On the go</button><button type="button" data-f="ready" aria-pressed="false">Ready</button><button type="button" data-f="unpaid" aria-pressed="false">Not paid</button><button type="button" data-f="returned" aria-pressed="false">Done</button><button type="button" data-f="all" aria-pressed="false">All</button></div>
+  <div class="list" id="jbl"></div>
+</section>
+
+<section id="v-job" hidden>
+  <button class="btn line sm back" type="button" data-go="jobs">‹ Jobs</button>
+  <h1 style="font-size:30px;margin-top:10px" id="jbh">New job</h1>
+  <div class="steps" id="jbst"></div>
+  <label for="jc">Customer</label>
+  <div class="row"><select id="jc" style="flex:1 1 220px"></select><button class="btn line sm" type="button" id="jcnew">+ New customer</button></div>
+  <div class="grid2">
+    <div><label for="js">What's the job?</label><input id="js" type="text" list="svcs" maxlength="80" placeholder="e.g. Regrips"><datalist id="svcs"><option value="Regrips"><option value="Club MOT"><option value="Repairs"><option value="Shaft replacement"><option value="Loft and lie"><option value="Custom logo"></datalist></div>
+    <div><label for="jn">Number of clubs</label><input id="jn" type="text" inputmode="numeric" maxlength="2"></div>
+  </div>
+  <label for="jg">Grips or parts</label><input id="jg" type="text" maxlength="200" placeholder="e.g. Golf Pride Tour Velvet, standard">
+  <div class="grid2">
+    <div><label for="jco">Collect on</label><input id="jco" type="date"></div>
+    <div><label for="jro">Return by</label><input id="jro" type="date"></div>
+  </div>
+  <div class="grid2">
+    <div><label for="jp">Price</label><div class="pct"><span>£</span><input id="jp" type="text" inputmode="decimal" maxlength="8"></div></div>
+    <div><label class="chk" style="margin-top:44px"><input type="checkbox" id="jpaid"><span>Paid</span></label></div>
+  </div>
+  <label for="jnotes">Notes</label><textarea id="jnotes" style="min-height:90px" maxlength="2000"></textarea>
+  <div class="row" style="margin-top:16px"><button class="btn gold" type="button" id="jsave">Save job</button><button class="btn bad sm" type="button" id="jdel" hidden>Delete job</button></div>
+  <p class="help" id="jfrom"></p>
+</section>
+
+<section id="v-customers" hidden>
+  <div class="row" style="justify-content:space-between"><h1 style="font-size:32px">Customers</h1><button class="btn gold" type="button" data-go="customer/new">+ Add</button></div>
+  <input id="csq" class="search" type="text" placeholder="Search by name, phone or postcode">
+  <div class="list" id="csl"></div>
+</section>
+
+<section id="v-customer" hidden>
+  <button class="btn line sm back" type="button" data-go="customers">‹ Customers</button>
+  <h1 style="font-size:30px;margin-top:10px" id="csh">New customer</h1>
+  <div class="quick" id="csqk"></div>
+  <label for="cn">Name</label><input id="cn" type="text" maxlength="120">
+  <div class="grid2">
+    <div><label for="cp">Phone</label><input id="cp" type="text" inputmode="tel" maxlength="40"></div>
+    <div><label for="ce">Email</label><input id="ce" type="email" maxlength="200"></div>
+  </div>
+  <label for="cpc">Postcode</label><input id="cpc" type="text" maxlength="12" style="text-transform:uppercase;max-width:200px">
+  <label for="cno">Notes <small>(club specs, preferences)</small></label><textarea id="cno" style="min-height:90px" maxlength="2000"></textarea>
+  <div class="row" style="margin-top:16px"><button class="btn gold" type="button" id="csave">Save customer</button><button class="btn line sm" type="button" id="cjob" hidden>+ New job for them</button><button class="btn bad sm" type="button" id="cdel" hidden>Delete</button></div>
+  <h2 style="font-size:22px;margin-top:26px" id="cjh" hidden>Their jobs</h2>
+  <div class="list" id="cjl"></div>
+</section>
+
+<section id="v-website" hidden>
+  <h1 style="font-size:32px">Website</h1>
+  <p class="help">Everything you can change on coastalgolfco.co.uk.</p>
+  <div class="hub">
+    <button type="button" data-go="offers"><i>%</i><div><b>Offers</b><span>This week's offers and the WhatsApp picture</span></div></button>
+    <button type="button" data-go="sale"><i>£</i><div><b>Sale</b><span>Set a sale with dates and percentages</span></div></button>
+    <button type="button" data-go="words"><i>?</i><div><b>Prices &amp; FAQs</b><span>Change prices and answers on the site</span></div></button>
+    <button type="button" data-go="journal"><i>✎</i><div><b>Journal</b><span>Write and publish posts</span></div></button>
+  </div>
+  <p class="help" style="margin-top:18px"><a href="https://www.coastalgolfco.co.uk/" target="_blank" rel="noopener" style="font-weight:800;color:var(--bronze)">Open the website</a></p>
 </section>
 </main>
 <div class="bar" id="obar" hidden><div class="in"><span class="st" id="ost">No changes yet</span><button class="btn gold sm" type="button" id="osave" disabled>Save offers</button></div></div>
@@ -239,8 +420,12 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 var URL0 = 'https://acdpgarasgfhvupzsbxf.supabase.co', KEY = 'sb_publishable_OWTVpDyadL1lITnCp4gfAQ_EZxVHldY';
 var SITE = 'https://www.coastalgolfco.co.uk/', BUCKET = 'cgc-journal', AUTH = 'cgc-editor-auth';
 var $ = function(id){ return document.getElementById(id); };
-function show(v){ ['gate','list','edit','words','offers','sale'].forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('obar').hidden = v !== 'offers'; $('sbar').hidden = v !== 'sale'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
-  [].forEach.call(document.querySelectorAll('#nav button'), function(b){ if (b.getAttribute('data-v') === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); window.scrollTo(0, 0); }
+var VIEWS = ['gate','home','bookings','booking','jobs','job','customers','customer','website','list','edit','words','offers','sale'];
+var GROUP = { home: 'home', bookings: 'bookings', booking: 'bookings', jobs: 'jobs', job: 'jobs', customers: 'customers', customer: 'customers' };
+function show(v){ VIEWS.forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('obar').hidden = v !== 'offers'; $('sbar').hidden = v !== 'sale'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
+  document.body.classList.toggle('hasnav', !$('nav').hidden);
+  var g = GROUP[v] || 'website';
+  [].forEach.call(document.querySelectorAll('#nav button'), function(b){ if (b.getAttribute('data-v') === g) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); window.scrollTo(0, 0); }
 function toast(t, bad){ var e = $('toast'); e.textContent = t; e.style.background = bad ? 'var(--bad)' : 'var(--navy)'; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function(){ e.hidden = true; }, 3500); }
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -277,7 +462,7 @@ $('f-gate').addEventListener('submit', function(e){
   b.disabled = true; m.className = 'msg'; m.textContent = 'Sending…';
   fetch(URL0 + '/functions/v1/cgc-editor-login', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: em }) })
     .then(function(r){ return r.json().then(function(j){ if (!r.ok) throw new Error(j.error || 'Could not send the email.'); }); })
-    .then(function(){ m.className = 'msg ok'; m.textContent = 'Check your inbox for the sign-in link (and the junk folder, just in case). It works once and runs out in an hour.'; })
+    .then(function(){ m.className = 'msg ok'; m.textContent = 'Check your inbox for the sign-in link (and the junk folder, just in case). It works once and runs out in an hour.'; $('f-code').hidden = false; })
     .catch(function(err){ m.className = 'msg bad'; m.textContent = err.message; })
     .then(function(){ b.disabled = false; });
 });
@@ -519,15 +704,36 @@ $('wsave').addEventListener('click', function(){
   }).catch(function(e){ toast(e.message, true); $('wsave').disabled = false; });
 });
 addEventListener('beforeunload', function(e){ if (Object.keys(EDIT).length || ODIRTY || SDIRTY) { e.preventDefault(); e.returnValue = ''; } });
-$('nav').addEventListener('click', function(e){
-  var b = e.target.closest('button[data-v]'); if (!b) return; var v = b.getAttribute('data-v');
-  if (Object.keys(EDIT).length && v !== 'words' && !confirm('Leave without saving your price and FAQ changes?')) return;
-  if (ODIRTY && v !== 'offers' && !confirm('Leave without saving your offers?')) return;
-  if (SDIRTY && v !== 'sale' && !confirm('Leave without saving your sale settings?')) return;
-  if (v !== 'words') EDIT = {}; if (v !== 'offers') ODIRTY = false; if (v !== 'sale') SDIRTY = false;
-  if (v === 'words') loadWords(); else if (v === 'offers') loadOffers(); else if (v === 'sale') loadSale(); else loadList();
-});
-
+$('nav').addEventListener('click', function(e){ var b = e.target.closest('button[data-v]'); if (b) go(b.getAttribute('data-v')); });
+document.addEventListener('click', function(e){ var b = e.target.closest('[data-go]'); if (b && !b.closest('#nav')) { e.preventDefault(); go(b.getAttribute('data-go')); } });
+function leaveOk(to){
+  if (Object.keys(EDIT).length && to !== 'words' && !confirm('Leave without saving your price and FAQ changes?')) return false;
+  if (ODIRTY && to !== 'offers' && !confirm('Leave without saving your offers?')) return false;
+  if (SDIRTY && to !== 'sale' && !confirm('Leave without saving your sale settings?')) return false;
+  if (ADIRTY && !confirm('Leave without saving your changes?')) return false;
+  if (to !== 'words') EDIT = {}; if (to !== 'offers') ODIRTY = false; if (to !== 'sale') SDIRTY = false; ADIRTY = false;
+  return true;
+}
+/* one place that opens every screen; the address keeps the screen (#jobs, #job/<id>) so alerts can link straight in */
+function go(to, quiet){
+  to = String(to || 'home').replace(/^#/, '');
+  if (!quiet && !leaveOk(to)) return;
+  var parts = to.split('/'), v = parts[0].split(':')[0], id = parts[1];
+  if (location.hash !== '#' + to) history.replaceState(null, '', '#' + to);
+  if (v === 'home') return loadHome();
+  if (v === 'bookings') return loadBookings();
+  if (v === 'booking') return loadBooking(id);
+  if (v === 'jobs') return loadJobs(to.split(':')[1] || null);
+  if (v === 'job') return loadJob(id);
+  if (v === 'customers') return loadCustomers();
+  if (v === 'customer') return loadCustomer(id);
+  if (v === 'website') { show('website'); return; }
+  if (v === 'words') return loadWords();
+  if (v === 'offers') return loadOffers();
+  if (v === 'sale') return loadSale();
+  if (v === 'journal' || v === 'list') return loadList();
+  return loadHome();
+}
 
 /* ---- offers: cgc_content key "offers" = {title, sub, note, show, items:[{p,q,w,n}]} ---- */
 var OF = null, ODIRTY = false, OBADGE = new Image(); OBADGE.src = 'badge.svg';
@@ -661,16 +867,245 @@ $('ssave').addEventListener('click', function(){
     .catch(function(e){ toast(e.message, true); $('ssave').disabled = false; });
 });
 
+
+/* ================= the admin app: home, bookings, jobs, customers, phone alerts ================= */
+var ADIRTY = false, CUS = [], JOBS = [];
+var VAPID = 'BAzpLvvDwmMtC0EhGWD79Fs4B5XSgsw5tJkZlYzv886OT486oBozBzk1onH-dcWq4IzPc3MiXlQCPVorDQ3LGIc';
+var JSTEPS = ['booked', 'collected', 'in the workshop', 'ready', 'returned'];
+var JLABEL = { 'booked': 'Booked in', 'collected': 'Collected', 'in the workshop': 'In the workshop', 'ready': 'Ready', 'returned': 'Returned' };
+function stc(x){ return 's-' + String(x || 'new').replace('in the workshop', 'workshop'); }
+function ukDate(d, long){ if (!d) return ''; var x = new Date(String(d).length > 10 ? d : d + 'T12:00:00Z'); return x.toLocaleDateString('en-GB', long ? { weekday: 'long', day: 'numeric', month: 'long' } : { weekday: 'short', day: 'numeric', month: 'short' }); }
+function ago(t){ var m = Math.round((Date.now() - new Date(t).getTime()) / 60000); if (m < 60) return m <= 1 ? 'just now' : m + ' mins ago'; var h = Math.round(m / 60); if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago'); var d = Math.round(h / 24); return d === 1 ? 'yesterday' : d < 7 ? d + ' days ago' : ukDate(t); }
+function pounds(v){ if (v == null || v === '') return ''; var n = +v; return '£' + (n % 1 ? n.toFixed(2) : n); }
+function wa(ph){ return 'https://wa.me/' + String(ph || '').replace(/\D/g, '').replace(/^0/, '44'); }
+function quick(ph, em){ return (ph ? '<a class="btn sm" href="tel:' + esc(ph) + '">Call</a><a class="btn sm wa" href="' + wa(ph) + '" target="_blank" rel="noopener">WhatsApp</a>' : '') + (em ? '<a class="btn line sm" href="mailto:' + esc(em) + '">Email</a>' : ''); }
+function adirty(){ ADIRTY = true; }
+
+/* ---- home ---- */
+function loadHome(){
+  show('home');
+  var h = new Date().getHours(), em = (store.get() || {}).email || '';
+  $('hi').textContent = (h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening') + (/^hello@coastalgolfco/.test(em) ? ', Stuart' : '');
+  $('hdate').textContent = ukDate(today(), true);
+  alertsUi(); installUi();
+  return api('/rest/v1/rpc/cgc_app_stats', { method: 'POST', json: {} }).then(function(s){
+    $('s-new').textContent = s.bookings_new; $('t-new').classList.toggle('hot', s.bookings_new > 0); $('nbk').hidden = !s.bookings_new;
+    $('s-open').textContent = s.jobs_open; $('s-ready').textContent = s.jobs_ready; $('t-ready').classList.toggle('hot', s.jobs_ready > 0);
+    $('s-vis').textContent = s.visitors_7d;
+    var ch = s.visitors_prev ? Math.round((s.visitors_7d - s.visitors_prev) / s.visitors_prev * 100) : null;
+    $('s-vch').textContent = ch == null ? '' : (ch >= 0 ? '▲ ' + ch : '▼ ' + Math.abs(ch)) + '% on last week'; $('s-vch').className = ch == null ? '' : ch >= 0 ? 'up' : 'down';
+    var mx = Math.max.apply(null, (s.daily || []).map(function(d){ return d.n; }).concat([1]));
+    $('bars').innerHTML = (s.daily || []).map(function(d){ return '<div><em>' + d.n + '</em><i style="height:' + Math.max(3, Math.round(d.n / mx * 80)) + 'px"></i>' + new Date(d.day + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'short' }).slice(0, 2) + '</div>'; }).join('');
+    var tp = s.top_pages || [];
+    $('tops').innerHTML = tp.length ? tp.map(function(t){ return '<div class="tp"><span>' + esc(t.path === '/' ? 'Home page' : t.path) + '</span><b>' + t.n + '</b></div>'; }).join('') : '<p class="help">No visits recorded yet this week.</p>';
+  }).catch(function(e){ toast(e.message, true); });
+}
+
+/* ---- phone alerts ---- */
+function b64u(s){ var p = '='.repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+function canPush(){ return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+function alertsUi(){
+  var t = $('altxt'), on = $('alon'), ts = $('altest');
+  if (!canPush()) { t.textContent = /iPhone|iPad/.test(navigator.userAgent) ? 'On an iPhone, add this app to your home screen first (Share, then Add to Home Screen), open it from there and come back here.' : 'This browser can\'t show phone alerts. Bookings still come by email.'; on.hidden = true; ts.hidden = true; return; }
+  navigator.serviceWorker.ready.then(function(reg){ return reg.pushManager.getSubscription(); }).then(function(sub){
+    var ok = !!sub && Notification.permission === 'granted';
+    t.textContent = ok ? 'Alerts are on for this phone. You\'ll get a ping for every new booking.' : Notification.permission === 'denied' ? 'Alerts are blocked for this app. Allow notifications for it in your phone\'s settings, then come back.' : 'Get a ping on this phone the moment someone books on the website.';
+    on.hidden = ok || Notification.permission === 'denied'; ts.hidden = !ok;
+  }).catch(function(){});
+}
+$('alon').addEventListener('click', function(){
+  var btn = this; btn.disabled = true;
+  Notification.requestPermission().then(function(p){
+    if (p !== 'granted') throw new Error('Alerts weren\'t allowed. You can turn them on later in your phone\'s settings.');
+    return navigator.serviceWorker.ready;
+  }).then(function(reg){ return reg.pushManager.getSubscription().then(function(s){ return s || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(VAPID) }); }); })
+  .then(function(sub){ var j = sub.toJSON();
+    return api('/rest/v1/cgc_push_subs?on_conflict=endpoint', { method: 'POST', json: [{ email: ((store.get() || {}).email || '').toLowerCase(), endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth }], headers: { Prefer: 'resolution=merge-duplicates,return=minimal' } }); })
+  .then(function(){ toast('Alerts are on for this phone.'); alertsUi(); })
+  .catch(function(e){ toast(e.message || 'Could not turn alerts on.', true); }).then(function(){ btn.disabled = false; });
+});
+$('altest').addEventListener('click', function(){
+  session().then(function(t){ return fetch(URL0 + '/functions/v1/cgc-push', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + t.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: 'test' }) }); })
+    .then(function(r){ return r.json(); }).then(function(j){ toast(j.sent ? 'Test sent. It should pop up in a few seconds.' : (j.error || 'No phone found. Turn alerts on again.'), !j.sent); })
+    .catch(function(){ toast('Could not send the test.', true); });
+});
+var DEFER = null;
+addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); DEFER = e; installUi(); });
+function installUi(){
+  var standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  $('install').hidden = !!standalone; if (standalone) return;
+  var ios = /iPhone|iPad/.test(navigator.userAgent);
+  $('instxt').textContent = ios ? 'In Safari, tap Share (the square with the arrow), then Add to Home Screen. It then opens like an app.' : DEFER ? 'Add CGC Admin to your home screen so it opens like an app.' : 'In Chrome, tap the three dots (top right), then Add to home screen or Install app.';
+  $('instbtn').hidden = !DEFER;
+}
+$('instbtn').addEventListener('click', function(){ if (!DEFER) return; DEFER.prompt(); DEFER.userChoice.then(function(){ DEFER = null; installUi(); }); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+addEventListener('hashchange', function(){ if (store.get() && location.hash && location.hash.indexOf('#offers-import') !== 0) go(location.hash, true); });
+
+/* ---- bookings ---- */
+var BKF = 'open', BK = [], BCUR = null;
+function bkStatus(b){ return b.status || 'new'; }
+function loadBookings(){
+  show('bookings'); $('bkl').innerHTML = '<p class="help">Loading…</p>';
+  return api('/rest/v1/cgc_bookings?select=id,created_at,name,phone,service,clubs,postcode,collection_day,status&order=created_at.desc&limit=200').then(function(rows){ BK = rows || []; drawBk(); })
+    .catch(function(e){ $('bkl').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
+}
+function drawBk(){
+  var rows = BK.filter(function(b){ return BKF === 'all' || ['new', 'contacted'].indexOf(bkStatus(b)) >= 0; });
+  $('bkl').innerHTML = rows.length ? rows.map(function(b){ var st = bkStatus(b);
+    return '<button class="rec ' + st + '" type="button" data-go="booking/' + b.id + '"><div class="h"><b>' + esc(b.name) + '</b><span class="w">' + ago(b.created_at) + '</span></div>' +
+      '<div class="d"><span class="st ' + stc(st) + '">' + esc(st) + '</span> ' + esc([b.service || 'Not sure yet', b.clubs ? b.clubs + ' clubs' : '', b.postcode].filter(Boolean).join(' · ')) + (b.collection_day ? '<br>Collect ' + ukDate(b.collection_day) : '') + '</div></button>'; }).join('')
+    : '<div class="empty">' + (BKF === 'all' ? 'No bookings yet.' : 'Nothing waiting. New website bookings will show here.') + '</div>';
+}
+$('bkf').addEventListener('click', function(e){ var b = e.target.closest('button[data-f]'); if (!b) return; BKF = b.getAttribute('data-f'); [].forEach.call(this.children, function(x){ x.setAttribute('aria-pressed', x === b); }); drawBk(); });
+function loadBooking(id){
+  show('booking'); $('bkn').textContent = 'Loading…'; $('bkd').innerHTML = ''; $('bkq').innerHTML = '';
+  return api('/rest/v1/cgc_bookings?id=eq.' + encodeURIComponent(id) + '&select=*').then(function(rows){
+    var b = BCUR = rows && rows[0]; if (!b) { $('bkn').textContent = 'Booking not found'; return; }
+    var st = bkStatus(b);
+    $('bkn').textContent = b.name; $('bks').textContent = st; $('bks').className = 'st ' + stc(st);
+    $('bkw').textContent = 'Booked ' + ago(b.created_at) + (b.page ? ' from ' + b.page : '');
+    $('bkq').innerHTML = quick(b.phone, b.email);
+    var kv = [['Phone', b.phone], ['Email', b.email], ['Postcode', b.postcode], ['Service', b.service], ['Clubs', b.clubs], ['Collect on', b.collection_day ? ukDate(b.collection_day, true) : ''], ['Grips', b.grip], ['Discount', b.discount]];
+    $('bkd').innerHTML = kv.filter(function(x){ return x[1] != null && x[1] !== ''; }).map(function(x){ return '<dt>' + x[0] + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('');
+    $('bkm').hidden = !b.message; $('bkm').textContent = b.message || '';
+    $('bknote').value = b.notes || '';
+    $('bkjob').textContent = st === 'booked' ? 'Open the job' : 'Make it a job'; $('bkcon').hidden = st !== 'new'; $('bkno').hidden = st === 'declined' || st === 'booked';
+  }).catch(function(e){ toast(e.message, true); });
+}
+function bkSet(patch){ if (!BCUR) return Promise.resolve(); patch.handled_at = new Date().toISOString(); return api('/rest/v1/cgc_bookings?id=eq.' + BCUR.id, { method: 'PATCH', json: patch, headers: { Prefer: 'return=minimal' } }); }
+$('bknote').addEventListener('change', function(){ bkSet({ notes: this.value.trim() || null }).then(function(){ toast('Notes saved'); }).catch(function(e){ toast(e.message, true); }); });
+$('bkcon').addEventListener('click', function(){ bkSet({ status: 'contacted' }).then(function(){ toast('Marked as contacted'); loadBooking(BCUR.id); }).catch(function(e){ toast(e.message, true); }); });
+$('bkno').addEventListener('click', function(){ if (!confirm('Mark this booking as not going ahead?')) return; bkSet({ status: 'declined' }).then(function(){ toast('Done'); go('bookings', true); }).catch(function(e){ toast(e.message, true); }); });
+$('bkjob').addEventListener('click', function(){
+  var b = BCUR; if (!b) return;
+  if (bkStatus(b) === 'booked') return api('/rest/v1/cgc_jobs?booking_id=eq.' + b.id + '&select=id').then(function(r){ go(r && r[0] ? 'job/' + r[0].id : 'jobs', true); });
+  var digits = String(b.phone || '').replace(/\D/g, '');
+  // reuse the customer if we already have their phone number
+  api('/rest/v1/cgc_customers?select=id,phone').then(function(cs){
+    var hit = (cs || []).filter(function(c){ return digits && String(c.phone || '').replace(/\D/g, '') === digits; })[0];
+    return hit ? hit.id : api('/rest/v1/cgc_customers', { method: 'POST', json: [{ name: b.name, phone: b.phone, email: b.email, postcode: b.postcode }], headers: { Prefer: 'return=representation' } }).then(function(r){ return r[0].id; });
+  }).then(function(cid){
+    return api('/rest/v1/cgc_jobs', { method: 'POST', json: [{ customer_id: cid, booking_id: b.id, service: b.service, clubs: b.clubs, grip: b.grip, collect_on: b.collection_day, notes: [b.discount ? 'Discount: ' + b.discount : '', b.message || ''].filter(Boolean).join('\n') || null }], headers: { Prefer: 'return=representation' } });
+  }).then(function(r){ return bkSet({ status: 'booked' }).then(function(){ toast('Job made. Add the price when you know it.'); go('job/' + r[0].id, true); }); })
+  .catch(function(e){ toast(e.message, true); });
+});
+
+/* ---- jobs ---- */
+var JBF = 'open';
+function loadCusList(){ return api('/rest/v1/cgc_customers?select=id,name,phone,email,postcode&order=name.asc').then(function(r){ CUS = r || []; return CUS; }); }
+function cusName(id){ var c = CUS.filter(function(x){ return x.id === id; })[0]; return c ? c.name : 'No customer'; }
+function loadJobs(f){
+  if (f) JBF = f; [].forEach.call($('jbf').children, function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-f') === JBF); });
+  show('jobs'); $('jbl').innerHTML = '<p class="help">Loading…</p>';
+  return Promise.all([api('/rest/v1/cgc_jobs?select=*&order=created_at.desc&limit=500'), loadCusList()]).then(function(r){ JOBS = r[0] || []; drawJobs(); })
+    .catch(function(e){ $('jbl').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
+}
+function jobRow(j, withName){
+  var due = j.status !== 'returned' && j.return_on && j.return_on < today();
+  return '<button class="rec ' + (j.status === 'ready' ? 'booked' : j.status === 'returned' ? '' : 'contacted') + '" type="button" data-go="job/' + j.id + '"><div class="h"><b>' + esc(withName === false ? (j.service || 'Job') : cusName(j.customer_id)) + '</b><span class="w">' + (j.price != null ? pounds(j.price) : '') + '</span></div>' +
+    '<div class="d"><span class="st ' + stc(j.status) + '">' + esc(JLABEL[j.status]) + '</span>' + (!j.paid && j.price != null && j.status === 'returned' ? ' <span class="st s-unpaid">Not paid</span>' : '') + ' ' +
+    esc([withName === false ? '' : j.service, j.clubs ? j.clubs + ' clubs' : ''].filter(Boolean).join(' · ')) +
+    (j.collect_on && j.status === 'booked' ? '<br>Collect ' + ukDate(j.collect_on) : '') + (j.return_on && j.status !== 'returned' ? '<br>' + (due ? '<b style="color:var(--bad)">Due back ' : 'Back by ') + ukDate(j.return_on) + (due ? '</b>' : '') : '') + '</div></button>';
+}
+function drawJobs(){
+  var rows = JOBS.filter(function(j){ return JBF === 'all' ? true : JBF === 'open' ? j.status !== 'returned' : JBF === 'unpaid' ? (!j.paid && j.price != null) : j.status === JBF; });
+  if (JBF === 'open') rows.sort(function(a, z){ return (a.return_on || a.collect_on || '9') < (z.return_on || z.collect_on || '9') ? -1 : 1; });
+  $('jbl').innerHTML = rows.length ? rows.map(function(j){ return jobRow(j); }).join('') : '<div class="empty">' + (JBF === 'open' ? 'No jobs on the go. Make one from a booking, or tap + New job.' : 'Nothing here.') + '</div>';
+}
+$('jbf').addEventListener('click', function(e){ var b = e.target.closest('button[data-f]'); if (!b) return; JBF = b.getAttribute('data-f'); [].forEach.call(this.children, function(x){ x.setAttribute('aria-pressed', x === b); }); drawJobs(); });
+var JCUR = null, JSTAT = 'booked';
+function drawSteps(){ var i = JSTEPS.indexOf(JSTAT); $('jbst').innerHTML = JSTEPS.map(function(s, k){ return '<button type="button" data-s="' + s + '" aria-pressed="' + (s === JSTAT) + '" class="' + (k < i ? 'done' : '') + '">' + JLABEL[s] + '</button>'; }).join(''); }
+$('jbst').addEventListener('click', function(e){ var b = e.target.closest('button[data-s]'); if (!b) return; JSTAT = b.getAttribute('data-s'); drawSteps(); adirty(); if (JSTAT === 'returned' && !$('jro').value) $('jro').value = today(); });
+function fillCus(sel){ $('jc').innerHTML = '<option value="">Choose a customer…</option>' + CUS.map(function(c){ return '<option value="' + c.id + '">' + esc(c.name + (c.postcode ? ' (' + c.postcode + ')' : '')) + '</option>'; }).join(''); $('jc').value = sel || ''; }
+function loadJob(id, forCustomer){
+  show('job'); JCUR = null; ADIRTY = false;
+  return loadCusList().then(function(){
+    if (!id || id === 'new') { JSTAT = 'booked'; drawSteps(); fillCus(forCustomer || ''); ['js','jn','jg','jco','jro','jp','jnotes'].forEach(function(k){ $(k).value = ''; }); $('jpaid').checked = false; $('jbh').textContent = 'New job'; $('jdel').hidden = true; $('jfrom').textContent = ''; return; }
+    return api('/rest/v1/cgc_jobs?id=eq.' + encodeURIComponent(id) + '&select=*').then(function(r){
+      var j = JCUR = r && r[0]; if (!j) { toast('Job not found', true); return go('jobs', true); }
+      JSTAT = j.status; drawSteps(); fillCus(j.customer_id);
+      $('js').value = j.service || ''; $('jn').value = j.clubs == null ? '' : j.clubs; $('jg').value = j.grip || ''; $('jco').value = j.collect_on || ''; $('jro').value = j.return_on || '';
+      $('jp').value = j.price == null ? '' : (+j.price % 1 ? (+j.price).toFixed(2) : +j.price); $('jpaid').checked = !!j.paid; $('jnotes').value = j.notes || '';
+      $('jbh').textContent = cusName(j.customer_id); $('jdel').hidden = false;
+      $('jfrom').innerHTML = j.booking_id ? 'Made from a <a href="#booking/' + j.booking_id + '" style="font-weight:800">website booking</a>.' : '';
+    });
+  }).catch(function(e){ toast(e.message, true); });
+}
+['jc','js','jn','jg','jco','jro','jp','jpaid','jnotes'].forEach(function(k){ $(k).addEventListener('input', adirty); $(k).addEventListener('change', adirty); });
+$('jcnew').addEventListener('click', function(){ var n = prompt('Customer\'s name'); if (!n || !n.trim()) return; var ph = prompt('Their phone number (optional)') || null;
+  api('/rest/v1/cgc_customers', { method: 'POST', json: [{ name: n.trim(), phone: ph && ph.trim() || null }], headers: { Prefer: 'return=representation' } }).then(function(r){ CUS.push(r[0]); CUS.sort(function(a, z){ return a.name.localeCompare(z.name); }); fillCus(r[0].id); adirty(); toast('Customer added'); }).catch(function(e){ toast(e.message, true); }); });
+$('jsave').addEventListener('click', function(){
+  var price = $('jp').value.replace(/[£,\s]/g, ''), clubs = $('jn').value.trim();
+  if (price && isNaN(+price)) return toast('Check the price: numbers only, e.g. 88.50', true);
+  if (clubs && (isNaN(+clubs) || +clubs < 0 || +clubs > 30)) return toast('Number of clubs should be 0 to 30', true);
+  if (!$('jc').value) return toast('Choose a customer (or add a new one)', true);
+  var row = { customer_id: $('jc').value, service: $('js').value.trim() || null, clubs: clubs === '' ? null : Math.round(+clubs), grip: $('jg').value.trim() || null, collect_on: $('jco').value || null, return_on: $('jro').value || null,
+    price: price === '' ? null : +price, paid: $('jpaid').checked, status: JSTAT, notes: $('jnotes').value.trim() || null };
+  var btn = this; btn.disabled = true;
+  (JCUR ? api('/rest/v1/cgc_jobs?id=eq.' + JCUR.id, { method: 'PATCH', json: row, headers: { Prefer: 'return=minimal' } }) : api('/rest/v1/cgc_jobs', { method: 'POST', json: [row], headers: { Prefer: 'return=minimal' } }))
+    .then(function(){ ADIRTY = false; toast('Job saved'); go('jobs', true); }).catch(function(e){ toast(e.message, true); }).then(function(){ btn.disabled = false; });
+});
+$('jdel').addEventListener('click', function(){ if (!JCUR || !confirm('Delete this job? This can\'t be undone.')) return; api('/rest/v1/cgc_jobs?id=eq.' + JCUR.id, { method: 'DELETE' }).then(function(){ ADIRTY = false; toast('Job deleted'); go('jobs', true); }).catch(function(e){ toast(e.message, true); }); });
+
+/* ---- customers ---- */
+function loadCustomers(){
+  show('customers'); $('csl').innerHTML = '<p class="help">Loading…</p>';
+  return Promise.all([loadCusList(), api('/rest/v1/cgc_jobs?select=customer_id,status')]).then(function(r){ JOBS = r[1] || []; drawCus(); }).catch(function(e){ $('csl').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
+}
+function drawCus(){
+  var q = $('csq').value.trim().toLowerCase(), qd = q.replace(/\D/g, '');
+  var rows = CUS.filter(function(c){ return !q || c.name.toLowerCase().indexOf(q) >= 0 || (c.postcode || '').toLowerCase().indexOf(q) >= 0 || (qd.length > 2 && String(c.phone || '').replace(/\D/g, '').indexOf(qd) >= 0); });
+  $('csl').innerHTML = rows.length ? rows.map(function(c){ var n = JOBS.filter(function(j){ return j.customer_id === c.id; }).length;
+    return '<button class="rec" type="button" data-go="customer/' + c.id + '"><div class="h"><b>' + esc(c.name) + '</b><span class="w">' + n + (n === 1 ? ' job' : ' jobs') + '</span></div><div class="d">' + esc([c.phone, c.postcode].filter(Boolean).join(' · ') || 'No details yet') + '</div></button>'; }).join('')
+    : '<div class="empty">' + (q ? 'No one matches that.' : 'No customers yet. They\'re added when you make a job from a booking, or tap + Add.') + '</div>';
+}
+$('csq').addEventListener('input', drawCus);
+var CCUR = null;
+function loadCustomer(id){
+  show('customer'); CCUR = null; ADIRTY = false; $('cjl').innerHTML = ''; $('cjh').hidden = true; $('csqk').innerHTML = '';
+  if (!id || id === 'new') { ['cn','cp','ce','cpc','cno'].forEach(function(k){ $(k).value = ''; }); $('csh').textContent = 'New customer'; $('cdel').hidden = true; $('cjob').hidden = true; return Promise.resolve(); }
+  return Promise.all([api('/rest/v1/cgc_customers?id=eq.' + encodeURIComponent(id) + '&select=*'), api('/rest/v1/cgc_jobs?customer_id=eq.' + encodeURIComponent(id) + '&select=*&order=created_at.desc')]).then(function(r){
+    var c = CCUR = r[0] && r[0][0]; if (!c) { toast('Customer not found', true); return go('customers', true); }
+    $('cn').value = c.name; $('cp').value = c.phone || ''; $('ce').value = c.email || ''; $('cpc').value = c.postcode || ''; $('cno').value = c.notes || '';
+    $('csh').textContent = c.name; $('csqk').innerHTML = quick(c.phone, c.email); $('cdel').hidden = false; $('cjob').hidden = false;
+    var js = r[1] || []; $('cjh').hidden = !js.length; $('cjl').innerHTML = js.map(function(j){ return jobRow(j, false); }).join('');
+  }).catch(function(e){ toast(e.message, true); });
+}
+['cn','cp','ce','cpc','cno'].forEach(function(k){ $(k).addEventListener('input', adirty); });
+$('csave').addEventListener('click', function(){
+  var row = { name: $('cn').value.trim(), phone: $('cp').value.trim() || null, email: $('ce').value.trim() || null, postcode: $('cpc').value.trim().toUpperCase() || null, notes: $('cno').value.trim() || null };
+  if (!row.name) return toast('Add their name', true);
+  var btn = this; btn.disabled = true;
+  (CCUR ? api('/rest/v1/cgc_customers?id=eq.' + CCUR.id, { method: 'PATCH', json: row, headers: { Prefer: 'return=minimal' } }).then(function(){ return CCUR.id; })
+        : api('/rest/v1/cgc_customers', { method: 'POST', json: [row], headers: { Prefer: 'return=representation' } }).then(function(r){ return r[0].id; }))
+    .then(function(id){ ADIRTY = false; toast('Customer saved'); go('customer/' + id, true); }).catch(function(e){ toast(e.message, true); }).then(function(){ btn.disabled = false; });
+});
+$('cjob').addEventListener('click', function(){ if (!CCUR || !leaveOk('job')) return; history.replaceState(null, '', '#job/new'); loadJob('new', CCUR.id); });
+$('cdel').addEventListener('click', function(){ if (!CCUR || !confirm('Delete ' + CCUR.name + '? Their jobs are kept but won\'t show a name.')) return; api('/rest/v1/cgc_customers?id=eq.' + CCUR.id, { method: 'DELETE' }).then(function(){ ADIRTY = false; toast('Customer deleted'); go('customers', true); }).catch(function(e){ toast(e.message, true); }); });
+
+/* ---- sign in with the 6-digit code (an app on the home screen can't always open the email link) ---- */
+$('f-code').addEventListener('submit', function(e){
+  e.preventDefault(); var em = $('em').value.trim().toLowerCase(), code = $('code').value.replace(/\D/g, ''), m = $('cmsg');
+  if (code.length !== 6) { m.className = 'msg bad'; m.textContent = 'The code is 6 numbers.'; return; }
+  m.className = 'msg'; m.textContent = 'Checking…';
+  fetch(URL0 + '/auth/v1/verify', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'email', email: em, token: code }) })
+    .then(function(r){ return r.json().then(function(j){ if (!r.ok || !j.access_token) throw new Error('That code didn\'t work. It may have run out; ask for a new email.'); keep(j); }); })
+    .then(function(){ m.textContent = ''; $('code').value = ''; go('home', true); })
+    .catch(function(err){ m.className = 'msg bad'; m.textContent = err.message; });
+});
+
 /* the old offers page (coastalgolfco.co.uk/offers/) sends its list here once; #offers / #sale open those tabs */
 var OIMP = null;
 try {
   var hm = /^#offers-import=(.+)$/.exec(location.hash);
   if (hm) { localStorage.setItem('cgc-offers-import', decodeURIComponent(hm[1])); localStorage.setItem('cgc-editor-tab', 'offers'); history.replaceState(null, '', location.pathname + location.search); }
-  else if (/^#(offers|sale)$/.test(location.hash)) { localStorage.setItem('cgc-editor-tab', location.hash.slice(1)); history.replaceState(null, '', location.pathname + location.search); }
+  else if (/^#(offers|sale)$/.test(location.hash) && !store.get()) { localStorage.setItem('cgc-editor-tab', location.hash.slice(1)); }
 } catch(e){}
 function firstView(){
   var tab = null; try { tab = localStorage.getItem('cgc-editor-tab'); localStorage.removeItem('cgc-editor-tab'); var ij = localStorage.getItem('cgc-offers-import'); localStorage.removeItem('cgc-offers-import'); if (ij) OIMP = JSON.parse(ij); } catch(e){}
-  if (tab === 'offers') return loadOffers(OIMP); if (tab === 'sale') return loadSale(); return loadList();
+  if (tab === 'offers') return loadOffers(OIMP); if (tab === 'sale') return loadSale();
+  return go(location.hash || '#home', true);
 }
 /* ---- start: a sign-in link lands here with a one-time token ---- */
 var q = new URLSearchParams(location.search), th = q.get('token_hash');
@@ -682,7 +1117,7 @@ var start = th
   ? verify(q.get('type') || 'magiclink').then(function(j){ return j || verify('email'); })
       .then(function(j){ if (!j) throw new Error('That sign-in link has expired or was already used. Ask for a new one below.'); keep(j); })
       .catch(function(e){ show('gate'); $('gmsg').className = 'msg bad'; $('gmsg').textContent = e.message; throw e; })
-      .then(function(){ history.replaceState(null, '', location.pathname); })
+      .then(function(){ history.replaceState(null, '', location.pathname + (location.hash || '')); })
   : Promise.resolve();
 start.then(session).then(function(t){ t ? firstView() : show('gate'); }).catch(function(){});
 })();

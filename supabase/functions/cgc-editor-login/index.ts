@@ -1,11 +1,11 @@
-// cgc-editor-login: emails a sign-in link for Stuart's editor (dunnworks.io/editor/coastal-golf-co/).
-// Only addresses in public.cgc_editors get a link; everyone else gets the same "check your inbox"
-// answer, so the list can't be probed. The link carries a one-time token the editor page swaps for
-// a session (POST /auth/v1/verify), so no redirect settings are needed in Supabase Auth.
+// cgc-editor-login: emails a sign-in link (and a 6-digit code) for Stuart's admin app (dunnworks.io/editor/coastal-golf-co/).
+// Only addresses in public.cgc_editors get one; everyone else gets the same "check your inbox"
+// answer, so the list can't be probed. The link carries a one-time token the app swaps for
+// a session (POST /auth/v1/verify); the code does the same when typed into the app (type "email").
 //
-// Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (built in), RESEND_API_KEY,
-// CGC_EDITOR_FROM (a sender on a domain verified in Resend, e.g. editor@coastalgolfco.co.uk).
-// Falls back to BOOKING_FROM, then onboarding@resend.dev (which only reaches the Resend account owner).
+// Sends through Resend from editor@dunnworks.io (dunnworks.io is verified in the anthonygdunn Resend team).
+// Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (built in), CGC_RESEND_KEY (that team's "CGC editor sign-in" key),
+// falling back to RESEND_API_KEY; CGC_EDITOR_FROM overrides the sender.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const EDITOR_URL = "https://dunnworks.io/editor/coastal-golf-co/";
@@ -48,23 +48,27 @@ Deno.serve(async (req) => {
   }
   const { data: link, error } = await db.auth.admin.generateLink({ type: "magiclink", email });
   const hashed = link?.properties?.hashed_token;
+  const code = link?.properties?.email_otp ?? "";
   if (error || !hashed) { console.error("generateLink", error?.message); return json({ error: "Could not send the email. Please try again." }, 500); }
   const url = `${EDITOR_URL}?token_hash=${encodeURIComponent(hashed)}&type=magiclink`;
 
-  const key = Deno.env.get("RESEND_API_KEY");
-  const from = Deno.env.get("CGC_EDITOR_FROM") ?? Deno.env.get("BOOKING_FROM") ?? "onboarding@resend.dev";
+  const key = Deno.env.get("CGC_RESEND_KEY") ?? Deno.env.get("RESEND_API_KEY");
+  const from = Deno.env.get("CGC_EDITOR_FROM") ?? "editor@dunnworks.io";
   const hi = ed.name ? `Hi ${ed.name},` : "Hi,";
+  const codeHtml = code ? `<p style="margin:0 0 8px">Using the app on your home screen? Type this code into it instead:</p>
+    <p style="margin:0 0 24px;font:700 30px/1 ui-monospace,Menlo,monospace;letter-spacing:.25em;color:#022042">${code}</p>` : "";
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:16px;line-height:1.6;color:#022042;max-width:520px">
     <p style="margin:0 0 14px">${hi}</p>
-    <p style="margin:0 0 20px">Tap the button to sign in to your Coastal Golf Co editor. The link works once and runs out in an hour.</p>
-    <p style="margin:0 0 24px"><a href="${url}" style="display:inline-block;background:#022042;color:#fff;text-decoration:none;font-weight:700;padding:14px 26px;border-radius:999px">Sign in to the editor</a></p>
-    <p style="margin:0;color:#5b6b85;font-size:14px">Didn't ask for this? You can ignore it; nobody can sign in without the link.</p></div>`;
+    <p style="margin:0 0 20px">Tap the button to sign in to Coastal Golf Co Admin. It works once and runs out in an hour.</p>
+    <p style="margin:0 0 24px"><a href="${url}" style="display:inline-block;background:#022042;color:#fff;text-decoration:none;font-weight:700;padding:14px 26px;border-radius:999px">Sign in</a></p>
+    ${codeHtml}
+    <p style="margin:0;color:#5b6b85;font-size:14px">Didn't ask for this? You can ignore it; nobody can sign in without it.</p></div>`;
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: `Coastal Golf Co editor <${from}>`, to: [email], subject: "Your sign-in link for the Coastal Golf Co editor", html,
-        text: `${hi}\n\nSign in to your Coastal Golf Co editor (the link works once and runs out in an hour):\n${url}\n\nDidn't ask for this? You can ignore it.` }),
+      body: JSON.stringify({ from: `Coastal Golf Co Admin <${from}>`, to: [email], subject: code ? `Your Coastal Golf Co sign-in (code ${code})` : "Your Coastal Golf Co sign-in link", html,
+        text: `${hi}\n\nSign in to Coastal Golf Co Admin (works once, runs out in an hour):\n${url}\n${code ? `\nOr type this code into the app: ${code}\n` : ""}\nDidn't ask for this? You can ignore it.` }),
     });
     if (!r.ok) { console.error("Resend refused", r.status, await r.text()); return json({ error: "Could not send the email. Please try again later." }, 502); }
   } catch (e) { console.error("send failed", e); return json({ error: "Could not send the email. Please try again later." }, 502); }

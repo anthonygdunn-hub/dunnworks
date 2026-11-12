@@ -1,5 +1,5 @@
 // cgc-booking: the Coastal Golf Co booking form, sent straight from the website.
-// Saves the request to cgc_bookings, then emails hello@coastalgolfco.co.uk.
+// Saves the request to cgc_bookings, alerts the admin app (cgc-push), then emails hello@coastalgolfco.co.uk.
 // If the email can't be sent the booking is still saved and the site falls back
 // to opening the customer's email app, so no request is ever lost silently.
 //
@@ -52,6 +52,14 @@ Deno.serve(async (req) => {
 
   const { data: saved, error } = await db.from("cgc_bookings").insert(row).select("id").single();
   if (error) { console.error("insert failed", error); return json({ error: "Could not save your request." }, 500); }
+
+  // ping the admin app on Stuart's phone; never holds up or breaks the booking
+  try {
+    const { data: k } = await db.from("cgc_private").select("v").eq("k", "internal").maybeSingle();
+    if (k?.v) await fetch(Deno.env.get("SUPABASE_URL") + "/functions/v1/cgc-push", {
+      method: "POST", headers: { "Content-Type": "application/json", "x-internal": k.v }, body: JSON.stringify({ kind: "booking", id: saved.id }),
+    }).catch(() => {});
+  } catch (e) { console.error("push failed", e); }
 
   let emailed = false;
   const key = Deno.env.get("RESEND_API_KEY");
