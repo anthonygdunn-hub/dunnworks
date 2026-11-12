@@ -204,8 +204,8 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
     <p class="msg" id="gmsg" role="status"></p>
   </form>
   <form id="f-code" novalidate hidden>
-    <label for="code">Or type the 6-digit code from the email <small>(handy on the home screen app)</small></label>
-    <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" style="letter-spacing:.3em;font-size:22px;text-align:center">
+    <label for="code">Or type the code from the email <small>(handy on the home screen app)</small></label>
+    <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" pattern="[0-9]*" style="letter-spacing:.2em;font-size:22px;text-align:center">
     <button class="btn gold" type="submit" style="margin-top:12px;width:100%">Sign in with the code</button>
     <p class="msg" id="cmsg" role="status"></p>
   </form>
@@ -1084,10 +1084,10 @@ $('csave').addEventListener('click', function(){
 $('cjob').addEventListener('click', function(){ if (!CCUR || !leaveOk('job')) return; history.replaceState(null, '', '#job/new'); loadJob('new', CCUR.id); });
 $('cdel').addEventListener('click', function(){ if (!CCUR || !confirm('Delete ' + CCUR.name + '? Their jobs are kept but won\'t show a name.')) return; api('/rest/v1/cgc_customers?id=eq.' + CCUR.id, { method: 'DELETE' }).then(function(){ ADIRTY = false; toast('Customer deleted'); go('customers', true); }).catch(function(e){ toast(e.message, true); }); });
 
-/* ---- sign in with the 6-digit code (an app on the home screen can't always open the email link) ---- */
+/* ---- sign in with the code from the email (an app on the home screen can't always open the email link) ---- */
 $('f-code').addEventListener('submit', function(e){
   e.preventDefault(); var em = $('em').value.trim().toLowerCase(), code = $('code').value.replace(/\D/g, ''), m = $('cmsg');
-  if (code.length !== 6) { m.className = 'msg bad'; m.textContent = 'The code is 6 numbers.'; return; }
+  if (code.length < 6 || code.length > 10) { m.className = 'msg bad'; m.textContent = 'Type the code exactly as it is in the email.'; return; }
   m.className = 'msg'; m.textContent = 'Checking…';
   fetch(URL0 + '/auth/v1/verify', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'email', email: em, token: code }) })
     .then(function(r){ return r.json().then(function(j){ if (!r.ok || !j.access_token) throw new Error('That code didn\'t work. It may have run out; ask for a new email.'); keep(j); }); })

@@ -1,4 +1,4 @@
-// cgc-editor-login: emails a sign-in link (and a 6-digit code) for Stuart's admin app (dunnworks.io/editor/coastal-golf-co/).
+// cgc-editor-login: emails a sign-in link (and a one-time code) for Stuart's admin app (dunnworks.io/editor/coastal-golf-co/).
 // Only addresses in public.cgc_editors get one; everyone else gets the same "check your inbox"
 // answer, so the list can't be probed. The link carries a one-time token the app swaps for
 // a session (POST /auth/v1/verify); the code does the same when typed into the app (type "email").
