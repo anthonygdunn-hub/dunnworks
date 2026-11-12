@@ -104,3 +104,31 @@ values ('cgc-photos', 'cgc-photos', false, 8388608, array['image/jpeg','image/pn
 create policy "cgc editors read photos" on storage.objects for select using (bucket_id = 'cgc-photos' and public.cgc_is_editor());
 create policy "cgc editors add photos" on storage.objects for insert with check (bucket_id = 'cgc-photos' and public.cgc_is_editor());
 create policy "cgc editors delete photos" on storage.objects for delete using (bucket_id = 'cgc-photos' and public.cgc_is_editor());
+
+-- Added 12 Nov 2026 (migrations cgc_admin_app_extras, cgc_customers_grip_pref): track my clubs, mileage and expenses, grip stock, bag profiles, insights, calendar feed
+alter table public.cgc_jobs add column if not exists track text unique default encode(gen_random_bytes(12), 'hex');
+alter table public.cgc_jobs add column if not exists stock_taken boolean not null default false;
+create or replace function public.cgc_track(t text) returns json language sql stable security definer set search_path = public as $$
+  select json_build_object('first', split_part(coalesce(c.name, ''), ' ', 1), 'status', j.status, 'service', j.service, 'clubs', j.clubs,
+    'collect_on', j.collect_on, 'return_on', j.return_on, 'updated_at', j.updated_at)
+  from cgc_jobs j left join cgc_customers c on c.id = j.customer_id where t is not null and length(t) >= 20 and j.track = t $$;
+revoke all on function public.cgc_track(text) from public;
+grant execute on function public.cgc_track(text) to anon, authenticated;
+create table if not exists public.cgc_expenses (id uuid primary key default gen_random_uuid(), created_at timestamptz not null default now(), on_date date not null default current_date,
+  kind text not null check (kind in ('mileage','expense')), miles numeric(7,1) check (miles is null or miles >= 0), amount numeric(9,2) check (amount is null or amount >= 0),
+  category text check (category is null or length(category) <= 60), note text check (note is null or length(note) <= 500), receipt text);
+alter table public.cgc_expenses enable row level security;
+create policy "editors manage expenses" on public.cgc_expenses for all using (public.cgc_is_editor()) with check (public.cgc_is_editor());
+create table if not exists public.cgc_stock (item text primary key check (length(item) between 1 and 120), qty integer not null default 0, low integer not null default 3, updated_at timestamptz not null default now());
+alter table public.cgc_stock enable row level security;
+create policy "editors manage stock" on public.cgc_stock for all using (public.cgc_is_editor()) with check (public.cgc_is_editor());
+alter table public.cgc_customers add column if not exists grip_size text check (grip_size is null or length(grip_size) <= 40);
+alter table public.cgc_customers add column if not exists grip_pref text check (grip_pref is null or length(grip_pref) <= 80);
+alter table public.cgc_customers add column if not exists bag text check (bag is null or length(bag) <= 500);
+alter table public.cgc_customers add column if not exists specs text check (specs is null or length(specs) <= 1000);
+insert into public.cgc_private(k, v) values ('ical', encode(gen_random_bytes(16), 'hex')) on conflict (k) do nothing;
+create or replace function public.cgc_ical_key() returns text language plpgsql stable security definer set search_path = public as $$
+begin if not public.cgc_is_editor() then raise exception 'not allowed'; end if; return (select v from cgc_private where k = 'ical'); end $$;
+revoke all on function public.cgc_ical_key() from public, anon;
+grant execute on function public.cgc_ical_key() to authenticated;
+-- cgc_app_insights(): visitors and bookings by month for 6 months, traffic sources and devices for 30 days (editors only); see the live function for the full body

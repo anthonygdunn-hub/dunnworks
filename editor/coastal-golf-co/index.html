@@ -37,7 +37,7 @@ main{max-width:900px;margin:0 auto;padding:22px 16px 120px}
 .btn.sm{min-height:40px;padding:0 14px;font-size:14px}
 label{display:block;font-weight:800;font-size:14px;margin:18px 0 6px}
 label small{font-weight:600;color:var(--body)}
-input[type=text],input[type=email],input[type=date],select,textarea{width:100%;min-width:0;max-width:100%;display:block;border:1px solid #cdbf9c;border-radius:10px;background:#fff;padding:12px 14px;font-size:16px}
+input[type=text],input[type=email],input[type=date],input[type=search],input[type=url],select,textarea{width:100%;min-width:0;max-width:100%;display:block;border:1px solid #cdbf9c;border-radius:10px;background:#fff;padding:12px 14px;font-size:16px}
 textarea{min-height:360px;line-height:1.6;resize:vertical}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .msg{min-height:1.4em;margin:10px 0 0;font-weight:700}
@@ -236,6 +236,21 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 .sin h2{font-size:24px;margin:0 0 6px}
 .pays{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
 .big{font:700 40px/1 'Oswald',Impact,sans-serif}
+.bars2{display:flex;gap:8px;align-items:flex-end;height:130px;padding-top:6px}
+.bars2 div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--body)}
+.bars2 .pair{display:flex;flex-direction:row;gap:3px;align-items:flex-end;width:100%;height:90px}
+.bars2 i{flex:1;display:block;background:var(--gold);border-radius:4px 4px 1px 1px;min-height:2px}
+.bars2 i.b{background:var(--navy)}
+.key{display:flex;gap:14px;font-size:13px;font-weight:700;color:var(--body);margin-top:8px}.key span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;background:var(--gold)}.key span.b::before{background:var(--navy)}
+.sk{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
+.sk:first-child{border-top:0}
+.sk .n{flex:1;min-width:0;font-size:14.5px;font-weight:700}.sk .n small{display:block;font-weight:600;color:var(--body);font-size:12.5px}
+.sk button{flex:none;width:38px;height:38px;border-radius:50%;border:2px solid var(--navy);background:#fff;font-size:20px;font-weight:800;cursor:pointer;color:var(--navy)}
+.sk input{width:52px;text-align:center;border:1px solid #cdbf9c;border-radius:8px;padding:7px 4px;font-size:16px}
+.sk.low .n{color:var(--bad)}
+.hub em.badge{margin-left:auto;align-self:center;background:var(--bad);color:#fff}
+.hub button>div{flex:1}
+.bar1{height:8px;border-radius:4px;background:var(--gold);margin-top:4px}
 </style>
 </head>
 <body>
@@ -316,6 +331,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
   </div>
   <div id="orows"></div>
   <button class="btn line" type="button" id="oadd" style="width:100%;margin-top:12px">+ Add product</button>
+  <button class="btn line sm" type="button" id="ostock" style="margin-top:10px">Fill "Stock left" from my grip stock</button>
   <p class="help">Leave "Was" empty to show one price. Leave "Stock left" empty to hide it. Stock of 2 or less shows in red.</p>
   <label for="on">Line under the offers <small>(optional)</small></label><input id="on" type="text" maxlength="80" placeholder="While stocks last">
   <label class="chk"><input type="checkbox" id="oshow" checked><span>Show these offers on the website<small>Untick to keep the list here without showing it. An empty list never shows.</small></span></label>
@@ -360,6 +376,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <button class="tile" type="button" data-go="takings"><b id="s-week">–</b><span>Taken this week</span></button>
     <button class="tile" type="button" data-go="remind" id="t-due"><b id="s-due">–</b><span>Due a regrip</span></button>
   </div>
+  <button class="note" type="button" data-go="stock" id="hlow" hidden style="display:block;width:100%;text-align:left;cursor:pointer"></button>
   <div class="panel"><h2>Visitors this week</h2><div class="bars" id="bars"></div></div>
   <div class="panel"><h2>Most viewed pages</h2><div id="tops"><p class="help">Loading…</p></div></div>
   <div class="panel" id="alerts"><h2>Phone alerts</h2><p class="help" id="altxt">Get a ping on this phone the moment someone books on the website.</p>
@@ -421,6 +438,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
   <div class="steps" id="jbst"></div>
   <label for="jc">Customer</label>
   <div class="row"><select id="jc" style="flex:1 1 220px"></select><button class="btn line sm" type="button" id="jcnew">+ New customer</button></div>
+  <div class="note" id="jcprof" hidden></div>
   <div class="grid2">
     <div><label for="js">What's the job?</label><input id="js" type="text" list="svcs" maxlength="80" placeholder="e.g. Regrips"><datalist id="svcs"><option value="Regrips"><option value="Club MOT"><option value="Repairs"><option value="Shaft replacement"><option value="Loft and lie"><option value="Custom logo"></datalist></div>
     <div><label for="jn">Number of clubs</label><input id="jn" type="text" inputmode="numeric" maxlength="2"></div>
@@ -456,7 +474,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
   <div class="row" style="justify-content:space-between"><h1 style="font-size:32px" id="tdh">Today's round</h1><button class="btn line sm" type="button" data-go="diary">Diary</button></div>
   <div class="chips" id="tdday"></div>
   <p class="help" id="tdsum"></p>
-  <div class="row" style="margin-top:12px"><a class="btn gold" id="tdroute" target="_blank" rel="noopener" hidden>Open the route in Maps</a><button class="btn line sm" type="button" id="tdhere" hidden>Start from where I am</button></div>
+  <div class="row" style="margin-top:12px"><a class="btn gold" id="tdroute" target="_blank" rel="noopener" hidden>Open the route in Maps</a><button class="btn line sm" type="button" id="tdhere" hidden>Start from where I am</button><button class="btn line sm" type="button" id="tdmiles" hidden>Log the miles</button></div>
   <div class="list" id="tdl"></div>
 </section>
 
@@ -471,19 +489,54 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
   <div class="hub">
     <button type="button" data-go="customers"><i>☺</i><div><b>Customers</b><span>Everyone you've worked for, and their jobs</span></div></button>
     <button type="button" data-go="diary"><i>▦</i><div><b>Diary</b><span>The week ahead: collections and returns</span></div></button>
-    <button type="button" data-go="takings"><i>£</i><div><b>Takings</b><span>Money in, and who still owes</span></div></button>
+    <button type="button" data-go="takings"><i>£</i><div><b>Money</b><span>Takings, who owes, mileage, expenses and profit</span></div></button>
     <button type="button" data-go="remind"><i>↻</i><div><b>Regrip reminders</b><span>Customers due a fresh set of grips</span></div></button>
+    <button type="button" data-go="stock"><i>▤</i><div><b>Grip stock</b><span>What's on the shelf, and what's running low</span><em class="badge" id="lowb" hidden></em></div></button>
+    <button type="button" data-go="insights"><i>↗</i><div><b>Insights</b><span>Best sellers, busiest areas, website to bookings</span></div></button>
     <button type="button" data-go="website"><i>◎</i><div><b>Website</b><span>Offers, sale, prices, FAQs and journal</span></div></button>
+    <button type="button" data-go="settings"><i>⚙</i><div><b>Settings</b><span>Put your round in your phone's calendar</span></div></button>
   </div>
 </section>
 
 <section id="v-takings" hidden>
   <button class="btn line sm back" type="button" data-go="more">‹ More</button>
-  <h1 style="font-size:32px;margin-top:10px">Takings</h1>
-  <div class="chips" id="tkf"><button type="button" data-f="week" aria-pressed="true">This week</button><button type="button" data-f="month" aria-pressed="false">This month</button><button type="button" data-f="year" aria-pressed="false">This year</button></div>
+  <h1 style="font-size:32px;margin-top:10px">Money</h1>
+  <div class="chips" id="tkf"><button type="button" data-f="week" aria-pressed="true">This week</button><button type="button" data-f="month" aria-pressed="false">This month</button><button type="button" data-f="year" aria-pressed="false">Tax year</button></div>
   <div class="tiles" id="tkt"></div>
   <div class="panel"><h2>Owed to you</h2><div id="tko"></div></div>
+  <div class="panel"><h2>Mileage and expenses</h2>
+    <div class="row"><button class="btn gold sm" type="button" id="exm">+ Log miles</button><button class="btn line sm" type="button" id="exe">+ Add an expense</button></div>
+    <div id="exl" style="margin-top:10px"></div></div>
   <div class="panel"><h2 id="tkph">Paid</h2><div id="tkp"></div></div>
+  <div class="panel"><h2>For your tax return</h2><p class="help">A spreadsheet of the tax year (6 April to 5 April): money in, expenses and business miles. Hand it to your accountant or use it for your Self Assessment.</p><button class="btn line sm" type="button" id="tkcsv" style="margin-top:10px">Download the tax year</button></div>
+</section>
+
+<section id="v-stock" hidden>
+  <button class="btn line sm back" type="button" data-go="more">‹ More</button>
+  <h1 style="font-size:32px;margin-top:10px">Grip stock</h1>
+  <p class="help">How many of each grip you have. Grips come off automatically when a job goes into the workshop. Running low shows on your Home screen.</p>
+  <input id="stq" class="search" type="search" placeholder="Search grips">
+  <div class="chips" id="stf"><button type="button" data-f="have" aria-pressed="true">In stock or low</button><button type="button" data-f="low" aria-pressed="false">Running low</button><button type="button" data-f="all" aria-pressed="false">Every grip</button></div>
+  <div id="stl"></div>
+</section>
+
+<section id="v-insights" hidden>
+  <button class="btn line sm back" type="button" data-go="more">‹ More</button>
+  <h1 style="font-size:32px;margin-top:10px">Insights</h1>
+  <div class="tiles" id="int"></div>
+  <div class="panel"><h2>Website visitors and bookings</h2><div class="bars2" id="inm"></div><p class="help" id="inconv"></p></div>
+  <div class="panel"><h2>Best-selling grips</h2><div id="ing"></div></div>
+  <div class="panel"><h2>Busiest areas</h2><div id="ina"></div></div>
+  <div class="panel"><h2>Where visitors come from <small style="font-family:Mulish;font-size:13px;text-transform:none">(last 30 days)</small></h2><div id="ins"></div></div>
+</section>
+
+<section id="v-settings" hidden>
+  <button class="btn line sm back" type="button" data-go="more">‹ More</button>
+  <h1 style="font-size:32px;margin-top:10px">Settings</h1>
+  <div class="panel"><h2>Your phone's calendar</h2><p class="help">Collections and returns appear in your normal calendar and keep themselves up to date.</p>
+    <a class="btn gold sm" id="calsub" href="#" style="margin-top:10px">Add to my calendar</a>
+    <p class="help" style="margin-top:12px"><b>iPhone:</b> tap the button, then Subscribe.<br><b>Google Calendar (Android):</b> copy the link, then on a computer open calendar.google.com, Other calendars, +, From URL, and paste it.</p>
+    <button class="btn line sm" type="button" id="calcopy" style="margin-top:8px">Copy the calendar link</button></div>
 </section>
 
 <section id="v-remind" hidden>
@@ -513,7 +566,13 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
   </div>
   <label for="ca">Address <small>(house and street)</small></label><input id="ca" type="text" maxlength="200" autocomplete="off">
   <label for="cpc">Postcode</label><input id="cpc" type="text" maxlength="12" style="text-transform:uppercase;max-width:200px">
-  <label for="cno">Notes <small>(club specs, preferences)</small></label><textarea id="cno" style="min-height:90px" maxlength="2000"></textarea>
+  <div class="grid2">
+    <div><label for="cgs">Grip size</label><select id="cgs"><option value="">Not known yet</option><option>Undersize</option><option>Standard</option><option>Standard, +1 wrap</option><option>Standard, +2 wraps</option><option>Midsize</option><option>Midsize, +1 wrap</option><option>Jumbo</option></select></div>
+    <div><label for="cgl">Their usual grip</label><input id="cgl" type="text" maxlength="80" list="cglist" placeholder="e.g. Golf Pride Tour Velvet"><datalist id="cglist"></datalist></div>
+  </div>
+  <label for="cbag">What's in the bag <small>(e.g. Driver, 3W, 4-PW, 52/56/60, Scotty putter)</small></label><textarea id="cbag" style="min-height:70px" maxlength="400"></textarea>
+  <label for="csp">Club specs <small>(lengths, lofts and lies, shafts)</small></label><textarea id="csp" style="min-height:70px" maxlength="1000"></textarea>
+  <label for="cno">Notes</label><textarea id="cno" style="min-height:90px" maxlength="2000"></textarea>
   <div class="row" style="margin-top:16px"><button class="btn gold" type="button" id="csave">Save customer</button><button class="btn line sm" type="button" id="cjob" hidden>+ New job for them</button><button class="btn bad sm" type="button" id="cdel" hidden>Delete</button></div>
   <h2 style="font-size:22px;margin-top:26px" id="cjh" hidden>Their jobs</h2>
   <div class="list" id="cjl"></div>
@@ -552,7 +611,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 var URL0 = 'https://acdpgarasgfhvupzsbxf.supabase.co', KEY = 'sb_publishable_OWTVpDyadL1lITnCp4gfAQ_EZxVHldY';
 var SITE = 'https://www.coastalgolfco.co.uk/', BUCKET = 'cgc-journal', AUTH = 'cgc-editor-auth';
 var $ = function(id){ return document.getElementById(id); };
-var VIEWS = ['gate','home','today','diary','more','takings','remind','bookings','booking','jobs','job','customers','customer','website','list','edit','words','offers','sale'];
+var VIEWS = ['gate','home','today','diary','more','takings','remind','stock','insights','settings','bookings','booking','jobs','job','customers','customer','website','list','edit','words','offers','sale'];
 var GROUP = { home: 'home', today: 'today', diary: 'today', bookings: 'bookings', booking: 'bookings', jobs: 'jobs', job: 'jobs' };
 function show(v){ VIEWS.forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('obar').hidden = v !== 'offers'; $('sbar').hidden = v !== 'sale'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
   document.body.classList.toggle('hasnav', !$('nav').hidden);
@@ -862,6 +921,9 @@ function go(to, quiet){
   if (v === 'more') { show('more'); return; }
   if (v === 'takings') return loadTakings();
   if (v === 'remind') return loadRemind();
+  if (v === 'stock') return loadStock();
+  if (v === 'insights') return loadInsights();
+  if (v === 'settings') return loadSettings();
   if (v === 'customers') return loadCustomers();
   if (v === 'customer') return loadCustomer(id);
   if (v === 'website') { show('website'); return; }
@@ -1190,7 +1252,7 @@ $('bkjob').addEventListener('click', function(){
 
 /* ---- jobs ---- */
 var JBF = 'open';
-function loadCusList(){ return api('/rest/v1/cgc_customers?select=id,name,phone,email,postcode,address,reminded_at&order=name.asc').then(function(r){ CUS = r || []; return CUS; }); }
+function loadCusList(){ return api('/rest/v1/cgc_customers?select=id,name,phone,email,postcode,address,reminded_at,grip_size,grip_pref,bag,specs&order=name.asc').then(function(r){ CUS = r || []; return CUS; }); }
 function cusName(id){ var c = CUS.filter(function(x){ return x.id === id; })[0]; return c ? c.name : 'No customer'; }
 function loadJobs(f){
   if (f) JBF = f; [].forEach.call($('jbf').children, function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-f') === JBF); });
@@ -1217,14 +1279,14 @@ $('jbst').addEventListener('click', function(e){ var b = e.target.closest('butto
 function fillCus(sel){ $('jc').innerHTML = '<option value="">Choose a customer…</option>' + CUS.map(function(c){ return '<option value="' + c.id + '">' + esc(c.name + (c.postcode ? ' (' + c.postcode + ')' : '')) + '</option>'; }).join(''); $('jc').value = sel || ''; }
 function loadJob(id, forCustomer){
   show('job'); JCUR = null; ADIRTY = false;
-  return Promise.all([loadCusList(), saleNow()]).then(function(){
-    if (!id || id === 'new') { JSTAT = 'booked'; drawSteps(); fillCus(forCustomer || ''); ['js','jn','jg','jco','jro','jp','jnotes','jpm'].forEach(function(k){ $(k).value = ''; }); $('jpaid').checked = false; $('jpmw').hidden = true; $('jbh').textContent = 'New job'; $('jdel').hidden = true; $('jfrom').textContent = ''; JL = []; drawLines(); drawMsgs(); drawPhotos(); return; }
+  return Promise.all([loadCusList(), saleNow(), settings()]).then(function(){
+    if (!id || id === 'new') { JSTAT = 'booked'; drawSteps(); fillCus(forCustomer || ''); ['js','jn','jg','jco','jro','jp','jnotes','jpm'].forEach(function(k){ $(k).value = ''; }); $('jpaid').checked = false; $('jpmw').hidden = true; $('jbh').textContent = 'New job'; $('jdel').hidden = true; $('jfrom').textContent = ''; JL = []; drawLines(); drawMsgs(); drawPhotos(); profileNote(forCustomer || ''); return; }
     return api('/rest/v1/cgc_jobs?id=eq.' + encodeURIComponent(id) + '&select=*').then(function(r){
       var j = JCUR = r && r[0]; if (!j) { toast('Job not found', true); return go('jobs', true); }
       JSTAT = j.status; drawSteps(); fillCus(j.customer_id);
       $('js').value = j.service || ''; $('jn').value = j.clubs == null ? '' : j.clubs; $('jg').value = j.grip || ''; $('jco').value = j.collect_on || ''; $('jro').value = j.return_on || '';
       $('jp').value = j.price == null ? '' : (+j.price % 1 ? (+j.price).toFixed(2) : +j.price); $('jpaid').checked = !!j.paid; $('jnotes').value = j.notes || '';
-      $('jpm').value = j.pay_method || ''; $('jpmw').hidden = !j.paid; JL = (j.lines || []).map(function(l){ return Object.assign({}, l); }); drawLines(); drawMsgs(); drawPhotos();
+      $('jpm').value = j.pay_method || ''; $('jpmw').hidden = !j.paid; JL = (j.lines || []).map(function(l){ return Object.assign({}, l); }); drawLines(); drawMsgs(); drawPhotos(); profileNote(j.customer_id);
       $('jbh').textContent = cusName(j.customer_id); $('jdel').hidden = false;
       $('jfrom').innerHTML = j.booking_id ? 'Made from a <a href="#booking/' + j.booking_id + '" style="font-weight:800">website booking</a>.' : '';
     });
@@ -1244,7 +1306,7 @@ $('jsave').addEventListener('click', function(){
   var wasRet = JCUR && JCUR.status === 'returned';
   var btn = this; btn.disabled = true;
   (JCUR ? api('/rest/v1/cgc_jobs?id=eq.' + JCUR.id, { method: 'PATCH', json: row, headers: { Prefer: 'return=representation' } }) : api('/rest/v1/cgc_jobs', { method: 'POST', json: [row], headers: { Prefer: 'return=representation' } }))
-    .then(function(r){ ADIRTY = false; toast('Job saved'); var j = r && r[0];
+    .then(function(r){ ADIRTY = false; toast('Job saved'); var j = r && r[0]; if (j) takeStock(j);
       if (j && j.status === 'returned' && !wasRet) { refreshAfterSheet = function(){}; go('job/' + j.id, true); setTimeout(function(){ returnedSheet(j); }, 300); }
       else if (j) go('job/' + j.id, true); else go('jobs', true); }).catch(function(e){ toast(e.message, true); }).then(function(){ btn.disabled = false; });
 });
@@ -1332,17 +1394,20 @@ function receipt(j, c){
   } else L.push([j.service || 'Club work', j.clubs ? j.clubs + ' clubs' : ''].filter(Boolean).join(', '));
   L.push('', 'Total: ' + (x.price || 'to be confirmed'));
   L.push(j.paid ? 'Paid' + (j.pay_method ? ' by ' + ({ cash: 'cash', bank: 'bank transfer', card: 'card', other: 'other' })[j.pay_method] : '') + '. Thank you!' : 'Still to pay.');
+  if (!j.paid) payLines().forEach(function(x){ L.push(x); });
   L.push('', 'Coastal Golf Co, the trading name of Stuart Horne · 07792 554989 · coastalgolfco.co.uk');
   return L.join('\n');
 }
 function messages(j, c){
   var x = jobFacts(j, c), st = j.status, out = [];
-  out.push({ id: 'confirm', on: st === 'booked', t: 'Confirm the collection', m: 'Hi ' + x.f + ', it\'s Stuart at Coastal Golf Co. Just confirming I\'ll collect your clubs' + (x.col ? ' on ' + x.col : ' soon') + '. Any questions, just reply here.' });
+  var tr = trackUrl(j), pl = payLines();
+  out.push({ id: 'confirm', on: st === 'booked', t: 'Confirm the collection', m: 'Hi ' + x.f + ', it\'s Stuart at Coastal Golf Co. Just confirming I\'ll collect your clubs' + (x.col ? ' on ' + x.col : ' soon') + '. Any questions, just reply here.' + (tr ? '\n\nYou can follow your clubs here: ' + tr : '') });
   out.push({ id: 'way', on: false, t: 'On my way', m: 'Hi ' + x.f + ', Stuart from Coastal Golf Co here. I\'m on my way to ' + (st === 'booked' ? 'collect' : 'drop off') + ' your clubs, see you shortly.' });
-  out.push({ id: 'got', on: st === 'collected' || st === 'in the workshop', t: 'Got your clubs', m: 'Hi ' + x.f + ', thanks, I\'ve got your ' + (x.n ? x.n + ' ' : '') + 'clubs. They\'ll be back with you ' + (x.ret ? 'by ' + x.ret : 'within 72 hours') + '.' });
+  out.push({ id: 'got', on: st === 'collected' || st === 'in the workshop', t: 'Got your clubs', m: 'Hi ' + x.f + ', thanks, I\'ve got your ' + (x.n ? x.n + ' ' : '') + 'clubs. They\'ll be back with you ' + (x.ret ? 'by ' + x.ret : 'within 72 hours') + '.' + (tr ? '\n\nFollow their progress here: ' + tr : '') });
+  if (tr) out.push({ id: 'track', on: false, t: 'Send the tracking link', m: 'Hi ' + x.f + ', you can see how your clubs are getting on here: ' + tr });
   out.push({ id: 'ready', on: st === 'ready', t: 'Ready to come back', m: 'Good news ' + x.f + ', your clubs are ready. I\'ll bring them back ' + (x.ret ? 'on ' + x.ret : 'soon, I\'ll message you a time') + '.' + (x.price ? ' The total is ' + x.price + '.' : '') });
   if (j.price != null) out.push({ id: 'receipt', on: st === 'returned' && j.paid, t: 'Send the receipt', m: receipt(j, c) });
-  if (!j.paid && j.price != null && (st === 'ready' || st === 'returned')) out.push({ id: 'pay', on: st === 'returned', t: 'Payment reminder', m: 'Hi ' + x.f + ', hope you\'re enjoying the fresh grips. Just a friendly reminder that ' + x.price + ' is still to pay for your clubs. Let me know how you\'d like to pay. Thanks, Stuart' });
+  if (!j.paid && j.price != null && (st === 'ready' || st === 'returned')) out.push({ id: 'pay', on: st === 'returned', t: 'Payment reminder', m: 'Hi ' + x.f + ', hope you\'re enjoying the fresh grips. Just a friendly reminder that ' + x.price + ' is still to pay for your clubs.' + (pl.length ? '\n\n' + pl.join('\n') + '\n\n' : ' Let me know how you\'d like to pay. ') + 'Thanks, Stuart' });
   out.push({ id: 'review', on: st === 'returned' && !j.review_asked_at, t: j.review_asked_at ? 'Ask for a review again' : 'Ask for a Google review', m: 'Thanks again ' + x.f + '! If you\'re happy with your clubs, a quick Google review would really help a small local business: ' + REVIEW });
   return out;
 }
@@ -1449,7 +1514,7 @@ function drawToday(st){
   var live = st.filter(function(s){ return !s.done; }), nc = live.filter(function(s){ return s.type === 'col'; }).length, nr = live.filter(function(s){ return s.type === 'ret'; }).length, nq = live.filter(function(s){ return s.type === 'req'; }).length;
   $('tdsum').textContent = live.length ? [nc ? nc + (nc === 1 ? ' collection' : ' collections') : '', nr ? nr + (nr === 1 ? ' return' : ' returns') : '', nq ? nq + (nq === 1 ? ' booking still to confirm' : ' bookings still to confirm') : ''].filter(Boolean).join(', ') + '. In driving order from ' + (HERE ? 'where you are' : 'Cranleigh') + '.' : 'Nothing booked for this day.';
   var pl = live.map(function(s){ return stopPlace(s).q; }).filter(Boolean);
-  $('tdroute').hidden = !pl.length; $('tdhere').hidden = !pl.length || !!HERE;
+  $('tdroute').hidden = !pl.length; $('tdhere').hidden = !pl.length || !!HERE; $('tdmiles').hidden = !st.some(function(x){ return x.type !== 'req'; });
   if (pl.length) { var dest = pl[pl.length - 1], way = pl.slice(0, -1).slice(0, 9); $('tdroute').href = 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(dest + ', UK') + (way.length ? '&waypoints=' + encodeURIComponent(way.map(function(w){ return w + ', UK'; }).join('|')) : ''); }
   var k = 0;
   $('tdl').innerHTML = st.length ? st.map(function(s){
@@ -1474,7 +1539,7 @@ $('tdl').addEventListener('click', function(e){
   api('/rest/v1/cgc_jobs?id=eq.' + id, { method: 'PATCH', json: patch, headers: { Prefer: 'return=minimal' } }).then(function(){
     Object.assign(j, patch, { updated_at: new Date().toISOString() });
     if (c) { toast('Collected. Back by ' + ukDate(j.return_on)); var cu = cusOf(j.customer_id), m = cu && cu.phone ? waText(cu.phone, messages(j, cu).filter(function(x){ return x.id === 'got'; })[0].m) : ''; if (m) sheet('<h2>Collected</h2><p class="help">Let ' + esc(first(cu.name)) + ' know you\'ve got them?</p><a class="btn wa" style="margin-top:12px;width:100%" href="' + m + '" target="_blank" rel="noopener" data-close>Send "Got your clubs" on WhatsApp</a><button class="btn line" type="button" data-close style="margin-top:10px;width:100%">Not now</button>'); }
-    else { refreshAfterSheet = function(){ drawToday(stopsFor(TDATE, TD.jobs, TD.bks)); }; returnedSheet(j); }
+    else { takeStock(j); refreshAfterSheet = function(){ drawToday(stopsFor(TDATE, TD.jobs, TD.bks)); }; returnedSheet(j); }
     drawToday(stopsFor(TDATE, TD.jobs, TD.bks));
   }).catch(function(err){ toast(err.message, true); (c || r).disabled = false; });
 });
@@ -1503,20 +1568,21 @@ $('dnext').addEventListener('click', function(){ DWK = addDays(DWK, 7); loadDiar
 
 /* ---- takings ---- */
 var TKF = 'week', TKJ = [];
-function since(f){ var t = today(); return f === 'week' ? monday(t) : f === 'month' ? t.slice(0, 8) + '01' : t.slice(0, 5) + '01-01'; }
+function since(f){ var t = today(); return f === 'week' ? monday(t) : f === 'month' ? t.slice(0, 8) + '01' : taxStart(t); }
 function loadTakings(){
   show('takings'); $('tko').innerHTML = '<p class="help">Loading…</p>';
-  return Promise.all([api('/rest/v1/cgc_jobs?select=id,customer_id,status,service,clubs,price,paid,paid_at,pay_method,return_on&price=not.is.null&order=paid_at.desc.nullslast&limit=1000'), loadCusList()]).then(function(r){ TKJ = r[0] || []; drawTakings(); })
+  return Promise.all([api('/rest/v1/cgc_jobs?select=id,customer_id,status,service,clubs,price,paid,paid_at,pay_method,return_on&price=not.is.null&order=paid_at.desc.nullslast&limit=1000'), loadCusList(), api('/rest/v1/cgc_expenses?select=*&on_date=gte.' + addDays(taxStart(), -1) + '&order=on_date.desc'), settings()]).then(function(r){ TKJ = r[0] || []; EXP = r[2] || []; drawTakings(); })
     .catch(function(e){ $('tko').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
 }
 function drawTakings(){
   var from = since(TKF), paid = TKJ.filter(function(j){ return j.paid && j.paid_at && j.paid_at.slice(0, 10) >= from; }), sum = function(a){ return a.reduce(function(s, j){ return s + (+j.price || 0); }, 0); };
   var by = {}; paid.forEach(function(j){ var m = j.pay_method || 'not noted'; by[m] = (by[m] || 0) + (+j.price || 0); });
   var owed = TKJ.filter(function(j){ return !j.paid && ['ready', 'returned'].indexOf(j.status) >= 0; });
-  $('tkt').innerHTML = '<div class="tile"><b>' + money(sum(paid)) + '</b><span>Taken ' + ({ week: 'this week', month: 'this month', year: 'this year' })[TKF] + '</span></div><div class="tile' + (owed.length ? ' hot' : '') + '"><b>' + money(sum(owed)) + '</b><span>Owed to you</span></div>' +
-    '<div class="tile"><b>' + paid.length + '</b><span>Paid jobs</span></div><div class="tile"><b>' + (paid.length ? money(sum(paid) / paid.length) : '–') + '</b><span>Average job</span></div>';
-  $('tkph').textContent = 'Paid ' + ({ week: 'this week', month: 'this month', year: 'this year' })[TKF] + (Object.keys(by).length ? ': ' + Object.keys(by).map(function(k){ return (({ cash: 'cash', bank: 'bank', card: 'card', other: 'other' })[k] || k) + ' ' + money(by[k]); }).join(', ') : '');
-  $('tko').innerHTML = owed.length ? owed.map(function(j){ var c = cusOf(j.customer_id), m = c && c.phone ? waText(c.phone, 'Hi ' + first(c.name) + ', hope you\'re enjoying the fresh grips. Just a friendly reminder that ' + money(j.price) + ' is still to pay for your clubs. Let me know how you\'d like to pay. Thanks, Stuart') : '';
+  var ex = drawExpenses(from), prof = sum(paid) - ex.spend - ex.allow;
+  $('tkt').innerHTML = '<div class="tile"><b>' + money(sum(paid)) + '</b><span>Taken ' + ({ week: 'this week', month: 'this month', year: 'this tax year' })[TKF] + '</span></div><div class="tile' + (owed.length ? ' hot' : '') + '"><b>' + money(sum(owed)) + '</b><span>Owed to you</span></div>' +
+    '<div class="tile"><b>' + money(ex.spend + ex.allow) + '</b><span>Expenses and mileage</span></div><div class="tile"><b' + (prof < 0 ? ' style="color:var(--bad)"' : '') + '>' + (prof < 0 ? '−' + money(-prof) : money(prof)) + '</b><span>Profit before tax</span></div>';
+  $('tkph').textContent = 'Paid ' + ({ week: 'this week', month: 'this month', year: 'this tax year' })[TKF] + (Object.keys(by).length ? ': ' + Object.keys(by).map(function(k){ return (({ cash: 'cash', bank: 'bank', card: 'card', other: 'other' })[k] || k) + ' ' + money(by[k]); }).join(', ') : '');
+  $('tko').innerHTML = owed.length ? owed.map(function(j){ var c = cusOf(j.customer_id), m = c && c.phone ? waText(c.phone, 'Hi ' + first(c.name) + ', hope you\'re enjoying the fresh grips. Just a friendly reminder that ' + money(j.price) + ' is still to pay for your clubs.' + (payLines().length ? '\n\n' + payLines().join('\n') + '\n\n' : ' Let me know how you\'d like to pay. ') + 'Thanks, Stuart') : '';
     return '<div class="tp"><span><a href="#job/' + j.id + '" style="font-weight:800;color:var(--navy)">' + esc((c && c.name) || 'No customer') + '</a><br><small style="color:var(--body)">' + esc(JLABEL[j.status]) + (j.return_on ? ' · ' + ukDate(j.return_on) : '') + '</small></span><span style="text-align:right"><b>' + money(j.price) + '</b>' + (m ? '<br><a href="' + m + '" target="_blank" rel="noopener" style="font-size:13px;font-weight:800;color:#128c4a">Remind</a>' : '') + '</span></div>'; }).join('') : '<p class="help">Nobody owes you anything. Nice.</p>';
   $('tkp').innerHTML = paid.length ? paid.map(function(j){ var c = cusOf(j.customer_id); return '<div class="tp"><span><a href="#job/' + j.id + '" style="font-weight:800;color:var(--navy)">' + esc((c && c.name) || 'No customer') + '</a><br><small style="color:var(--body)">' + ukDate(j.paid_at) + (j.pay_method ? ' · ' + esc(j.pay_method) : '') + '</small></span><b>' + money(j.price) + '</b></div>'; }).join('') : '<p class="help">No paid jobs yet in this period. Tick Paid on a job (or use Returned on the round) and it shows here.</p>';
 }
@@ -1552,7 +1618,153 @@ function homeExtras(){
     $('s-owed').textContent = money(owed); $('t-owed').classList.toggle('hot', owed > 0);
     var wk = monday(today()); $('s-week').textContent = money(jobs.filter(function(j){ return j.paid && j.paid_at && j.paid_at.slice(0, 10) >= wk; }).reduce(function(a, j){ return a + (+j.price || 0); }, 0));
     var due = dueList(jobs).length; $('s-due').textContent = due; $('t-due').classList.toggle('hot', due > 0);
+    return loadStockData().then(function(){ var lo = lowItems(); $('hlow').hidden = !lo.length; $('hlow').innerHTML = '<b>Running low on grips:</b> ' + esc(lo.slice(0, 4).map(function(k){ return k + ' (' + STK[k].qty + ')'; }).join(', ')) + (lo.length > 4 ? ' and ' + (lo.length - 4) + ' more' : '') + ' ›'; $('lowb').hidden = !lo.length; $('lowb').textContent = lo.length; });
   }).catch(function(){});
+}
+
+/* ================= tracking, payments, mileage and expenses, stock, bag profiles, insights, calendar ================= */
+var TRACK = 'https://www.coastalgolfco.co.uk/track/?t=';
+function trackUrl(j){ return j && j.track ? TRACK + j.track : ''; }
+
+/* ---- private settings (payment details) ---- */
+var SET = null;
+function settings(){ return SET ? Promise.resolve(SET) : api('/rest/v1/cgc_settings?select=k,v').then(function(r){ SET = {}; (r || []).forEach(function(x){ SET[x.k] = x.v; }); return SET; }).catch(function(){ SET = {}; return SET; }); }
+function payLines(){ return []; } /* payment details left out for now (Tony, 12 Nov) */
+function loadSettings(){
+  show('settings');
+  return Promise.all([settings(), api('/rest/v1/rpc/cgc_ical_key', { method: 'POST', json: {} })]).then(function(r){
+    var u = URL0.replace('https://', '') + '/functions/v1/cgc-ical?k=' + r[1];
+    $('calsub').href = 'webcal://' + u; $('calsub').setAttribute('data-u', 'https://' + u);
+  }).catch(function(e){ toast(e.message, true); });
+}
+$('calcopy').addEventListener('click', function(){ var u = $('calsub').getAttribute('data-u'); if (!u) return; (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function(){ toast('Calendar link copied'); }).catch(function(){ prompt('Copy this link', u); }); });
+
+/* ---- stock ---- */
+var STK = {}, STF = 'have';
+function allGrips(){ var a = []; CAT.forEach(function(g){ g[1].forEach(function(m){ a.push(g[0] + ' ' + m[0]); }); }); CATP.forEach(function(m){ a.push(m[0]); }); return a; }
+function loadStockData(){ return api('/rest/v1/cgc_stock?select=*').then(function(r){ STK = {}; (r || []).forEach(function(x){ STK[x.item] = x; }); return STK; }); }
+function lowItems(){ return Object.keys(STK).filter(function(k){ return STK[k].qty <= STK[k].low; }); }
+function loadStock(){ show('stock'); $('stl').innerHTML = '<p class="help">Loading…</p>'; return loadStockData().then(drawStock).catch(function(e){ $('stl').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; }); }
+function drawStock(){
+  var q = $('stq').value.trim().toLowerCase(), names = allGrips().concat(Object.keys(STK).filter(function(k){ return allGrips().indexOf(k) < 0; }));
+  var rows = names.filter(function(n){ var x = STK[n]; if (q && n.toLowerCase().indexOf(q) < 0) return false; return STF === 'all' || q ? true : STF === 'low' ? x && x.qty <= x.low : !!x; });
+  $('stl').innerHTML = rows.length ? '<div class="panel" style="padding-top:6px">' + rows.map(function(n){ var x = STK[n] || { qty: 0, low: 3 }; return '<div class="sk' + (STK[n] && x.qty <= x.low ? ' low' : '') + '" data-n="' + esc(n) + '"><div class="n">' + esc(n) + '<small>' + (STK[n] && x.qty <= x.low ? 'Running low · ' : '') + 'warn at ' + x.low + '</small></div><button type="button" data-d="-1" aria-label="One fewer">−</button><input type="text" inputmode="numeric" value="' + x.qty + '" aria-label="How many in stock"><button type="button" data-d="1" aria-label="One more">+</button></div>'; }).join('') + '</div>'
+    : '<div class="empty">' + (STF === 'have' ? 'No grips counted yet. Tap "Every grip" and add what\'s on your shelf.' : 'Nothing running low.') + '</div>';
+}
+var stT = {};
+function stockSet(n, qty, low){
+  qty = Math.max(0, Math.min(9999, qty | 0)); var x = STK[n] || { item: n, qty: 0, low: 3 }; x.qty = qty; if (low != null) x.low = low; STK[n] = x;
+  clearTimeout(stT[n]); stT[n] = setTimeout(function(){ api('/rest/v1/cgc_stock', { method: 'POST', json: [{ item: n, qty: x.qty, low: x.low, updated_at: new Date().toISOString() }], headers: { Prefer: 'resolution=merge-duplicates,return=minimal' } }).catch(function(e){ toast(e.message, true); }); }, 500);
+}
+$('stl').addEventListener('click', function(e){ var b = e.target.closest('button[data-d]'); if (!b) return; var r = b.closest('.sk'), n = r.getAttribute('data-n'), inp = r.querySelector('input'); var v = Math.max(0, (parseInt(inp.value, 10) || 0) + +b.getAttribute('data-d')); inp.value = v; stockSet(n, v); var x = STK[n]; r.classList.toggle('low', x.qty <= x.low); });
+$('stl').addEventListener('change', function(e){ if (e.target.tagName !== 'INPUT') return; var r = e.target.closest('.sk'); stockSet(r.getAttribute('data-n'), parseInt(e.target.value, 10) || 0); });
+$('stl').addEventListener('dblclick', function(e){ var r = e.target.closest('.sk .n'); if (!r) return; var n = r.parentNode.getAttribute('data-n'), l = prompt('Warn me when ' + n + ' gets down to', (STK[n] || {}).low != null ? STK[n].low : 3); if (l == null) return; stockSet(n, (STK[n] || {}).qty || 0, Math.max(0, parseInt(l, 10) || 0)); drawStock(); });
+$('stq').addEventListener('input', drawStock);
+$('stf').addEventListener('click', function(e){ var b = e.target.closest('button[data-f]'); if (!b) return; STF = b.getAttribute('data-f'); [].forEach.call(this.children, function(x){ x.setAttribute('aria-pressed', x === b); }); drawStock(); });
+/* take a job's grips off the shelf once, when it goes into the workshop (or later) */
+function takeStock(j){
+  if (!j || j.stock_taken || ['in the workshop', 'ready', 'returned'].indexOf(j.status) < 0 || !(j.lines || []).some(function(l){ return l.k === 'grip' || l.k === 'putter'; })) return Promise.resolve();
+  return loadStockData().then(function(){
+    var ups = [];
+    j.lines.forEach(function(l){ if ((l.k === 'grip' || l.k === 'putter') && STK[l.n]) { STK[l.n].qty = Math.max(0, STK[l.n].qty - (+l.q || 0)); ups.push({ item: l.n, qty: STK[l.n].qty, low: STK[l.n].low, updated_at: new Date().toISOString() }); } });
+    return (ups.length ? api('/rest/v1/cgc_stock', { method: 'POST', json: ups, headers: { Prefer: 'resolution=merge-duplicates,return=minimal' } }) : Promise.resolve())
+      .then(function(){ j.stock_taken = true; return api('/rest/v1/cgc_jobs?id=eq.' + j.id, { method: 'PATCH', json: { stock_taken: true }, headers: { Prefer: 'return=minimal' } }); })
+      .then(function(){ var low = ups.filter(function(u){ return u.qty <= u.low; }); if (low.length) toast('Running low: ' + low.map(function(u){ return u.item + ' (' + u.qty + ' left)'; }).join(', ')); });
+  }).catch(function(){});
+}
+$('ostock').addEventListener('click', function(){
+  loadStockData().then(function(){ var n = 0;
+    OF.items.forEach(function(r){ var p = (r.p || '').trim().toLowerCase(); if (!p) return; var hit = Object.keys(STK).filter(function(k){ var kk = k.toLowerCase(); return kk === p || kk.indexOf(p) >= 0 || p.indexOf(kk.replace(/^(golf pride|g-rip|superstroke|winn|jumbomax) /, '')) >= 0; })[0]; if (hit) { r.q = String(STK[hit].qty); n++; } });
+    drawOrows(); odirty(true); odraw(); toast(n ? 'Filled ' + n + (n === 1 ? ' quantity' : ' quantities') + ' from your stock' : 'No matching grips in your stock list yet', !n);
+  }).catch(function(e){ toast(e.message, true); });
+});
+
+/* ---- bag profiles ---- */
+$('cglist').innerHTML = allGrips().map(function(n){ return '<option value="' + esc(n) + '">'; }).join('');
+['cgs', 'cgl', 'cbag', 'csp'].forEach(function(k){ $(k).addEventListener('input', adirty); $(k).addEventListener('change', adirty); });
+function profileNote(cid){
+  var c = cusOf(cid), e = $('jcprof'); if (!c) { e.hidden = true; return; }
+  var bits = [c.grip_size ? '<b>Grip size:</b> ' + esc(c.grip_size) : '', c.grip_pref ? '<b>Usual grip:</b> ' + esc(c.grip_pref) : '', c.bag ? '<b>Bag:</b> ' + esc(c.bag) : '', c.specs ? '<b>Specs:</b> ' + esc(c.specs) : ''].filter(Boolean);
+  e.innerHTML = bits.join('<br>'); e.hidden = !bits.length;
+}
+$('jc').addEventListener('change', function(){ profileNote(this.value); });
+
+/* ---- mileage and expenses (HMRC: 45p a mile for the first 10,000 business miles in a tax year, 25p after) ---- */
+var EXP = [];
+function taxStart(d){ d = d || today(); var y = +d.slice(0, 4); return (d >= y + '-04-06' ? y : y - 1) + '-04-06'; }
+function mileAllow(miles, before){ var first = Math.max(0, Math.min(miles, 10000 - (before || 0))); return Math.round((first * 0.45 + (miles - first) * 0.25) * 100) / 100; }
+function expSheet(kind, preset){
+  preset = preset || {};
+  var cats = ['Grips and stock', 'Tape and solvent', 'Tools and equipment', 'Fuel (if not claiming mileage)', 'Phone and internet', 'Website and software', 'Advertising', 'Insurance', 'Other'];
+  sheet('<h2>' + (kind === 'mileage' ? 'Log business miles' : 'Add an expense') + '</h2>' +
+    (kind === 'mileage' ? '<p class="help">Miles driven for the business, for example a collection round. Claimed at the HMRC rate: 45p a mile for the first 10,000 miles in a tax year, then 25p.</p>' : '<p class="help">Anything you buy for the business. Keep the receipt: add a photo of it here.</p>') +
+    '<label for="xd">Date</label><input id="xd" type="date" value="' + (preset.on_date || today()) + '">' +
+    (kind === 'mileage' ? '<label for="xm">Miles</label><input id="xm" type="text" inputmode="decimal" value="' + (preset.miles || '') + '">' :
+      '<label for="xa">Amount</label><div class="pct"><span>£</span><input id="xa" type="text" inputmode="decimal"></div><label for="xc">What for</label><select id="xc">' + cats.map(function(c){ return '<option>' + c + '</option>'; }).join('') + '</select><label class="btn line sm" style="margin-top:12px">Add a photo of the receipt<input id="xr" type="file" accept="image/*" hidden></label><span class="help" id="xrn"></span>') +
+    '<label for="xn">Note <small>(optional)</small></label><input id="xn" type="text" maxlength="200" value="' + esc(preset.note || '') + '">' +
+    '<div class="row" style="margin-top:16px"><button class="btn gold" type="button" id="xsave">Save</button><button class="btn line" type="button" data-close>Cancel</button></div>');
+  var rf = null; if ($('xr')) $('xr').addEventListener('change', function(){ rf = this.files && this.files[0]; $('xrn').textContent = rf ? ' Photo added' : ''; });
+  $('xsave').onclick = function(){
+    var row = { kind: kind, on_date: $('xd').value || today(), note: $('xn').value.trim() || null };
+    if (kind === 'mileage') { row.miles = parseFloat($('xm').value); if (!(row.miles > 0)) return toast('Add the number of miles', true); }
+    else { row.amount = parseFloat($('xa').value.replace(/[£,\s]/g, '')); if (!(row.amount > 0)) return toast('Add the amount', true); row.category = $('xc').value; }
+    this.disabled = true;
+    var up = rf ? session().then(function(t){ return shrink(rf).then(function(b){ var path = 'expenses/' + Date.now() + '.jpg'; return fetch(URL0 + '/storage/v1/object/cgc-photos/' + path, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + t.access_token, 'Content-Type': 'image/jpeg' }, body: b }).then(function(r){ if (!r.ok) throw new Error('Receipt photo didn\'t upload'); row.receipt = path; }); }); }) : Promise.resolve();
+    up.then(function(){ return api('/rest/v1/cgc_expenses', { method: 'POST', json: [row], headers: { Prefer: 'return=minimal' } }); })
+      .then(function(){ unsheet(); toast('Saved'); if (!$('v-takings').hidden) loadTakings(); }).catch(function(e){ toast(e.message, true); $('xsave').disabled = false; });
+  };
+}
+$('exm').addEventListener('click', function(){ expSheet('mileage'); });
+$('exe').addEventListener('click', function(){ expSheet('expense'); });
+$('tdmiles').addEventListener('click', function(){
+  var st = order(stopsFor(TDATE, TD.jobs, TD.bks)).filter(function(s){ return s.type !== 'req'; }), at = BASE, km0 = 0;
+  st.forEach(function(s){ var g = GEO[stopPlace(s).pc]; if (g) { km0 += km(at, g); at = g; } }); km0 += km(at, BASE);
+  var miles = Math.round(km0 * 0.621371 * 1.25); // straight lines to road miles
+  expSheet('mileage', { on_date: TDATE, miles: miles || '', note: 'Collection round, ' + st.length + (st.length === 1 ? ' stop' : ' stops') + (miles ? ' (estimate: check your mileage)' : '') });
+});
+$('exl').addEventListener('click', function(e){ var b = e.target.closest('[data-xdel]'); if (!b || !confirm('Delete this entry?')) return; api('/rest/v1/cgc_expenses?id=eq.' + b.getAttribute('data-xdel'), { method: 'DELETE' }).then(function(){ toast('Deleted'); loadTakings(); }).catch(function(err){ toast(err.message, true); }); });
+$('exl').addEventListener('click', function(e){ var a = e.target.closest('[data-rcpt]'); if (!a) return; e.preventDefault(); api('/storage/v1/object/sign/cgc-photos', { method: 'POST', json: { expiresIn: 600, paths: [a.getAttribute('data-rcpt')] } }).then(function(r){ if (r && r[0] && r[0].signedURL) window.open(URL0 + '/storage/v1' + r[0].signedURL, '_blank'); }); });
+function drawExpenses(from){
+  var rows = EXP.filter(function(x){ return x.on_date >= from; }), miles = rows.filter(function(x){ return x.kind === 'mileage'; }), spend = rows.filter(function(x){ return x.kind === 'expense'; });
+  var ts = taxStart(), before = EXP.filter(function(x){ return x.kind === 'mileage' && x.on_date >= ts && x.on_date < from; }).reduce(function(a, x){ return a + (+x.miles || 0); }, 0);
+  if (from < ts) before = 0;
+  var mi = miles.reduce(function(a, x){ return a + (+x.miles || 0); }, 0), allow = mileAllow(mi, before), sp = spend.reduce(function(a, x){ return a + (+x.amount || 0); }, 0);
+  $('exl').innerHTML = '<div class="tp"><span>Business miles</span><b>' + (Math.round(mi * 10) / 10) + ' miles · ' + money(allow) + '</b></div><div class="tp"><span>Expenses</span><b>' + money(sp) + '</b></div>' +
+    rows.slice(0, 40).map(function(x){ return '<div class="tp"><span>' + esc(x.kind === 'mileage' ? (+x.miles) + ' miles' : x.category || 'Expense') + '<br><small style="color:var(--body)">' + ukDate(x.on_date) + (x.note ? ' · ' + esc(x.note) : '') + (x.receipt ? ' · <a href="#" data-rcpt="' + esc(x.receipt) + '" style="color:var(--bronze);font-weight:800">Receipt</a>' : '') + '</small></span><span style="text-align:right"><b>' + (x.kind === 'mileage' ? '' : money(x.amount)) + '</b><br><button type="button" data-xdel="' + x.id + '" style="border:0;background:none;color:var(--bad);font-weight:800;font-size:13px;cursor:pointer">Delete</button></span></div>'; }).join('');
+  return { miles: mi, allow: allow, spend: sp };
+}
+function csvCell(v){ v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+$('tkcsv').addEventListener('click', function(){
+  var ts = taxStart(), te = (+ts.slice(0, 4) + 1) + '-04-05', L = [['Type', 'Date', 'Description', 'Customer or category', 'Miles', 'Money in (£)', 'Money out (£)', 'Payment method']];
+  TKJ.filter(function(j){ return j.paid && j.paid_at && j.paid_at.slice(0, 10) >= ts; }).forEach(function(j){ var c = cusOf(j.customer_id); L.push(['Income', j.paid_at.slice(0, 10), [j.service, j.clubs ? j.clubs + ' clubs' : ''].filter(Boolean).join(', '), c ? c.name : '', '', (+j.price).toFixed(2), '', j.pay_method || '']); });
+  EXP.filter(function(x){ return x.on_date >= ts; }).forEach(function(x){ L.push(x.kind === 'mileage' ? ['Business miles', x.on_date, x.note || '', '', x.miles, '', '', ''] : ['Expense', x.on_date, x.note || '', x.category || '', '', '', (+x.amount).toFixed(2), '']); });
+  var mi = EXP.filter(function(x){ return x.kind === 'mileage' && x.on_date >= ts; }).reduce(function(a, x){ return a + (+x.miles || 0); }, 0);
+  L.push([]); L.push(['Mileage allowance (HMRC 45p/25p)', '', '', '', Math.round(mi * 10) / 10, '', mileAllow(mi, 0).toFixed(2), '']);
+  var csv = L.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n'), a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' })); a.download = 'Coastal Golf Co tax year ' + ts.slice(0, 4) + '-' + te.slice(2, 4) + '.csv'; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); }, 1000);
+});
+
+/* ---- insights ---- */
+function loadInsights(){
+  show('insights'); $('int').innerHTML = ''; $('inm').innerHTML = '<p class="help">Loading…</p>';
+  return Promise.all([api('/rest/v1/rpc/cgc_app_insights', { method: 'POST', json: {} }), api('/rest/v1/cgc_jobs?select=customer_id,status,service,lines,clubs,price,paid&limit=3000'), loadCusList()]).then(function(r){
+    var s = r[0] || {}, jobs = r[1] || [], priced = jobs.filter(function(j){ return j.price != null; });
+    var per = {}; jobs.forEach(function(j){ if (j.customer_id) per[j.customer_id] = (per[j.customer_id] || 0) + 1; }); var cs = Object.keys(per), rep = cs.filter(function(k){ return per[k] > 1; }).length;
+    var mm = s.months || [], v6 = mm.reduce(function(a, m){ return a + m.visitors; }, 0), b6 = mm.reduce(function(a, m){ return a + m.bookings; }, 0);
+    $('int').innerHTML = '<div class="tile"><b>' + jobs.length + '</b><span>Jobs so far</span></div><div class="tile"><b>' + (priced.length ? money(priced.reduce(function(a, j){ return a + (+j.price); }, 0) / priced.length) : '–') + '</b><span>Average job</span></div>' +
+      '<div class="tile"><b>' + (cs.length ? Math.round(rep / cs.length * 100) + '%' : '–') + '</b><span>Customers who came back</span></div><div class="tile"><b>' + (v6 ? (Math.round(b6 / v6 * 1000) / 10) + '%' : '–') + '</b><span>Visitors who booked</span></div>';
+    var mx = Math.max.apply(null, mm.map(function(m){ return m.visitors; }).concat([1])), mb = Math.max.apply(null, mm.map(function(m){ return m.bookings; }).concat([1]));
+    $('inm').innerHTML = mm.map(function(m){ return '<div><em style="font-style:normal;color:var(--navy);font-weight:800">' + m.visitors + ' · ' + m.bookings + '</em><div class="pair"><i style="height:' + Math.max(2, Math.round(m.visitors / mx * 88)) + 'px"></i><i class="b" style="height:' + Math.max(2, Math.round(m.bookings / mb * 88)) + 'px"></i></div>' + new Date(m.month + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'short' }) + '</div>'; }).join('');
+    $('inconv').innerHTML = '<span class="key"><span>Visitors</span><span class="b">Bookings</span></span>' + (v6 ? 'Over 6 months, ' + v6 + ' visitors made ' + b6 + (b6 === 1 ? ' booking.' : ' bookings.') : '');
+    var g = {}; jobs.forEach(function(j){ (j.lines || []).forEach(function(l){ if (l.k === 'grip' || l.k === 'putter') g[l.n] = (g[l.n] || 0) + (+l.q || 0); }); });
+    var gk = Object.keys(g).sort(function(a, z){ return g[z] - g[a]; }).slice(0, 8), gm = gk.length ? g[gk[0]] : 1;
+    $('ing').innerHTML = gk.length ? gk.map(function(k){ return '<div class="tp" style="display:block"><div style="display:flex;justify-content:space-between"><span>' + esc(k) + '</span><b>' + g[k] + '</b></div><div class="bar1" style="width:' + Math.round(g[k] / gm * 100) + '%"></div></div>'; }).join('') : '<p class="help">Shows once jobs are priced with the calculator.</p>';
+    var a = {}; jobs.forEach(function(j){ var c = cusOf(j.customer_id), d = c && c.postcode ? c.postcode.toUpperCase().split(' ')[0] : ''; if (d) a[d] = (a[d] || 0) + 1; });
+    var ak = Object.keys(a).sort(function(x, z){ return a[z] - a[x]; }).slice(0, 8), am = ak.length ? a[ak[0]] : 1;
+    $('ina').innerHTML = ak.length ? ak.map(function(k){ return '<div class="tp" style="display:block"><div style="display:flex;justify-content:space-between"><span>' + esc(k) + '</span><b>' + a[k] + (a[k] === 1 ? ' job' : ' jobs') + '</b></div><div class="bar1" style="width:' + Math.round(a[k] / am * 100) + '%;background:var(--navy)"></div></div>'; }).join('') : '<p class="help">Shows once customers have postcodes.</p>';
+    var so = s.sources || [];
+    $('ins').innerHTML = so.length ? so.map(function(x){ return '<div class="tp"><span>' + esc(x.src) + '</span><b>' + x.n + '</b></div>'; }).join('') + ((s.devices || []).length ? '<p class="help" style="margin-top:8px">' + s.devices.map(function(d){ return esc(d.device) + ' ' + d.n; }).join(' · ') + '</p>' : '') : '<p class="help">No visits recorded in the last 30 days.</p>';
+  }).catch(function(e){ $('inm').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
 }
 
 /* ---- customers ---- */
@@ -1571,17 +1783,17 @@ $('csq').addEventListener('input', drawCus);
 var CCUR = null;
 function loadCustomer(id){
   show('customer'); CCUR = null; ADIRTY = false; $('cjl').innerHTML = ''; $('cjh').hidden = true; $('csqk').innerHTML = '';
-  if (!id || id === 'new') { ['cn','cp','ce','ca','cpc','cno'].forEach(function(k){ $(k).value = ''; }); $('csh').textContent = 'New customer'; $('cdel').hidden = true; $('cjob').hidden = true; return Promise.resolve(); }
+  if (!id || id === 'new') { ['cn','cp','ce','ca','cpc','cno','cgs','cgl','cbag','csp'].forEach(function(k){ $(k).value = ''; }); $('csh').textContent = 'New customer'; $('cdel').hidden = true; $('cjob').hidden = true; return Promise.resolve(); }
   return Promise.all([api('/rest/v1/cgc_customers?id=eq.' + encodeURIComponent(id) + '&select=*'), api('/rest/v1/cgc_jobs?customer_id=eq.' + encodeURIComponent(id) + '&select=*&order=created_at.desc')]).then(function(r){
     var c = CCUR = r[0] && r[0][0]; if (!c) { toast('Customer not found', true); return go('customers', true); }
-    $('cn').value = c.name; $('cp').value = c.phone || ''; $('ce').value = c.email || ''; $('cpc').value = c.postcode || ''; $('ca').value = c.address || ''; $('cno').value = c.notes || '';
+    $('cn').value = c.name; $('cp').value = c.phone || ''; $('ce').value = c.email || ''; $('cpc').value = c.postcode || ''; $('ca').value = c.address || ''; $('cno').value = c.notes || ''; $('cgs').value = c.grip_size || ''; $('cgl').value = c.grip_pref || ''; $('cbag').value = c.bag || ''; $('csp').value = c.specs || '';
     $('csh').textContent = c.name; $('csqk').innerHTML = quick(c.phone, c.email); $('cdel').hidden = false; $('cjob').hidden = false;
     var js = r[1] || []; $('cjh').hidden = !js.length; $('cjl').innerHTML = js.map(function(j){ return jobRow(j, false); }).join('');
   }).catch(function(e){ toast(e.message, true); });
 }
 ['cn','cp','ce','ca','cpc','cno'].forEach(function(k){ $(k).addEventListener('input', adirty); });
 $('csave').addEventListener('click', function(){
-  var row = { name: $('cn').value.trim(), phone: $('cp').value.trim() || null, email: $('ce').value.trim() || null, postcode: $('cpc').value.trim().toUpperCase() || null, address: $('ca').value.trim() || null, notes: $('cno').value.trim() || null };
+  var row = { name: $('cn').value.trim(), phone: $('cp').value.trim() || null, email: $('ce').value.trim() || null, postcode: $('cpc').value.trim().toUpperCase() || null, address: $('ca').value.trim() || null, notes: $('cno').value.trim() || null, grip_size: $('cgs').value || null, grip_pref: $('cgl').value.trim() || null, bag: $('cbag').value.trim() || null, specs: $('csp').value.trim() || null };
   if (!row.name) return toast('Add their name', true);
   var btn = this; btn.disabled = true;
   (CCUR ? api('/rest/v1/cgc_customers?id=eq.' + CCUR.id, { method: 'PATCH', json: row, headers: { Prefer: 'return=minimal' } }).then(function(){ return CCUR.id; })

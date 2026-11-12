@@ -87,5 +87,27 @@ Deno.serve(async (req) => {
     } catch (e) { console.error("send failed", e); }
   }
   if (emailed) await db.from("cgc_bookings").update({ emailed: true }).eq("id", saved.id);
+
+  // a thank-you to the customer, so they know the request arrived (never holds up the booking)
+  if (key && row.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email)) {
+    const first = esc(row.name!.split(/\s+/)[0]);
+    const what = [row.service, row.clubs ? row.clubs + " clubs" : "", row.collection_day ? "collection on " + new Date(row.collection_day + "T12:00:00Z").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) : ""].filter(Boolean).join(", ");
+    const html = `<div style="font-family:system-ui,sans-serif;font-size:16px;line-height:1.6;color:#022042;max-width:520px">
+      <h2 style="margin:0 0 10px">Thanks, ${first}, we've got your booking request</h2>
+      <p>Stuart will be in touch shortly to confirm a collection time.${what ? " You asked for: " + esc(what) + "." : ""}</p>
+      <p>Need anything sooner? Call or WhatsApp Stuart on <a href="tel:07792554989">07792 554989</a>, or just reply to this email.</p>
+      <p style="margin-top:22px">Coastal Golf Co<br><span style="color:#666;font-size:13px">Coastal Golf Co, the trading name of Stuart Horne · <a href="https://www.coastalgolfco.co.uk/">coastalgolfco.co.uk</a></span></p></div>`;
+    try {
+      const r = await fetch("https://api.resend.com/emails", {
+        method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: `Coastal Golf Co <${Deno.env.get("BOOKING_FROM") ?? "bookings@coastalgolfco.co.uk"}>`, to: [row.email], reply_to: Deno.env.get("BOOKING_TO") ?? "hello@coastalgolfco.co.uk",
+          subject: "Thanks for your booking request", html,
+          text: `Thanks, ${row.name!.split(/\s+/)[0]}, we've got your booking request.\n\nStuart will be in touch shortly to confirm a collection time.${what ? " You asked for: " + what + "." : ""}\n\nNeed anything sooner? Call or WhatsApp Stuart on 07792 554989, or reply to this email.\n\nCoastal Golf Co, the trading name of Stuart Horne\ncoastalgolfco.co.uk`,
+        }),
+      });
+      if (!r.ok) console.error("customer thanks refused", r.status, await r.text());
+    } catch (e) { console.error("customer thanks failed", e); }
+  }
   return json({ ok: true, emailed });
 });
