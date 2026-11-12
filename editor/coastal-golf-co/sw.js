@@ -1,6 +1,6 @@
 // CGC Admin app: opens with no signal (the screens come from the cache when the network can't)
 // and shows phone alerts for new bookings. Data from Supabase is never cached here.
-const CACHE = "cgc-admin-v4";
+const CACHE = "cgc-admin-v5";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./badge.svg", "./icons/icon-192.png"];
 
 self.addEventListener("install", (e) => {

@@ -112,7 +112,7 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
   .nav button[aria-current=page]{border-top-color:var(--gold)}
   /* app shell: the page never scrolls, only the middle does, so the tab bar can't drift up */
   html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-  body{display:flex;flex-direction:column;height:100vh;height:100dvh}
+  body{display:flex;flex-direction:column;position:fixed;top:0;right:0;bottom:0;left:0;width:100%;height:auto;margin:0}
   body>header.top{flex:none}
   body>main{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;width:100%}
   .nav{position:static;flex:none;order:9}
@@ -225,7 +225,8 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 .stop .a .btn{min-height:40px;padding:0 14px;font-size:14px}
 .btn.wa{background:#25d366;border-color:#25d366;color:#05371a}
 .day{margin-top:16px}.day h3{font:700 17px/1.2 'Oswald',Impact,sans-serif;text-transform:uppercase;margin:0 0 6px;display:flex;justify-content:space-between;align-items:center}
-.day h3 button{border:0;background:none;color:var(--bronze);font:800 13px 'Mulish',sans-serif;cursor:pointer;text-transform:none}
+.day h3{gap:10px}.day h3 span{min-width:0}
+.day h3 button{flex:none;border:1.5px solid var(--bronze);background:#fff;color:var(--bronze);font:800 13px 'Mulish',sans-serif;cursor:pointer;text-transform:none;border-radius:999px;padding:5px 12px;white-space:nowrap}
 .day.today h3{color:var(--bronze)}
 .de{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:6px;font-size:14.5px;cursor:pointer}
 .de i{font-style:normal;font-weight:800;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:999px;margin-right:6px;background:#f6e7c1;color:var(--bronze)}
@@ -479,7 +480,8 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 </section>
 
 <section id="v-diary" hidden>
-  <div class="row" style="justify-content:space-between"><h1 style="font-size:32px">Diary</h1><button class="btn line sm" type="button" data-go="today">Today</button></div>
+  <button class="btn line sm back" type="button" data-go="more">‹ More</button>
+  <div class="row" style="justify-content:space-between;margin-top:10px"><h1 style="font-size:32px">Diary</h1><button class="btn line sm" type="button" data-go="today">Today</button></div>
   <div class="row" style="justify-content:space-between;margin-top:12px;flex-wrap:nowrap"><button class="btn line sm" type="button" id="dprev" aria-label="Previous week">‹</button><b id="dwk" style="text-align:center"></b><button class="btn line sm" type="button" id="dnext" aria-label="Next week">›</button></div>
   <div id="dl"></div>
 </section>
@@ -612,7 +614,7 @@ var URL0 = 'https://acdpgarasgfhvupzsbxf.supabase.co', KEY = 'sb_publishable_OWT
 var SITE = 'https://www.coastalgolfco.co.uk/', BUCKET = 'cgc-journal', AUTH = 'cgc-editor-auth';
 var $ = function(id){ return document.getElementById(id); };
 var VIEWS = ['gate','home','today','diary','more','takings','remind','stock','insights','settings','bookings','booking','jobs','job','customers','customer','website','list','edit','words','offers','sale'];
-var GROUP = { home: 'home', today: 'today', diary: 'today', bookings: 'bookings', booking: 'bookings', jobs: 'jobs', job: 'jobs' };
+var GROUP = { home: 'home', today: 'today', bookings: 'bookings', booking: 'bookings', jobs: 'jobs', job: 'jobs' };
 function show(v){ VIEWS.forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('obar').hidden = v !== 'offers'; $('sbar').hidden = v !== 'sale'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
   document.body.classList.toggle('hasnav', !$('nav').hidden);
   var g = GROUP[v] || 'more'; if ($('sheet')) $('sheet').hidden = true;
@@ -1558,7 +1560,7 @@ function loadDiary(){
       var d = addDays(DWK, i), ev = [];
       jobs.forEach(function(j){ if (j.collect_on === d) ev.push('<button class="de" type="button" data-go="job/' + j.id + '"><i>Collect</i>' + esc(cusName(j.customer_id)) + (j.clubs ? ' · ' + j.clubs + ' clubs' : '') + (j.status !== 'booked' ? ' ✓' : '') + '</button>'); if (j.return_on === d) ev.push('<button class="de" type="button" data-go="job/' + j.id + '"><i class="r">Return</i>' + esc(cusName(j.customer_id)) + (j.status === 'returned' ? ' ✓' : '') + '</button>'); });
       bks.forEach(function(b){ if (b.collection_day === d) ev.push('<button class="de" type="button" data-go="booking/' + b.id + '"><i class="q">Request</i>' + esc(b.name) + (b.clubs ? ' · ' + b.clubs + ' clubs' : '') + '</button>'); });
-      html += '<div class="day' + (d === today() ? ' today' : '') + '"><h3><span>' + ukDate(d, true) + '</span>' + (ev.length ? '<button type="button" data-go="today:' + d + '">Round ›</button>' : '') + '</h3>' + (ev.length ? ev.join('') : '<div class="de none">Free</div>') + '</div>';
+      html += '<div class="day' + (d === today() ? ' today' : '') + '"><h3><span>' + ukDate(d, true) + '</span>' + (ev.length ? '<button type="button" data-go="today:' + d + '">See round</button>' : '') + '</h3>' + (ev.length ? ev.join('') : '<div class="de none">Free</div>') + '</div>';
     }
     $('dl').innerHTML = html;
   }).catch(function(e){ $('dl').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
