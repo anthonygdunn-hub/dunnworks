@@ -80,3 +80,27 @@ alter table public.cgc_bookings drop constraint cgc_bookings_status_check;
 alter table public.cgc_bookings add constraint cgc_bookings_status_check check (status in ('new','contacted','booked','done','spam','declined'));
 create policy "editors add bookings" on public.cgc_bookings for insert with check (public.cgc_is_editor());
 create policy "editors delete bookings" on public.cgc_bookings for delete using (public.cgc_is_editor());
+
+-- Added 12 Nov 2026 (migration cgc_admin_app_more): round, takings, prices, photos, review asks, regrip reminders
+alter table public.cgc_jobs add column if not exists pay_method text check (pay_method is null or pay_method in ('cash','bank','card','other'));
+alter table public.cgc_jobs add column if not exists paid_at timestamptz;
+alter table public.cgc_jobs add column if not exists lines jsonb;
+alter table public.cgc_jobs add column if not exists photos jsonb not null default '[]'::jsonb;
+alter table public.cgc_jobs add column if not exists review_asked_at timestamptz;
+alter table public.cgc_customers add column if not exists address text check (address is null or length(address) <= 200);
+alter table public.cgc_customers add column if not exists reminded_at timestamptz;
+alter table public.cgc_bookings add column if not exists address text check (address is null or length(address) <= 200);
+create or replace function public.cgc_jobs_touch() returns trigger language plpgsql set search_path = public as $$
+begin
+  new.updated_at := now();
+  if new.paid and new.paid_at is null then new.paid_at := now(); end if;
+  if not new.paid then new.paid_at := null; end if;
+  return new;
+end $$;
+drop trigger if exists cgc_jobs_touch on public.cgc_jobs;
+create trigger cgc_jobs_touch before insert or update on public.cgc_jobs for each row execute function public.cgc_jobs_touch();
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('cgc-photos', 'cgc-photos', false, 8388608, array['image/jpeg','image/png','image/webp']) on conflict (id) do nothing;
+create policy "cgc editors read photos" on storage.objects for select using (bucket_id = 'cgc-photos' and public.cgc_is_editor());
+create policy "cgc editors add photos" on storage.objects for insert with check (bucket_id = 'cgc-photos' and public.cgc_is_editor());
+create policy "cgc editors delete photos" on storage.objects for delete using (bucket_id = 'cgc-photos' and public.cgc_is_editor());

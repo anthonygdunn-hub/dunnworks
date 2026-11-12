@@ -198,11 +198,49 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 input[type=date]{-webkit-appearance:none;appearance:none;min-height:48px;text-align:left}
 input[type=date]::-webkit-date-and-time-value{text-align:left}
 .grid2>div{min-width:0}
+.msgs{display:grid;gap:8px}
+.msgs a{display:flex;gap:10px;align-items:center;justify-content:space-between;text-decoration:none;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-weight:800}
+.msgs a.now{border-color:#25d366;background:#effbf3}
+.msgs a small{font-weight:600;color:var(--body);font-size:13px}
+.msgs a span{display:block}
+.ln{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14.5px}
+.ln:first-child{border-top:0}
+.ln .n{flex:1;min-width:0}.ln .n small{display:block;color:var(--body);font-size:12.5px}
+.ln input{width:72px;flex:none;border:1px solid #cdbf9c;border-radius:8px;padding:7px 8px;font-size:16px;text-align:right}
+.ln .q{width:52px;text-align:center}
+.ln button{flex:none;border:0;background:none;color:var(--bad);font-size:22px;line-height:1;padding:4px 6px;cursor:pointer}
+.sum{margin-top:10px;border-top:2px solid var(--navy);padding-top:8px;font-size:14.5px}
+.sum div{display:flex;justify-content:space-between;padding:3px 0}.sum .sv{color:var(--green);font-weight:800}
+.sum .tt{font:700 22px/1.2 'Oswald',Impact,sans-serif;text-transform:uppercase;padding-top:6px}
+.ph{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.ph figure{margin:0;position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#ece4cf}
+.ph img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.ph button{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(1,22,46,.75);color:#fff;font-size:16px;cursor:pointer}
+.stop{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--gold);border-radius:12px;padding:12px 14px}
+.stop.ret{border-left-color:var(--green)}.stop.req{border-left-color:#cdbf9c}.stop.done{opacity:.55}
+.stop .h{display:flex;gap:10px;align-items:baseline;justify-content:space-between}
+.stop .num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:inline-grid;place-items:center;font-weight:800;font-size:14px;margin-right:6px}
+.stop b{font-size:17px}.stop .d{font-size:14px;color:var(--body);margin-top:4px}
+.stop .a{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.stop .a .btn{min-height:40px;padding:0 14px;font-size:14px}
+.btn.wa{background:#25d366;border-color:#25d366;color:#05371a}
+.day{margin-top:16px}.day h3{font:700 17px/1.2 'Oswald',Impact,sans-serif;text-transform:uppercase;margin:0 0 6px;display:flex;justify-content:space-between;align-items:center}
+.day h3 button{border:0;background:none;color:var(--bronze);font:800 13px 'Mulish',sans-serif;cursor:pointer;text-transform:none}
+.day.today h3{color:var(--bronze)}
+.de{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:6px;font-size:14.5px;cursor:pointer}
+.de i{font-style:normal;font-weight:800;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:999px;margin-right:6px;background:#f6e7c1;color:var(--bronze)}
+.de i.r{background:#d7eedd;color:var(--green)}.de i.q{background:#ece4cf;color:var(--body)}
+.de.none{color:var(--body);cursor:default;border-style:dashed}
+.sheet{position:fixed;inset:0;background:rgba(1,22,46,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sin{background:var(--cream);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+.sin h2{font-size:24px;margin:0 0 6px}
+.pays{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+.big{font:700 40px/1 'Oswald',Impact,sans-serif}
 </style>
 </head>
 <body>
 <header class="top"><div class="in"><div class="brand"><img src="badge.svg" alt=""><div><b>Coastal Golf Co</b><small>Admin</small></div></div><button type="button" id="out" hidden>Sign out</button></div></header>
-<nav class="nav" id="nav" hidden aria-label="Editor"><div class="in"><button type="button" data-v="home" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home<i class="dot" id="nbk" hidden></i></button><button type="button" data-v="bookings"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 9h16M9 4v5"/></svg>Bookings</button><button type="button" data-v="jobs"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>Jobs</button><button type="button" data-v="customers"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 0 1 0 8M22 21c0-3-2-5-4-6"/></svg>Customers</button><button type="button" data-v="website"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Website</button></div></nav>
+<nav class="nav" id="nav" hidden aria-label="Editor"><div class="in"><button type="button" data-v="home" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home<i class="dot" id="nbk" hidden></i></button><button type="button" data-v="today"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Today</button><button type="button" data-v="bookings"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 9h16M9 4v5"/></svg>Bookings</button><button type="button" data-v="jobs"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>Jobs</button><button type="button" data-v="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>More</button></div></nav>
 <main id="main">
 
 <section id="v-gate" class="gate" hidden>
@@ -317,6 +355,10 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <button class="tile" type="button" data-go="jobs" id="t-open"><b id="s-open">–</b><span>Jobs on the go</span></button>
     <button class="tile" type="button" data-go="jobs:ready" id="t-ready"><b id="s-ready">–</b><span>Ready to go back</span></button>
     <button class="tile" type="button" data-go="website"><b id="s-vis">–</b><span>Website visitors, 7 days</span><small id="s-vch"></small></button>
+    <button class="tile" type="button" data-go="today" id="t-today"><b id="s-today">–</b><span>Stops today</span></button>
+    <button class="tile" type="button" data-go="takings" id="t-owed"><b id="s-owed">–</b><span>Owed to you</span></button>
+    <button class="tile" type="button" data-go="takings"><b id="s-week">–</b><span>Taken this week</span></button>
+    <button class="tile" type="button" data-go="remind" id="t-due"><b id="s-due">–</b><span>Due a regrip</span></button>
   </div>
   <div class="panel"><h2>Visitors this week</h2><div class="bars" id="bars"></div></div>
   <div class="panel"><h2>Most viewed pages</h2><div id="tops"><p class="help">Loading…</p></div></div>
@@ -351,6 +393,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <div><label for="bf-clubs">Number of clubs</label><input id="bf-clubs" type="number" inputmode="numeric" min="0" max="30" style="width:100%;max-width:none"></div>
     <div><label for="bf-day">Collect on</label><input id="bf-day" type="date"></div>
   </div>
+  <label for="bf-address">Collection address <small>(house and street, for the round)</small></label><input id="bf-address" type="text" maxlength="200" autocomplete="off">
   <label for="bf-grip">Grips or parts</label><input id="bf-grip" type="text" maxlength="200">
   <label for="bf-discount">Discount</label><input id="bf-discount" type="text" maxlength="60" placeholder="e.g. Black Friday 20%">
   <label for="bf-status">Where it's at</label>
@@ -387,17 +430,74 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <div><label for="jco">Collect on</label><input id="jco" type="date"></div>
     <div><label for="jro">Return by</label><input id="jro" type="date"></div>
   </div>
+  <div class="panel" id="jcalc">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Work out the price</h2><span class="st" id="jsale" hidden></span></div>
+    <div id="jlines"></div>
+    <div class="row" style="margin-top:10px;flex-wrap:nowrap"><select id="jadd" style="flex:1;min-width:0"></select><input id="jaddq" type="text" inputmode="numeric" maxlength="2" value="1" aria-label="How many" style="width:64px;flex:none;text-align:center"></div>
+    <div class="row" style="margin-top:8px"><button class="btn line sm" type="button" id="jaddb">+ Add to the price</button></div>
+    <div id="jsum"></div>
+    <button class="btn gold sm" type="button" id="juse" hidden style="margin-top:10px">Use this price</button>
+  </div>
   <div class="grid2">
     <div><label for="jp">Price</label><div class="pct"><span>£</span><input id="jp" type="text" inputmode="decimal" maxlength="8"></div></div>
     <div><label class="chk" style="margin-top:44px"><input type="checkbox" id="jpaid"><span>Paid</span></label></div>
   </div>
+  <div id="jpmw" hidden><label for="jpm">Paid by</label><select id="jpm"><option value="">Choose…</option><option value="cash">Cash</option><option value="bank">Bank transfer</option><option value="card">Card</option><option value="other">Other</option></select></div>
   <label for="jnotes">Notes</label><textarea id="jnotes" style="min-height:90px" maxlength="2000"></textarea>
   <div class="row" style="margin-top:16px"><button class="btn gold" type="button" id="jsave">Save job</button><button class="btn bad sm" type="button" id="jdel" hidden>Delete job</button></div>
   <p class="help" id="jfrom"></p>
+  <div class="panel" id="jmsgs" hidden><h2>Send the customer a message</h2><p class="help">Opens WhatsApp with the message written for you. Check it, then press send.</p><div class="msgs" id="jmsgl"></div></div>
+  <div class="panel" id="jphw" hidden><h2>Photos</h2><p class="help">A record of the clubs when you collect them. Only you can see these.</p>
+    <div class="ph" id="jph"></div>
+    <label class="btn line sm" style="margin-top:10px">+ Add photos<input id="jphin" type="file" accept="image/*" multiple hidden></label></div>
 </section>
 
+<section id="v-today" hidden>
+  <div class="row" style="justify-content:space-between"><h1 style="font-size:32px" id="tdh">Today's round</h1><button class="btn line sm" type="button" data-go="diary">Diary</button></div>
+  <div class="chips" id="tdday"></div>
+  <p class="help" id="tdsum"></p>
+  <div class="row" style="margin-top:12px"><a class="btn gold" id="tdroute" target="_blank" rel="noopener" hidden>Open the route in Maps</a><button class="btn line sm" type="button" id="tdhere" hidden>Start from where I am</button></div>
+  <div class="list" id="tdl"></div>
+</section>
+
+<section id="v-diary" hidden>
+  <div class="row" style="justify-content:space-between"><h1 style="font-size:32px">Diary</h1><button class="btn line sm" type="button" data-go="today">Today</button></div>
+  <div class="row" style="justify-content:space-between;margin-top:12px;flex-wrap:nowrap"><button class="btn line sm" type="button" id="dprev" aria-label="Previous week">‹</button><b id="dwk" style="text-align:center"></b><button class="btn line sm" type="button" id="dnext" aria-label="Next week">›</button></div>
+  <div id="dl"></div>
+</section>
+
+<section id="v-more" hidden>
+  <h1 style="font-size:32px">More</h1>
+  <div class="hub">
+    <button type="button" data-go="customers"><i>☺</i><div><b>Customers</b><span>Everyone you've worked for, and their jobs</span></div></button>
+    <button type="button" data-go="diary"><i>▦</i><div><b>Diary</b><span>The week ahead: collections and returns</span></div></button>
+    <button type="button" data-go="takings"><i>£</i><div><b>Takings</b><span>Money in, and who still owes</span></div></button>
+    <button type="button" data-go="remind"><i>↻</i><div><b>Regrip reminders</b><span>Customers due a fresh set of grips</span></div></button>
+    <button type="button" data-go="website"><i>◎</i><div><b>Website</b><span>Offers, sale, prices, FAQs and journal</span></div></button>
+  </div>
+</section>
+
+<section id="v-takings" hidden>
+  <button class="btn line sm back" type="button" data-go="more">‹ More</button>
+  <h1 style="font-size:32px;margin-top:10px">Takings</h1>
+  <div class="chips" id="tkf"><button type="button" data-f="week" aria-pressed="true">This week</button><button type="button" data-f="month" aria-pressed="false">This month</button><button type="button" data-f="year" aria-pressed="false">This year</button></div>
+  <div class="tiles" id="tkt"></div>
+  <div class="panel"><h2>Owed to you</h2><div id="tko"></div></div>
+  <div class="panel"><h2 id="tkph">Paid</h2><div id="tkp"></div></div>
+</section>
+
+<section id="v-remind" hidden>
+  <button class="btn line sm back" type="button" data-go="more">‹ More</button>
+  <h1 style="font-size:32px;margin-top:10px">Regrip reminders</h1>
+  <p class="help">Grips lose their tack after about a year. These customers had a regrip 11 or more months ago and haven't been reminded since. One message usually brings them back.</p>
+  <div class="list" id="rml"></div>
+</section>
+
+<div class="sheet" id="sheet" hidden><div class="sin" id="sheetin" role="dialog" aria-modal="true"></div></div>
+
 <section id="v-customers" hidden>
-  <div class="row" style="justify-content:space-between"><h1 style="font-size:32px">Customers</h1><button class="btn gold" type="button" data-go="customer/new">+ Add</button></div>
+  <button class="btn line sm back" type="button" data-go="more">‹ More</button>
+  <div class="row" style="justify-content:space-between;margin-top:10px"><h1 style="font-size:32px">Customers</h1><button class="btn gold" type="button" data-go="customer/new">+ Add</button></div>
   <input id="csq" class="search" type="text" placeholder="Search by name, phone or postcode">
   <div class="list" id="csl"></div>
 </section>
@@ -411,6 +511,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <div><label for="cp">Phone</label><input id="cp" type="text" inputmode="tel" maxlength="40"></div>
     <div><label for="ce">Email</label><input id="ce" type="email" maxlength="200"></div>
   </div>
+  <label for="ca">Address <small>(house and street)</small></label><input id="ca" type="text" maxlength="200" autocomplete="off">
   <label for="cpc">Postcode</label><input id="cpc" type="text" maxlength="12" style="text-transform:uppercase;max-width:200px">
   <label for="cno">Notes <small>(club specs, preferences)</small></label><textarea id="cno" style="min-height:90px" maxlength="2000"></textarea>
   <div class="row" style="margin-top:16px"><button class="btn gold" type="button" id="csave">Save customer</button><button class="btn line sm" type="button" id="cjob" hidden>+ New job for them</button><button class="btn bad sm" type="button" id="cdel" hidden>Delete</button></div>
@@ -419,6 +520,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 </section>
 
 <section id="v-website" hidden>
+  <button class="btn line sm back" type="button" data-go="more">‹ More</button>
   <h1 style="font-size:32px">Website</h1>
   <p class="help">Everything you can change on coastalgolfco.co.uk.</p>
   <div class="hub">
@@ -450,11 +552,11 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 var URL0 = 'https://acdpgarasgfhvupzsbxf.supabase.co', KEY = 'sb_publishable_OWTVpDyadL1lITnCp4gfAQ_EZxVHldY';
 var SITE = 'https://www.coastalgolfco.co.uk/', BUCKET = 'cgc-journal', AUTH = 'cgc-editor-auth';
 var $ = function(id){ return document.getElementById(id); };
-var VIEWS = ['gate','home','bookings','booking','jobs','job','customers','customer','website','list','edit','words','offers','sale'];
-var GROUP = { home: 'home', bookings: 'bookings', booking: 'bookings', jobs: 'jobs', job: 'jobs', customers: 'customers', customer: 'customers' };
+var VIEWS = ['gate','home','today','diary','more','takings','remind','bookings','booking','jobs','job','customers','customer','website','list','edit','words','offers','sale'];
+var GROUP = { home: 'home', today: 'today', diary: 'today', bookings: 'bookings', booking: 'bookings', jobs: 'jobs', job: 'jobs' };
 function show(v){ VIEWS.forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('obar').hidden = v !== 'offers'; $('sbar').hidden = v !== 'sale'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
   document.body.classList.toggle('hasnav', !$('nav').hidden);
-  var g = GROUP[v] || 'website';
+  var g = GROUP[v] || 'more'; if ($('sheet')) $('sheet').hidden = true;
   [].forEach.call(document.querySelectorAll('#nav button'), function(b){ if (b.getAttribute('data-v') === g) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); window.scrollTo(0, 0); $('main').scrollTop = 0; }
 function toast(t, bad){ var e = $('toast'); e.textContent = t; e.style.background = bad ? 'var(--bad)' : 'var(--navy)'; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function(){ e.hidden = true; }, 3500); }
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -755,6 +857,11 @@ function go(to, quiet){
   if (v === 'booking') return loadBooking(id);
   if (v === 'jobs') return loadJobs(to.split(':')[1] || null);
   if (v === 'job') return loadJob(id);
+  if (v === 'today') return loadToday(to.split(':')[1] || null);
+  if (v === 'diary') return loadDiary();
+  if (v === 'more') { show('more'); return; }
+  if (v === 'takings') return loadTakings();
+  if (v === 'remind') return loadRemind();
   if (v === 'customers') return loadCustomers();
   if (v === 'customer') return loadCustomer(id);
   if (v === 'website') { show('website'); return; }
@@ -936,7 +1043,7 @@ function loadHome(){
   var h = new Date().getHours(), em = (store.get() || {}).email || '';
   $('hi').textContent = (h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening') + (/^hello@coastalgolfco/.test(em) ? ', Stuart' : '');
   $('hdate').textContent = ukDate(today(), true);
-  alertsUi(); installUi();
+  alertsUi(); installUi(); saleNow(); homeExtras();
   return api('/rest/v1/rpc/cgc_app_stats', { method: 'POST', json: {} }).then(function(s){
     $('s-new').textContent = s.bookings_new; $('t-new').classList.toggle('hot', s.bookings_new > 0); $('nbk').hidden = !s.bookings_new;
     $('s-open').textContent = s.jobs_open; $('s-ready').textContent = s.jobs_ready; $('t-ready').classList.toggle('hot', s.jobs_ready > 0);
@@ -1010,16 +1117,16 @@ function drawBk(){
     : '<div class="empty">' + (BKF === 'all' ? 'No bookings yet.' : 'Nothing waiting. New website bookings will show here.') + '</div>';
 }
 $('bkf').addEventListener('click', function(e){ var b = e.target.closest('button[data-f]'); if (!b) return; BKF = b.getAttribute('data-f'); [].forEach.call(this.children, function(x){ x.setAttribute('aria-pressed', x === b); }); drawBk(); });
-var BF = ['name','phone','email','postcode','service','clubs','day','grip','discount','status'];
+var BF = ['name','phone','email','postcode','address','service','clubs','day','grip','discount','status'];
 function bfill(b){
   b = b || {};
-  var v = { name: b.name, phone: b.phone, email: b.email, postcode: b.postcode, service: b.service, clubs: b.clubs, day: b.collection_day, grip: b.grip, discount: b.discount, status: bkStatus(b) };
+  var v = { name: b.name, phone: b.phone, email: b.email, postcode: b.postcode, address: b.address, service: b.service, clubs: b.clubs, day: b.collection_day, grip: b.grip, discount: b.discount, status: bkStatus(b) };
   BF.forEach(function(k){ $('bf-' + k).value = v[k] == null ? '' : v[k]; });
   $('bknote').value = b.notes || '';
 }
 function bread(){
   var t = function(k){ var x = $('bf-' + k).value.trim(); return x || null; }, n = $('bf-clubs').value.trim();
-  return { name: t('name'), phone: t('phone'), email: t('email'), postcode: t('postcode') ? t('postcode').toUpperCase() : null, service: t('service'),
+  return { name: t('name'), phone: t('phone'), email: t('email'), postcode: t('postcode') ? t('postcode').toUpperCase() : null, address: t('address'), service: t('service'),
     clubs: n === '' ? null : Math.max(0, Math.min(30, Math.round(+n))), collection_day: t('day'), grip: t('grip'), discount: t('discount'),
     status: $('bf-status').value, notes: $('bknote').value.trim() || null };
 }
@@ -1068,9 +1175,10 @@ $('bkjob').addEventListener('click', function(){
     if (bkStatus(b) === 'booked') return api('/rest/v1/cgc_jobs?booking_id=eq.' + b.id + '&select=id').then(function(r){ go(r && r[0] ? 'job/' + r[0].id : 'jobs', true); });
     var digits = String(b.phone || '').replace(/\D/g, '');
     // reuse the customer if we already have their phone number
-    return api('/rest/v1/cgc_customers?select=id,phone').then(function(cs){
+    return api('/rest/v1/cgc_customers?select=id,phone,address').then(function(cs){
       var hit = (cs || []).filter(function(c){ return digits && String(c.phone || '').replace(/\D/g, '') === digits; })[0];
-      return hit ? hit.id : api('/rest/v1/cgc_customers', { method: 'POST', json: [{ name: b.name, phone: b.phone, email: b.email, postcode: b.postcode }], headers: { Prefer: 'return=representation' } }).then(function(r){ return r[0].id; });
+      if (hit && !hit.address && b.address) api('/rest/v1/cgc_customers?id=eq.' + hit.id, { method: 'PATCH', json: { address: b.address }, headers: { Prefer: 'return=minimal' } }).catch(function(){});
+      return hit ? hit.id : api('/rest/v1/cgc_customers', { method: 'POST', json: [{ name: b.name, phone: b.phone, email: b.email, postcode: b.postcode, address: b.address }], headers: { Prefer: 'return=representation' } }).then(function(r){ return r[0].id; });
     }).then(function(cid){
       return api('/rest/v1/cgc_jobs', { method: 'POST', json: [{ customer_id: cid, booking_id: b.id, service: b.service, clubs: b.clubs, grip: b.grip, collect_on: b.collection_day, notes: [b.discount ? 'Discount: ' + b.discount : '', b.message || ''].filter(Boolean).join('\n') || null }], headers: { Prefer: 'return=representation' } });
     }).then(function(r){ return bkSet({ status: 'booked' }).then(function(){ ADIRTY = false; toast('Job made. Add the price when you know it.'); go('job/' + r[0].id, true); }); });
@@ -1082,7 +1190,7 @@ $('bkjob').addEventListener('click', function(){
 
 /* ---- jobs ---- */
 var JBF = 'open';
-function loadCusList(){ return api('/rest/v1/cgc_customers?select=id,name,phone,email,postcode&order=name.asc').then(function(r){ CUS = r || []; return CUS; }); }
+function loadCusList(){ return api('/rest/v1/cgc_customers?select=id,name,phone,email,postcode,address,reminded_at&order=name.asc').then(function(r){ CUS = r || []; return CUS; }); }
 function cusName(id){ var c = CUS.filter(function(x){ return x.id === id; })[0]; return c ? c.name : 'No customer'; }
 function loadJobs(f){
   if (f) JBF = f; [].forEach.call($('jbf').children, function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-f') === JBF); });
@@ -1109,13 +1217,14 @@ $('jbst').addEventListener('click', function(e){ var b = e.target.closest('butto
 function fillCus(sel){ $('jc').innerHTML = '<option value="">Choose a customer…</option>' + CUS.map(function(c){ return '<option value="' + c.id + '">' + esc(c.name + (c.postcode ? ' (' + c.postcode + ')' : '')) + '</option>'; }).join(''); $('jc').value = sel || ''; }
 function loadJob(id, forCustomer){
   show('job'); JCUR = null; ADIRTY = false;
-  return loadCusList().then(function(){
-    if (!id || id === 'new') { JSTAT = 'booked'; drawSteps(); fillCus(forCustomer || ''); ['js','jn','jg','jco','jro','jp','jnotes'].forEach(function(k){ $(k).value = ''; }); $('jpaid').checked = false; $('jbh').textContent = 'New job'; $('jdel').hidden = true; $('jfrom').textContent = ''; return; }
+  return Promise.all([loadCusList(), saleNow()]).then(function(){
+    if (!id || id === 'new') { JSTAT = 'booked'; drawSteps(); fillCus(forCustomer || ''); ['js','jn','jg','jco','jro','jp','jnotes','jpm'].forEach(function(k){ $(k).value = ''; }); $('jpaid').checked = false; $('jpmw').hidden = true; $('jbh').textContent = 'New job'; $('jdel').hidden = true; $('jfrom').textContent = ''; JL = []; drawLines(); drawMsgs(); drawPhotos(); return; }
     return api('/rest/v1/cgc_jobs?id=eq.' + encodeURIComponent(id) + '&select=*').then(function(r){
       var j = JCUR = r && r[0]; if (!j) { toast('Job not found', true); return go('jobs', true); }
       JSTAT = j.status; drawSteps(); fillCus(j.customer_id);
       $('js').value = j.service || ''; $('jn').value = j.clubs == null ? '' : j.clubs; $('jg').value = j.grip || ''; $('jco').value = j.collect_on || ''; $('jro').value = j.return_on || '';
       $('jp').value = j.price == null ? '' : (+j.price % 1 ? (+j.price).toFixed(2) : +j.price); $('jpaid').checked = !!j.paid; $('jnotes').value = j.notes || '';
+      $('jpm').value = j.pay_method || ''; $('jpmw').hidden = !j.paid; JL = (j.lines || []).map(function(l){ return Object.assign({}, l); }); drawLines(); drawMsgs(); drawPhotos();
       $('jbh').textContent = cusName(j.customer_id); $('jdel').hidden = false;
       $('jfrom').innerHTML = j.booking_id ? 'Made from a <a href="#booking/' + j.booking_id + '" style="font-weight:800">website booking</a>.' : '';
     });
@@ -1130,12 +1239,321 @@ $('jsave').addEventListener('click', function(){
   if (clubs && (isNaN(+clubs) || +clubs < 0 || +clubs > 30)) return toast('Number of clubs should be 0 to 30', true);
   if (!$('jc').value) return toast('Choose a customer (or add a new one)', true);
   var row = { customer_id: $('jc').value, service: $('js').value.trim() || null, clubs: clubs === '' ? null : Math.round(+clubs), grip: $('jg').value.trim() || null, collect_on: $('jco').value || null, return_on: $('jro').value || null,
-    price: price === '' ? null : +price, paid: $('jpaid').checked, status: JSTAT, notes: $('jnotes').value.trim() || null };
+    price: price === '' ? null : +price, paid: $('jpaid').checked, status: JSTAT, notes: $('jnotes').value.trim() || null,
+    lines: JL.length ? JL : null, pay_method: $('jpaid').checked ? ($('jpm').value || null) : null };
+  var wasRet = JCUR && JCUR.status === 'returned';
   var btn = this; btn.disabled = true;
-  (JCUR ? api('/rest/v1/cgc_jobs?id=eq.' + JCUR.id, { method: 'PATCH', json: row, headers: { Prefer: 'return=minimal' } }) : api('/rest/v1/cgc_jobs', { method: 'POST', json: [row], headers: { Prefer: 'return=minimal' } }))
-    .then(function(){ ADIRTY = false; toast('Job saved'); go('jobs', true); }).catch(function(e){ toast(e.message, true); }).then(function(){ btn.disabled = false; });
+  (JCUR ? api('/rest/v1/cgc_jobs?id=eq.' + JCUR.id, { method: 'PATCH', json: row, headers: { Prefer: 'return=representation' } }) : api('/rest/v1/cgc_jobs', { method: 'POST', json: [row], headers: { Prefer: 'return=representation' } }))
+    .then(function(r){ ADIRTY = false; toast('Job saved'); var j = r && r[0];
+      if (j && j.status === 'returned' && !wasRet) { refreshAfterSheet = function(){}; go('job/' + j.id, true); setTimeout(function(){ returnedSheet(j); }, 300); }
+      else if (j) go('job/' + j.id, true); else go('jobs', true); }).catch(function(e){ toast(e.message, true); }).then(function(){ btn.disabled = false; });
 });
 $('jdel').addEventListener('click', function(){ if (!JCUR || !confirm('Delete this job? This can\'t be undone.')) return; api('/rest/v1/cgc_jobs?id=eq.' + JCUR.id, { method: 'DELETE' }).then(function(){ ADIRTY = false; toast('Job deleted'); go('jobs', true); }).catch(function(e){ toast(e.message, true); }); });
+
+/* ================= round, diary, prices, messages, photos, takings, reminders ================= */
+var REVIEW = 'https://www.coastalgolfco.co.uk/review/';
+/* normal prices per club, fitted (the sale knocks its percentage off these) */
+var CAT = [
+  ['Golf Pride', [['Tour Velvet', 11], ['Tour Velvet 360', 11], ['Tour Velvet Plus 4', 11], ['Tour Velvet Cord', 16], ['Tour Velvet Align', 16], ['CP2 Pro', 13], ['CPx', 13], ['CP Stealth Grey', 13], ['Tour Wrap 2G', 13], ['MCC Plus 4', 16], ['MCC Classic Align', 16], ['New Decade MCC', 16], ['Z-Grip Cord', 16], ['Align Z-Grip Cord', 16], ['Align MCC', 18], ['Align MCC Plus 4', 18]]],
+  ['G-Rip', [['GR 20', 8], ['A-TAC', 8], ['GR360', 9]]],
+  ['SuperStroke', [['Crossline', 10], ['Revl Player / Comfort', 11]]],
+  ['Winn', [['Dri-Tac', 13], ['Dri-Tac 2.0', 13], ['Dri-Tac Lite', 15]]],
+  ['JumboMax', [['Comfort Wrap', 16], ['Tour Series', 19], ['STR8-Tech', 19], ['JMX Ultralite', 19], ['JMX Zenlight', 19]]]
+];
+var CATP = [['Golf Pride Pro Only', 19], ['Golf Pride Pro Only Cord', 23], ['Golf Pride Reverse Taper', 28], ['Golf Pride Zero Taper Straight', 28], ['G-Rip MP-1', 12], ['G-Rip ST-1', 20], ['SuperStroke 100 Deep Etched', 18], ['SuperStroke Zenergy', 37], ['SuperStroke Speciality', 42], ['Winn Dri-Tac putter', 18], ['Winn Midsize Pistol', 22], ['JumboMax JMX Mid Jumbo', 20]];
+var CATX = [['Fitting only, their own grips', 4, 'own'], ['Re-glue a loose head', 10], ['Ferrule replacement', 5], ['Lengthen or shorten a club', 8], ['Reshaft, labour', 15], ['Adjustable adaptor', 20], ['Club MOT, full bag', 30], ['Loft and lie, per club', 5]];
+var ITEMS = {};
+(function(){
+  var o = '<option value="">Choose a grip or service…</option>';
+  CAT.forEach(function(g){ o += '<optgroup label="' + esc(g[0]) + ' grips">' + g[1].map(function(m){ var k = 'g:' + g[0] + ' ' + m[0]; ITEMS[k] = { n: g[0] + ' ' + m[0], p: m[1], k: 'grip' }; return '<option value="' + esc(k) + '">' + esc(m[0]) + ' · £' + m[1] + '</option>'; }).join('') + '</optgroup>'; });
+  o += '<optgroup label="Putter grips">' + CATP.map(function(m){ var k = 'p:' + m[0]; ITEMS[k] = { n: m[0], p: m[1], k: 'putter' }; return '<option value="' + esc(k) + '">' + esc(m[0]) + ' · £' + m[1] + '</option>'; }).join('') + '</optgroup>';
+  o += '<optgroup label="Other work">' + CATX.map(function(m){ var k = 'x:' + m[0]; ITEMS[k] = { n: m[0], p: m[1], k: m[2] || 'work' }; return '<option value="' + esc(k) + '">' + esc(m[0]) + ' · £' + m[1] + '</option>'; }).join('') + '</optgroup>';
+  o += '<option value="custom">Something else (type it in)…</option>';
+  $('jadd').innerHTML = o;
+})();
+
+var SALEV = null;
+function saleNow(){ return SALEV ? Promise.resolve(SALEV) : api('/rest/v1/cgc_content?key=eq.sale&select=value').then(function(r){ var o = {}; try { o = r && r[0] ? JSON.parse(r[0].value) : {}; } catch(e){} SALEV = {}; for (var k in SD) SALEV[k] = k in o ? o[k] : SD[k]; return SALEV; }).catch(function(){ SALEV = SD; return SD; }); }
+function saleOn(d){ var s = SALEV || SD; d = d || today(); return !!s.on && s.start <= d && d <= s.end; }
+function money(v){ v = Math.round((+v + 1e-9) * 100) / 100; return '£' + (v % 1 ? v.toFixed(2) : v); }
+function first(n){ return String(n || '').trim().split(/\s+/)[0] || 'there'; }
+function waText(ph, text){ var n = String(ph || '').replace(/\D/g, '').replace(/^0/, '44'); return n ? 'https://wa.me/' + n + '?text=' + encodeURIComponent(text) : ''; }
+function cusOf(id){ return CUS.filter(function(c){ return c.id === id; })[0] || null; }
+
+/* ---- price calculator: lines [{n, p, q, k}], k = grip | putter | own | work | custom ---- */
+var JL = [];
+function calcTotals(lines, d){
+  var s = SALEV || SD, on = saleOn(d), sub = 0, grips = [], save = 0, free = 0;
+  lines.forEach(function(l){ var q = Math.max(0, +l.q || 0), p = +l.p || 0; sub += q * p;
+    if (l.k === 'grip') { for (var i = 0; i < q; i++) grips.push(p); if (on) save += q * p * (+s.g || 0) / 100; }
+    if (l.k === 'putter' && on) save += q * p * (+s.p || 0) / 100; });
+  if (!(on && s.pause) && grips.length >= 7) { grips.sort(function(a, z){ return a - z; }); var nfree = Math.floor(grips.length / 7); for (var i = 0; i < nfree; i++) free += grips[i] * (on ? (1 - (+s.g || 0) / 100) : 1); }
+  var after = Math.round((sub - save - free) * 100) / 100, del = after > 0 && after < 40 ? 5 : 0;
+  return { sub: sub, save: Math.round(save * 100) / 100, free: Math.round(free * 100) / 100, del: del, total: Math.round((after + del) * 100) / 100, on: on, name: s.name };
+}
+function drawLines(){
+  var d = $('jco').value || today(), t = calcTotals(JL, d), s = SALEV || SD;
+  $('jsale').hidden = !t.on; $('jsale').textContent = (s.name || 'Sale') + ' prices'; $('jsale').className = 'st s-booked';
+  $('jlines').innerHTML = JL.length ? JL.map(function(l, i){ return '<div class="ln" data-i="' + i + '"><div class="n">' + esc(l.n) + '<small>' + (l.k === 'grip' || l.k === 'putter' ? 'per grip, fitted' : l.k === 'own' ? 'per club' : '') + '</small></div><input class="q" data-f="q" type="text" inputmode="numeric" value="' + esc(l.q) + '" aria-label="How many"><input data-f="p" type="text" inputmode="decimal" value="' + esc(l.p) + '" aria-label="Price each"><button type="button" aria-label="Remove">×</button></div>'; }).join('') : '<p class="help">Add the grips and any other work, and the total works itself out, with the sale and the 7th grip free if they apply.</p>';
+  if (!JL.length) { $('jsum').innerHTML = ''; $('juse').hidden = true; return; }
+  $('jsum').innerHTML = '<div class="sum"><div><span>Before savings</span><span>' + money(t.sub) + '</span></div>' +
+    (t.save ? '<div class="sv"><span>' + esc(t.name || 'Sale') + ' saving</span><span>−' + money(t.save) + '</span></div>' : '') +
+    (t.free ? '<div class="sv"><span>7th grip free</span><span>−' + money(t.free) + '</span></div>' : '') +
+    '<div><span>Collection &amp; delivery</span><span>' + (t.del ? money(t.del) : 'Free') + '</span></div><div class="tt"><span>Total</span><span>' + money(t.total) + '</span></div></div>';
+  $('juse').hidden = $('jp').value.replace(/[£,\s]/g, '') === String(t.total);
+}
+$('jaddb').addEventListener('click', function(){
+  var k = $('jadd').value, q = Math.max(1, Math.min(30, parseInt($('jaddq').value, 10) || 1));
+  if (!k) return toast('Choose a grip or service first', true);
+  if (k === 'custom') { var n = prompt('What is it?'); if (!n || !n.trim()) return; var p = parseFloat(String(prompt('Price each, in pounds') || '').replace(/[£,\s]/g, '')); if (isNaN(p)) return toast('Price should be a number', true); JL.push({ n: n.trim().slice(0, 80), p: p, q: q, k: 'custom' }); }
+  else { var it = ITEMS[k]; JL.push({ n: it.n, p: it.p, q: (it.k === 'grip' || it.k === 'own') && q === 1 && +$('jn').value > 1 ? +$('jn').value : q, k: it.k }); }
+  $('jadd').value = ''; $('jaddq').value = '1'; adirty(); drawLines();
+  if (k.indexOf('g:') === 0 && !$('jg').value.trim()) $('jg').value = ITEMS[k].n;
+});
+$('jlines').addEventListener('input', function(e){ var r = e.target.closest('.ln'); if (!r) return; var l = JL[+r.getAttribute('data-i')], f = e.target.getAttribute('data-f'); l[f] = f === 'q' ? Math.max(0, Math.min(30, parseInt(e.target.value, 10) || 0)) : parseFloat(e.target.value.replace(/[£,\s]/g, '')) || 0; adirty(); var t = calcTotals(JL, $('jco').value || today()); $('jsum').querySelector('.tt span:last-child').textContent = money(t.total); drawLinesSoon(); });
+var dlt; function drawLinesSoon(){ clearTimeout(dlt); dlt = setTimeout(function(){ var a = document.activeElement, i = a && a.closest('.ln') ? [a.closest('.ln').getAttribute('data-i'), a.getAttribute('data-f')] : null; drawLines(); if (i) { var el = $('jlines').querySelector('.ln[data-i="' + i[0] + '"] [data-f="' + i[1] + '"]'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } } }, 700); }
+$('jlines').addEventListener('click', function(e){ if (e.target.tagName !== 'BUTTON') return; JL.splice(+e.target.closest('.ln').getAttribute('data-i'), 1); adirty(); drawLines(); });
+$('juse').addEventListener('click', function(){ var t = calcTotals(JL, $('jco').value || today()); $('jp').value = t.total; var g = JL.filter(function(l){ return l.k === 'grip' || l.k === 'own'; }).reduce(function(a, l){ return a + (+l.q || 0); }, 0); if (g && !$('jn').value) $('jn').value = g; adirty(); drawLines(); toast('Price set to ' + money(t.total)); });
+$('jco').addEventListener('change', drawLines);
+$('jpaid').addEventListener('change', function(){ $('jpmw').hidden = !this.checked; });
+$('jpm').addEventListener('change', adirty);
+
+/* ---- messages ---- */
+function jobFacts(j, c){
+  var t = j.lines && j.lines.length ? calcTotals(j.lines, j.collect_on || today()) : null;
+  return { f: first(c && c.name), n: j.clubs, col: j.collect_on ? ukDate(j.collect_on, true) : '', ret: j.return_on ? ukDate(j.return_on, true) : '', price: j.price != null ? money(j.price) : '', t: t };
+}
+function receipt(j, c){
+  var x = jobFacts(j, c), L = ['Coastal Golf Co', 'Receipt for ' + ((c && c.name) || 'your clubs') + ', ' + ukDate(j.return_on || today(), true), ''];
+  if (j.lines && j.lines.length) {
+    j.lines.forEach(function(l){ L.push((+l.q > 1 ? l.q + ' × ' : '') + l.n + ': ' + money((+l.q || 0) * (+l.p || 0))); });
+    if (x.t.save) L.push((x.t.name || 'Sale') + ' saving: −' + money(x.t.save)); if (x.t.free) L.push('7th grip free: −' + money(x.t.free));
+    L.push('Collection & delivery: ' + (x.t.del ? money(x.t.del) : 'Free'));
+  } else L.push([j.service || 'Club work', j.clubs ? j.clubs + ' clubs' : ''].filter(Boolean).join(', '));
+  L.push('', 'Total: ' + (x.price || 'to be confirmed'));
+  L.push(j.paid ? 'Paid' + (j.pay_method ? ' by ' + ({ cash: 'cash', bank: 'bank transfer', card: 'card', other: 'other' })[j.pay_method] : '') + '. Thank you!' : 'Still to pay.');
+  L.push('', 'Coastal Golf Co, the trading name of Stuart Horne · 07792 554989 · coastalgolfco.co.uk');
+  return L.join('\n');
+}
+function messages(j, c){
+  var x = jobFacts(j, c), st = j.status, out = [];
+  out.push({ id: 'confirm', on: st === 'booked', t: 'Confirm the collection', m: 'Hi ' + x.f + ', it\'s Stuart at Coastal Golf Co. Just confirming I\'ll collect your clubs' + (x.col ? ' on ' + x.col : ' soon') + '. Any questions, just reply here.' });
+  out.push({ id: 'way', on: false, t: 'On my way', m: 'Hi ' + x.f + ', Stuart from Coastal Golf Co here. I\'m on my way to ' + (st === 'booked' ? 'collect' : 'drop off') + ' your clubs, see you shortly.' });
+  out.push({ id: 'got', on: st === 'collected' || st === 'in the workshop', t: 'Got your clubs', m: 'Hi ' + x.f + ', thanks, I\'ve got your ' + (x.n ? x.n + ' ' : '') + 'clubs. They\'ll be back with you ' + (x.ret ? 'by ' + x.ret : 'within 72 hours') + '.' });
+  out.push({ id: 'ready', on: st === 'ready', t: 'Ready to come back', m: 'Good news ' + x.f + ', your clubs are ready. I\'ll bring them back ' + (x.ret ? 'on ' + x.ret : 'soon, I\'ll message you a time') + '.' + (x.price ? ' The total is ' + x.price + '.' : '') });
+  if (j.price != null) out.push({ id: 'receipt', on: st === 'returned' && j.paid, t: 'Send the receipt', m: receipt(j, c) });
+  if (!j.paid && j.price != null && (st === 'ready' || st === 'returned')) out.push({ id: 'pay', on: st === 'returned', t: 'Payment reminder', m: 'Hi ' + x.f + ', hope you\'re enjoying the fresh grips. Just a friendly reminder that ' + x.price + ' is still to pay for your clubs. Let me know how you\'d like to pay. Thanks, Stuart' });
+  out.push({ id: 'review', on: st === 'returned' && !j.review_asked_at, t: j.review_asked_at ? 'Ask for a review again' : 'Ask for a Google review', m: 'Thanks again ' + x.f + '! If you\'re happy with your clubs, a quick Google review would really help a small local business: ' + REVIEW });
+  return out;
+}
+function drawMsgs(){
+  var j = JCUR, c = j && cusOf(j.customer_id);
+  $('jmsgs').hidden = !j; if (!j) return;
+  if (!c || !c.phone) { $('jmsgl').innerHTML = '<p class="help">Add a phone number to ' + esc(c ? c.name : 'the customer') + ' to send messages.</p>'; return; }
+  $('jmsgl').innerHTML = messages(j, c).map(function(m){ return '<a class="' + (m.on ? 'now' : '') + '" href="' + waText(c.phone, m.m) + '" target="_blank" rel="noopener" data-m="' + m.id + '"><span>' + esc(m.t) + '<small>' + esc(m.m.split('\n')[0].slice(0, 70)) + '…</small></span><span aria-hidden="true">›</span></a>'; }).join('') +
+    (c.email ? '<a href="mailto:' + esc(c.email) + '?subject=' + encodeURIComponent('Your Coastal Golf Co receipt') + '&body=' + encodeURIComponent(receipt(j, c)) + '"><span>Email the receipt<small>To ' + esc(c.email) + '</small></span><span aria-hidden="true">›</span></a>' : '');
+}
+$('jmsgl').addEventListener('click', function(e){ var a = e.target.closest('a[data-m="review"]'); if (a && JCUR) { JCUR.review_asked_at = new Date().toISOString(); api('/rest/v1/cgc_jobs?id=eq.' + JCUR.id, { method: 'PATCH', json: { review_asked_at: JCUR.review_asked_at }, headers: { Prefer: 'return=minimal' } }).catch(function(){}); } });
+
+/* ---- the sheet: quick questions after marking a job returned ---- */
+function sheet(html){ $('sheetin').innerHTML = html; $('sheet').hidden = false; }
+function unsheet(){ $('sheet').hidden = true; $('sheetin').innerHTML = ''; }
+$('sheet').addEventListener('click', function(e){ if (e.target === this || e.target.closest('[data-close]')) unsheet(); });
+function returnedSheet(j){
+  var c = cusOf(j.customer_id), rv = c && c.phone ? waText(c.phone, messages(j, c).filter(function(m){ return m.id === 'review'; })[0].m) : '';
+  sheet('<h2>Clubs returned</h2><p class="help">' + esc((c && c.name) || 'Customer') + (j.price != null ? ' · ' + money(j.price) : '') + '</p>' +
+    (j.paid ? '<p class="note">Paid' + (j.pay_method ? ' by ' + esc(j.pay_method) : '') + '.</p>' : (j.price != null ? '<p style="font-weight:800;margin:14px 0 0">How did they pay?</p><div class="pays"><button class="btn" type="button" data-pay="cash">Cash</button><button class="btn" type="button" data-pay="bank">Bank transfer</button><button class="btn" type="button" data-pay="card">Card</button><button class="btn line" type="button" data-close>Not paid yet</button></div>' : '')) +
+    (rv ? '<p style="font-weight:800;margin:18px 0 0">Ask for a Google review?</p><p class="help">The best time to ask is now, while the fresh grips feel great.</p><a class="btn wa" style="margin-top:10px;width:100%" href="' + rv + '" target="_blank" rel="noopener" data-rv>Send the review link on WhatsApp</a>' : '') +
+    '<button class="btn line" type="button" data-close style="margin-top:16px;width:100%">Done</button>');
+  $('sheetin').onclick = function(e){
+    var p = e.target.closest('[data-pay]');
+    if (p) { api('/rest/v1/cgc_jobs?id=eq.' + j.id, { method: 'PATCH', json: { paid: true, pay_method: p.getAttribute('data-pay') }, headers: { Prefer: 'return=minimal' } }).then(function(){ j.paid = true; j.pay_method = p.getAttribute('data-pay'); toast('Marked as paid'); returnedSheet(j); refreshAfterSheet(); }).catch(function(err){ toast(err.message, true); }); }
+    if (e.target.closest('[data-rv]')) api('/rest/v1/cgc_jobs?id=eq.' + j.id, { method: 'PATCH', json: { review_asked_at: new Date().toISOString() }, headers: { Prefer: 'return=minimal' } }).catch(function(){});
+  };
+}
+var refreshAfterSheet = function(){};
+
+/* ---- photos (private storage, shown through short-lived links) ---- */
+var PHURL = {};
+function drawPhotos(){
+  var j = JCUR; $('jphw').hidden = !j; if (!j) return;
+  var ps = j.photos || [];
+  $('jph').innerHTML = ps.map(function(p, i){ return '<figure data-i="' + i + '"><img alt="Photo ' + (i + 1) + '" data-p="' + esc(p) + '"' + (PHURL[p] ? ' src="' + PHURL[p] + '"' : '') + '><button type="button" aria-label="Remove photo">×</button></figure>'; }).join('');
+  var need = ps.filter(function(p){ return !PHURL[p]; });
+  if (need.length) api('/storage/v1/object/sign/cgc-photos', { method: 'POST', json: { expiresIn: 3600, paths: need } }).then(function(r){ (r || []).forEach(function(x){ if (x.signedURL) PHURL[x.path] = URL0 + '/storage/v1' + x.signedURL; }); [].forEach.call($('jph').querySelectorAll('img'), function(im){ var u = PHURL[im.getAttribute('data-p')]; if (u) im.src = u; }); }).catch(function(){});
+}
+function shrink(file){
+  return new Promise(function(ok, no){ var im = new Image(), u = URL.createObjectURL(file);
+    im.onload = function(){ var m = 1600, w = im.width, h = im.height, k = Math.min(1, m / Math.max(w, h)), c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); c.toBlob(function(b){ b ? ok(b) : no(new Error('Could not read that photo')); }, 'image/jpeg', 0.82); };
+    im.onerror = function(){ no(new Error('Could not read that photo')); }; im.src = u; });
+}
+$('jphin').addEventListener('change', function(){
+  var files = [].slice.call(this.files || []), j = JCUR; this.value = ''; if (!j || !files.length) return;
+  toast('Uploading ' + files.length + (files.length === 1 ? ' photo…' : ' photos…'));
+  session().then(function(t){
+    return files.reduce(function(pr, f, i){ return pr.then(function(){ return shrink(f).then(function(b){
+      var path = j.id + '/' + Date.now() + '-' + i + '.jpg';
+      return fetch(URL0 + '/storage/v1/object/cgc-photos/' + path, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + t.access_token, 'Content-Type': 'image/jpeg' }, body: b })
+        .then(function(r){ if (!r.ok) return r.text().then(function(x){ throw new Error('Upload failed: ' + x.slice(0, 120)); }); j.photos = (j.photos || []).concat([path]); PHURL[path] = URL.createObjectURL(b); }); }); }); }, Promise.resolve());
+  }).then(function(){ return api('/rest/v1/cgc_jobs?id=eq.' + j.id, { method: 'PATCH', json: { photos: j.photos }, headers: { Prefer: 'return=minimal' } }); })
+    .then(function(){ toast('Photos saved'); drawPhotos(); }).catch(function(e){ toast(e.message, true); drawPhotos(); });
+});
+$('jph').addEventListener('click', function(e){
+  var f = e.target.closest('figure'); if (!f || !JCUR) return; var i = +f.getAttribute('data-i'), p = JCUR.photos[i];
+  if (e.target.tagName === 'IMG') { if (PHURL[p]) window.open(PHURL[p], '_blank'); return; }
+  if (e.target.tagName !== 'BUTTON' || !confirm('Remove this photo?')) return;
+  var ps = JCUR.photos.slice(); ps.splice(i, 1);
+  api('/storage/v1/object/cgc-photos', { method: 'DELETE', json: { prefixes: [p] } }).catch(function(){}).then(function(){ return api('/rest/v1/cgc_jobs?id=eq.' + JCUR.id, { method: 'PATCH', json: { photos: ps }, headers: { Prefer: 'return=minimal' } }); })
+    .then(function(){ JCUR.photos = ps; drawPhotos(); toast('Photo removed'); }).catch(function(err){ toast(err.message, true); });
+});
+
+/* ---- today's round ---- */
+var TDATE = null, GEO = {}, HERE = null, BASE = { lat: 51.1406, lon: -0.4870 }; // Cranleigh, where the round starts
+function addDays(d, n){ var x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
+function stopsFor(d, jobs, bks){
+  var isToday = d === today(), out = [];
+  jobs.forEach(function(j){
+    if (j.status === 'booked' && j.collect_on && (j.collect_on === d || (isToday && j.collect_on < d))) out.push({ type: 'col', j: j, late: j.collect_on < d });
+    else if (['collected', 'in the workshop', 'ready'].indexOf(j.status) >= 0 && j.return_on && (j.return_on === d || (isToday && j.return_on < d))) out.push({ type: 'ret', j: j, late: j.return_on < d });
+    else if (j.status === 'returned' && j.return_on === d && j.updated_at && j.updated_at.slice(0, 10) === today()) out.push({ type: 'ret', j: j, done: true });
+    else if (j.status !== 'booked' && j.collect_on === d && j.updated_at && j.updated_at.slice(0, 10) === today() && d === today()) out.push({ type: 'col', j: j, done: true });
+  });
+  bks.forEach(function(b){ if (b.collection_day === d && ['new', 'contacted'].indexOf(b.status || 'new') >= 0) out.push({ type: 'req', b: b }); });
+  return out;
+}
+function stopPlace(s){ var c = s.j ? cusOf(s.j.customer_id) : null, a = s.j ? (c && c.address) : s.b.address, pc = s.j ? (c && c.postcode) : s.b.postcode; return { a: a || '', pc: (pc || '').toUpperCase(), q: [a, pc].filter(Boolean).join(', ') }; }
+function geocode(pcs){
+  pcs = pcs.filter(function(p){ return p && !GEO[p]; }); if (!pcs.length) return Promise.resolve();
+  return fetch('https://api.postcodes.io/postcodes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ postcodes: pcs.slice(0, 100) }) }).then(function(r){ return r.json(); })
+    .then(function(j){ (j.result || []).forEach(function(x){ if (x.result) GEO[x.query.toUpperCase()] = { lat: x.result.latitude, lon: x.result.longitude }; }); }).catch(function(){});
+}
+function km(a, b){ var R = 6371, dl = (b.lat - a.lat) * Math.PI / 180, dn = (b.lon - a.lon) * Math.PI / 180, x = Math.sin(dl / 2) * Math.sin(dl / 2) + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dn / 2) * Math.sin(dn / 2); return 2 * R * Math.asin(Math.sqrt(x)); }
+function order(stops){
+  var todo = stops.filter(function(s){ return !s.done; }), done = stops.filter(function(s){ return s.done; }), at = HERE || BASE, out = [];
+  while (todo.length) { var bi = 0, bd = 1e9; todo.forEach(function(s, i){ var g = GEO[stopPlace(s).pc]; var dd = g ? km(at, g) : 5e8; if (dd < bd) { bd = dd; bi = i; } }); var n = todo.splice(bi, 1)[0]; out.push(n); var g = GEO[stopPlace(n).pc]; if (g) at = g; }
+  return done.concat(out);
+}
+var TD = { jobs: [], bks: [] };
+function loadToday(d){
+  TDATE = d || TDATE || today(); show('today'); $('tdl').innerHTML = '<p class="help">Loading…</p>';
+  var t0 = today(), chips = [[t0, 'Today'], [addDays(t0, 1), 'Tomorrow'], [addDays(t0, 2), ukDate(addDays(t0, 2)).split(' ')[0]], [addDays(t0, 3), ukDate(addDays(t0, 3)).split(' ')[0]]];
+  if (chips.every(function(c){ return c[0] !== TDATE; })) chips.push([TDATE, ukDate(TDATE)]);
+  $('tdday').innerHTML = chips.map(function(c){ return '<button type="button" data-d="' + c[0] + '" aria-pressed="' + (c[0] === TDATE) + '">' + esc(c[1]) + '</button>'; }).join('');
+  $('tdh').textContent = TDATE === t0 ? 'Today\'s round' : ukDate(TDATE, true);
+  return Promise.all([api('/rest/v1/cgc_jobs?select=*&status=neq.returned&order=created_at.desc&limit=500'), api('/rest/v1/cgc_jobs?select=*&status=eq.returned&or=(return_on.eq.' + TDATE + ',collect_on.eq.' + TDATE + ')'), api('/rest/v1/cgc_bookings?select=id,name,phone,postcode,address,service,clubs,collection_day,status&collection_day=eq.' + TDATE), loadCusList()])
+    .then(function(r){ TD.jobs = (r[0] || []).concat(r[1] || []); TD.bks = r[2] || []; var st = stopsFor(TDATE, TD.jobs, TD.bks); drawToday(st); return geocode(st.map(function(s){ return stopPlace(s).pc; })).then(function(){ drawToday(stopsFor(TDATE, TD.jobs, TD.bks)); }); })
+    .catch(function(e){ $('tdl').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
+}
+function drawToday(st){
+  st = order(st);
+  var live = st.filter(function(s){ return !s.done; }), nc = live.filter(function(s){ return s.type === 'col'; }).length, nr = live.filter(function(s){ return s.type === 'ret'; }).length, nq = live.filter(function(s){ return s.type === 'req'; }).length;
+  $('tdsum').textContent = live.length ? [nc ? nc + (nc === 1 ? ' collection' : ' collections') : '', nr ? nr + (nr === 1 ? ' return' : ' returns') : '', nq ? nq + (nq === 1 ? ' booking still to confirm' : ' bookings still to confirm') : ''].filter(Boolean).join(', ') + '. In driving order from ' + (HERE ? 'where you are' : 'Cranleigh') + '.' : 'Nothing booked for this day.';
+  var pl = live.map(function(s){ return stopPlace(s).q; }).filter(Boolean);
+  $('tdroute').hidden = !pl.length; $('tdhere').hidden = !pl.length || !!HERE;
+  if (pl.length) { var dest = pl[pl.length - 1], way = pl.slice(0, -1).slice(0, 9); $('tdroute').href = 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(dest + ', UK') + (way.length ? '&waypoints=' + encodeURIComponent(way.map(function(w){ return w + ', UK'; }).join('|')) : ''); }
+  var k = 0;
+  $('tdl').innerHTML = st.length ? st.map(function(s){
+    var p = stopPlace(s), c = s.j ? cusOf(s.j.customer_id) : null, name = s.j ? ((c && c.name) || 'No customer') : s.b.name, ph = s.j ? (c && c.phone) : s.b.phone, n = s.done ? '✓' : ++k;
+    var what = s.type === 'col' ? 'Collect' : s.type === 'ret' ? 'Return' : 'Booking request', x = s.j || s.b;
+    var owe = s.type === 'ret' && !s.j.paid && s.j.price != null ? ' · <b style="color:var(--bad)">Take ' + money(s.j.price) + '</b>' : '';
+    var way = waText(ph, 'Hi ' + first(name) + ', Stuart from Coastal Golf Co here. I\'m on my way to ' + (s.type === 'ret' ? 'drop off' : 'collect') + ' your clubs, see you shortly.');
+    return '<div class="stop ' + (s.type === 'ret' ? 'ret' : s.type === 'req' ? 'req' : '') + (s.done ? ' done' : '') + '"><div class="h"><div><span class="num">' + n + '</span><b>' + esc(name) + '</b></div><span class="st ' + (s.type === 'ret' ? 's-ready' : s.type === 'col' ? 's-collected' : '') + '">' + what + '</span></div>' +
+      '<div class="d">' + esc(p.q || 'No address yet: add it to the customer') + (s.late ? ' · <b style="color:var(--bad)">Overdue</b>' : '') + '<br>' + esc([x.service, x.clubs ? x.clubs + ' clubs' : ''].filter(Boolean).join(' · ')) + owe + '</div>' +
+      (s.done ? '' : '<div class="a">' + (p.q ? '<a class="btn line" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(p.q + ', UK') + '" target="_blank" rel="noopener">Directions</a>' : '') + (way ? '<a class="btn wa" href="' + way + '" target="_blank" rel="noopener">On my way</a>' : '') +
+        (s.type === 'col' ? '<button class="btn gold" type="button" data-col="' + s.j.id + '">Collected</button>' : s.type === 'ret' ? '<button class="btn gold" type="button" data-ret="' + s.j.id + '">Returned</button>' : '<button class="btn gold" type="button" data-go="booking/' + s.b.id + '">Open booking</button>') +
+        (s.j ? '<button class="btn line" type="button" data-go="job/' + s.j.id + '">Job</button>' : '') + '</div>') + '</div>';
+  }).join('') : '<div class="empty">Nothing booked for ' + (TDATE === today() ? 'today' : ukDate(TDATE, true)) + '. Jobs show here on their collection and return dates.</div>';
+}
+$('tdday').addEventListener('click', function(e){ var b = e.target.closest('button[data-d]'); if (b) go('today:' + b.getAttribute('data-d'), true); });
+$('tdhere').addEventListener('click', function(){ if (!navigator.geolocation) return toast('This phone can\'t share its location', true); navigator.geolocation.getCurrentPosition(function(p){ HERE = { lat: p.coords.latitude, lon: p.coords.longitude }; drawToday(stopsFor(TDATE, TD.jobs, TD.bks)); }, function(){ toast('Location not allowed, so the round starts from Cranleigh', true); }, { timeout: 10000 }); });
+$('tdl').addEventListener('click', function(e){
+  var c = e.target.closest('[data-col]'), r = e.target.closest('[data-ret]'); if (!c && !r) return;
+  var id = (c || r).getAttribute(c ? 'data-col' : 'data-ret'), j = TD.jobs.filter(function(x){ return x.id === id; })[0]; if (!j) return;
+  var patch = c ? { status: 'collected', collect_on: j.collect_on || today(), return_on: j.return_on || addDays(today(), 3) } : { status: 'returned', return_on: today() };
+  (c || r).disabled = true;
+  api('/rest/v1/cgc_jobs?id=eq.' + id, { method: 'PATCH', json: patch, headers: { Prefer: 'return=minimal' } }).then(function(){
+    Object.assign(j, patch, { updated_at: new Date().toISOString() });
+    if (c) { toast('Collected. Back by ' + ukDate(j.return_on)); var cu = cusOf(j.customer_id), m = cu && cu.phone ? waText(cu.phone, messages(j, cu).filter(function(x){ return x.id === 'got'; })[0].m) : ''; if (m) sheet('<h2>Collected</h2><p class="help">Let ' + esc(first(cu.name)) + ' know you\'ve got them?</p><a class="btn wa" style="margin-top:12px;width:100%" href="' + m + '" target="_blank" rel="noopener" data-close>Send "Got your clubs" on WhatsApp</a><button class="btn line" type="button" data-close style="margin-top:10px;width:100%">Not now</button>'); }
+    else { refreshAfterSheet = function(){ drawToday(stopsFor(TDATE, TD.jobs, TD.bks)); }; returnedSheet(j); }
+    drawToday(stopsFor(TDATE, TD.jobs, TD.bks));
+  }).catch(function(err){ toast(err.message, true); (c || r).disabled = false; });
+});
+
+/* ---- diary ---- */
+var DWK = null;
+function monday(d){ var x = new Date(d + 'T12:00:00Z'), w = (x.getUTCDay() + 6) % 7; return addDays(d, -w); }
+function loadDiary(){
+  DWK = DWK || monday(today()); show('diary'); $('dl').innerHTML = '<p class="help">Loading…</p>';
+  var end = addDays(DWK, 6);
+  $('dwk').textContent = ukDate(DWK).replace(/^\w+ /, '') + ' to ' + ukDate(end).replace(/^\w+ /, '');
+  return Promise.all([api('/rest/v1/cgc_jobs?select=id,customer_id,status,service,clubs,collect_on,return_on&or=(and(collect_on.gte.' + DWK + ',collect_on.lte.' + end + '),and(return_on.gte.' + DWK + ',return_on.lte.' + end + '))'),
+    api('/rest/v1/cgc_bookings?select=id,name,service,clubs,collection_day,status&collection_day=gte.' + DWK + '&collection_day=lte.' + end), loadCusList()]).then(function(r){
+    var jobs = r[0] || [], bks = (r[1] || []).filter(function(b){ return ['new', 'contacted'].indexOf(b.status || 'new') >= 0; }), html = '';
+    for (var i = 0; i < 7; i++) {
+      var d = addDays(DWK, i), ev = [];
+      jobs.forEach(function(j){ if (j.collect_on === d) ev.push('<button class="de" type="button" data-go="job/' + j.id + '"><i>Collect</i>' + esc(cusName(j.customer_id)) + (j.clubs ? ' · ' + j.clubs + ' clubs' : '') + (j.status !== 'booked' ? ' ✓' : '') + '</button>'); if (j.return_on === d) ev.push('<button class="de" type="button" data-go="job/' + j.id + '"><i class="r">Return</i>' + esc(cusName(j.customer_id)) + (j.status === 'returned' ? ' ✓' : '') + '</button>'); });
+      bks.forEach(function(b){ if (b.collection_day === d) ev.push('<button class="de" type="button" data-go="booking/' + b.id + '"><i class="q">Request</i>' + esc(b.name) + (b.clubs ? ' · ' + b.clubs + ' clubs' : '') + '</button>'); });
+      html += '<div class="day' + (d === today() ? ' today' : '') + '"><h3><span>' + ukDate(d, true) + '</span>' + (ev.length ? '<button type="button" data-go="today:' + d + '">Round ›</button>' : '') + '</h3>' + (ev.length ? ev.join('') : '<div class="de none">Free</div>') + '</div>';
+    }
+    $('dl').innerHTML = html;
+  }).catch(function(e){ $('dl').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
+}
+$('dprev').addEventListener('click', function(){ DWK = addDays(DWK, -7); loadDiary(); });
+$('dnext').addEventListener('click', function(){ DWK = addDays(DWK, 7); loadDiary(); });
+
+/* ---- takings ---- */
+var TKF = 'week', TKJ = [];
+function since(f){ var t = today(); return f === 'week' ? monday(t) : f === 'month' ? t.slice(0, 8) + '01' : t.slice(0, 5) + '01-01'; }
+function loadTakings(){
+  show('takings'); $('tko').innerHTML = '<p class="help">Loading…</p>';
+  return Promise.all([api('/rest/v1/cgc_jobs?select=id,customer_id,status,service,clubs,price,paid,paid_at,pay_method,return_on&price=not.is.null&order=paid_at.desc.nullslast&limit=1000'), loadCusList()]).then(function(r){ TKJ = r[0] || []; drawTakings(); })
+    .catch(function(e){ $('tko').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
+}
+function drawTakings(){
+  var from = since(TKF), paid = TKJ.filter(function(j){ return j.paid && j.paid_at && j.paid_at.slice(0, 10) >= from; }), sum = function(a){ return a.reduce(function(s, j){ return s + (+j.price || 0); }, 0); };
+  var by = {}; paid.forEach(function(j){ var m = j.pay_method || 'not noted'; by[m] = (by[m] || 0) + (+j.price || 0); });
+  var owed = TKJ.filter(function(j){ return !j.paid && ['ready', 'returned'].indexOf(j.status) >= 0; });
+  $('tkt').innerHTML = '<div class="tile"><b>' + money(sum(paid)) + '</b><span>Taken ' + ({ week: 'this week', month: 'this month', year: 'this year' })[TKF] + '</span></div><div class="tile' + (owed.length ? ' hot' : '') + '"><b>' + money(sum(owed)) + '</b><span>Owed to you</span></div>' +
+    '<div class="tile"><b>' + paid.length + '</b><span>Paid jobs</span></div><div class="tile"><b>' + (paid.length ? money(sum(paid) / paid.length) : '–') + '</b><span>Average job</span></div>';
+  $('tkph').textContent = 'Paid ' + ({ week: 'this week', month: 'this month', year: 'this year' })[TKF] + (Object.keys(by).length ? ': ' + Object.keys(by).map(function(k){ return (({ cash: 'cash', bank: 'bank', card: 'card', other: 'other' })[k] || k) + ' ' + money(by[k]); }).join(', ') : '');
+  $('tko').innerHTML = owed.length ? owed.map(function(j){ var c = cusOf(j.customer_id), m = c && c.phone ? waText(c.phone, 'Hi ' + first(c.name) + ', hope you\'re enjoying the fresh grips. Just a friendly reminder that ' + money(j.price) + ' is still to pay for your clubs. Let me know how you\'d like to pay. Thanks, Stuart') : '';
+    return '<div class="tp"><span><a href="#job/' + j.id + '" style="font-weight:800;color:var(--navy)">' + esc((c && c.name) || 'No customer') + '</a><br><small style="color:var(--body)">' + esc(JLABEL[j.status]) + (j.return_on ? ' · ' + ukDate(j.return_on) : '') + '</small></span><span style="text-align:right"><b>' + money(j.price) + '</b>' + (m ? '<br><a href="' + m + '" target="_blank" rel="noopener" style="font-size:13px;font-weight:800;color:#128c4a">Remind</a>' : '') + '</span></div>'; }).join('') : '<p class="help">Nobody owes you anything. Nice.</p>';
+  $('tkp').innerHTML = paid.length ? paid.map(function(j){ var c = cusOf(j.customer_id); return '<div class="tp"><span><a href="#job/' + j.id + '" style="font-weight:800;color:var(--navy)">' + esc((c && c.name) || 'No customer') + '</a><br><small style="color:var(--body)">' + ukDate(j.paid_at) + (j.pay_method ? ' · ' + esc(j.pay_method) : '') + '</small></span><b>' + money(j.price) + '</b></div>'; }).join('') : '<p class="help">No paid jobs yet in this period. Tick Paid on a job (or use Returned on the round) and it shows here.</p>';
+}
+$('tkf').addEventListener('click', function(e){ var b = e.target.closest('button[data-f]'); if (!b) return; TKF = b.getAttribute('data-f'); [].forEach.call(this.children, function(x){ x.setAttribute('aria-pressed', x === b); }); drawTakings(); });
+
+/* ---- regrip reminders ---- */
+function isRegrip(j){ return /grip/i.test(j.service || '') || (j.lines || []).some(function(l){ return l.k === 'grip'; }); }
+function dueList(jobs){
+  var last = {}, cut = addDays(today(), -335);
+  jobs.forEach(function(j){ if (!j.customer_id || !isRegrip(j)) return; var d = j.status === 'returned' ? (j.return_on || (j.updated_at || '').slice(0, 10)) : '9999'; if (!last[j.customer_id] || d > last[j.customer_id].d) last[j.customer_id] = { d: d, j: j }; });
+  return CUS.filter(function(c){ var l = last[c.id]; return l && l.d <= cut && (!c.reminded_at || c.reminded_at.slice(0, 10) < l.d); }).map(function(c){ return { c: c, l: last[c.id] }; }).sort(function(a, z){ return a.l.d < z.l.d ? -1 : 1; });
+}
+function loadRemind(){
+  show('remind'); $('rml').innerHTML = '<p class="help">Loading…</p>';
+  return Promise.all([api('/rest/v1/cgc_jobs?select=customer_id,service,lines,status,return_on,updated_at,clubs&limit=2000'), api('/rest/v1/cgc_customers?select=*&order=name.asc')]).then(function(r){
+    CUS = r[1] || []; var due = dueList(r[0] || []);
+    $('rml').innerHTML = due.length ? due.map(function(x){ var c = x.c, m = c.phone ? waText(c.phone, 'Hi ' + first(c.name) + ', it\'s Stuart at Coastal Golf Co. It\'s been about a year since we regripped your clubs, which is usually when grips start to lose their tack. Fancy a fresh set? I can collect whenever suits.') : '';
+      return '<div class="stop req"><div class="h"><b>' + esc(c.name) + '</b><span class="w" style="font-size:13px;color:var(--body)">' + ukDate(x.l.d) + '</span></div><div class="d">Last regrip ' + ukDate(x.l.d, true) + (x.l.j.clubs ? ', ' + x.l.j.clubs + ' clubs' : '') + (c.postcode ? ' · ' + esc(c.postcode) : '') + '</div>' +
+        '<div class="a">' + (m ? '<a class="btn wa" href="' + m + '" target="_blank" rel="noopener" data-rm="' + c.id + '">Send a reminder</a>' : '<span class="help">No phone number</span>') + '<button class="btn line" type="button" data-rm="' + c.id + '" data-skip="1">Skip</button><button class="btn line" type="button" data-go="customer/' + c.id + '">Customer</button></div></div>'; }).join('')
+      : '<div class="empty">No one is due yet. Customers show here 11 months after their last regrip.</div>';
+  }).catch(function(e){ $('rml').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
+}
+$('rml').addEventListener('click', function(e){ var b = e.target.closest('[data-rm]'); if (!b) return; var id = b.getAttribute('data-rm'), card = b.closest('.stop');
+  api('/rest/v1/cgc_customers?id=eq.' + id, { method: 'PATCH', json: { reminded_at: new Date().toISOString() }, headers: { Prefer: 'return=minimal' } }).then(function(){ card.style.opacity = '.4'; toast(b.getAttribute('data-skip') ? 'Skipped until their next regrip' : 'Marked as reminded'); }).catch(function(err){ toast(err.message, true); }); });
+
+/* ---- home extras ---- */
+function homeExtras(){
+  return Promise.all([api('/rest/v1/cgc_jobs?select=id,customer_id,status,service,lines,clubs,price,paid,paid_at,collect_on,return_on,updated_at&limit=2000'), api('/rest/v1/cgc_bookings?select=id,collection_day,status&collection_day=eq.' + today()), api('/rest/v1/cgc_customers?select=*')]).then(function(r){
+    var jobs = r[0] || []; CUS = r[2] || [];
+    var st = stopsFor(today(), jobs, r[1] || []).filter(function(s){ return !s.done; });
+    $('s-today').textContent = st.length; $('t-today').classList.toggle('hot', st.length > 0);
+    var owed = jobs.filter(function(j){ return !j.paid && j.price != null && ['ready', 'returned'].indexOf(j.status) >= 0; }).reduce(function(a, j){ return a + (+j.price || 0); }, 0);
+    $('s-owed').textContent = money(owed); $('t-owed').classList.toggle('hot', owed > 0);
+    var wk = monday(today()); $('s-week').textContent = money(jobs.filter(function(j){ return j.paid && j.paid_at && j.paid_at.slice(0, 10) >= wk; }).reduce(function(a, j){ return a + (+j.price || 0); }, 0));
+    var due = dueList(jobs).length; $('s-due').textContent = due; $('t-due').classList.toggle('hot', due > 0);
+  }).catch(function(){});
+}
 
 /* ---- customers ---- */
 function loadCustomers(){
@@ -1153,17 +1571,17 @@ $('csq').addEventListener('input', drawCus);
 var CCUR = null;
 function loadCustomer(id){
   show('customer'); CCUR = null; ADIRTY = false; $('cjl').innerHTML = ''; $('cjh').hidden = true; $('csqk').innerHTML = '';
-  if (!id || id === 'new') { ['cn','cp','ce','cpc','cno'].forEach(function(k){ $(k).value = ''; }); $('csh').textContent = 'New customer'; $('cdel').hidden = true; $('cjob').hidden = true; return Promise.resolve(); }
+  if (!id || id === 'new') { ['cn','cp','ce','ca','cpc','cno'].forEach(function(k){ $(k).value = ''; }); $('csh').textContent = 'New customer'; $('cdel').hidden = true; $('cjob').hidden = true; return Promise.resolve(); }
   return Promise.all([api('/rest/v1/cgc_customers?id=eq.' + encodeURIComponent(id) + '&select=*'), api('/rest/v1/cgc_jobs?customer_id=eq.' + encodeURIComponent(id) + '&select=*&order=created_at.desc')]).then(function(r){
     var c = CCUR = r[0] && r[0][0]; if (!c) { toast('Customer not found', true); return go('customers', true); }
-    $('cn').value = c.name; $('cp').value = c.phone || ''; $('ce').value = c.email || ''; $('cpc').value = c.postcode || ''; $('cno').value = c.notes || '';
+    $('cn').value = c.name; $('cp').value = c.phone || ''; $('ce').value = c.email || ''; $('cpc').value = c.postcode || ''; $('ca').value = c.address || ''; $('cno').value = c.notes || '';
     $('csh').textContent = c.name; $('csqk').innerHTML = quick(c.phone, c.email); $('cdel').hidden = false; $('cjob').hidden = false;
     var js = r[1] || []; $('cjh').hidden = !js.length; $('cjl').innerHTML = js.map(function(j){ return jobRow(j, false); }).join('');
   }).catch(function(e){ toast(e.message, true); });
 }
-['cn','cp','ce','cpc','cno'].forEach(function(k){ $(k).addEventListener('input', adirty); });
+['cn','cp','ce','ca','cpc','cno'].forEach(function(k){ $(k).addEventListener('input', adirty); });
 $('csave').addEventListener('click', function(){
-  var row = { name: $('cn').value.trim(), phone: $('cp').value.trim() || null, email: $('ce').value.trim() || null, postcode: $('cpc').value.trim().toUpperCase() || null, notes: $('cno').value.trim() || null };
+  var row = { name: $('cn').value.trim(), phone: $('cp').value.trim() || null, email: $('ce').value.trim() || null, postcode: $('cpc').value.trim().toUpperCase() || null, address: $('ca').value.trim() || null, notes: $('cno').value.trim() || null };
   if (!row.name) return toast('Add their name', true);
   var btn = this; btn.disabled = true;
   (CCUR ? api('/rest/v1/cgc_customers?id=eq.' + CCUR.id, { method: 'PATCH', json: row, headers: { Prefer: 'return=minimal' } }).then(function(){ return CCUR.id; })
