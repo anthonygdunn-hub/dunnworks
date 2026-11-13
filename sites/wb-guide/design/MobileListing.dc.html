@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>woolmer – mobile listing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:var(--f)}a:hover{color:inherit}
+</style>
+</helmet>
+<div style="{{vars}} width: 390px; height: 1500px; overflow: hidden; position: relative; font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--cr)">
+
+<div style="height: 220px; background: #E9C9A8; position: relative">
+<a href="MobileHome.dc.html" aria-label="Back" style="position: absolute; left: 16px; top: 16px; width: 44px; height: 44px; border-radius: 999px; background: var(--cd); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 14 14" aria-hidden="true"><path d="M12 7H2M6 3L2 7l4 4" stroke="#FFFFFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+<span style="position: absolute; right: 16px; bottom: 30px; font-size: 11px; font-weight: 600; background: var(--cd); padding: 4px 9px; border-radius: 999px">1 / 17 photos</span>
+</div>
+
+<section style="background: var(--f); color: var(--od); border-radius: 24px 24px 0 0; margin-top: -20px; position: relative; padding: 22px 18px 24px">
+<span style="font-size: 11px; font-weight: 600; color: var(--ohi); background: var(--hi); padding: 4px 9px; border-radius: 999px">Open now · till 11pm</span>
+<h1 style="margin: 12px 0 4px; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 38px; letter-spacing: -1px">The Pine Wok</h1>
+<p style="margin: 0; font-size: 13px; color: var(--od2)">Chinese takeaway · Delivers · 0.4 mi</p>
+<div style="display: flex; gap: 8px; margin-top: 14px; font-size: 12px">
+<span style="background: var(--f2); padding: 6px 10px; border-radius: 8px"><strong style="color: var(--hi)">★ 4.6</strong> (82)</span>
+<span style="background: var(--f2); padding: 6px 10px; border-radius: 8px">Hygiene <strong style="color: var(--hi)">5</strong></span>
+<span style="background: var(--f2); padding: 6px 10px; border-radius: 8px">Verified</span>
+</div>
+</section>
+
+<nav aria-label="Listing sections" style="display: flex; gap: 6px; padding: 14px 18px; background: var(--cd); border-bottom: 1px solid var(--ln)">
+<a href="#" style="padding: 9px 14px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 13px; font-weight: 600">Menu</a>
+<a href="#" style="padding: 9px 14px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 500">Reviews</a>
+<a href="#" style="padding: 9px 14px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 500">Q&amp;A</a>
+<a href="#" style="padding: 9px 14px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 500">Info</a>
+</nav>
+
+<section style="padding: 8px 18px 0">
+<sc-for list="{{menu}}" as="m" hint-placeholder-count="5">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--ln)">
+<div><strong style="font-size: 14px; font-weight: 600">{{m.name}}</strong><p style="margin: 3px 0 0; font-size: 12px; color: var(--mu)">{{m.desc}}</p></div>
+<strong style="flex: none; font-size: 14px">{{m.price}}</strong>
+</div>
+</sc-for>
+</section>
+
+<section style="padding: 20px 18px">
+<div style="background: var(--cd); border: 1px solid var(--ln); border-radius: 18px; padding: 16px">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px"><strong style="font-size: 15px">Latest review</strong><span style="font-size: 13px; font-weight: 600; color: var(--at)">★ 5</span></div>
+<p style="margin: 0; font-size: 14px; line-height: 1.5">Best salt and pepper chicken in GU35, no contest. Still piping hot after 25 minutes.</p>
+<p style="margin: 8px 0 0; font-size: 12px; color: var(--mu)">Dave M. · Verified local</p>
+</div>
+</section>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; background: var(--cd); border-top: 1px solid var(--ln); padding: 12px 18px 22px; display: flex; gap: 10px">
+<a href="#" style="flex: 1; text-align: center; padding: 14px; border-radius: 999px; background: var(--hi); color: var(--ohi); text-decoration: none; font-size: 15px; font-weight: 600">Call to order</a>
+<a href="#" style="flex: 1; text-align: center; padding: 14px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 600">Directions</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"palette":{"editor":"enum","options":["original","gold","sage","mint"],"default":"original"},"$preview":{"width":390,"height":1500}}'>
+var WB_PALETTES = {
+  original: { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#B5E38D', ohi:'#17302A', hs:'#E4F4D6', ac:'#F26B2A', at:'#B4410C', oac:'#1C1B19' },
+  gold:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#E9C46A', ohi:'#17302A', hs:'#F6EBCB', ac:'#E8685A', at:'#B23A2E', oac:'#1C1B19' },
+  sage:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#BFD8B0', ohi:'#17302A', hs:'#E5EFDD', ac:'#E39424', at:'#9A5A00', oac:'#1C1B19' },
+  mint:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#9FE3C6', ohi:'#17302A', hs:'#DCF4EA', ac:'#C65A3E', at:'#A0412B', oac:'#FFFFFF' }
+};
+function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.original; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      vars: wbVars(this.props.palette ?? 'original'),
+      menu: [
+        { name: 'Set meal for two', desc: 'Spring rolls, sweet and sour chicken, beef in black bean, egg fried rice', price: '£26.50' },
+        { name: 'Salt and pepper chicken', desc: 'Onions, peppers, fresh chilli', price: '£8.20' },
+        { name: 'Crispy shredded beef', desc: 'Sweet chilli glaze', price: '£8.90' },
+        { name: 'Vegetable chow mein (v)', desc: 'Egg noodles, beansprouts, mixed veg', price: '£6.40' },
+        { name: 'Special fried rice', desc: 'Chicken, prawn and char siu pork', price: '£7.10' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

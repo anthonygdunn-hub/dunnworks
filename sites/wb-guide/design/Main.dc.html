@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>woolmer – homepage</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{opacity:.85}
+input::placeholder{color:#6B7A72}
+</style>
+</helmet>
+<div style="{{vars}} font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--cr); min-height: 100vh">
+
+<header style="background: var(--cd); border-bottom: 1px solid var(--ln)">
+<div style="max-width: 1200px; margin: 0 auto; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+<a href="Main.dc.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink)">
+<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2.5 L8 8.5 M13 2.5 L18 8.5 M13 8 L5.5 15.5 M13 8 L20.5 15.5 M13 13.5 L3 23 M13 13.5 L23 23 M13 2.5 V23.5" style="stroke: var(--ac)" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+<span style="font-family: 'Inter Tight', sans-serif; font-size: 26px; font-weight: 500; letter-spacing: -0.8px">woolmer</span>
+<span style="font-size: 12px; color: var(--mu); border-left: 1px solid var(--ln2); padding-left: 10px; margin-left: 4px">the W&amp;B guide</span>
+</a>
+<nav aria-label="Main" style="display: flex; gap: 26px; flex-wrap: wrap; font-size: 14px; font-weight: 500; color: var(--f)">
+<a href="Category.dc.html" style="text-decoration: none">Eat &amp; drink</a>
+<a href="#" style="text-decoration: none">Shops</a>
+<a href="#" style="text-decoration: none">Sport &amp; leisure</a>
+<a href="#" style="text-decoration: none">What's on</a>
+<a href="#" style="text-decoration: none">Ask the town</a>
+</nav>
+<div style="display: flex; gap: 8px">
+<a href="#" style="padding: 10px 16px; border-radius: 999px; background: var(--ch); color: var(--f); text-decoration: none; font-size: 14px; font-weight: 500">Sign in</a>
+<a href="#" style="padding: 10px 18px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">List your business</a>
+</div>
+</div>
+</header>
+
+<section style="background: var(--f); color: var(--od); overflow: hidden">
+<div style="max-width: 1200px; margin: 0 auto; padding: 96px 32px 104px; display: flex; flex-wrap: wrap; gap: 56px; align-items: center">
+<div style="flex: 1 1 520px; min-width: 0">
+<p style="margin: 0 0 20px; font-size: 14px; color: var(--hi); font-weight: 500; letter-spacing: 0.4px">WHITEHILL · BORDON · LINDFORD · HEADLEY DOWN</p>
+<h1 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 72px; line-height: 1.02; letter-spacing: -2px">Everything local,<br>finally in<br><span style="color: var(--hi)">one place.</span></h1>
+<p style="margin: 24px 0 36px; font-size: 18px; line-height: 1.5; color: var(--od2); max-width: 470px">Every shop, takeaway, pub, club and pitch in Whitehill &amp; Bordon. Menus, opening hours, honest reviews and answers from people who live here.</p>
+<form role="search" style="display: flex; align-items: center; background: #FFFFFF; border-radius: 999px; padding: 6px; max-width: 520px">
+<label for="q" style="position: absolute; left: -9999px">Search Whitehill &amp; Bordon</label>
+<input id="q" type="search" placeholder="Try &quot;chippy open now&quot; or &quot;football for 8 year olds&quot;" style="flex: 1; min-width: 0; border: 0; outline: 0; font: inherit; font-size: 16px; padding: 12px 18px; color: #1C1B19; background: transparent">
+<button type="submit" style="display: flex; align-items: center; gap: 10px; border: 0; cursor: pointer; background: var(--hi); color: var(--ohi); font: inherit; font-weight: 600; font-size: 16px; padding: 8px 8px 8px 20px; border-radius: 999px">Search
+<span style="width: 30px; height: 30px; border-radius: 999px; background: var(--ac); display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="#FFFFFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+</button>
+</form>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="5">
+<a href="Category.dc.html" style="padding: 8px 14px; border-radius: 999px; border: 1px solid var(--fl); color: var(--od); text-decoration: none; font-size: 13px">{{c}}</a>
+</sc-for>
+</div>
+</div>
+
+<div aria-hidden="true" style="flex: 1 1 420px; min-width: 0; position: relative; height: 440px">
+<div style="position: absolute; inset: 20px 10px 0 40px; border-radius: 50%; border: 1px solid var(--f2)"></div>
+<div style="position: absolute; inset: 80px 70px 60px 100px; border-radius: 50%; border: 1px solid var(--f2)"></div>
+<div style="position: absolute; top: 40px; left: 60px; width: 300px; background: #FFFFFF; color: #1C1B19; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.25)">
+<div style="height: 120px; background: #E9C9A8; display: flex; align-items: flex-end; padding: 12px"><span style="font-size: 11px; font-weight: 600; background: #FFFFFF; padding: 4px 8px; border-radius: 999px">Photo</span></div>
+<div style="padding: 14px 16px 16px">
+<div style="display: flex; justify-content: space-between; align-items: center"><strong style="font-size: 16px">The Pine Wok</strong><span style="font-size: 12px; font-weight: 600; color: var(--f); background: var(--hs); padding: 3px 8px; border-radius: 999px">Open now</span></div>
+<p style="margin: 6px 0 0; font-size: 13px; color: #5E5B55">Chinese takeaway · Delivers · 0.4 miles</p>
+<div style="display: flex; gap: 8px; margin-top: 12px; font-size: 12px"><span style="background: var(--ch); padding: 4px 8px; border-radius: 6px">★ 4.6 (82)</span><span style="background: var(--ch); padding: 4px 8px; border-radius: 6px">Hygiene 5</span></div>
+</div>
+</div>
+<div style="position: absolute; top: 290px; right: 0; width: 250px; background: var(--f2); border: 1px solid var(--fl); border-radius: 16px; padding: 16px; color: var(--od)">
+<p style="margin: 0; font-size: 11px; color: var(--hi); font-weight: 600">ASK THE TOWN</p>
+<p style="margin: 8px 0 12px; font-size: 14px; line-height: 1.4">Anywhere do gluten-free fish and chips on a Monday?</p>
+<p style="margin: 0; font-size: 12px; color: var(--od2)">4 answers · 2h ago</p>
+</div>
+<div style="position: absolute; bottom: 0; left: 10px; display: flex; align-items: center; gap: 10px; background: #FFFFFF; color: #1C1B19; border-radius: 999px; padding: 8px 16px 8px 8px; box-shadow: 0 12px 30px rgba(0,0,0,0.2)">
+<span style="width: 32px; height: 32px; border-radius: 999px; background: var(--ac); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">New</span>
+<span style="font-size: 13px"><strong>Just opened:</strong> Forest Road Bakehouse</span>
+</div>
+</div>
+</div>
+</section>
+
+<section style="max-width: 1200px; margin: 0 auto; padding: 80px 32px 40px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 28px">
+<h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 40px; letter-spacing: -1px">What are you after?</h2>
+<a href="#" style="font-size: 14px; font-weight: 500; color: var(--f)">See every category</a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px">
+<sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
+<a href="Category.dc.html" style="display: flex; flex-direction: column; gap: 22px; padding: 20px; background: var(--cd); border: 1px solid var(--ln); border-radius: 18px; text-decoration: none; color: var(--ink)">
+<span style="width: 42px; height: 42px; border-radius: 12px; background: var(--f); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" style="stroke: var(--hi)" stroke-width="1.8" fill="none"/><path d="M10 6.5v3.5l2.5 2" style="stroke: var(--hi)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span>
+<span><strong style="display: block; font-size: 16px; font-weight: 600">{{c.name}}</strong><span style="font-size: 13px; color: var(--mu)">{{c.count}}</span></span>
+</a>
+</sc-for>
+</div>
+</section>
+
+<section style="max-width: 1200px; margin: 0 auto; padding: 40px 32px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 28px">
+<div>
+<p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--at)">FRIDAY NIGHT, SORTED</p>
+<h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 40px; letter-spacing: -1px">Takeaways open now</h2>
+</div>
+<a href="Category.dc.html" style="font-size: 14px; font-weight: 500; color: var(--f)">All takeaways and menus</a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px">
+<sc-for list="{{takeaways}}" as="t" hint-placeholder-count="4">
+<a href="Listing.dc.html" style="display: block; background: var(--cd); border: 1px solid var(--ln); border-radius: 18px; overflow: hidden; text-decoration: none; color: var(--ink)">
+<div style="height: 150px; background: {{t.tone}}; display: flex; align-items: flex-start; justify-content: space-between; padding: 12px">
+<span style="font-size: 12px; font-weight: 600; color: var(--f); background: var(--hs); padding: 4px 9px; border-radius: 999px">Open till {{t.until}}</span>
+<span style="font-size: 11px; font-weight: 600; background: #FFFFFF; color: #1C1B19; padding: 4px 8px; border-radius: 999px">Photo</span>
+</div>
+<div style="padding: 16px">
+<strong style="font-size: 17px; font-weight: 600">{{t.name}}</strong>
+<p style="margin: 4px 0 12px; font-size: 13px; color: var(--mu)">{{t.meta}}</p>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px"><span style="background: var(--ch); padding: 4px 8px; border-radius: 6px">★ {{t.rating}}</span><span style="background: var(--ch); padding: 4px 8px; border-radius: 6px">Hygiene {{t.fsa}}</span><span style="background: var(--ch); padding: 4px 8px; border-radius: 6px">Menu online</span></div>
+</div>
+</a>
+</sc-for>
+</div>
+</section>
+
+<section style="max-width: 1200px; margin: 0 auto; padding: 40px 32px 80px; display: flex; flex-wrap: wrap; gap: 24px">
+<div style="flex: 999 1 560px; min-width: 0; background: var(--cd); border: 1px solid var(--ln); border-radius: 22px; padding: 32px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px">
+<h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 32px; letter-spacing: -0.8px">Ask the town</h2>
+<a href="#" style="padding: 10px 16px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">Ask a question</a>
+</div>
+<sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
+<a href="#" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; border-top: 1px solid var(--ln); text-decoration: none; color: var(--ink)">
+<span><span style="display: block; font-size: 16px; font-weight: 500">{{q.text}}</span><span style="font-size: 13px; color: var(--mu)">{{q.tag}} · {{q.when}}</span></span>
+<span style="flex: none; font-size: 13px; font-weight: 600; background: var(--hs); color: var(--f); padding: 6px 10px; border-radius: 999px">{{q.answers}} answers</span>
+</a>
+</sc-for>
+</div>
+<div style="flex: 1 1 340px; min-width: 0; background: var(--f); color: var(--od); border-radius: 22px; padding: 32px">
+<h2 style="margin: 0 0 20px; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 32px; letter-spacing: -0.8px">What's on</h2>
+<sc-for list="{{events}}" as="e" hint-placeholder-count="3">
+<div style="display: flex; gap: 14px; padding: 14px 0; border-top: 1px solid var(--fl)">
+<div style="flex: none; width: 52px; text-align: center; background: var(--hi); color: var(--ohi); border-radius: 12px; padding: 6px 0"><span style="display: block; font-size: 11px; font-weight: 600">{{e.mon}}</span><span style="font-size: 20px; font-weight: 600">{{e.day}}</span></div>
+<div><strong style="display: block; font-size: 15px; font-weight: 600">{{e.name}}</strong><span style="font-size: 13px; color: var(--od2)">{{e.where}}</span></div>
+</div>
+</sc-for>
+<a href="#" style="display: inline-block; margin-top: 16px; color: var(--hi); font-size: 14px; font-weight: 500">Full calendar</a>
+</div>
+</section>
+
+<section id="why-woolmer" style="max-width: 1200px; margin: 0 auto; padding: 0 32px 80px">
+<div style="background: var(--cd); border: 1px solid var(--ln); border-radius: 26px; overflow: hidden; display: flex; flex-wrap: wrap">
+<div style="flex: 1 1 380px; min-width: 0; background: var(--f); color: var(--od); padding: 48px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px">
+<svg width="56" height="56" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2.5 L8 8.5 M13 2.5 L18 8.5 M13 8 L5.5 15.5 M13 8 L20.5 15.5 M13 13.5 L3 23 M13 13.5 L23 23 M13 2.5 V23.5" style="stroke: var(--ac)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+<div>
+<p style="margin: 0 0 10px; font-size: 13px; font-weight: 600; color: var(--hi); letter-spacing: 0.4px">WHY "WOOLMER"?</p>
+<h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 44px; line-height: 1.05; letter-spacing: -1.2px">Named after the forest we all live in.</h2>
+</div>
+</div>
+<div style="flex: 999 1 520px; min-width: 0; padding: 48px; display: flex; flex-direction: column; gap: 18px; font-size: 16px; line-height: 1.65">
+<p style="margin: 0">Long before the Army arrived, before the regeneration and long before Bordon had a high street, this whole area was the <strong>Royal Forest of Woolmer</strong>, open heath and woodland where kings came to hunt deer. Edward I hunted here in the 13th century, and Gilbert White wrote about "Wolmer Forest" in his Natural History of Selborne.</p>
+<p style="margin: 0">In the 1860s the forest was enclosed and turned into Army training land. That brought the camps at Bordon and Longmoor, and Bordon grew from a hamlet of about a hundred people into the town we know.</p>
+<p style="margin: 0">The name never left. It's on Woolmer Road, the Woolmer Trading Estate and the Woolmer Forest Heritage Society, and the protected heathland is still on our doorstep. We chose it so the guide belongs to all of us, in Whitehill, Bordon, Lindford and Headley Down, and keeps the place's oldest name alive.</p>
+<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px">
+<span style="font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--hs); color: var(--f); font-weight: 600">Royal hunting forest</span>
+<span style="font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--hs); color: var(--f); font-weight: 600">Army town since the 1900s</span>
+<span style="font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--hs); color: var(--f); font-weight: 600">Protected heathland today</span>
+</div>
+<a href="#" style="font-size: 14px; font-weight: 500; color: var(--f)">Read more local history from the Woolmer Forest Heritage Society</a>
+</div>
+</div>
+</section>
+
+<section style="max-width: 1200px; margin: 0 auto; padding: 0 32px 80px">
+<div style="background: var(--ac); border-radius: 26px; padding: 48px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; color: var(--oac)">
+<div style="flex: 1 1 480px; min-width: 0">
+<h2 style="margin: 0 0 10px; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 40px; letter-spacing: -1px">Run a local business?</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; max-width: 560px">Claim your free listing. Add your menu, photos and opening hours, and reply to reviews and questions yourself.</p>
+</div>
+<a href="#" style="padding: 16px 26px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 16px; font-weight: 600">Claim your listing</a>
+</div>
+</section>
+
+<footer style="background: var(--fd); color: var(--od2)">
+<div style="max-width: 1200px; margin: 0 auto; padding: 56px 32px 40px; display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between">
+<div style="flex: 1 1 280px">
+<div style="display: flex; align-items: center; gap: 8px; color: var(--od)">
+<svg width="22" height="22" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2.5 L8 8.5 M13 2.5 L18 8.5 M13 8 L5.5 15.5 M13 8 L20.5 15.5 M13 13.5 L3 23 M13 13.5 L23 23 M13 2.5 V23.5" style="stroke: var(--ac)" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+<span style="font-family: 'Inter Tight', sans-serif; font-size: 22px; font-weight: 500; letter-spacing: -0.6px">woolmer</span>
+</div>
+<p style="margin: 14px 0 0; font-size: 14px; line-height: 1.5; max-width: 300px">An independent guide to Whitehill &amp; Bordon, built by people who live here.</p>
+</div>
+<div style="display: flex; gap: 56px; flex-wrap: wrap; font-size: 14px">
+<div style="display: flex; flex-direction: column; gap: 10px"><strong style="color: var(--od)">Explore</strong><a href="#" style="text-decoration: none">Eat &amp; drink</a><a href="#" style="text-decoration: none">Shops</a><a href="#" style="text-decoration: none">Sport &amp; leisure</a><a href="#" style="text-decoration: none">What's on</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><strong style="color: var(--od)">Businesses</strong><a href="#" style="text-decoration: none">Claim a listing</a><a href="#" style="text-decoration: none">Featured spots</a><a href="#" style="text-decoration: none">Review guidelines</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><strong style="color: var(--od)">Trust</strong><a href="#why-woolmer" style="text-decoration: none">Why woolmer?</a><a href="#" style="text-decoration: none">Report content</a><a href="#" style="text-decoration: none">Terms</a><a href="#" style="text-decoration: none">Privacy</a></div>
+</div>
+</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"palette":{"editor":"enum","options":["original","gold","sage","mint"],"default":"original"},"$preview":{"width":1440,"height":3600}}'>
+var WB_PALETTES = {
+  original: { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#B5E38D', ohi:'#17302A', hs:'#E4F4D6', ac:'#F26B2A', at:'#B4410C', oac:'#1C1B19' },
+  gold:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#E9C46A', ohi:'#17302A', hs:'#F6EBCB', ac:'#E8685A', at:'#B23A2E', oac:'#1C1B19' },
+  sage:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#BFD8B0', ohi:'#17302A', hs:'#E5EFDD', ac:'#E39424', at:'#9A5A00', oac:'#1C1B19' },
+  mint:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#9FE3C6', ohi:'#17302A', hs:'#DCF4EA', ac:'#C65A3E', at:'#A0412B', oac:'#FFFFFF' }
+};
+function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.original; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      vars: wbVars(this.props.palette ?? 'original'),
+      chips: ['Takeaways open now', 'Supermarkets', 'Kids’ activities', 'Gyms & sport', 'Pubs with food'],
+      cats: [
+        { name: 'Takeaways', count: '[count] places' },
+        { name: 'Restaurants & cafés', count: '[count] places' },
+        { name: 'Pubs', count: '[count] places' },
+        { name: 'Supermarkets', count: '[count] shops' },
+        { name: 'Sport & fitness', count: '[count] venues' },
+        { name: 'Kids & families', count: '[count] clubs' }
+      ],
+      takeaways: [
+        { name: 'The Pine Wok', meta: 'Chinese · Delivers · 0.4 mi', rating: '4.6', fsa: '5', until: '11pm', tone: '#E9C9A8' },
+        { name: 'Inclosure Fish Bar', meta: 'Fish & chips · Collection · 0.8 mi', rating: '4.4', fsa: '5', until: '9:30pm', tone: '#CFE0C3' },
+        { name: 'Deadwater Pizza Co.', meta: 'Pizza · Delivers · 1.1 mi', rating: '4.2', fsa: '4', until: '11pm', tone: '#F2D4C2' },
+        { name: 'Spice of Hogmoor', meta: 'Indian · Delivers · 0.6 mi', rating: '4.7', fsa: '5', until: '11:30pm', tone: '#E8DDB5' }
+      ],
+      questions: [
+        { text: 'Anywhere do gluten-free fish and chips on a Monday?', tag: 'Takeaways', when: '2h ago', answers: 4 },
+        { text: 'Which supermarket has the biggest free-from aisle?', tag: 'Shopping', when: 'Yesterday', answers: 9 },
+        { text: 'Recommendations for under-8s football on Saturdays?', tag: 'Kids & sport', when: '3 days ago', answers: 6 }
+      ],
+      events: [
+        { mon: 'NOV', day: '21', name: 'Christmas lights switch-on', where: 'Town centre · Free' },
+        { mon: 'NOV', day: '29', name: 'Makers’ market', where: 'Community hall · 10am–3pm' },
+        { mon: 'DEC', day: '06', name: 'Forest 5k fun run', where: 'Hogmoor Inclosure · 9am' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

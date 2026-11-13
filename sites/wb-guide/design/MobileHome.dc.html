@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>woolmer – mobile homepage</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:var(--f)}a:hover{color:inherit}
+</style>
+</helmet>
+<div style="{{vars}} width: 390px; height: 1500px; overflow: hidden; font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--cr)">
+
+<header style="background: var(--f); display: flex; align-items: center; justify-content: space-between; padding: 16px 18px">
+<a href="Main.dc.html" style="display: flex; align-items: center; gap: 7px; text-decoration: none; color: var(--od)">
+<svg width="22" height="22" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2.5 L8 8.5 M13 2.5 L18 8.5 M13 8 L5.5 15.5 M13 8 L20.5 15.5 M13 13.5 L3 23 M13 13.5 L23 23 M13 2.5 V23.5" style="stroke: var(--ac)" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+<span style="font-family: 'Inter Tight', sans-serif; font-size: 22px; font-weight: 500; letter-spacing: -0.6px">woolmer</span>
+</a>
+<button type="button" aria-label="Open menu" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--ch); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12" stroke="var(--od)" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+</header>
+
+<section style="background: var(--f); color: var(--od); padding: 20px 18px 32px">
+<p style="margin: 0 0 12px; font-size: 11px; color: var(--hi); font-weight: 600; letter-spacing: 0.4px">WHITEHILL &amp; BORDON</p>
+<h1 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 42px; line-height: 1.04; letter-spacing: -1.2px">Everything local, <span style="color: var(--hi)">in one place.</span></h1>
+<form role="search" style="display: flex; align-items: center; background: #FFFFFF; border-radius: 999px; padding: 5px; margin-top: 22px">
+<label for="mq" style="position: absolute; left: -9999px">Search</label>
+<input id="mq" type="search" placeholder="Chippy open now…" style="flex: 1; min-width: 0; border: 0; outline: 0; font: inherit; font-size: 15px; padding: 10px 14px; background: transparent">
+<button type="submit" aria-label="Search" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--hi); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" style="stroke: var(--ohi)" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+</form>
+<div style="display: flex; gap: 8px; margin-top: 14px; overflow: hidden">
+<span style="flex: none; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--fl); font-size: 12px">Open now</span>
+<span style="flex: none; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--fl); font-size: 12px">Supermarkets</span>
+<span style="flex: none; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--fl); font-size: 12px">Kids' clubs</span>
+<span style="flex: none; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--fl); font-size: 12px">Pubs</span>
+</div>
+</section>
+
+<section style="padding: 24px 18px 8px">
+<h2 style="margin: 0 0 14px; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 26px; letter-spacing: -0.6px">What are you after?</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
+<a href="Category.dc.html" style="display: flex; flex-direction: column; gap: 10px; padding: 14px 12px; background: var(--cd); border: 1px solid var(--ln); border-radius: 16px; text-decoration: none; color: var(--ink); font-size: 13px; font-weight: 600">
+<span style="width: 32px; height: 32px; border-radius: 10px; background: var(--f); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" stroke="#FFFFFF" stroke-width="2" fill="none"/></svg></span>{{c}}</a>
+</sc-for>
+</div>
+</section>
+
+<section style="padding: 24px 0 8px 18px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; padding-right: 18px; margin-bottom: 14px">
+<h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 26px; letter-spacing: -0.6px">Open now</h2>
+<a href="Category.dc.html" style="font-size: 13px; font-weight: 500">See all</a>
+</div>
+<div style="display: flex; gap: 12px; overflow: hidden">
+<sc-for list="{{takeaways}}" as="t" hint-placeholder-count="3">
+<a href="MobileListing.dc.html" style="flex: none; width: 230px; background: var(--cd); border: 1px solid var(--ln); border-radius: 16px; overflow: hidden; text-decoration: none; color: var(--ink)">
+<div style="height: 110px; background: {{t.tone}}; padding: 10px; box-sizing: border-box"><span style="font-size: 11px; font-weight: 600; background: var(--hs); color: #FFFFFF; padding: 4px 8px; border-radius: 999px">Till {{t.until}}</span></div>
+<div style="padding: 12px 14px"><strong style="font-size: 15px">{{t.name}}</strong><p style="margin: 3px 0 0; font-size: 12px; color: var(--mu)">{{t.meta}}</p></div>
+</a>
+</sc-for>
+</div>
+</section>
+
+<section style="padding: 24px 18px">
+<div style="background: var(--cd); border: 1px solid var(--ln); border-radius: 20px; padding: 20px">
+<h2 style="margin: 0 0 6px; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 24px; letter-spacing: -0.5px">Ask the town</h2>
+<sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
+<div style="padding: 12px 0; border-top: 1px solid var(--ln)"><span style="display: block; font-size: 14px; font-weight: 500">{{q.text}}</span><span style="font-size: 12px; color: var(--mu)">{{q.answers}} answers</span></div>
+</sc-for>
+<a href="#" style="display: block; text-align: center; margin-top: 8px; padding: 13px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">Ask a question</a>
+</div>
+</section>
+
+<section style="padding: 0 18px 24px">
+<div style="background: var(--f); color: var(--od); border-radius: 20px; padding: 20px">
+<h2 style="margin: 0 0 6px; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 24px; letter-spacing: -0.5px">What's on</h2>
+<sc-for list="{{events}}" as="e" hint-placeholder-count="2">
+<div style="display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--fl)">
+<div style="flex: none; width: 46px; text-align: center; background: var(--hi); color: var(--ohi); border-radius: 10px; padding: 5px 0"><span style="display: block; font-size: 10px; font-weight: 600">{{e.mon}}</span><span style="font-size: 18px; font-weight: 600">{{e.day}}</span></div>
+<div><strong style="display: block; font-size: 14px">{{e.name}}</strong><span style="font-size: 12px; color: var(--od2)">{{e.where}}</span></div>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"palette":{"editor":"enum","options":["original","gold","sage","mint"],"default":"original"},"$preview":{"width":390,"height":1500}}'>
+var WB_PALETTES = {
+  original: { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#B5E38D', ohi:'#17302A', hs:'#E4F4D6', ac:'#F26B2A', at:'#B4410C', oac:'#1C1B19' },
+  gold:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#E9C46A', ohi:'#17302A', hs:'#F6EBCB', ac:'#E8685A', at:'#B23A2E', oac:'#1C1B19' },
+  sage:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#BFD8B0', ohi:'#17302A', hs:'#E5EFDD', ac:'#E39424', at:'#9A5A00', oac:'#1C1B19' },
+  mint:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#9FE3C6', ohi:'#17302A', hs:'#DCF4EA', ac:'#C65A3E', at:'#A0412B', oac:'#FFFFFF' }
+};
+function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.original; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      vars: wbVars(this.props.palette ?? 'original'),
+      cats: ['Takeaways', 'Cafés', 'Pubs', 'Supermarkets', 'Sport', 'Kids'],
+      takeaways: [
+        { name: 'The Pine Wok', meta: 'Chinese · ★ 4.6', until: '11pm', tone: '#E9C9A8' },
+        { name: 'Spice of Hogmoor', meta: 'Indian · ★ 4.7', until: '11:30pm', tone: '#E8DDB5' },
+        { name: 'Inclosure Fish Bar', meta: 'Fish & chips · ★ 4.4', until: '9:30pm', tone: '#CFE0C3' }
+      ],
+      questions: [
+        { text: 'Anywhere do gluten-free fish and chips on a Monday?', answers: 4 },
+        { text: 'Which supermarket has the biggest free-from aisle?', answers: 9 },
+        { text: 'Under-8s football on Saturdays?', answers: 6 }
+      ],
+      events: [
+        { mon: 'NOV', day: '21', name: 'Christmas lights switch-on', where: 'Town centre · Free' },
+        { mon: 'NOV', day: '29', name: 'Makers’ market', where: 'Community hall · 10am–3pm' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
