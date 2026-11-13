@@ -21,22 +21,18 @@ Design canvas: https://claude.ai/artifact/JZ2MeExHz6Dy2fvC7ZMnhG
 
 ## Colours
 
-Every colour is a token (`--f` dark sections and buttons, `--cr` page, `--hi` highlight, `--ac` accent
-and so on), defined once in `WB_PALETTES` at the bottom of each design file. They match the Gary Evans
-Pro site:
+Forest colours, mixed section by section the way campfire.ai does it. Every colour is a token,
+defined once in `WB_PALETTES` at the bottom of each design file:
 
 | Token | Colour | Used for |
 |---|---|---|
-| `--cr` / `--cd` | #F8F7FC / #FFFFFF | page and cards |
-| `--f` | #1A1640 | hero, dark panels, buttons |
-| `--fd` | #0A080C | footer |
-| `--ink` / `--mu` | #0A080C / #5E5A72 | text |
-| `--hi` | #F0A8DC | highlights on dark, Search and Call to order buttons |
-| `--ac` | #8A4FD0 | logo mark, small accents |
-| `--at` | #B63DB6 | accent text on white |
-
-The business call-to-action uses Gary's pink, purple and indigo gradient (#D24BA9, #9A5FD8, #7674F1).
-Headings stay Inter Tight rather than Gary's Bebas Neue.
+| `--f` | #142D25 deep forest | hero, listing header, footer tone |
+| `--rg` | #0A4733 rich green | buttons, icon squares, What's on, Why woolmer panel |
+| `--mint` | #DAECDE | category band, Good to know box, soft pills |
+| `--cr` / `--cd` | #F9F9F8 / #FFFFFF | page and cards |
+| `--hi` | #B3ED97 lime | highlights, Search and Call to order, business call-to-action band |
+| `--ac` | #FF862F orange | small pops only: logo mark, Search arrow, New badge, map pin |
+| `--ink` / `--mu` | #101012 / #52644D | text |
 
 ## Preview on dunnworks.io
 

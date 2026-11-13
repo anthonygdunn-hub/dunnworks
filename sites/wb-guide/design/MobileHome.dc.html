@@ -45,7 +45,7 @@ a{color:var(--f)}a:hover{color:inherit}
 <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
 <sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
 <a href="Category.dc.html" style="display: flex; flex-direction: column; gap: 10px; padding: 14px 12px; background: var(--cd); border: 1px solid var(--ln); border-radius: 16px; text-decoration: none; color: var(--ink); font-size: 13px; font-weight: 600">
-<span style="width: 32px; height: 32px; border-radius: 10px; background: var(--f); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" stroke="#FFFFFF" stroke-width="2" fill="none"/></svg></span>{{c}}</a>
+<span style="width: 32px; height: 32px; border-radius: 10px; background: var(--rg); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" stroke="#FFFFFF" stroke-width="2" fill="none"/></svg></span>{{c}}</a>
 </sc-for>
 </div>
 </section>
@@ -71,7 +71,7 @@ a{color:var(--f)}a:hover{color:inherit}
 <sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
 <div style="padding: 12px 0; border-top: 1px solid var(--ln)"><span style="display: block; font-size: 14px; font-weight: 500">{{q.text}}</span><span style="font-size: 12px; color: var(--mu)">{{q.answers}} answers</span></div>
 </sc-for>
-<a href="#" style="display: block; text-align: center; margin-top: 8px; padding: 13px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">Ask a question</a>
+<a href="#" style="display: block; text-align: center; margin-top: 8px; padding: 13px; border-radius: 999px; background: var(--rg); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">Ask a question</a>
 </div>
 </section>
 
@@ -90,7 +90,7 @@ a{color:var(--f)}a:hover{color:inherit}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1500}}'>
 var WB_PALETTES = {
-  original: { f:'#1A1640', f2:'#2A2458', fl:'#3D3672', fd:'#0A080C', cr:'#F8F7FC', cd:'#FFFFFF', ch:'#F1EFF8', ln:'#E2DFEE', ln2:'#D3CFE3', ink:'#0A080C', mu:'#5E5A72', od:'#FFFFFF', od2:'#C9C5E0', hi:'#F0A8DC', ohi:'#0A080C', hs:'#F6E3F1', ac:'#8A4FD0', at:'#B63DB6', oac:'#FFFFFF' }
+  original: { f:'#142D25', f2:'#1F4236', fl:'#2F5446', fd:'#0E201A', rg:'#0A4733', mint:'#DAECDE', sage:'#869C80', cr:'#F9F9F8', cd:'#FFFFFF', ch:'#EEF3EC', ln:'#E3E6E1', ln2:'#D2D8CF', ink:'#101012', mu:'#52644D', od:'#F9F9F8', od2:'#B9C8B3', hi:'#B3ED97', ohi:'#142D25', hs:'#DAECDE', ac:'#FF862F', at:'#0A4733', oac:'#142D25' }
 };
 function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.original; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
 class Component extends DCLogic {
@@ -99,9 +99,9 @@ class Component extends DCLogic {
       vars: wbVars(this.props.palette ?? 'original'),
       cats: ['Takeaways', 'Cafés', 'Pubs', 'Supermarkets', 'Sport', 'Kids'],
       takeaways: [
-        { name: 'The Pine Wok', meta: 'Chinese · ★ 4.6', until: '11pm', tone: '#E9DDF6' },
-        { name: 'Spice of Hogmoor', meta: 'Indian · ★ 4.7', until: '11:30pm', tone: '#E4E3FB' },
-        { name: 'Inclosure Fish Bar', meta: 'Fish & chips · ★ 4.4', until: '9:30pm', tone: '#DCE7F8' }
+        { name: 'The Pine Wok', meta: 'Chinese · ★ 4.6', until: '11pm', tone: '#DCE9D5' },
+        { name: 'Spice of Hogmoor', meta: 'Indian · ★ 4.7', until: '11:30pm', tone: '#D5E6DE' },
+        { name: 'Inclosure Fish Bar', meta: 'Fish & chips · ★ 4.4', until: '9:30pm', tone: '#E8EFD9' }
       ],
       questions: [
         { text: 'Anywhere do gluten-free fish and chips on a Monday?', answers: 4 },

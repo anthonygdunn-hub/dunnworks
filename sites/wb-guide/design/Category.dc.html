@@ -29,7 +29,7 @@ a{color:var(--f)}a:hover{color:inherit}
 <a href="#" style="text-decoration: none">What's on</a>
 <a href="#" style="text-decoration: none">Ask the town</a>
 </nav>
-<a href="#" style="padding: 10px 16px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">Sign in</a>
+<a href="#" style="padding: 10px 16px; border-radius: 999px; background: var(--rg); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">Sign in</a>
 </div>
 </header>
 
@@ -37,7 +37,7 @@ a{color:var(--f)}a:hover{color:inherit}
 <h1 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 48px; letter-spacing: -1.2px">Takeaways in Whitehill &amp; Bordon</h1>
 <p style="margin: 8px 0 20px; font-size: 15px; color: var(--mu)">[count] places · 9 open right now</p>
 <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px">
-<button type="button" style="border: 0; border-radius: 999px; padding: 10px 16px; background: var(--f); color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600">Open now</button>
+<button type="button" style="border: 0; border-radius: 999px; padding: 10px 16px; background: var(--rg); color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600">Open now</button>
 <sc-for list="{{filters}}" as="f" hint-placeholder-count="6">
 <button type="button" style="border: 1px solid var(--ln2); border-radius: 999px; padding: 10px 16px; background: var(--cd); color: var(--ink); font: inherit; font-size: 14px">{{f}}</button>
 </sc-for>
@@ -59,7 +59,7 @@ a{color:var(--f)}a:hover{color:inherit}
 </div>
 
 <!-- map -->
-<div aria-label="Map of takeaways" role="img" style="flex: 1 1 440px; min-width: 0; height: 760px; border-radius: 22px; overflow: hidden; position: relative; background: #DCE6D5; border: 1px solid #CFD9C8">
+<div aria-label="Map of takeaways" role="img" style="flex: 1 1 440px; min-width: 0; height: 760px; border-radius: 22px; overflow: hidden; position: relative; background: #DAECDE; border: 1px solid #C7DCCB">
 <div style="position: absolute; left: -40px; right: -40px; top: 300px; height: 14px; background: #F7F5F0; transform: rotate(-8deg)"></div>
 <div style="position: absolute; top: -40px; bottom: -40px; left: 230px; width: 12px; background: #F7F5F0; transform: rotate(10deg)"></div>
 <div style="position: absolute; left: 0; right: 0; top: 540px; height: 9px; background: #F7F5F0"></div>
@@ -81,7 +81,7 @@ a{color:var(--f)}a:hover{color:inherit}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
 var WB_PALETTES = {
-  original: { f:'#1A1640', f2:'#2A2458', fl:'#3D3672', fd:'#0A080C', cr:'#F8F7FC', cd:'#FFFFFF', ch:'#F1EFF8', ln:'#E2DFEE', ln2:'#D3CFE3', ink:'#0A080C', mu:'#5E5A72', od:'#FFFFFF', od2:'#C9C5E0', hi:'#F0A8DC', ohi:'#0A080C', hs:'#F6E3F1', ac:'#8A4FD0', at:'#B63DB6', oac:'#FFFFFF' }
+  original: { f:'#142D25', f2:'#1F4236', fl:'#2F5446', fd:'#0E201A', rg:'#0A4733', mint:'#DAECDE', sage:'#869C80', cr:'#F9F9F8', cd:'#FFFFFF', ch:'#EEF3EC', ln:'#E3E6E1', ln2:'#D2D8CF', ink:'#101012', mu:'#52644D', od:'#F9F9F8', od2:'#B9C8B3', hi:'#B3ED97', ohi:'#142D25', hs:'#DAECDE', ac:'#FF862F', at:'#0A4733', oac:'#142D25' }
 };
 function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.original; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
 class Component extends DCLogic {
@@ -91,12 +91,12 @@ class Component extends DCLogic {
       vars: wbVars(this.props.palette ?? 'original'),
       filters: ['Delivers', 'Hygiene 5 only', 'Chinese', 'Indian', 'Fish & chips', 'Pizza', 'Kebabs', 'Vegan options'],
       places: [
-        { n: '1', name: 'The Pine Wok', meta: 'Chinese · Delivers · 0.4 mi', rating: '4.6', count: '82', fsa: '5', extra: 'Menu online', status: 'Open till 11pm', statusBg: open, tone: '#E9DDF6' },
-        { n: '2', name: 'Spice of Hogmoor', meta: 'Indian · Delivers · 0.6 mi', rating: '4.7', count: '114', fsa: '5', extra: 'Menu online', status: 'Open till 11:30pm', statusBg: open, tone: '#E4E3FB' },
-        { n: '3', name: 'Inclosure Fish Bar', meta: 'Fish & chips · Collection · 0.8 mi', rating: '4.4', count: '96', fsa: '5', extra: 'Gluten-free Mondays', status: 'Open till 9:30pm', statusBg: open, tone: '#DCE7F8' },
-        { n: '4', name: 'Deadwater Pizza Co.', meta: 'Pizza · Delivers · 1.1 mi', rating: '4.2', count: '57', fsa: '4', extra: 'Menu online', status: 'Open till 11pm', statusBg: open, tone: '#F6DDEE' },
-        { n: '5', name: 'Station Road Kebab House', meta: 'Kebabs & grill · Delivers · 0.9 mi', rating: '4.0', count: '41', fsa: '4', extra: 'Late night', status: 'Open till 1am', statusBg: open, tone: '#EFDDF3' },
-        { n: '6', name: 'Lindford Noodle Bar', meta: 'Thai · Collection · 1.4 mi', rating: '4.5', count: '33', fsa: '5', extra: 'Vegan options', status: 'Opens 5pm tomorrow', statusBg: shut, tone: '#DDEBFA' }
+        { n: '1', name: 'The Pine Wok', meta: 'Chinese · Delivers · 0.4 mi', rating: '4.6', count: '82', fsa: '5', extra: 'Menu online', status: 'Open till 11pm', statusBg: open, tone: '#DCE9D5' },
+        { n: '2', name: 'Spice of Hogmoor', meta: 'Indian · Delivers · 0.6 mi', rating: '4.7', count: '114', fsa: '5', extra: 'Menu online', status: 'Open till 11:30pm', statusBg: open, tone: '#D5E6DE' },
+        { n: '3', name: 'Inclosure Fish Bar', meta: 'Fish & chips · Collection · 0.8 mi', rating: '4.4', count: '96', fsa: '5', extra: 'Gluten-free Mondays', status: 'Open till 9:30pm', statusBg: open, tone: '#E8EFD9' },
+        { n: '4', name: 'Deadwater Pizza Co.', meta: 'Pizza · Delivers · 1.1 mi', rating: '4.2', count: '57', fsa: '4', extra: 'Menu online', status: 'Open till 11pm', statusBg: open, tone: '#F3E6D3' },
+        { n: '5', name: 'Station Road Kebab House', meta: 'Kebabs & grill · Delivers · 0.9 mi', rating: '4.0', count: '41', fsa: '4', extra: 'Late night', status: 'Open till 1am', statusBg: open, tone: '#E6EDD2' },
+        { n: '6', name: 'Lindford Noodle Bar', meta: 'Thai · Collection · 1.4 mi', rating: '4.5', count: '33', fsa: '5', extra: 'Vegan options', status: 'Opens 5pm tomorrow', statusBg: shut, tone: '#DCE8E2' }
       ],
       pins: [
         { n: '1', x: 236, y: 200, bg: '#F26B2A', fg: '#FFFFFF' },

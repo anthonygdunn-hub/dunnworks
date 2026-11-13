@@ -13,7 +13,7 @@
 <style>
 body{margin:0}
 a{color:inherit}a:hover{opacity:.85}
-input::placeholder{color:#8A86A0}
+input::placeholder{color:#7C8A78}
 </style>
 </helmet>
 <div style="{{vars}} font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--cr); min-height: 100vh">
@@ -34,7 +34,7 @@ input::placeholder{color:#8A86A0}
 </nav>
 <div style="display: flex; gap: 8px">
 <a href="#" style="padding: 10px 16px; border-radius: 999px; background: var(--ch); color: var(--f); text-decoration: none; font-size: 14px; font-weight: 500">Sign in</a>
-<a href="#" style="padding: 10px 18px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">List your business</a>
+<a href="#" style="padding: 10px 18px; border-radius: 999px; background: var(--rg); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">List your business</a>
 </div>
 </div>
 </header>
@@ -63,7 +63,7 @@ input::placeholder{color:#8A86A0}
 <div style="position: absolute; inset: 20px 10px 0 40px; border-radius: 50%; border: 1px solid var(--f2)"></div>
 <div style="position: absolute; inset: 80px 70px 60px 100px; border-radius: 50%; border: 1px solid var(--f2)"></div>
 <div style="position: absolute; top: 40px; left: 60px; width: 300px; background: #FFFFFF; color: #1C1B19; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.25)">
-<div style="height: 120px; background: #E9DDF6; display: flex; align-items: flex-end; padding: 12px"><span style="font-size: 11px; font-weight: 600; background: #FFFFFF; padding: 4px 8px; border-radius: 999px">Photo</span></div>
+<div style="height: 120px; background: #DCE9D5; display: flex; align-items: flex-end; padding: 12px"><span style="font-size: 11px; font-weight: 600; background: #FFFFFF; padding: 4px 8px; border-radius: 999px">Photo</span></div>
 <div style="padding: 14px 16px 16px">
 <div style="display: flex; justify-content: space-between; align-items: center"><strong style="font-size: 16px">The Pine Wok</strong><span style="font-size: 12px; font-weight: 600; color: var(--f); background: var(--hs); padding: 3px 8px; border-radius: 999px">Open now</span></div>
 <p style="margin: 6px 0 0; font-size: 13px; color: #5E5B55">Chinese takeaway · Delivers · 0.4 miles</p>
@@ -83,7 +83,7 @@ input::placeholder{color:#8A86A0}
 </div>
 </section>
 
-<section style="max-width: 1200px; margin: 0 auto; padding: 80px 32px 40px">
+<section style="background: var(--mint)"><div style="max-width: 1200px; margin: 0 auto; padding: 80px 32px 80px">
 <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 28px">
 <h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 40px; letter-spacing: -1px">What are you after?</h2>
 <a href="#" style="font-size: 14px; font-weight: 500; color: var(--f)">See every category</a>
@@ -91,14 +91,15 @@ input::placeholder{color:#8A86A0}
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px">
 <sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
 <a href="Category.dc.html" style="display: flex; flex-direction: column; gap: 22px; padding: 20px; background: var(--cd); border: 1px solid var(--ln); border-radius: 18px; text-decoration: none; color: var(--ink)">
-<span style="width: 42px; height: 42px; border-radius: 12px; background: var(--f); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" style="stroke: var(--hi)" stroke-width="1.8" fill="none"/><path d="M10 6.5v3.5l2.5 2" style="stroke: var(--hi)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span>
+<span style="width: 42px; height: 42px; border-radius: 12px; background: var(--rg); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" style="stroke: var(--hi)" stroke-width="1.8" fill="none"/><path d="M10 6.5v3.5l2.5 2" style="stroke: var(--hi)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span>
 <span><strong style="display: block; font-size: 16px; font-weight: 600">{{c.name}}</strong><span style="font-size: 13px; color: var(--mu)">{{c.count}}</span></span>
 </a>
 </sc-for>
 </div>
+</div>
 </section>
 
-<section style="max-width: 1200px; margin: 0 auto; padding: 40px 32px">
+<section style="max-width: 1200px; margin: 0 auto; padding: 80px 32px 40px">
 <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 28px">
 <div>
 <p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--at)">FRIDAY NIGHT, SORTED</p>
@@ -127,7 +128,7 @@ input::placeholder{color:#8A86A0}
 <div style="flex: 999 1 560px; min-width: 0; background: var(--cd); border: 1px solid var(--ln); border-radius: 22px; padding: 32px">
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px">
 <h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 32px; letter-spacing: -0.8px">Ask the town</h2>
-<a href="#" style="padding: 10px 16px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">Ask a question</a>
+<a href="#" style="padding: 10px 16px; border-radius: 999px; background: var(--rg); color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">Ask a question</a>
 </div>
 <sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
 <a href="#" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; border-top: 1px solid var(--ln); text-decoration: none; color: var(--ink)">
@@ -136,10 +137,10 @@ input::placeholder{color:#8A86A0}
 </a>
 </sc-for>
 </div>
-<div style="flex: 1 1 340px; min-width: 0; background: var(--f); color: var(--od); border-radius: 22px; padding: 32px">
+<div style="flex: 1 1 340px; min-width: 0; background: var(--rg); color: var(--od); border-radius: 22px; padding: 32px">
 <h2 style="margin: 0 0 20px; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 32px; letter-spacing: -0.8px">What's on</h2>
 <sc-for list="{{events}}" as="e" hint-placeholder-count="3">
-<div style="display: flex; gap: 14px; padding: 14px 0; border-top: 1px solid var(--fl)">
+<div style="display: flex; gap: 14px; padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.14)">
 <div style="flex: none; width: 52px; text-align: center; background: var(--hi); color: var(--ohi); border-radius: 12px; padding: 6px 0"><span style="display: block; font-size: 11px; font-weight: 600">{{e.mon}}</span><span style="font-size: 20px; font-weight: 600">{{e.day}}</span></div>
 <div><strong style="display: block; font-size: 15px; font-weight: 600">{{e.name}}</strong><span style="font-size: 13px; color: var(--od2)">{{e.where}}</span></div>
 </div>
@@ -150,14 +151,14 @@ input::placeholder{color:#8A86A0}
 
 <section id="why-woolmer" style="max-width: 1200px; margin: 0 auto; padding: 0 32px 80px">
 <div style="background: var(--cd); border: 1px solid var(--ln); border-radius: 26px; overflow: hidden; display: flex; flex-wrap: wrap">
-<div style="flex: 1 1 380px; min-width: 0; background: var(--f); color: var(--od); padding: 48px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px">
+<div style="flex: 1 1 380px; min-width: 0; background: var(--rg); color: var(--od); padding: 48px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px">
 <svg width="56" height="56" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2.5 L8 8.5 M13 2.5 L18 8.5 M13 8 L5.5 15.5 M13 8 L20.5 15.5 M13 13.5 L3 23 M13 13.5 L23 23 M13 2.5 V23.5" style="stroke: var(--ac)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
 <div>
 <p style="margin: 0 0 10px; font-size: 13px; font-weight: 600; color: var(--hi); letter-spacing: 0.4px">WHY "WOOLMER"?</p>
 <h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 44px; line-height: 1.05; letter-spacing: -1.2px">Named after the forest we all live in.</h2>
 </div>
 </div>
-<div style="flex: 999 1 520px; min-width: 0; padding: 48px; display: flex; flex-direction: column; gap: 18px; font-size: 16px; line-height: 1.65">
+<div style="flex: 999 1 520px; min-width: 0; padding: 48px; background: var(--cd); display: flex; flex-direction: column; gap: 18px; font-size: 16px; line-height: 1.65">
 <p style="margin: 0">Long before the Army arrived, before the regeneration and long before Bordon had a high street, this whole area was the <strong>Royal Forest of Woolmer</strong>, open heath and woodland where kings came to hunt deer. Edward I hunted here in the 13th century, and Gilbert White wrote about "Wolmer Forest" in his Natural History of Selborne.</p>
 <p style="margin: 0">In the 1860s the forest was enclosed and turned into Army training land. That brought the camps at Bordon and Longmoor, and Bordon grew from a hamlet of about a hundred people into the town we know.</p>
 <p style="margin: 0">The name never left. It's on Woolmer Road, the Woolmer Trading Estate and the Woolmer Forest Heritage Society, and the protected heathland is still on our doorstep. We chose it so the guide belongs to all of us, in Whitehill, Bordon, Lindford and Headley Down, and keeps the place's oldest name alive.</p>
@@ -172,12 +173,12 @@ input::placeholder{color:#8A86A0}
 </section>
 
 <section style="max-width: 1200px; margin: 0 auto; padding: 0 32px 80px">
-<div style="background: linear-gradient(120deg, #D24BA9, #9A5FD8 55%, #7674F1); border-radius: 26px; padding: 48px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; color: var(--oac)">
+<div style="background: var(--hi); border-radius: 26px; padding: 48px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; color: var(--oac)">
 <div style="flex: 1 1 480px; min-width: 0">
 <h2 style="margin: 0 0 10px; font-family: 'Inter Tight', sans-serif; font-weight: 400; font-size: 40px; letter-spacing: -1px">Run a local business?</h2>
 <p style="margin: 0; font-size: 17px; line-height: 1.5; max-width: 560px">Claim your free listing. Add your menu, photos and opening hours, and reply to reviews and questions yourself.</p>
 </div>
-<a href="#" style="padding: 16px 26px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 16px; font-weight: 600">Claim your listing</a>
+<a href="#" style="padding: 16px 26px; border-radius: 999px; background: var(--rg); color: #FFFFFF; text-decoration: none; font-size: 16px; font-weight: 600">Claim your listing</a>
 </div>
 </section>
 
@@ -201,7 +202,7 @@ input::placeholder{color:#8A86A0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3600}}'>
 var WB_PALETTES = {
-  original: { f:'#1A1640', f2:'#2A2458', fl:'#3D3672', fd:'#0A080C', cr:'#F8F7FC', cd:'#FFFFFF', ch:'#F1EFF8', ln:'#E2DFEE', ln2:'#D3CFE3', ink:'#0A080C', mu:'#5E5A72', od:'#FFFFFF', od2:'#C9C5E0', hi:'#F0A8DC', ohi:'#0A080C', hs:'#F6E3F1', ac:'#8A4FD0', at:'#B63DB6', oac:'#FFFFFF' }
+  original: { f:'#142D25', f2:'#1F4236', fl:'#2F5446', fd:'#0E201A', rg:'#0A4733', mint:'#DAECDE', sage:'#869C80', cr:'#F9F9F8', cd:'#FFFFFF', ch:'#EEF3EC', ln:'#E3E6E1', ln2:'#D2D8CF', ink:'#101012', mu:'#52644D', od:'#F9F9F8', od2:'#B9C8B3', hi:'#B3ED97', ohi:'#142D25', hs:'#DAECDE', ac:'#FF862F', at:'#0A4733', oac:'#142D25' }
 };
 function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.original; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
 class Component extends DCLogic {
@@ -218,10 +219,10 @@ class Component extends DCLogic {
         { name: 'Kids & families', count: '[count] clubs' }
       ],
       takeaways: [
-        { name: 'The Pine Wok', meta: 'Chinese · Delivers · 0.4 mi', rating: '4.6', fsa: '5', until: '11pm', tone: '#E9DDF6' },
-        { name: 'Inclosure Fish Bar', meta: 'Fish & chips · Collection · 0.8 mi', rating: '4.4', fsa: '5', until: '9:30pm', tone: '#DCE7F8' },
-        { name: 'Deadwater Pizza Co.', meta: 'Pizza · Delivers · 1.1 mi', rating: '4.2', fsa: '4', until: '11pm', tone: '#F6DDEE' },
-        { name: 'Spice of Hogmoor', meta: 'Indian · Delivers · 0.6 mi', rating: '4.7', fsa: '5', until: '11:30pm', tone: '#E4E3FB' }
+        { name: 'The Pine Wok', meta: 'Chinese · Delivers · 0.4 mi', rating: '4.6', fsa: '5', until: '11pm', tone: '#DCE9D5' },
+        { name: 'Inclosure Fish Bar', meta: 'Fish & chips · Collection · 0.8 mi', rating: '4.4', fsa: '5', until: '9:30pm', tone: '#E8EFD9' },
+        { name: 'Deadwater Pizza Co.', meta: 'Pizza · Delivers · 1.1 mi', rating: '4.2', fsa: '4', until: '11pm', tone: '#F3E6D3' },
+        { name: 'Spice of Hogmoor', meta: 'Indian · Delivers · 0.6 mi', rating: '4.7', fsa: '5', until: '11:30pm', tone: '#D5E6DE' }
       ],
       questions: [
         { text: 'Anywhere do gluten-free fish and chips on a Monday?', tag: 'Takeaways', when: '2h ago', answers: 4 },

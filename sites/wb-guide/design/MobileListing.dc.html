@@ -16,7 +16,7 @@ a{color:var(--f)}a:hover{color:inherit}
 </helmet>
 <div style="{{vars}} width: 390px; height: 1500px; overflow: hidden; position: relative; font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--cr)">
 
-<div style="height: 220px; background: #E9DDF6; position: relative">
+<div style="height: 220px; background: #DCE9D5; position: relative">
 <a href="MobileHome.dc.html" aria-label="Back" style="position: absolute; left: 16px; top: 16px; width: 44px; height: 44px; border-radius: 999px; background: var(--cd); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 14 14" aria-hidden="true"><path d="M12 7H2M6 3L2 7l4 4" stroke="#FFFFFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
 <span style="position: absolute; right: 16px; bottom: 30px; font-size: 11px; font-weight: 600; background: var(--cd); padding: 4px 9px; border-radius: 999px">1 / 17 photos</span>
 </div>
@@ -33,7 +33,7 @@ a{color:var(--f)}a:hover{color:inherit}
 </section>
 
 <nav aria-label="Listing sections" style="display: flex; gap: 6px; padding: 14px 18px; background: var(--cd); border-bottom: 1px solid var(--ln)">
-<a href="#" style="padding: 9px 14px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 13px; font-weight: 600">Menu</a>
+<a href="#" style="padding: 9px 14px; border-radius: 999px; background: var(--rg); color: #FFFFFF; text-decoration: none; font-size: 13px; font-weight: 600">Menu</a>
 <a href="#" style="padding: 9px 14px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 500">Reviews</a>
 <a href="#" style="padding: 9px 14px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 500">Q&amp;A</a>
 <a href="#" style="padding: 9px 14px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 500">Info</a>
@@ -58,13 +58,13 @@ a{color:var(--f)}a:hover{color:inherit}
 
 <div style="position: absolute; left: 0; right: 0; bottom: 0; background: var(--cd); border-top: 1px solid var(--ln); padding: 12px 18px 22px; display: flex; gap: 10px">
 <a href="#" style="flex: 1; text-align: center; padding: 14px; border-radius: 999px; background: var(--hi); color: var(--ohi); text-decoration: none; font-size: 15px; font-weight: 600">Call to order</a>
-<a href="#" style="flex: 1; text-align: center; padding: 14px; border-radius: 999px; background: var(--f); color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 600">Directions</a>
+<a href="#" style="flex: 1; text-align: center; padding: 14px; border-radius: 999px; background: var(--rg); color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 600">Directions</a>
 </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1500}}'>
 var WB_PALETTES = {
-  original: { f:'#1A1640', f2:'#2A2458', fl:'#3D3672', fd:'#0A080C', cr:'#F8F7FC', cd:'#FFFFFF', ch:'#F1EFF8', ln:'#E2DFEE', ln2:'#D3CFE3', ink:'#0A080C', mu:'#5E5A72', od:'#FFFFFF', od2:'#C9C5E0', hi:'#F0A8DC', ohi:'#0A080C', hs:'#F6E3F1', ac:'#8A4FD0', at:'#B63DB6', oac:'#FFFFFF' }
+  original: { f:'#142D25', f2:'#1F4236', fl:'#2F5446', fd:'#0E201A', rg:'#0A4733', mint:'#DAECDE', sage:'#869C80', cr:'#F9F9F8', cd:'#FFFFFF', ch:'#EEF3EC', ln:'#E3E6E1', ln2:'#D2D8CF', ink:'#101012', mu:'#52644D', od:'#F9F9F8', od2:'#B9C8B3', hi:'#B3ED97', ohi:'#142D25', hs:'#DAECDE', ac:'#FF862F', at:'#0A4733', oac:'#142D25' }
 };
 function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.original; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
 class Component extends DCLogic {
