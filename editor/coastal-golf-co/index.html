@@ -103,24 +103,20 @@ textarea{min-height:360px;line-height:1.6;resize:vertical}
 .search{margin:14px 0 4px}
 [hidden]{display:none!important}
 /* app shell */
-.top{padding-top:env(safe-area-inset-top)}
+.top{padding-top:env(safe-area-inset-top);position:sticky;top:0;z-index:7}
 .brand{display:flex;gap:10px;align-items:center}.brand img{width:40px;height:40px;border-radius:50%;background:var(--cream)}
+/* phones: the same set-up as the Falkners app. The page scrolls normally, the tab bar is fixed to the bottom,
+   and the page behind everything is navy, so anything the iPhone shows below or behind the page matches the bar */
+html{background:var(--navy2)}
+body{min-height:100vh}
 @media(max-width:759px){
   .nav{position:fixed;left:0;right:0;bottom:0;z-index:6;border-top:2px solid var(--gold);padding-bottom:env(safe-area-inset-bottom)}
-  /* iPhone home-screen apps can stop the page short of the bottom edge: paint that strip navy so the bar reaches the bottom */
-  html:has(body.hasnav){background:var(--navy2)}
   .nav .in{padding:0;gap:0;justify-content:space-around;overflow:visible}
   .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;padding:8px 2px 9px;border-bottom:0;border-top:3px solid transparent;position:relative}
   .nav button[aria-current=page]{border-top-color:var(--gold)}
-  /* app shell: the page never scrolls, only the middle does, so the tab bar can't drift up */
-  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-  /* --gap: how far short of the screen's bottom edge an iPhone home-screen app's page stops (iOS bug, about the status bar's height); the app reaches past it */
-  body{display:flex;flex-direction:column;position:fixed;top:0;right:0;bottom:calc(0px - var(--gap, 0px));left:0;width:100%;height:auto;margin:0}
-  body>header.top{flex:none}
-  body>main{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;width:100%}
-  .nav{position:static;flex:none;order:9}
+  body.hasnav{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
   body.typing .nav{display:none}
-  body.hasnav main{padding-bottom:40px}
+  body.hasnav main{padding-bottom:24px}
   body.hasnav .bar{bottom:calc(64px + env(safe-area-inset-bottom))}
   body.typing .bar{bottom:0}
   body.hasnav .toast{bottom:150px}
@@ -501,7 +497,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <button type="button" data-go="website"><i>◎</i><div><b>Website</b><span>Offers, sale, prices, FAQs and journal</span></div></button>
     <button type="button" data-go="settings"><i>⚙</i><div><b>Settings</b><span>Put your round in your phone's calendar</span></div></button>
   </div>
-  <p class="help" style="margin-top:18px;text-align:center">App version 8 · 13 November<br><small id="dbg" style="font-size:11px;opacity:.7"></small></p>
+  <p class="help" style="margin-top:18px;text-align:center">App version 9 · 13 November</p>
 </section>
 
 <section id="v-takings" hidden>
@@ -622,7 +618,7 @@ var GROUP = { home: 'home', today: 'today', bookings: 'bookings', booking: 'book
 function show(v){ VIEWS.forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('obar').hidden = v !== 'offers'; $('sbar').hidden = v !== 'sale'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
   document.body.classList.toggle('hasnav', !$('nav').hidden);
   var g = GROUP[v] || 'more'; if ($('sheet')) $('sheet').hidden = true;
-  [].forEach.call(document.querySelectorAll('#nav button'), function(b){ if (b.getAttribute('data-v') === g) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); window.scrollTo(0, 0); $('main').scrollTop = 0; }
+  [].forEach.call(document.querySelectorAll('#nav button'), function(b){ if (b.getAttribute('data-v') === g) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); window.scrollTo(0, 0); }
 function toast(t, bad){ var e = $('toast'); e.textContent = t; e.style.background = bad ? 'var(--bad)' : 'var(--navy)'; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function(){ e.hidden = true; }, 3500); }
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -1166,14 +1162,6 @@ $('instbtn').addEventListener('click', function(){ if (!DEFER) return; DEFER.pro
 /* hide the tab bar while the keyboard is up (phones), so it never floats mid-screen */
 document.addEventListener('focusin', function(e){ if (innerWidth < 760 && e.target.matches('input:not([type=checkbox]):not([type=radio]),textarea,select')) document.body.classList.add('typing'); });
 document.addEventListener('focusout', function(){ setTimeout(function(){ var a = document.activeElement; if (!a || !a.matches('input,textarea,select')) document.body.classList.remove('typing'); }, 80); });
-/* how far short of the bottom of the screen an iPhone home-screen app stops (iOS bug); the page is stretched down by that much */
-function fitGap(){ var sa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone, port = innerHeight > innerWidth;
-  var g = sa && port ? Math.max(0, Math.min(80, screen.height - innerHeight)) : 0; document.documentElement.style.setProperty('--gap', g + 'px'); }
-fitGap(); addEventListener('resize', fitGap);
-/* screen measurements, shown small on More, to pin down the iPhone bottom gap */
-function dbg(){ var e = $('dbg'); if (!e) return; var t = document.createElement('div'); t.style.cssText = 'position:fixed;top:0;left:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);visibility:hidden'; document.body.appendChild(t); var cs = getComputedStyle(t), n = $('nav').getBoundingClientRect(), b = document.body.getBoundingClientRect();
-  e.textContent = 'sc ' + screen.height + ' · ih ' + innerHeight + ' · ch ' + document.documentElement.clientHeight + ' · vv ' + (window.visualViewport ? Math.round(visualViewport.height) + '/' + Math.round(visualViewport.offsetTop) : '-') + ' · sat ' + cs.paddingTop + ' · sab ' + cs.paddingBottom + ' · body ' + Math.round(b.top) + '-' + Math.round(b.bottom) + ' · nav ' + Math.round(n.bottom) + ' · gap ' + getComputedStyle(document.documentElement).getPropertyValue('--gap') + ' · sa ' + ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || !!navigator.standalone); t.remove(); }
-addEventListener('hashchange', function(){ setTimeout(dbg, 200); }); setTimeout(dbg, 800); addEventListener('orientationchange', function(){ setTimeout(fitGap, 300); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 addEventListener('hashchange', function(){ if (store.get() && location.hash && location.hash.indexOf('#offers-import') !== 0) go(location.hash, true); });
 
