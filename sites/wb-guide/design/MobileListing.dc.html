@@ -16,7 +16,7 @@ a{color:var(--f)}a:hover{color:inherit}
 </helmet>
 <div style="{{vars}} width: 390px; height: 1500px; overflow: hidden; position: relative; font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--cr)">
 
-<div style="height: 220px; background: #E9C9A8; position: relative">
+<div style="height: 220px; background: #E9DDF6; position: relative">
 <a href="MobileHome.dc.html" aria-label="Back" style="position: absolute; left: 16px; top: 16px; width: 44px; height: 44px; border-radius: 999px; background: var(--cd); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 14 14" aria-hidden="true"><path d="M12 7H2M6 3L2 7l4 4" stroke="#FFFFFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
 <span style="position: absolute; right: 16px; bottom: 30px; font-size: 11px; font-weight: 600; background: var(--cd); padding: 4px 9px; border-radius: 999px">1 / 17 photos</span>
 </div>
@@ -62,12 +62,9 @@ a{color:var(--f)}a:hover{color:inherit}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"palette":{"editor":"enum","options":["original","gold","sage","mint"],"default":"original"},"$preview":{"width":390,"height":1500}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1500}}'>
 var WB_PALETTES = {
-  original: { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#B5E38D', ohi:'#17302A', hs:'#E4F4D6', ac:'#F26B2A', at:'#B4410C', oac:'#1C1B19' },
-  gold:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#E9C46A', ohi:'#17302A', hs:'#F6EBCB', ac:'#E8685A', at:'#B23A2E', oac:'#1C1B19' },
-  sage:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#BFD8B0', ohi:'#17302A', hs:'#E5EFDD', ac:'#E39424', at:'#9A5A00', oac:'#1C1B19' },
-  mint:     { f:'#17302A', f2:'#2B4A40', fl:'#3C5A50', fd:'#0F211C', cr:'#F7F5F0', cd:'#FFFFFF', ch:'#F0EDE6', ln:'#E6E2D9', ln2:'#DDD8CD', ink:'#1C1B19', mu:'#5E5B55', od:'#F7F5F0', od2:'#C9D6CF', hi:'#9FE3C6', ohi:'#17302A', hs:'#DCF4EA', ac:'#C65A3E', at:'#A0412B', oac:'#FFFFFF' }
+  original: { f:'#1A1640', f2:'#2A2458', fl:'#3D3672', fd:'#0A080C', cr:'#F8F7FC', cd:'#FFFFFF', ch:'#F1EFF8', ln:'#E2DFEE', ln2:'#D3CFE3', ink:'#0A080C', mu:'#5E5A72', od:'#FFFFFF', od2:'#C9C5E0', hi:'#F0A8DC', ohi:'#0A080C', hs:'#F6E3F1', ac:'#8A4FD0', at:'#B63DB6', oac:'#FFFFFF' }
 };
 function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.original; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
 class Component extends DCLogic {

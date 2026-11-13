@@ -65,14 +65,14 @@ const html = `<!doctype html>
 ${palCss}
 body{margin:0;background:var(--cr)}
 a{color:inherit}a:hover{opacity:.85}
-input::placeholder{color:#6B7A72}
+input::placeholder{color:#8A86A0}
 .pg{display:none}.pg.on{display:block}
 html{scroll-behavior:smooth}
 @media (max-width:640px){header nav{display:none!important}.palsw{left:12px;right:12px;bottom:12px;max-width:none;justify-content:center}.palsw b,.palsw .lbl{display:none}.palsw button{padding:9px 12px}.palsw i{width:30px;height:16px;border-radius:8px}h1{font-size:44px!important;letter-spacing:-1px!important}section>div{padding-left:18px!important;padding-right:18px!important}}
 .palsw{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;flex-wrap:wrap;gap:6px;align-items:center;max-width:calc(100% - 32px);
-  background:#FFFFFF;border:1px solid #DDD8CD;border-radius:18px;padding:8px;box-shadow:0 12px 30px rgba(0,0,0,.18);font:500 13px Inter,system-ui,sans-serif;color:#1C1B19}
+  background:#FFFFFF;border:1px solid #E2DFEE;border-radius:18px;padding:8px;box-shadow:0 12px 30px rgba(0,0,0,.18);font:500 13px Inter,system-ui,sans-serif;color:#1C1B19}
 .palsw b{padding:0 6px;font-weight:600}
-.palsw button{display:flex;align-items:center;gap:7px;border:1px solid #DDD8CD;background:#FFFFFF;border-radius:999px;padding:7px 11px;font:inherit;cursor:pointer;color:#1C1B19}
+.palsw button{display:flex;align-items:center;gap:7px;border:1px solid #E2DFEE;background:#FFFFFF;border-radius:999px;padding:7px 11px;font:inherit;cursor:pointer;color:#1C1B19}
 .palsw button[aria-pressed="true"]{background:#17302A;color:#FFFFFF;border-color:#17302A}
 .palsw i{display:inline-flex;width:22px;height:12px;border-radius:6px;overflow:hidden}
 .palsw i span{flex:1}
@@ -80,10 +80,10 @@ html{scroll-behavior:smooth}
 </head>
 <body data-pal="original">
 ${pages.map(p => `<div class="pg" id="pg-${p.id}">${p.body}</div>`).join('\n')}
-<div class="palsw" role="group" aria-label="Colour version">
+${Object.keys(PAL).length > 1 ? `<div class="palsw" role="group" aria-label="Colour version">
 <b>Colours</b>
 ${Object.keys(PAL).map(k => `<button type="button" data-pal="${k}" aria-label="${NAMES[k] || k}" aria-pressed="${k === 'original'}"><i aria-hidden="true"><span style="background:${PAL[k].hi}"></span><span style="background:${PAL[k].ac}"></span></i><span class="lbl">${NAMES[k] || k}</span></button>`).join('\n')}
-</div>
+</div>` : ''}
 <script>
 (function(){
   var ids = ${JSON.stringify(Object.keys(PAGES))};

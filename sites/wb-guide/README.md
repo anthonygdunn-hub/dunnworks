@@ -21,18 +21,22 @@ Design canvas: https://claude.ai/artifact/JZ2MeExHz6Dy2fvC7ZMnhG
 
 ## Colours
 
-Every colour is a token (`--f` forest, `--cr` cream, `--hi` highlight, `--ac` accent and so on),
-defined once per palette in `WB_PALETTES` at the bottom of each design file. All four versions keep
-the forest green (#17302A) and cream (#F7F5F0) backgrounds; only the highlight and accent change:
+Every colour is a token (`--f` dark sections and buttons, `--cr` page, `--hi` highlight, `--ac` accent
+and so on), defined once in `WB_PALETTES` at the bottom of each design file. They match the Gary Evans
+Pro site:
 
-| Version | Highlight | Accent |
+| Token | Colour | Used for |
 |---|---|---|
-| Original | lime #B5E38D | orange #F26B2A |
-| Gold and coral | #E9C46A | #E8685A |
-| Sage and amber | #BFD8B0 | #E39424 |
-| Mint and terracotta | #9FE3C6 | #C65A3E |
+| `--cr` / `--cd` | #F8F7FC / #FFFFFF | page and cards |
+| `--f` | #1A1640 | hero, dark panels, buttons |
+| `--fd` | #0A080C | footer |
+| `--ink` / `--mu` | #0A080C / #5E5A72 | text |
+| `--hi` | #F0A8DC | highlights on dark, Search and Call to order buttons |
+| `--ac` | #8A4FD0 | logo mark, small accents |
+| `--at` | #B63DB6 | accent text on white |
 
-The preview has a switcher in the bottom corner and remembers the choice per browser.
+The business call-to-action uses Gary's pink, purple and indigo gradient (#D24BA9, #9A5FD8, #7674F1).
+Headings stay Inter Tight rather than Gary's Bebas Neue.
 
 ## Preview on dunnworks.io
 
@@ -43,7 +47,7 @@ The preview has a switcher in the bottom corner and remembers the choice per bro
 node sites/wb-guide/build.mjs
 cp sites/wb-guide/preview.html /tmp/wb.html
 node tools/previewbar.mjs --in=/tmp/wb.html --out=/tmp/wb.html --client="woolmer, the W&B guide" \
-  --note="colour versions in the bottom corner, click anything"
+  --note="click anything"
 node tools/lock.mjs --in=/tmp/wb.html --out=preview/wb-guide/index.html \
   --client="woolmer, the W&B guide" --pass="<passphrase from the console>"
 node tools/rekey.mjs --in=preview/wb-guide/index.html --slug=wb-guide --doc=site
