@@ -65,6 +65,8 @@ const html = `<!doctype html>
 ${palCss}
 body{margin:0;background:var(--cr)}
 a{color:inherit}a:hover{opacity:.85}
+h1,h2{color:var(--hl)}
+.dk h1,.dk h2{color:var(--hd)}
 input::placeholder{color:#8A86A0}
 .pg{display:none}.pg.on{display:block}
 html{scroll-behavior:smooth}

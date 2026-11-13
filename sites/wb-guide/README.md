@@ -21,22 +21,23 @@ Design canvas: https://claude.ai/artifact/JZ2MeExHz6Dy2fvC7ZMnhG
 
 ## Colours
 
-Six colour options, switchable from the bar in the preview's bottom corner (the choice is remembered
-per browser) and laid side by side on the design canvas. Every colour is a token (`--f` dark sections,
-`--rg` buttons and dark panels, `--mint` light band, `--hi` highlight, `--ac` small pops, `--t1`..`--t6`
-photo placeholder tints and so on), defined per option in `WB_PALETTES` at the bottom of each design file.
+Zodiac and fountain blue, with the tree logo and headings in orange. Every colour is a token,
+defined once in `WB_PALETTES` at the bottom of each design file:
 
-| Option | Dark | Light band | Highlight | Pop |
-|---|---|---|---|---|
-| forest: Forest mix (Campfire style) | #142D25 / #0A4733 | #DAECDE | #B3ED97 lime | #FF862F orange |
-| honey: Pine and honey | #1E3328 / #2D5A3D | #EFE6CF | #EBC766 | #D9622B |
-| moss: Moss and clay | #25301F / #3F5A2A | #E3EBD3 | #CFE68C | #C65A3E |
-| persian: Persian blue (Anthony's swatches) | #2218A7 / #1A1380 | #E1E5F8 | #BBC4EB | #737CCF |
-| juniper: Juniper and mist (Anthony's swatches) | #4E6F76 / #3E5C62 | #DFE9EB | #A9CCCF | #5E9BA3 |
-| zodiac: Zodiac and fountain blue (Anthony's swatches) | #0C243C / #12304F | #C9D1D5 | #55C2C3 | #2FA9AB |
+| Token | Colour | Used for |
+|---|---|---|
+| `--f` / `--rg` | #0C243C / #12304F Blue Zodiac | hero, dark panels, buttons, call-to-action band |
+| `--fd` | #07172A | footer |
+| `--mint` | #C9D1D5 Tiara | category band |
+| `--cr` / `--cd` | #F5F7F8 / #FFFFFF | page and cards |
+| `--hi` | #55C2C3 Fountain Blue | "one place.", Search, Call to order, date badges |
+| `--ac` | #FF862F orange | tree logo and small pops (Search arrow, New badge, map pin) |
+| `--hd` | #FF862F | headings on dark backgrounds |
+| `--hl` | #C4550F | headings on light backgrounds (deeper so they stay readable) |
+| `--ink` / `--mu` | #0C243C / #4F5E6E | text |
 
-Once one is chosen, delete the others from `WB_PALETTES` (the switcher disappears by itself when only
-one is left) and remove the `Home-*.dc.html` canvas boards.
+Headings pick their colour from CSS: `h1,h2` use `--hl`, and anything inside an element with
+class `dk` (the dark sections) uses `--hd`. Earlier colour options are in the git history.
 
 ## Preview on dunnworks.io
 
@@ -47,7 +48,7 @@ one is left) and remove the `Home-*.dc.html` canvas boards.
 node sites/wb-guide/build.mjs
 cp sites/wb-guide/preview.html /tmp/wb.html
 node tools/previewbar.mjs --in=/tmp/wb.html --out=/tmp/wb.html --client="woolmer, the W&B guide" \
-  --note="6 colour options in the bottom corner, click anything"
+  --note="click anything"
 node tools/lock.mjs --in=/tmp/wb.html --out=preview/wb-guide/index.html \
   --client="woolmer, the W&B guide" --pass="<passphrase from the console>"
 node tools/rekey.mjs --in=preview/wb-guide/index.html --slug=wb-guide --doc=site
