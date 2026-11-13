@@ -501,7 +501,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <button type="button" data-go="website"><i>◎</i><div><b>Website</b><span>Offers, sale, prices, FAQs and journal</span></div></button>
     <button type="button" data-go="settings"><i>⚙</i><div><b>Settings</b><span>Put your round in your phone's calendar</span></div></button>
   </div>
-  <p class="help" style="margin-top:18px;text-align:center">App version 7 · 13 November</p>
+  <p class="help" style="margin-top:18px;text-align:center">App version 8 · 13 November<br><small id="dbg" style="font-size:11px;opacity:.7"></small></p>
 </section>
 
 <section id="v-takings" hidden>
@@ -1169,7 +1169,11 @@ document.addEventListener('focusout', function(){ setTimeout(function(){ var a =
 /* how far short of the bottom of the screen an iPhone home-screen app stops (iOS bug); the page is stretched down by that much */
 function fitGap(){ var sa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone, port = innerHeight > innerWidth;
   var g = sa && port ? Math.max(0, Math.min(80, screen.height - innerHeight)) : 0; document.documentElement.style.setProperty('--gap', g + 'px'); }
-fitGap(); addEventListener('resize', fitGap); addEventListener('orientationchange', function(){ setTimeout(fitGap, 300); });
+fitGap(); addEventListener('resize', fitGap);
+/* screen measurements, shown small on More, to pin down the iPhone bottom gap */
+function dbg(){ var e = $('dbg'); if (!e) return; var t = document.createElement('div'); t.style.cssText = 'position:fixed;top:0;left:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);visibility:hidden'; document.body.appendChild(t); var cs = getComputedStyle(t), n = $('nav').getBoundingClientRect(), b = document.body.getBoundingClientRect();
+  e.textContent = 'sc ' + screen.height + ' · ih ' + innerHeight + ' · ch ' + document.documentElement.clientHeight + ' · vv ' + (window.visualViewport ? Math.round(visualViewport.height) + '/' + Math.round(visualViewport.offsetTop) : '-') + ' · sat ' + cs.paddingTop + ' · sab ' + cs.paddingBottom + ' · body ' + Math.round(b.top) + '-' + Math.round(b.bottom) + ' · nav ' + Math.round(n.bottom) + ' · gap ' + getComputedStyle(document.documentElement).getPropertyValue('--gap') + ' · sa ' + ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || !!navigator.standalone); t.remove(); }
+addEventListener('hashchange', function(){ setTimeout(dbg, 200); }); setTimeout(dbg, 800); addEventListener('orientationchange', function(){ setTimeout(fitGap, 300); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 addEventListener('hashchange', function(){ if (store.get() && location.hash && location.hash.indexOf('#offers-import') !== 0) go(location.hash, true); });
 
