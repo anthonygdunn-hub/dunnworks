@@ -47,9 +47,9 @@ function renderFile(file) {
 
 const pages = Object.entries(PAGES).map(([id, f]) => ({ id, ...renderFile(f) }));
 const PAL = pages.find(p => p.pal).pal;
-const NAMES = { original: 'Original', gold: 'Gold and coral', sage: 'Sage and amber', mint: 'Mint and terracotta' };
+const NAMES = { forest: 'Forest mix', honey: 'Pine and honey', moss: 'Moss and clay', persian: 'Persian blue', juniper: 'Juniper and mist', zodiac: 'Zodiac and fountain' };
 const palCss = Object.entries(PAL).map(([k, v]) =>
-  `${k === 'original' ? 'body,' : ''}body[data-pal="${k}"]{${Object.entries(v).map(([t, c]) => `--${t}:${c}`).join(';')}}`).join('\n');
+  `${k === Object.keys(PAL)[0] ? 'body,' : ''}body[data-pal="${k}"]{${Object.entries(v).map(([t, c]) => `--${t}:${c}`).join(';')}}`).join('\n');
 
 const html = `<!doctype html>
 <html lang="en-GB">
@@ -78,11 +78,11 @@ html{scroll-behavior:smooth}
 .palsw i span{flex:1}
 </style>
 </head>
-<body data-pal="original">
+<body data-pal="${Object.keys(PAL)[0]}">
 ${pages.map(p => `<div class="pg" id="pg-${p.id}">${p.body}</div>`).join('\n')}
 ${Object.keys(PAL).length > 1 ? `<div class="palsw" role="group" aria-label="Colour version">
 <b>Colours</b>
-${Object.keys(PAL).map(k => `<button type="button" data-pal="${k}" aria-label="${NAMES[k] || k}" aria-pressed="${k === 'original'}"><i aria-hidden="true"><span style="background:${PAL[k].hi}"></span><span style="background:${PAL[k].ac}"></span></i><span class="lbl">${NAMES[k] || k}</span></button>`).join('\n')}
+${Object.keys(PAL).map(k => `<button type="button" data-pal="${k}" aria-label="${NAMES[k] || k}" aria-pressed="${k === Object.keys(PAL)[0]}"><i aria-hidden="true"><span style="background:${PAL[k].hi}"></span><span style="background:${PAL[k].ac}"></span></i><span class="lbl">${NAMES[k] || k}</span></button>`).join('\n')}
 </div>` : ''}
 <script>
 (function(){
@@ -100,7 +100,7 @@ ${Object.keys(PAL).map(k => `<button type="button" data-pal="${k}" aria-label="$
   function pal(k){ document.body.setAttribute('data-pal', k); btns.forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.pal === k)); });
     try { localStorage.setItem('wb-pal', k); } catch (e) {} }
   btns.forEach(function(b){ b.addEventListener('click', function(){ pal(b.dataset.pal); }); });
-  try { var s = localStorage.getItem('wb-pal'); if (s) pal(s); } catch (e) {}
+  try { var s = localStorage.getItem('wb-pal'); if (s && document.querySelector('.palsw button[data-pal="' + s + '"]')) pal(s); } catch (e) {}
 })();
 </script>
 </body>

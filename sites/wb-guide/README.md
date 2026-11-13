@@ -21,18 +21,22 @@ Design canvas: https://claude.ai/artifact/JZ2MeExHz6Dy2fvC7ZMnhG
 
 ## Colours
 
-Forest colours, mixed section by section the way campfire.ai does it. Every colour is a token,
-defined once in `WB_PALETTES` at the bottom of each design file:
+Six colour options, switchable from the bar in the preview's bottom corner (the choice is remembered
+per browser) and laid side by side on the design canvas. Every colour is a token (`--f` dark sections,
+`--rg` buttons and dark panels, `--mint` light band, `--hi` highlight, `--ac` small pops, `--t1`..`--t6`
+photo placeholder tints and so on), defined per option in `WB_PALETTES` at the bottom of each design file.
 
-| Token | Colour | Used for |
-|---|---|---|
-| `--f` | #142D25 deep forest | hero, listing header, footer tone |
-| `--rg` | #0A4733 rich green | buttons, icon squares, What's on, Why woolmer panel |
-| `--mint` | #DAECDE | category band, Good to know box, soft pills |
-| `--cr` / `--cd` | #F9F9F8 / #FFFFFF | page and cards |
-| `--hi` | #B3ED97 lime | highlights, Search and Call to order, business call-to-action band |
-| `--ac` | #FF862F orange | small pops only: logo mark, Search arrow, New badge, map pin |
-| `--ink` / `--mu` | #101012 / #52644D | text |
+| Option | Dark | Light band | Highlight | Pop |
+|---|---|---|---|---|
+| forest: Forest mix (Campfire style) | #142D25 / #0A4733 | #DAECDE | #B3ED97 lime | #FF862F orange |
+| honey: Pine and honey | #1E3328 / #2D5A3D | #EFE6CF | #EBC766 | #D9622B |
+| moss: Moss and clay | #25301F / #3F5A2A | #E3EBD3 | #CFE68C | #C65A3E |
+| persian: Persian blue (Anthony's swatches) | #2218A7 / #1A1380 | #E1E5F8 | #BBC4EB | #737CCF |
+| juniper: Juniper and mist (Anthony's swatches) | #4E6F76 / #3E5C62 | #DFE9EB | #A9CCCF | #5E9BA3 |
+| zodiac: Zodiac and fountain blue (Anthony's swatches) | #0C243C / #12304F | #C9D1D5 | #55C2C3 | #2FA9AB |
+
+Once one is chosen, delete the others from `WB_PALETTES` (the switcher disappears by itself when only
+one is left) and remove the `Home-*.dc.html` canvas boards.
 
 ## Preview on dunnworks.io
 
@@ -43,7 +47,7 @@ defined once in `WB_PALETTES` at the bottom of each design file:
 node sites/wb-guide/build.mjs
 cp sites/wb-guide/preview.html /tmp/wb.html
 node tools/previewbar.mjs --in=/tmp/wb.html --out=/tmp/wb.html --client="woolmer, the W&B guide" \
-  --note="click anything"
+  --note="6 colour options in the bottom corner, click anything"
 node tools/lock.mjs --in=/tmp/wb.html --out=preview/wb-guide/index.html \
   --client="woolmer, the W&B guide" --pass="<passphrase from the console>"
 node tools/rekey.mjs --in=preview/wb-guide/index.html --slug=wb-guide --doc=site

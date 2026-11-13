@@ -63,7 +63,7 @@ input::placeholder{color:#7C8A78}
 <div style="position: absolute; inset: 20px 10px 0 40px; border-radius: 50%; border: 1px solid var(--f2)"></div>
 <div style="position: absolute; inset: 80px 70px 60px 100px; border-radius: 50%; border: 1px solid var(--f2)"></div>
 <div style="position: absolute; top: 40px; left: 60px; width: 300px; background: #FFFFFF; color: #1C1B19; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.25)">
-<div style="height: 120px; background: #DCE9D5; display: flex; align-items: flex-end; padding: 12px"><span style="font-size: 11px; font-weight: 600; background: #FFFFFF; padding: 4px 8px; border-radius: 999px">Photo</span></div>
+<div style="height: 120px; background: var(--t1); display: flex; align-items: flex-end; padding: 12px"><span style="font-size: 11px; font-weight: 600; background: #FFFFFF; padding: 4px 8px; border-radius: 999px">Photo</span></div>
 <div style="padding: 14px 16px 16px">
 <div style="display: flex; justify-content: space-between; align-items: center"><strong style="font-size: 16px">The Pine Wok</strong><span style="font-size: 12px; font-weight: 600; color: var(--f); background: var(--hs); padding: 3px 8px; border-radius: 999px">Open now</span></div>
 <p style="margin: 6px 0 0; font-size: 13px; color: #5E5B55">Chinese takeaway · Delivers · 0.4 miles</p>
@@ -200,15 +200,20 @@ input::placeholder{color:#7C8A78}
 </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3600}}'>
+<script type="text/x-dc" data-dc-script data-props='{"palette":{"editor":"enum","options":["forest","honey","moss","persian","juniper","zodiac"],"default":"forest"},"$preview":{"width":1440,"height":3600}}'>
 var WB_PALETTES = {
-  original: { f:'#142D25', f2:'#1F4236', fl:'#2F5446', fd:'#0E201A', rg:'#0A4733', mint:'#DAECDE', sage:'#869C80', cr:'#F9F9F8', cd:'#FFFFFF', ch:'#EEF3EC', ln:'#E3E6E1', ln2:'#D2D8CF', ink:'#101012', mu:'#52644D', od:'#F9F9F8', od2:'#B9C8B3', hi:'#B3ED97', ohi:'#142D25', hs:'#DAECDE', ac:'#FF862F', at:'#0A4733', oac:'#142D25' }
+  forest: { f:'#142D25', f2:'#1F4236', fl:'#2F5446', fd:'#0E201A', rg:'#0A4733', mint:'#DAECDE', sage:'#869C80', cr:'#F9F9F8', cd:'#FFFFFF', ch:'#EEF3EC', ln:'#E3E6E1', ln2:'#D2D8CF', ink:'#101012', mu:'#52644D', od:'#F9F9F8', od2:'#B9C8B3', hi:'#B3ED97', ohi:'#142D25', hs:'#DAECDE', ac:'#FF862F', at:'#0A4733', oac:'#142D25', t1:'#DCE9D5', t2:'#E8EFD9', t3:'#F3E6D3', t4:'#D5E6DE', t5:'#E6EDD2', t6:'#DCE8E2' },
+  honey: { f:'#1E3328', f2:'#2C4637', fl:'#3D5949', fd:'#14231B', rg:'#2D5A3D', mint:'#EFE6CF', sage:'#9A8F6A', cr:'#FBF8F1', cd:'#FFFFFF', ch:'#F3EEE1', ln:'#E8E1D0', ln2:'#D9CFB8', ink:'#15140F', mu:'#5E5640', od:'#FBF8F1', od2:'#C8C3AE', hi:'#EBC766', ohi:'#1E3328', hs:'#F5EAC8', ac:'#D9622B', at:'#2D5A3D', oac:'#1E3328', t1:'#EFE3C4', t2:'#E6E9D2', t3:'#F3DCC4', t4:'#E2DDC6', t5:'#EDE6CC', t6:'#E4E6D6' },
+  moss: { f:'#25301F', f2:'#344230', fl:'#465641', fd:'#192116', rg:'#3F5A2A', mint:'#E3EBD3', sage:'#8A9A70', cr:'#F8F9F4', cd:'#FFFFFF', ch:'#EEF2E6', ln:'#E1E6D7', ln2:'#CFD8C0', ink:'#141611', mu:'#58614B', od:'#F8F9F4', od2:'#C3CCB4', hi:'#CFE68C', ohi:'#25301F', hs:'#E6F0CC', ac:'#C65A3E', at:'#3F5A2A', oac:'#25301F', t1:'#DCE6C8', t2:'#E8EDD3', t3:'#EEDCCB', t4:'#D3E0C6', t5:'#E5EBCD', t6:'#DAE3D0' },
+  persian: { f:'#2218A7', f2:'#3A31B8', fl:'#544CC6', fd:'#120C5C', rg:'#1A1380', mint:'#E1E5F8', sage:'#737CCF', cr:'#F7F8FD', cd:'#FFFFFF', ch:'#EEF0FA', ln:'#DDE1F2', ln2:'#CBD1EC', ink:'#12123A', mu:'#4E5280', od:'#FFFFFF', od2:'#CDD2F2', hi:'#BBC4EB', ohi:'#2218A7', hs:'#E1E5F8', ac:'#737CCF', at:'#2218A7', oac:'#2218A7', t1:'#DCE0F6', t2:'#E6E2F7', t3:'#D6DDF5', t4:'#E1E5F8', t5:'#E9E6F8', t6:'#D9E2F6' },
+  juniper: { f:'#4E6F76', f2:'#61828A', fl:'#7896A0', fd:'#2E4549', rg:'#3E5C62', mint:'#DFE9EB', sage:'#ABC3CD', cr:'#F6F9FA', cd:'#FFFFFF', ch:'#EAF1F2', ln:'#DCE6E8', ln2:'#C7D4D8', ink:'#1B2A2D', mu:'#4E6469', od:'#FFFFFF', od2:'#D3E2E5', hi:'#A9CCCF', ohi:'#24393D', hs:'#DFE9EB', ac:'#5E9BA3', at:'#3E5C62', oac:'#24393D', t1:'#DFE9EB', t2:'#E6EEF0', t3:'#D6E4E7', t4:'#E0ECEC', t5:'#E9F0F1', t6:'#D9E6E9' },
+  zodiac: { f:'#0C243C', f2:'#1B3550', fl:'#2D4762', fd:'#07172A', rg:'#12304F', mint:'#C9D1D5', sage:'#7E8C9C', cr:'#F5F7F8', cd:'#FFFFFF', ch:'#ECEFF1', ln:'#DDE2E5', ln2:'#C9D1D5', ink:'#0C243C', mu:'#4F5E6E', od:'#FFFFFF', od2:'#B9C4CF', hi:'#55C2C3', ohi:'#0C243C', hs:'#D7F0F0', ac:'#2FA9AB', at:'#1C7F80', oac:'#0C243C', t1:'#DDE3E7', t2:'#E3E8EB', t3:'#D3EDED', t4:'#D9DFE4', t5:'#E6EAEC', t6:'#DBE6EA' }
 };
-function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.original; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
+function wbVars(name) { var p = WB_PALETTES[name] || WB_PALETTES.forest; return Object.keys(p).map(function (k) { return '--' + k + ': ' + p[k] + ';'; }).join(' '); }
 class Component extends DCLogic {
   renderVals() {
     return {
-      vars: wbVars(this.props.palette ?? 'original'),
+      vars: wbVars(this.props.palette ?? 'forest'),
       chips: ['Takeaways open now', 'Supermarkets', 'Kids’ activities', 'Gyms & sport', 'Pubs with food'],
       cats: [
         { name: 'Takeaways', count: '[count] places' },
@@ -219,10 +224,10 @@ class Component extends DCLogic {
         { name: 'Kids & families', count: '[count] clubs' }
       ],
       takeaways: [
-        { name: 'The Pine Wok', meta: 'Chinese · Delivers · 0.4 mi', rating: '4.6', fsa: '5', until: '11pm', tone: '#DCE9D5' },
-        { name: 'Inclosure Fish Bar', meta: 'Fish & chips · Collection · 0.8 mi', rating: '4.4', fsa: '5', until: '9:30pm', tone: '#E8EFD9' },
-        { name: 'Deadwater Pizza Co.', meta: 'Pizza · Delivers · 1.1 mi', rating: '4.2', fsa: '4', until: '11pm', tone: '#F3E6D3' },
-        { name: 'Spice of Hogmoor', meta: 'Indian · Delivers · 0.6 mi', rating: '4.7', fsa: '5', until: '11:30pm', tone: '#D5E6DE' }
+        { name: 'The Pine Wok', meta: 'Chinese · Delivers · 0.4 mi', rating: '4.6', fsa: '5', until: '11pm', tone: 'var(--t1)' },
+        { name: 'Inclosure Fish Bar', meta: 'Fish & chips · Collection · 0.8 mi', rating: '4.4', fsa: '5', until: '9:30pm', tone: 'var(--t2)' },
+        { name: 'Deadwater Pizza Co.', meta: 'Pizza · Delivers · 1.1 mi', rating: '4.2', fsa: '4', until: '11pm', tone: 'var(--t3)' },
+        { name: 'Spice of Hogmoor', meta: 'Indian · Delivers · 0.6 mi', rating: '4.7', fsa: '5', until: '11:30pm', tone: 'var(--t4)' }
       ],
       questions: [
         { text: 'Anywhere do gluten-free fish and chips on a Monday?', tag: 'Takeaways', when: '2h ago', answers: 4 },
