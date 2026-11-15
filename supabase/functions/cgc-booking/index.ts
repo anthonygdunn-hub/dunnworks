@@ -45,12 +45,30 @@ Deno.serve(async (req) => {
   };
   if (!row.name || !row.phone || row.phone.replace(/\D/g, "").length < 7) return json({ error: "Please add your name and a phone number." }, 400);
 
+  // where the booking came from: today's earliest visit by the same visitor that arrived from somewhere else
+  // (same hash as cgc-track: IP + browser + day + secret; nothing is stored on the customer's device)
+  let src: string | null = null;
+  try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? req.headers.get("x-real-ip") ?? "";
+    const ua = req.headers.get("user-agent") ?? "";
+    const day = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+    const salt = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "").slice(-24);
+    const vb = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${ip}|${ua}|${day}|${salt}`));
+    const visitor = Array.from(new Uint8Array(vb)).map((x) => x.toString(16).padStart(2, "0")).join("").slice(0, 24);
+    const { data: pv } = await db.from("cgc_pageviews").select("ref,utm").eq("visitor", visitor).or("ref.not.is.null,utm.not.is.null").order("at", { ascending: true }).limit(1);
+    const p = pv?.[0];
+    const u = (p?.utm || "").toLowerCase();
+    src = ({ facebook: "Facebook", fb: "Facebook", instagram: "Instagram", ig: "Instagram", whatsapp: "WhatsApp", buffer: "Social (Buffer)" } as Record<string, string>)[u] || p?.ref || null;
+    if (!src) { const { count: seen } = await db.from("cgc_pageviews").select("id", { count: "exact", head: true }).eq("visitor", visitor); if (seen) src = "Direct or typed in"; }
+    if (src) src = src.slice(0, 60);
+  } catch (e) { console.error("source lookup failed", e); }
+
   // no more than 5 requests an hour from one connection
   const since = new Date(Date.now() - 3600_000).toISOString();
   const { count } = await db.from("cgc_bookings").select("id", { count: "exact", head: true }).eq("ip_hash", row.ip_hash).gte("created_at", since);
   if ((count ?? 0) >= 5) return json({ error: "We've had a few requests from you already. Please call or WhatsApp 07792 554989." }, 429);
 
-  const { data: saved, error } = await db.from("cgc_bookings").insert(row).select("id").single();
+  const { data: saved, error } = await db.from("cgc_bookings").insert({ ...row, src }).select("id").single();
   if (error) { console.error("insert failed", error); return json({ error: "Could not save your request." }, 500); }
 
   // ping the admin app on Stuart's phone; never holds up or breaks the booking

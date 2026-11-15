@@ -132,3 +132,7 @@ begin if not public.cgc_is_editor() then raise exception 'not allowed'; end if; 
 revoke all on function public.cgc_ical_key() from public, anon;
 grant execute on function public.cgc_ical_key() to authenticated;
 -- cgc_app_insights(): visitors and bookings by month for 6 months, traffic sources and devices for 30 days (editors only); see the live function for the full body
+
+-- Added 15 Nov 2026 (migration cgc_social): social media results. cgc_bookings.src (where the booking came from, worked out in cgc-booking
+-- from the visitor's page views), cgc_social_cache (service role only), cgc_set_buffer_key(k) (editor pastes the Buffer API key; stored in
+-- cgc_private as 'buffer_key') and cgc_social_site(days) (visits and bookings from social networks). Buffer results come from the cgc-social function.

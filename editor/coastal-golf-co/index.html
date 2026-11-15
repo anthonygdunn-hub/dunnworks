@@ -493,11 +493,12 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <button type="button" data-go="takings"><i>£</i><div><b>Money</b><span>Takings, who owes, mileage, expenses and profit</span></div></button>
     <button type="button" data-go="remind"><i>↻</i><div><b>Regrip reminders</b><span>Customers due a fresh set of grips</span></div></button>
     <button type="button" data-go="stock"><i>▤</i><div><b>Grip stock</b><span>What's on the shelf, and what's running low</span><em class="badge" id="lowb" hidden></em></div></button>
+    <button type="button" data-go="social"><i>♥</i><div><b>Social media</b><span>How your Facebook and Instagram posts are doing</span></div></button>
     <button type="button" data-go="insights"><i>↗</i><div><b>Insights</b><span>Best sellers, busiest areas, website to bookings</span></div></button>
     <button type="button" data-go="website"><i>◎</i><div><b>Website</b><span>Offers, sale, prices, FAQs and journal</span></div></button>
     <button type="button" data-go="settings"><i>⚙</i><div><b>Settings</b><span>Put your round in your phone's calendar</span></div></button>
   </div>
-  <p class="help" style="margin-top:18px;text-align:center">App version 9 · 13 November</p>
+  <p class="help" style="margin-top:18px;text-align:center">App version 10 · 15 November</p>
 </section>
 
 <section id="v-takings" hidden>
@@ -530,6 +531,20 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
   <div class="panel"><h2>Best-selling grips</h2><div id="ing"></div></div>
   <div class="panel"><h2>Busiest areas</h2><div id="ina"></div></div>
   <div class="panel"><h2>Where visitors come from <small style="font-family:Mulish;font-size:13px;text-transform:none">(last 30 days)</small></h2><div id="ins"></div></div>
+</section>
+
+<section id="v-social" hidden>
+  <button class="btn line sm back" type="button" data-go="more">‹ More</button>
+  <div class="row" style="justify-content:space-between;margin-top:10px"><h1 style="font-size:32px">Social media</h1><button class="btn line sm" type="button" id="soref">Refresh</button></div>
+  <div class="chips" id="sof"><button type="button" data-f="7" aria-pressed="false">7 days</button><button type="button" data-f="30" aria-pressed="true">30 days</button><button type="button" data-f="90" aria-pressed="false">90 days</button></div>
+  <div class="tiles" id="sot"></div>
+  <div class="panel"><h2>From social media to your website</h2><div id="sow"></div></div>
+  <div class="panel" id="sobw"><h2>Your posts</h2><p class="help" id="soup"></p><div id="sob"></div></div>
+  <div class="panel" id="soconn" hidden><h2>Connect Buffer</h2>
+    <p class="help">To see likes, reach and comments for each post, the app needs a key from Buffer (free plan includes one). In Buffer: your account menu (bottom left), <b>API</b>, then <b>Create API key</b>. Copy it and paste it here. It's kept privately on the server; the app can't show it again.</p>
+    <input id="bkey" type="text" autocomplete="off" spellcheck="false" placeholder="Paste the Buffer API key" style="margin-top:10px">
+    <button class="btn gold sm" type="button" id="bkeysave" style="margin-top:10px">Connect Buffer</button></div>
+  <p class="help" style="margin-top:14px"><a href="#" id="bkeydrop" style="color:var(--bad);font-weight:800" hidden>Disconnect Buffer</a></p>
 </section>
 
 <section id="v-settings" hidden>
@@ -613,7 +628,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 var URL0 = 'https://acdpgarasgfhvupzsbxf.supabase.co', KEY = 'sb_publishable_OWTVpDyadL1lITnCp4gfAQ_EZxVHldY';
 var SITE = 'https://www.coastalgolfco.co.uk/', BUCKET = 'cgc-journal', AUTH = 'cgc-editor-auth';
 var $ = function(id){ return document.getElementById(id); };
-var VIEWS = ['gate','home','today','diary','more','takings','remind','stock','insights','settings','bookings','booking','jobs','job','customers','customer','website','list','edit','words','offers','sale'];
+var VIEWS = ['gate','home','today','diary','more','takings','remind','stock','insights','settings','social','bookings','booking','jobs','job','customers','customer','website','list','edit','words','offers','sale'];
 var GROUP = { home: 'home', today: 'today', bookings: 'bookings', booking: 'bookings', jobs: 'jobs', job: 'jobs' };
 function show(v){ VIEWS.forEach(function(k){ $('v-' + k).hidden = k !== v; }); $('bar').hidden = v !== 'edit'; $('wbar').hidden = v !== 'words'; $('obar').hidden = v !== 'offers'; $('sbar').hidden = v !== 'sale'; $('out').hidden = v === 'gate'; $('nav').hidden = v === 'gate' || v === 'edit';
   document.body.classList.toggle('hasnav', !$('nav').hidden);
@@ -926,6 +941,7 @@ function go(to, quiet){
   if (v === 'stock') return loadStock();
   if (v === 'insights') return loadInsights();
   if (v === 'settings') return loadSettings();
+  if (v === 'social') return loadSocial();
   if (v === 'customers') return loadCustomers();
   if (v === 'customer') return loadCustomer(id);
   if (v === 'website') { show('website'); return; }
@@ -1211,7 +1227,7 @@ function loadBooking(id){
     var b = BCUR = rows && rows[0]; if (!b) { $('bkn').textContent = 'Booking not found'; return; }
     var st = bkStatus(b);
     $('bkn').textContent = b.name; $('bks').hidden = false; $('bks').textContent = st === 'declined' ? 'not going ahead' : st; $('bks').className = 'st ' + stc(st);
-    $('bkw').textContent = (b.page === 'app' ? 'Added ' : 'Booked ') + ago(b.created_at) + (b.page && b.page !== 'app' ? ' from ' + b.page : b.page === 'app' ? ' in the app' : '');
+    $('bkw').textContent = (b.page === 'app' ? 'Added ' : 'Booked ') + ago(b.created_at) + (b.page && b.page !== 'app' ? ' from ' + b.page : b.page === 'app' ? ' in the app' : '') + (b.src ? ' · found us via ' + b.src : '');
     $('bkq').innerHTML = quick(b.phone, b.email);
     $('bkm').hidden = !b.message; $('bkm').textContent = b.message ? 'Their message: ' + b.message : '';
     bfill(b); bkButtons(); ADIRTY = false;
@@ -1768,6 +1784,45 @@ function loadInsights(){
     $('ins').innerHTML = so.length ? so.map(function(x){ return '<div class="tp"><span>' + esc(x.src) + '</span><b>' + x.n + '</b></div>'; }).join('') + ((s.devices || []).length ? '<p class="help" style="margin-top:8px">' + s.devices.map(function(d){ return esc(d.device) + ' ' + d.n; }).join(' · ') + '</p>' : '') : '<p class="help">No visits recorded in the last 30 days.</p>';
   }).catch(function(e){ $('inm').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
 }
+
+
+/* ---- social media: Buffer post results + visits and bookings from social ---- */
+var SOD = 30, SOC = null, SOS = null;
+function fnCall(name, body){ return session().then(function(t){ return fetch(URL0 + '/functions/v1/' + name, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + t.access_token }, body: JSON.stringify(body || {}) }).then(function(r){ return r.json(); }); }); }
+var MPRI = ['reach', 'impressions', 'views', 'reactions', 'likes', 'comments', 'shares', 'saves', 'clicks', 'engagement', 'engagementRate'];
+function mval(p, t){ var m = (p.metrics || []).filter(function(x){ return (x.type || '').toLowerCase() === t.toLowerCase(); })[0]; return m ? +m.value || 0 : null; }
+function mlabel(p, t){ var m = (p.metrics || []).filter(function(x){ return (x.type || '').toLowerCase() === t.toLowerCase(); })[0]; return m ? (m.name || t) : t; }
+function loadSocial(refresh){
+  show('social'); $('sot').innerHTML = ''; $('sow').innerHTML = '<p class="help">Loading…</p>'; $('sob').innerHTML = '';
+  return Promise.all([api('/rest/v1/rpc/cgc_social_site', { method: 'POST', json: { days: SOD } }), SOC && !refresh ? Promise.resolve(SOC) : fnCall('cgc-social', { refresh: !!refresh })])
+    .then(function(r){ SOS = r[0] || {}; SOC = r[1] || {}; drawSocial(); })
+    .catch(function(e){ $('sow').innerHTML = '<p class="msg bad">' + esc(e.message) + '</p>'; });
+}
+function drawSocial(){
+  var s = SOS, c = SOC, from = new Date(Date.now() - SOD * 86400e3).toISOString();
+  var sv = (s.visits || []).reduce(function(a, v){ return a + v.visitors; }, 0), socialNames = ['Facebook', 'Instagram', 'WhatsApp', 'Social (Buffer)', 'X (Twitter)', 'LinkedIn'];
+  var sb = (s.bookings || []).filter(function(b){ return socialNames.indexOf(b.src) >= 0; }).reduce(function(a, b){ return a + b.n; }, 0);
+  var posts = (c.posts || []).filter(function(p){ return p.dueAt && p.dueAt >= from; }), chan = {}; (c.channels || []).forEach(function(x){ chan[x.id] = x; });
+  var sum = function(t){ return posts.reduce(function(a, p){ var v = mval(p, t); return a + (v || 0); }, 0); };
+  var reach = sum('reach') || sum('impressions') || sum('views'), react = sum('reactions') + sum('likes'), comm = sum('comments'), shares = sum('shares');
+  $('sot').innerHTML = '<div class="tile"><b>' + (c.connected ? posts.length : '–') + '</b><span>Posts sent</span></div><div class="tile"><b>' + (c.connected ? reach : '–') + '</b><span>People reached</span></div>' +
+    '<div class="tile"><b>' + (c.connected ? react + comm + shares : '–') + '</b><span>Likes, comments and shares</span></div><div class="tile' + (sb ? ' hot' : '') + '"><b>' + sb + '</b><span>Bookings from social</span></div>';
+  $('sow').innerHTML = (s.visits || []).length ? (s.visits || []).map(function(v){ var nb = (s.bookings || []).filter(function(b){ return b.src === v.src; })[0]; return '<div class="tp"><span>' + esc(v.src) + '</span><b>' + v.visitors + (v.visitors === 1 ? ' visitor' : ' visitors') + (nb ? ' · ' + nb.n + (nb.n === 1 ? ' booking' : ' bookings') : '') + '</b></div>'; }).join('') +
+      '<p class="help" style="margin-top:8px">' + sv + ' of ' + (s.all_visitors || 0) + ' website visitors came from social media. ' + (s.all_bookings ? sb + ' of ' + s.all_bookings + ' bookings did.' : '') + '</p>'
+    : '<p class="help">No visits from social media in this period yet. Posts with a link to the website show up here when people tap through.</p>';
+  $('soconn').hidden = !!c.connected; $('bkeydrop').hidden = !c.connected; $('sobw').hidden = !c.connected;
+  if (!c.connected) return;
+  $('soup').textContent = c.error ? c.error : (c.fetched_at ? 'From Buffer, updated ' + ago(c.fetched_at) + '. Buffer refreshes results about once a day.' : '');
+  var ord = posts.slice().sort(function(a, z){ var k = function(p){ return (mval(p, 'reach') || mval(p, 'impressions') || 0) + 10 * ((mval(p, 'reactions') || 0) + (mval(p, 'likes') || 0) + (mval(p, 'comments') || 0) + (mval(p, 'shares') || 0)); }; return k(z) - k(a); });
+  $('sob').innerHTML = ord.length ? ord.slice(0, 30).map(function(p){ var ch = chan[p.channelId] || {}, ms = MPRI.map(function(t){ var v = mval(p, t); return v == null || !v && ['reach', 'impressions'].indexOf(t) < 0 ? '' : '<span><b>' + v + '</b> ' + esc(String(mlabel(p, t)).toLowerCase()) + '</span>'; }).filter(Boolean);
+      return '<div class="tp" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><b style="font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:' + (ch.service === 'instagram' ? '#c13584' : '#1877f2') + '">' + esc(ch.service || 'post') + '</b><small style="color:var(--body)">' + ukDate(p.dueAt) + '</small></div><div style="font-size:14.5px;margin:4px 0">' + esc(String(p.text || '').slice(0, 120)) + (String(p.text || '').length > 120 ? '…' : '') + '</div><div style="display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13.5px;color:var(--body)">' + (ms.join('') || 'No results yet') + '</div></div>'; }).join('')
+    : '<p class="help">No posts went out in this period.</p>';
+}
+$('sof').addEventListener('click', function(e){ var b = e.target.closest('button[data-f]'); if (!b) return; SOD = +b.getAttribute('data-f'); [].forEach.call(this.children, function(x){ x.setAttribute('aria-pressed', x === b); }); api('/rest/v1/rpc/cgc_social_site', { method: 'POST', json: { days: SOD } }).then(function(r){ SOS = r || {}; drawSocial(); }); });
+$('soref').addEventListener('click', function(){ loadSocial(true); });
+$('bkeysave').addEventListener('click', function(){ var k = $('bkey').value.trim(); if (!k) return toast('Paste the key from Buffer first', true); this.disabled = true; var btn = this;
+  api('/rest/v1/rpc/cgc_set_buffer_key', { method: 'POST', json: { k: k } }).then(function(){ $('bkey').value = ''; toast('Buffer connected'); SOC = null; return loadSocial(true); }).catch(function(e){ toast(e.message, true); }).then(function(){ btn.disabled = false; }); });
+$('bkeydrop').addEventListener('click', function(e){ e.preventDefault(); if (!confirm('Disconnect Buffer from the app?')) return; api('/rest/v1/rpc/cgc_set_buffer_key', { method: 'POST', json: { k: '' } }).then(function(){ SOC = null; toast('Buffer disconnected'); loadSocial(true); }).catch(function(err){ toast(err.message, true); }); });
 
 /* ---- customers ---- */
 function loadCustomers(){
