@@ -22,7 +22,6 @@
 <link rel="stylesheet" href="/assets/css/console.css?v=20261115">
 <style>
   :root { --tabh: 62px; --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px); }
-  html, body { overscroll-behavior-y: none; }
   body.hq-app { padding: 0; -webkit-tap-highlight-color: transparent; }
   body.hq-app #main { max-width: none; padding: 0; }
   .gate { padding: calc(40px + var(--safe-t)) 20px 40px; max-width: 440px; margin: 0 auto; }
@@ -112,7 +111,13 @@
   body.hq-app .hq-board { display: grid; grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 86%; gap: 10px;
          overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; margin: 0 -14px; padding: 0 14px 8px; scrollbar-width: none; }
   body.hq-app .hq-board::-webkit-scrollbar { display: none; }
-  body.hq-app .hq-board > .hq-col { scroll-snap-align: center; max-height: calc(100vh - 330px); min-height: 200px; }
+  /* one scroll only: the page scrolls up and down, the board swipes sideways; columns never scroll inside themselves */
+  body.hq-app .hq-board { align-items: start; touch-action: pan-x pan-y; }
+  body.hq-app .hq-board > .hq-col { scroll-snap-align: center; max-height: none; overflow: visible; min-height: 160px; }
+  body.hq-app .hq-col > header { position: static; margin: -10px -10px 0; }
+  body.hq-app .hq-doclist, body.hq-app .hq-chk { max-height: none; overflow: visible; }
+  body.hq-app .hq-drawer, .ap-sheet { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  body.hq-app .hq-card { -webkit-user-drag: none; -webkit-touch-callout: none; }
   body.hq-app .hq-pipe { grid-template-columns: minmax(0, 1fr); }
   body.hq-app .hq-pipe .hq-col { max-height: none; min-height: 0; }
   body.hq-app .hq-card { cursor: pointer; }
@@ -274,7 +279,9 @@
       [].forEach.call(d.children, function (x, j) { x.classList.toggle('on', j === i); });
     }, { passive: true });
   }
-  new MutationObserver(function () { if (seg().tab === 'board') boardDots(); }).observe(view, { childList: true, subtree: false });
+  var touch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+  function noDrag() { if (touch) [].forEach.call(view.querySelectorAll('[draggable="true"]'), function (c) { c.setAttribute('draggable', 'false'); }); }
+  new MutationObserver(function () { noDrag(); if (seg().tab === 'board') boardDots(); }).observe(view, { childList: true, subtree: true });
 
   function sync(quiet) {
     lastSync = Date.now();
