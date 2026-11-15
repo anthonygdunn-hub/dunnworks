@@ -240,7 +240,7 @@
 
   /* ----------------------------------------------------------------- shell */
   var TABS = [
-    ['', 'Home'], ['board', 'Board'], ['projects', 'Projects'], ['pipeline', 'Pipeline', 1], ['docs', 'Docs'],
+    ['', 'Home'], ['board', 'Board'], ['projects', 'Projects'], ['dashboards', 'Dashboards', 1], ['pipeline', 'Pipeline', 1], ['docs', 'Docs'],
     ['calendar', 'Calendar'], ['inbox', 'Inbox', 1], ['repos', 'Repos', 1], ['assistant', 'Assistant', 1], ['people', 'People', 1]
   ];
   function parts() { return (location.hash || '').replace(/^#\/?/, '').split('/').slice(1); }
@@ -256,7 +256,7 @@
     }).join('') + '<button type="button" class="hq-k" data-hq="search">Search  ⌘K</button>';
     root.innerHTML = '<div class="hq"><nav class="hq-nav" aria-label="Workspace">' + nav + '</nav><div class="hq-main" id="hq-main"></div></div>';
     var main = root.querySelector('#hq-main');
-    var V = { '':home, board:board, projects:projects, pipeline:pipeline, docs:docs, calendar:calendar, inbox:inbox, repos:repos, assistant:assistant, people:people };
+    var V = { '':home, board:board, projects:projects, dashboards:dashboards, pipeline:pipeline, docs:docs, calendar:calendar, inbox:inbox, repos:repos, assistant:assistant, people:people };
     var f = V[tab] && (ME.owner || !TABS.filter(function (t) { return t[0] === tab && t[2]; }).length) ? V[tab] : home;
     f(main, extra);
     drawer();
@@ -514,6 +514,46 @@
         '<div class="wide"><button class="mini go" type="submit">Save</button> <span class="saved" data-saved></span></div></form>';
     }
     el.innerHTML = html + '</div></div>';
+  }
+
+  /* ------------------------------------------------------------ dashboards */
+  function spark(vals) {
+    vals = vals || []; var max = Math.max.apply(null, vals.concat([1])), w = 120, h = 30, n = vals.length || 1;
+    var pts = vals.map(function (v, i) { return (i * w / Math.max(1, n - 1)).toFixed(1) + ',' + (h - 2 - (v / max) * (h - 4)).toFixed(1); }).join(' ');
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" aria-hidden="true"><polyline fill="none" stroke="var(--accent-2)" stroke-width="2" points="' + pts + '"/></svg>';
+  }
+  function dashboards(el, slug) {
+    el.innerHTML = '<p class="note">Loading dashboards…</p>';
+    Promise.all([
+      rest('dw_sites?select=*&active=eq.true&order=sort.asc'),
+      rest('rpc/dw_sites_summary', { method:'POST', body:{ p_days: 7 } }).catch(function () { return []; })
+    ]).then(function (o) {
+      var sites = o[0] || [], sum = {}; (o[1] || []).forEach(function (x) { sum[x.slug] = x; });
+      var site = slug && sites.filter(function (x) { return x.slug === slug; })[0];
+      if (site) {
+        el.innerHTML = '<p class="crumb" style="margin-bottom:6px"><a href="#/hq/dashboards">Dashboards</a> / ' + esc(site.host) + '</p>' +
+          '<h2 class="hq-h">' + esc(site.name) + '</h2><p class="hq-s"><a class="hq-ref" href="' + esc(site.url) + '" target="_blank" rel="noopener">' + esc(site.host) + '</a>' +
+          (site.project_id && proj(site.project_id) ? ' · <a class="hq-ref" href="#/hq/projects/' + esc(proj(site.project_id).slug) + '">project page</a>' : '') + '</p><div id="hq-sd"></div>';
+        var box = el.querySelector('#hq-sd');
+        if (site.slug === 'woolmer' && w.DWWoolmer) return w.DWWoolmer.view(box, say);
+        return w.DWSiteDash.view(box, say, site);
+      }
+      var tot = 0, totp = 0, taps = 0;
+      sites.forEach(function (x) { var m = sum[x.slug] || {}; tot += m.visits || 0; totp += m.visits_prev || 0; taps += m.clicks || 0; });
+      el.innerHTML = '<h2 class="hq-h">Dashboards</h2><p class="hq-s">Every site you\'ve built, last 7 days. Open one for traffic, Google search, target keywords, speed and enquiries.</p>' +
+        '<div class="stats"><div class="stat"><b>' + sites.length + '</b><span>Sites</span></div><div class="stat"><b>' + tot.toLocaleString('en-GB') + '</b><span>Visits, 7 days</span></div>' +
+        '<div class="stat"><b>' + (totp ? (tot >= totp ? '▲ ' : '▼ ') + Math.abs(Math.round(100 * (tot - totp) / totp)) + '%' : '–') + '</b><span>On the week before</span></div><div class="stat"><b>' + taps + '</b><span>Enquiry taps, 7 days</span></div></div>' +
+        '<div class="hq-tiles">' + sites.map(function (x) {
+          var m = sum[x.slug] || {}, live = !!m.last;
+          var d = m.visits_prev ? Math.round(100 * ((m.visits || 0) - m.visits_prev) / m.visits_prev) : null;
+          return '<a class="hq-tile" href="#/hq/dashboards/' + esc(x.slug) + '"><b>' + esc(x.name) + '</b><p>' + esc(x.host) + '</p>' +
+            (x.slug === 'woolmer' ? '<div class="row"><span class="hq-pill is-ok">Own counter</span><span class="hq-pill">Full woolmer dashboard</span></div>' :
+            '<div class="row" style="justify-content:space-between;align-items:center"><div><b style="font-size:26px">' + (m.visits || 0) + '</b> <span class="hq-m">visits' +
+              (d != null ? ' · ' + (d >= 0 ? '▲' : '▼') + Math.abs(d) + '%' : '') + '</span></div>' + spark(m.spark) + '</div>' +
+            '<div class="row" style="margin-top:8px">' + (live ? '<span class="hq-pill is-ok">Counting</span>' : '<span class="hq-pill is-soon">Waiting for first visit</span>') +
+              (m.clicks ? '<span class="hq-pill">' + m.clicks + ' enquiry taps</span>' : '') + (x.gsc ? '<span class="hq-pill">Search Console</span>' : '') + '</div>') + '</a>';
+        }).join('') + '</div>';
+    }).catch(err);
   }
 
   /* -------------------------------------------------------------- pipeline */

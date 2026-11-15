@@ -1,0 +1,340 @@
+/* Dunnworks console: one dashboard for any site in dw_sites (Workspace → Dashboards), the woolmer dashboard made general.
+ *   Traffic              t.js counter (rpc dw_site_traffic): visits, page views, channels, landing pages, referrers
+ *   Google search        Search Console via edge function dw-site-insights (the shared dashboard service account)
+ *   Target keywords      dw_site_keywords + Search Console positions
+ *   Speed                PageSpeed Insights via dw-site-insights
+ *   Enquiries & bookings rpc dw_site_leads: taps on phone, email, WhatsApp, directions, form sends, plus the site's own form tables
+ */
+(function (w) {
+  'use strict';
+  var SITE = '', SL = '', NAME = '', HOST = '', FIRST = null, BRAND = /^$/;
+  var S = { site: '', kw: null, days: 30, preset: '30', from: null, to: null, tab: 'traffic', t: null, d: null, g: null, sp: null, gs: null, kwAll: false, qAll: false, cAll: false, lAll: false };
+  var root = null, say = function () {};
+  /* Dunnworks brand: violet #7000ff / #a97cff on ink, shades of the same family so channels stay distinguishable */
+  var CH = [['Direct', '#7000ff'], ['Organic Search', '#a97cff'], ['Organic Social', '#3b0a8f'], ['Referral', '#d4c2ff'], ['Organic Video', '#c046ff'], ['AI engines', '#757083']];
+  var TABS = [['traffic', 'Traffic'], ['google', 'Google search'], ['keywords', 'Target keywords'], ['speed', 'Speed'], ['leads', 'Enquiries & bookings']];
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+  function num(x) { return x == null || isNaN(x) ? '–' : Number(x).toLocaleString('en-GB'); }
+  function dshort(d) { return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short' }); }
+  function dlong(d) { return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' }); }
+  function dfull(d) { return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }); }
+  function ago(iso) { if (!iso) return ''; var m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' hr ago' : Math.round(m / 1440) + ' days ago'; }
+  function delta(cur, prev, lowerBetter) {
+    cur = cur || 0; prev = prev || 0;
+    if (!prev && !cur) return '<span class="cg-d">no change</span>';
+    if (!prev) return '<span class="cg-d up">new</span>';
+    var diff = Math.round(100 * (cur - prev) / prev); if (!diff) return '<span class="cg-d">no change</span>';
+    var good = lowerBetter ? diff < 0 : diff > 0;
+    return '<span class="cg-d ' + (good ? 'up' : 'down') + '">' + (diff > 0 ? '▲ ' : '▼ ') + Math.abs(diff) + (single() ? '% on the day before' : '% on the period before') + '</span>';
+  }
+  function lToday() { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date()).slice(0, 10); }
+  function addDays(d, n) { var x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
+  var PRESETS = [['today', 'Today'], ['yesterday', 'Yesterday'], ['7', '7 days'], ['30', '30 days'], ['90', '90 days'], ['custom', 'Choose dates']];
+  function range() {
+    var t = lToday();
+    if (S.preset === 'today') return { from: t, to: t };
+    if (S.preset === 'yesterday') return { from: addDays(t, -1), to: addDays(t, -1) };
+    if (S.preset === 'custom' && S.from && S.to) return { from: S.from <= S.to ? S.from : S.to, to: S.from <= S.to ? S.to : S.from };
+    var n = +S.preset || 30; return { from: addDays(t, -(n - 1)), to: t, days: n };
+  }
+  function single() { var r = range(); return r.from === r.to; }
+  function info(t) { return ' <span class="wbx-i" title="' + esc(t) + '" tabindex="0">ⓘ</span>'; }
+  function tile(label, value, extra, hint) { return '<div class="cg-tile"><span>' + esc(label) + (hint ? info(hint) : '') + '</span><b>' + value + '</b>' + (extra || '') + '</div>'; }
+  function card(title, hint, inner, cls) { return '<section class="cg-sec ' + (cls || '') + '"><h2>' + esc(title) + (hint ? info(hint) : '') + '</h2>' + inner + '</section>'; }
+  function niceMax(v) { if (!v || v <= 4) return 4; var p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p; }
+
+  /* stacked (or single) column chart in plain HTML */
+  function stacked(rows, series, label) {
+    if (!rows || !rows.length) return '<p class="cg-empty">Nothing yet.</p>';
+    var totals = rows.map(function (r) { return series.reduce(function (a, s) { return a + (r.v[s[0]] || 0); }, 0); });
+    var top = niceMax(Math.max.apply(null, totals));
+    var every = Math.ceil(rows.length / (w.innerWidth < 620 ? 4 : 8));
+    var grid = [top, top / 2, 0].map(function (g) { return '<div class="cg-gl" style="bottom:' + (100 * g / top) + '%"><span>' + num(Math.round(g)) + '</span></div>'; }).join('');
+    var cols = rows.map(function (r, i) {
+      var segs = series.map(function (s) { var v = r.v[s[0]] || 0; return v ? '<em style="height:' + (100 * v / top) + '%;background:' + s[1] + '"></em>' : ''; }).join('');
+      var tip = '<b>' + esc(r.tip) + '</b>' + series.filter(function (s) { return r.v[s[0]]; }).map(function (s) { return '<br><i style="background:' + s[1] + '"></i>' + esc(s[0]) + ': ' + num(r.v[s[0]]); }).join('') + (series.length > 1 ? '<br>Total: ' + num(totals[i]) : '');
+      return '<div class="cg-col" tabindex="0"><div class="wbx-segs">' + segs + '</div>' +
+        ((i % every === 0 ? (rows.length - 1 - i >= Math.ceil(every / 2) || i === rows.length - 1) : i === rows.length - 1) ? '<span class="cg-xl">' + esc(r.label) + '</span>' : '') + '<div class="cg-tip">' + tip + '</div></div>';
+    }).join('');
+    var legend = series.length > 1 ? '<div class="wbx-leg">' + series.map(function (s) { return '<span><i style="background:' + s[1] + '"></i>' + esc(s[0]) + '</span>'; }).join('') + '</div>' : '';
+    return '<div class="cg-chart" role="img" aria-label="' + esc(label) + '"><div class="cg-plot">' + grid + '<div class="cg-cols">' + cols + '</div></div></div>' + legend;
+  }
+  function hbars(rows, color) {
+    if (!rows || !rows.length) return '<p class="cg-empty">Nothing yet.</p>';
+    var max = Math.max.apply(null, rows.map(function (r) { return r.n || 0; })) || 1;
+    return '<div class="wbx-hb">' + rows.map(function (r) {
+      return '<div class="wbx-hr"><span>' + esc(r.k) + '</span><i><em style="width:' + Math.max(2, Math.round(100 * r.n / max)) + '%;background:' + (r.c || color || 'var(--accent)') + '"></em></i><b>' + num(r.n) + '</b></div>';
+    }).join('') + '</div>';
+  }
+  function table(head, rows, opts) {
+    opts = opts || {};
+    if (!rows.length) return '<p class="cg-empty">' + esc(opts.empty || 'Nothing yet.') + '</p>';
+    var limit = opts.limit || 10, show = opts.all ? rows : rows.slice(0, limit);
+    return '<div class="cg-wrapx"><table class="cg-table"><thead><tr>' + head.map(function (h, i) { return '<th' + (i && !(opts.text || []).includes(i) ? ' class="n"' : '') + '>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      show.map(function (r) { return '<tr>' + r.map(function (c, i) { return '<td' + (i && !(opts.text || []).includes(i) ? ' class="n"' : '') + '>' + c + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' +
+      (rows.length > limit && opts.more ? '<button type="button" class="wbx-more" data-sdx-more="' + opts.more + '">' + (opts.all ? 'Show fewer' : 'Show all ' + rows.length) + '</button>' : '');
+  }
+  function plink(p) { return '<a href="' + SITE + esc(p) + '" target="_blank" rel="noopener">' + esc(p) + '</a>'; }
+
+  function css() {
+    if (document.getElementById('wbx-css')) return;
+    var s = document.createElement('style'); s.id = 'wbx-css';
+    s.textContent = [
+      '.cg-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}.cg-bar .sp{flex:1}',
+      '.cg-note{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius);background:var(--ink-2);padding:12px 15px;font-size:14px;color:var(--muted);margin-bottom:16px}.cg-note b{color:var(--paper)}',
+      '.cg-sec{border:1px solid var(--line);border-radius:var(--radius);background:var(--ink-2);padding:18px 19px;margin-bottom:14px;min-width:0}',
+      '.cg-sec > h2{font-family:var(--font-mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:400;margin-bottom:14px;color:var(--muted-2)}',
+      '.cg-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 0 14px}',
+      '.cg-tile{border:1px solid var(--line);border-top:2px solid var(--accent);border-radius:var(--radius);background:var(--ink-2);padding:16px 18px;min-width:0}',
+      '.cg-tile > span{display:block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin-bottom:9px}.cg-tile .wbx-i{display:inline}',
+      '.cg-tile b{display:block;font-family:var(--font-display);font-size:30px;line-height:1.05;color:var(--paper);font-weight:700;letter-spacing:-.01em}',
+      '.cg-d{display:inline-block;margin-top:6px;font-size:11.5px;color:var(--muted-2)}.cg-d.up{color:var(--cg-good)}.cg-d.down{color:var(--bad)}',
+      ':root{--cg-good:#a97cff}:root[data-theme=light]{--cg-good:#5600c2}',
+      '.wbx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px}@media (max-width:620px){.wbx-grid{grid-template-columns:1fr}}',
+      '.cg-empty{color:var(--muted-2);font-size:13.5px}',
+      '.cg-chart{margin:8px 0 4px;padding:0 0 24px 40px}.cg-plot{position:relative;height:260px}',
+      '.cg-gl{position:absolute;left:0;right:0;border-top:1px solid var(--line)}',
+      '.cg-gl span{position:absolute;right:100%;margin-right:8px;transform:translateY(-50%);font-size:11px;color:var(--muted-2);white-space:nowrap}',
+      '.cg-cols{position:absolute;inset:0;display:flex;align-items:flex-end;gap:3px}',
+      '.cg-col{position:relative;flex:1;height:100%;display:flex;align-items:flex-end;outline:none;min-width:0}',
+      '.wbx-segs{width:100%;max-width:34px;margin:0 auto;height:100%;display:flex;flex-direction:column-reverse}',
+      '.wbx-segs em{display:block;width:100%}.wbx-segs em:last-child{border-radius:var(--radius) var(--radius) 0 0}',
+      '.cg-col:hover .wbx-segs,.cg-col:focus .wbx-segs{filter:brightness(1.12)}',
+      '.cg-xl{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:7px;font-size:11px;color:var(--muted-2);white-space:nowrap}',
+      '.cg-tip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);z-index:5;background:var(--ink-3);border:1px solid var(--line-2);border-radius:var(--radius);padding:8px 10px;font-size:12.5px;line-height:1.5;white-space:nowrap;color:var(--paper);pointer-events:none}',
+      '.cg-tip i,.wbx-leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}',
+      '.cg-col:first-child .cg-tip,.cg-col:nth-child(2) .cg-tip{left:0;transform:none}.cg-col:last-child .cg-tip,.cg-col:nth-last-child(2) .cg-tip{left:auto;right:0;transform:none}',
+      '.cg-col:hover .cg-tip,.cg-col:focus .cg-tip{display:block}',
+      '.wbx-leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin-top:4px}',
+      '.wbx-hb{display:grid;gap:12px}.wbx-hr{display:grid;grid-template-columns:minmax(110px,32%) 1fr 56px;gap:14px;align-items:center;font-size:14px}',
+      '.wbx-hr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--paper)}.wbx-hr b{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}',
+      '.wbx-hr i{display:block;height:8px;background:var(--line);border-radius:var(--radius);overflow:hidden}.wbx-hr em{display:block;height:100%;border-radius:var(--radius)}',
+      '.cg-table{width:100%;min-width:0;border-collapse:collapse;font-size:13.5px}.wbx-grid > *{min-width:0}.cg-table td{overflow-wrap:anywhere}',
+      '.cg-table th,.cg-table td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}',
+      '.cg-table th{font-size:12px;color:var(--muted);font-weight:500}.cg-table td a{color:var(--paper);text-decoration:none}.cg-table td a:hover{text-decoration:underline}',
+      '.cg-table td.n,.cg-table th.n{text-align:right;font-variant-numeric:tabular-nums}.cg-wrapx{overflow-x:auto}',
+      '.wbx-more{margin-top:10px;background:none;border:0;padding:0;color:var(--accent-2);font:inherit;font-size:13px;cursor:pointer}',
+      '.wbx-i{color:var(--muted-2);font-size:12px;cursor:help}',
+      '.wbx-dates{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:-4px 0 14px;font-size:13px;color:var(--muted)}.wbx-dates input{font:13px var(--font-mono);background:var(--ink);color:var(--paper);border:1px solid var(--line-2);border-radius:var(--radius);padding:6px 8px;margin-left:6px;color-scheme:light dark}',
+      '.wbx-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px;border-bottom:1px solid var(--line);padding-bottom:10px}',
+      '.wbx-range{font-size:14px;color:var(--paper);margin:0 0 6px}.wbx-sub{font-size:13.5px;color:var(--muted);margin:0 0 14px}',
+      '.wbx-score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.wbx-score div{border:1px solid var(--line);border-radius:var(--radius);padding:12px;text-align:center}',
+      '.wbx-score b{display:block;font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--paper)}.wbx-score .ok{border-top:2px solid var(--accent)}.wbx-score .ok b{color:var(--accent-2)}.wbx-score .mid{border-top:2px solid #ffb347}.wbx-score .mid b{color:#ffb347}.wbx-score .bad{border-top:2px solid var(--bad)}.wbx-score .bad b{color:var(--bad)}',
+      '.wbx-score span{font-size:12px;color:var(--muted)}',
+      '.wbx-form textarea{width:100%;min-height:120px;font:12px var(--font-mono);background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:10px}',
+      '.wbx-steps{margin:8px 0 12px 18px;font-size:14px;color:var(--muted);line-height:1.7}.wbx-steps b,.wbx-steps code{color:var(--paper)}'
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function rpc(name, body) { return DWData.rest('rpc/' + name, { method:'POST', body: body || {} }); }
+  function fn(body) { return DWData.fn('dw-site-insights', Object.assign({ site: SL }, body)); }
+
+  function dday(d) { return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' }); }
+  function rangeLine(from, to) {
+    var lab = { today: 'Today', yesterday: 'Yesterday', '7': 'Last 7 days', '30': 'Last 30 days', '90': 'Last 90 days', custom: 'Chosen dates' }[S.preset] || '';
+    return '<p class="wbx-range">' + lab + ': ' + (from === to ? dday(from) : dfull(from) + ' to ' + dfull(to)) + '</p>';
+  }
+
+  function viewTraffic(el) {
+    var t = S.t; if (!t) { el.innerHTML = '<p class="cg-empty">Loading…</p>'; return; }
+    var series = CH.filter(function (c) { return (t.channels || []).some(function (x) { return x.k === c[0]; }); });
+    if (!series.length) series = [CH[0]];
+    var rows = (t.daily || []).map(function (r) { return { label: dshort(r.day), tip: dlong(r.day), v: r.ch || {} }; });
+    var colour = {}; CH.forEach(function (c) { colour[c[0]] = c[1]; });
+    el.innerHTML = rangeLine(t.from, t.to) +
+      '<p class="wbx-sub">' + (t.first ? 'Counting since ' + esc(dfull(t.first)) + '. ' : '<b>No visits recorded yet</b>: the counter starts the moment the site is next opened. ') + 'A visit is someone arriving from outside the site; bots are left out. No cookies, so one person on two days counts twice.</p>' +
+      '<div class="cg-tiles">' +
+        tile('Visits', num(t.visits), delta(t.visits, t.visits_prev), 'Arrivals from outside ' + NAME + ': search, social, links, apps or typed in') +
+        tile('Page views', num(t.views), delta(t.views, t.views_prev), 'Every page loaded, including moving around the site') +
+        tile('From search', num(t.search), '', 'Visits from Google, Bing, DuckDuckGo and other search engines') +
+        tile('From social', num(t.social), '', 'Facebook, Instagram, WhatsApp, X, Nextdoor and similar') +
+        tile('From AI engines', num(t.ai), '', 'ChatGPT, Perplexity, Claude, Gemini and Copilot') +
+      '</div>' +
+      card('Visits by channel', 'Each bar is a day; colours show where the visits came from', stacked(rows, series, 'Visits by channel per day')) +
+      '<div class="wbx-grid">' +
+        card('Channels', 'Where visits came from over the period', hbars((t.channels || []).map(function (c) { return { k: c.k, n: c.n, c: colour[c.k] }; }))) +
+        card('Top landing pages', 'The first page people saw when they arrived', table(['Page', 'Visits'], (t.landing || []).map(function (r) { return [plink(r.k), num(r.n)]; }), { more: 'landing', all: S.lAll, limit: 8 })) +
+      '</div>' +
+      card('Most read pages', 'Every page view in the period, including moving around the site', table(['Page', 'Views'], (t.pages || []).map(function (r) { return [plink(r.k), num(r.n)]; }), { limit: 10 })) +
+      card('Referring sites', 'Sites that sent visitors, excluding typed-in and direct', table(['Site', 'Channel', 'Visits'], (t.refs || []).map(function (r) { return [esc(r.k), esc(r.ch), num(r.n)]; }), { text: [1], empty: 'No referring sites yet.' }));
+  }
+
+  function needGoogle(el, g) {
+    var email = (S.gs && S.gs.email) || (g && g.sa_email) || 'woolmer-dashboard@woolmer.iam.gserviceaccount.com';
+    el.innerHTML = '<div class="cg-note"><b>Search Console isn\'t connected for ' + esc(HOST) + ' yet.</b> Every site uses the same dashboard service account. It needs adding as a user on this site\'s Search Console property.</div>' +
+      (g && g.error ? '<div class="cg-note" style="border-left-color:var(--bad)">' + esc(g.error) + '</div>' : '') +
+      card('To connect', '', '<ol class="wbx-steps">' +
+        '<li>Open <a href="https://search.google.com/search-console?resource_id=' + encodeURIComponent('sc-domain:' + HOST) + '" target="_blank" rel="noopener">Search Console for ' + esc(HOST) + '</a>. If the site isn\'t there, add it as a <b>Domain</b> property and verify it.</li>' +
+        '<li><b>Settings → Users and permissions → Add user</b>: <code>' + esc(email) + '</code> with <b>Restricted</b> permission.</li>' +
+        '<li>Come back here and press Refresh.</li></ol>');
+  }
+
+  function viewGoogle(el) {
+    var g = S.g; if (!g) { el.innerHTML = '<p class="cg-empty">Loading Search Console…</p>'; return; }
+    if (g.setup || g.error || !g.gsc) return needGoogle(el, g);
+    var s = g.gsc, c = s.cur, p = s.prev, days = s.daily || [];
+    el.innerHTML = rangeLine(s.from, s.to) + '<p class="wbx-sub">Google Search Console (' + esc(s.site) + '). Its last 2 to 3 days fill in late, so the newest days read low at first. Updated ' + esc(ago(g.fetched_at)) + '.</p>' +
+      '<div class="cg-tiles">' +
+        tile('Clicks', num(c.clicks), delta(c.clicks, p.clicks), 'People who clicked through to ' + NAME + ' from Google') +
+        tile('Impressions', num(c.impressions), delta(c.impressions, p.impressions), 'Times ' + NAME + ' appeared in Google results') +
+        tile('Click rate', (c.ctr || 0) + '%', '', 'Clicks divided by impressions') +
+        tile('Average position', (c.position == null || !c.impressions) ? '–' : c.position, p.position ? '<span class="cg-d">' + p.position + ' the period before</span>' : '', 'Lower is better; 1 to 10 is page 1') +
+        tile('Non-brand clicks', num(s.nonbrand_clicks), '', 'Clicks from searches that don\'t include the business name') +
+      '</div>' +
+      card('Impressions', 'Times ' + NAME + ' appeared in Google per day', stacked(days.map(function (r) { return { label: dshort(r.d), tip: dlong(r.d), v: { Impressions: r.impressions } }; }), [['Impressions', '#7000ff']], 'Impressions per day')) +
+      card('Clicks', 'Clicks from Google per day', stacked(days.map(function (r) { return { label: dshort(r.d), tip: dlong(r.d), v: { Clicks: r.clicks } }; }), [['Clicks', '#a97cff']], 'Clicks per day')) +
+      '<div class="wbx-grid">' +
+        card('Top searches', 'What people searched before seeing ' + NAME, table(['Search', 'Clicks', 'Impressions', 'Position'], (s.queries || []).map(function (r) { return [esc(r.k) + (BRAND.test(r.k.replace(/\\s+/g, '')) ? ' <span class="cg-empty">(brand)</span>' : ''), num(r.clicks), num(r.impressions), r.position]; }), { more: 'q', all: S.qAll })) +
+        card('Close to page 1', 'Searches where ' + NAME + ' sits between 4th and 20th: the quickest wins', table(['Search', 'Impressions', 'Position'], (s.close || []).map(function (r) { return [esc(r.k), num(r.impressions), r.position]; }), { more: 'c', all: S.cAll, empty: 'Nothing close to page 1 yet.' })) +
+      '</div>' +
+      card('Search landing pages', 'Pages people reached from Google', table(['Page', 'Clicks', 'Impressions', 'Position'], (s.pages || []).map(function (r) { return [plink(r.k), num(r.clicks), num(r.impressions), r.position]; })));
+  }
+
+  function where(pos) { return pos == null ? 'Not in the top 50' : pos <= 3 ? 'Top 3' : pos <= 10 ? 'Page 1' : pos <= 20 ? 'Page 2' : pos <= 50 ? 'Top 50' : 'Not in the top 50'; }
+  function viewKeywords(el) {
+    var g = S.g; if (!g) { el.innerHTML = '<p class="cg-empty">Loading…</p>'; return; }
+    if (g.setup || g.error || !g.gsc) {
+      // keywords still editable while Search Console is waiting
+      var gk = { gsc: { keywords: (S.kw || []).map(function (x) { return { keyword: x.keyword, page: x.page, volume: x.volume, position: null, impressions: 0, clicks: 0 }; }), from: range().from, to: range().to } };
+      needGoogle(el, g); var box = document.createElement('div'); el.appendChild(box); g = gk;
+      el = box;
+    }
+    var k = g.gsc.keywords || [];
+    var onP1 = k.filter(function (x) { return x.position != null && x.position <= 10; });
+    var vol = k.reduce(function (a, x) { return a + (x.volume || 0); }, 0), volP1 = onP1.reduce(function (a, x) { return a + (x.volume || 0); }, 0);
+    var opp = k.filter(function (x) { return x.position == null || x.position > 10; }).sort(function (a, b) { return (b.volume || 0) - (a.volume || 0) || (b.impressions - a.impressions); }).slice(0, 10);
+    el.innerHTML = rangeLine(g.gsc.from, g.gsc.to) + '<p class="wbx-sub">The searches ' + esc(NAME) + ' should win, and where it stands on each in Google UK. Add or remove them below.</p>' +
+      '<div class="cg-tiles">' +
+        tile('Keywords tracked', num(k.length)) + tile('On page 1', num(onP1.length)) +
+        tile('Monthly searches targeted', vol ? num(vol) : '–', vol ? '' : '<span class="cg-d">needs search volumes</span>', 'Sum of Google UK monthly searches for the tracked keywords') +
+        tile('Of those, on page 1', vol ? Math.round(100 * volP1 / vol) + '%' : '–') +
+        tile('Clicks from target keywords', num(k.reduce(function (a, x) { return a + x.clicks; }, 0))) +
+      '</div>' +
+      card('Progress by keyword', 'Position is Google\'s average for the period, from Search Console', table(['Keyword', 'Page', 'Monthly searches', 'Position', 'Where we are', 'Shown', 'Clicks'],
+        k.map(function (x) { return [esc(x.keyword), plink(x.page || '/'), x.volume == null ? '–' : num(x.volume), x.position == null ? '–' : x.position, where(x.position), num(x.impressions), num(x.clicks)]; }), { text: [1, 4], more: 'kw', all: S.kwAll, limit: 15 })) +
+      card('Biggest opportunities', 'Not on page 1 yet, biggest first', table(['Keyword', 'Page', 'Monthly searches', 'Where we are'], opp.map(function (x) { return [esc(x.keyword), plink(x.page || '/'), x.volume == null ? '–' : num(x.volume), where(x.position)]; }), { text: [1, 3] })) +
+      card('Edit target keywords', '', '<form data-sdx-kw style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"><input name="k" placeholder="e.g. drainage contractor farnborough" required style="flex:2 1 220px;font:inherit;font-size:14px;background:var(--ink);color:var(--paper);border:1px solid var(--line-2);border-radius:var(--radius);padding:8px 10px"><input name="p" placeholder="page, e.g. /drainage/" style="flex:1 1 140px;font:inherit;font-size:14px;background:var(--ink);color:var(--paper);border:1px solid var(--line-2);border-radius:var(--radius);padding:8px 10px"><input name="v" type="number" placeholder="monthly searches" style="flex:0 1 150px;font:inherit;font-size:14px;background:var(--ink);color:var(--paper);border:1px solid var(--line-2);border-radius:var(--radius);padding:8px 10px"><button class="mini" type="submit">Add keyword</button></form>' +
+        ((S.kw || []).length ? '<div class="row">' + S.kw.map(function (x) { return '<span class="hq-pill">' + esc(x.keyword) + ' <button type="button" data-sdx-delkw="' + x.id + '" style="all:unset;cursor:pointer;color:var(--bad);margin-left:4px">×</button></span>'; }).join(' ') + '</div>' : '<p class="cg-empty">No target keywords yet.</p>')) +
+      card('How to read this', '', '<p class="wbx-sub" style="margin:0">Positions come from Search Console and only show once the site has appeared for that exact search. Monthly search volumes need a keyword data source (Google Ads Keyword Planner or DataForSEO); until one is added they show as –.</p>');
+  }
+
+  function viewSpeed(el) {
+    var sp = S.sp; if (!sp) { el.innerHTML = '<p class="cg-empty">Running PageSpeed on ' + esc(HOST) + '… this takes up to a minute.</p>'; return; }
+    if (sp.error) {
+      el.innerHTML = '<div class="cg-note" style="border-left-color:var(--bad)">' + esc(sp.error) + '</div>' +
+        card('Add a free PageSpeed key', '', '<p class="wbx-sub">Without a key, PageSpeed shares Google\'s anonymous daily limit, which runs out. In the same Google Cloud project as the Search Console key: turn on the <a href="https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com" target="_blank" rel="noopener">PageSpeed Insights API</a>, then <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credentials → Create credentials → API key</a>, restrict it to the PageSpeed Insights API, and paste it here.</p>' +
+          '<form data-sdx-psi style="display:flex;gap:8px;flex-wrap:wrap"><input name="k" autocomplete="off" spellcheck="false" placeholder="AIza…" style="flex:1;min-width:240px;font:13px var(--font-mono);background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px"><button class="mini" type="submit">Save key</button></form>' +
+          (S.gs && S.gs.psi ? '<p class="cg-empty" style="margin-top:8px">A key is saved. Press Refresh to try again.</p>' : ''));
+      return;
+    }
+    var sc = function (label, s) { var cls = s == null ? '' : s >= 90 ? 'ok' : s >= 50 ? 'mid' : 'bad'; return '<div class="' + cls + '"><b>' + (s == null ? '–' : s) + '</b><span>' + label + '</span></div>'; };
+    var block = function (name, r) { return card(name, '', '<div class="wbx-score">' + sc('Performance', r.scores.performance) + sc('Accessibility', r.scores.accessibility) + sc('Best practice', r.scores.best) + sc('SEO', r.scores.seo) + '</div>' +
+      '<p class="wbx-sub" style="margin:12px 0 0">Largest paint ' + esc(r.lcp || '–') + ' · Layout shift ' + esc(r.cls || '–') + ' · Blocking ' + esc(r.tbt || '–') + '</p>' +
+      (r.opportunities && r.opportunities.length ? '<ul class="wbx-steps">' + r.opportunities.map(function (o) { return '<li>' + esc(o.title) + ' <span class="cg-empty">(saves about ' + (o.saving_ms / 1000).toFixed(1) + 's)</span></li>'; }).join('') + '</ul>' : '')); };
+    el.innerHTML = '<p class="wbx-sub">Google PageSpeed Insights for the home page. Updated ' + esc(ago(sp.fetched_at)) + '.</p><div class="wbx-grid">' + block('Mobile', sp.mobile) + block('Desktop', sp.desktop) + '</div>';
+  }
+
+  var KINDS = [['call', 'Calls', '#7000ff'], ['email', 'Emails', '#a97cff'], ['whatsapp', 'WhatsApp', '#3b0a8f'], ['form', 'Form sends', '#c046ff'], ['booking', 'Bookings', '#d4c2ff'], ['directions', 'Directions', '#757083'], ['social', 'Social', '#5a5466']];
+  function viewLeads(el) {
+    var d = S.d; if (!d) { el.innerHTML = '<p class="cg-empty">Loading…</p>'; return; }
+    var k = d.by_kind || {}, kp = d.by_kind_prev || {};
+    var contact = (k.call || 0) + (k.email || 0) + (k.whatsapp || 0) + (k.form || 0) + (k.booking || 0);
+    var pcontact = (kp.call || 0) + (kp.email || 0) + (kp.whatsapp || 0) + (kp.form || 0) + (kp.booking || 0);
+    var series = KINDS.filter(function (x) { return k[x[0]]; }).map(function (x) { return [x[1], x[2]]; });
+    var name = {}; KINDS.forEach(function (x) { name[x[0]] = x[1]; });
+    var rows = (d.daily || []).map(function (r) { var v = {}; Object.keys(r.k || {}).forEach(function (kk) { v[name[kk] || kk] = r.k[kk]; }); return { label: dshort(r.day), tip: dlong(r.day), v: v }; });
+    el.innerHTML = rangeLine(d.from, d.to) + '<p class="wbx-sub">Taps on phone numbers, email addresses, WhatsApp, directions and social links, and form sends, counted by the site counter. Below that, the site\'s own enquiries or bookings where it stores them.</p>' +
+      '<div class="cg-tiles">' +
+        tile('Enquiry actions', num(contact), delta(contact, pcontact), 'Calls, emails, WhatsApp, form sends and bookings together') +
+        tile('Calls', num(k.call || 0), delta(k.call, kp.call), 'Taps on a phone number') +
+        tile('Emails', num(k.email || 0), delta(k.email, kp.email), 'Taps on an email address') +
+        tile('WhatsApp', num(k.whatsapp || 0), delta(k.whatsapp, kp.whatsapp)) +
+        tile('Forms and bookings', num((k.form || 0) + (k.booking || 0)), delta((k.form || 0) + (k.booking || 0), (kp.form || 0) + (kp.booking || 0))) +
+        tile('Directions', num(k.directions || 0)) +
+      '</div>' +
+      card('Enquiry actions by day', 'Each bar is a day', series.length ? stacked(rows, series, 'Enquiry actions per day') : '<p class="cg-empty">Nothing yet. Taps start counting once the counter is on the site.</p>') +
+      '<div class="wbx-grid">' +
+        card('What people tapped', '', table(['Type', 'Detail', 'Taps'], (d.labels || []).map(function (r) { return [esc(name[r.kind] || r.kind), esc(r.label || ''), num(r.n)]; }), { text: [1], empty: 'No taps yet.' })) +
+        card('Pages that led to contact', '', table(['Page', 'Taps'], (d.pages || []).map(function (r) { return [plink(r.k), num(r.n)]; }), { empty: 'No taps yet.' })) +
+      '</div>' +
+      ((d.forms || []).length ? card('Enquiries and bookings received', 'From the site\'s own form', table(['When', 'Name', 'What', 'Status'], d.forms.map(function (r) { return [esc(new Date(r.at).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })), esc(r.name || ''), esc(r.what || ''), esc(r.status || '')]; }), { text: [1, 2, 3], limit: 25 })) : '');
+  }
+
+  function paint() {
+    if (!root) return;
+    var el = root.querySelector('[data-sdx]'); if (!el) return;
+    ({ traffic: viewTraffic, google: viewGoogle, keywords: viewKeywords, speed: viewSpeed, leads: viewLeads })[S.tab](el);
+  }
+  function load(force) {
+    say('');
+    var R = range();
+    if (S.tab === 'traffic') rpc('dw_site_traffic', { p_site: SL, p_from: R.from, p_to: R.to }).then(function (t) { S.t = t; paint(); }).catch(function (e) { say(e.message, 'bad'); });
+    if (S.tab === 'leads') rpc('dw_site_leads', { p_site: SL, p_from: R.from, p_to: R.to }).then(function (d) { S.d = d; paint(); }).catch(function (e) { say(e.message, 'bad'); });
+    if (S.tab === 'keywords') DWData.rest('dw_site_keywords?select=*&site=eq.' + encodeURIComponent(SL) + '&order=sort.asc,id.asc').then(function (k) { S.kw = k; paint(); }).catch(function () {});
+    if (S.tab === 'google' || S.tab === 'keywords') {
+      rpc('wb_google_status').then(function (gs) { S.gs = gs; }).catch(function () {});
+      fn(R.days ? { what: 'google', days: R.days, force: !!force } : { what: 'google', from: R.from, to: R.to, force: !!force }).then(function (g) { S.g = g; paint(); }).catch(function (e) { S.g = { error: e.message }; paint(); });
+    }
+    if (S.tab === 'speed') rpc('wb_google_status').then(function (gs) { S.gs = gs; }).catch(function () {});
+    if (S.tab === 'speed') fn({ what: 'speed', force: !!force }).then(function (sp) { S.sp = sp; paint(); }).catch(function (e) { S.sp = { error: e.message }; paint(); });
+  }
+  function view(el, sayFn, site) {
+    root = el; say = sayFn || say; css();
+    if (site) {
+      if (site.slug !== SL) { S.t = S.d = S.g = S.sp = S.kw = null; S.tab = 'traffic'; }
+      SL = site.slug; NAME = site.name; HOST = site.host; SITE = site.url.replace(/\/$/, '');
+      BRAND = new RegExp([HOST.split('.')[0]].concat(NAME.toLowerCase().split(/\s+/).filter(function (x) { return x.length > 4; })).map(function (x) { return x.replace(/[^a-z0-9]/g, ''); }).filter(Boolean).join('|') || '^$', 'i');
+    }
+    el.innerHTML = '<div class="wbx-tabs">' + TABS.map(function (t) { return '<button type="button" class="chip' + (S.tab === t[0] ? ' is-on' : '') + '" data-sdx-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>' +
+      '<div class="cg-bar">' + (S.tab === 'speed' ? '' : PRESETS.map(function (p) { return '<button type="button" class="chip' + (p[0] === S.preset ? ' is-on' : '') + '" data-sdx-days="' + p[0] + '">' + p[1] + '</button>'; }).join('')) +
+      '<span class="sp"></span><a class="mini" href="' + SITE + '/" target="_blank" rel="noopener">Open ' + esc(HOST) + '</a><button type="button" class="mini" data-sdx-refresh>Refresh</button></div>' +
+      (S.tab !== 'speed' && S.preset === 'custom' ? '<form class="wbx-dates" data-sdx-dates><label>From <input type="date" name="f" value="' + (S.from || addDays(lToday(), -6)) + '" max="' + lToday() + '"></label><label>To <input type="date" name="t" value="' + (S.to || lToday()) + '" max="' + lToday() + '"></label><button class="mini" type="submit">Show</button><span class="cg-empty">Pick one day by choosing the same date twice.</span></form>' : '') +
+      ((S.tab === 'google' || S.tab === 'keywords') && (S.preset === 'today' || S.preset === 'yesterday') ? '<p class="cg-note">Google Search Console runs 2 to 3 days behind, so today and yesterday will read low or empty here. The Traffic tab is live.</p>' : '') +
+      '<div data-sdx><p class="cg-empty">Loading…</p></div>';
+    paint(); load();
+  }
+  document.addEventListener('click', function (e) {
+    if (!root) return;
+    var b = e.target.closest && e.target.closest('[data-sdx-days],[data-sdx-refresh],[data-sdx-tab],[data-sdx-more],[data-sdx-delkw]');
+    if (!b || !root.contains(b)) return;
+    if (b.hasAttribute('data-sdx-tab')) { S.tab = b.getAttribute('data-sdx-tab'); view(root, say); }
+    else if (b.hasAttribute('data-sdx-delkw')) { DWData.rest('dw_site_keywords?id=eq.' + b.getAttribute('data-sdx-delkw'), { method:'DELETE' }).then(function () { S.g = null; load(true); }).catch(function (err) { say(err.message, 'bad'); }); }
+    else if (b.hasAttribute('data-sdx-days')) {
+      S.preset = b.getAttribute('data-sdx-days');
+      if (S.preset === 'custom' && !S.from) { S.from = addDays(lToday(), -6); S.to = lToday(); }
+      S.t = S.d = S.g = null; view(root, say);
+    }
+    else if (b.hasAttribute('data-sdx-more')) { var k = b.getAttribute('data-sdx-more'); if (k === 'kw') S.kwAll = !S.kwAll; if (k === 'q') S.qAll = !S.qAll; if (k === 'c') S.cAll = !S.cAll; if (k === 'landing') S.lAll = !S.lAll; paint(); }
+    else load(true);
+  });
+  document.addEventListener('submit', function (e) {
+    var df = e.target.closest && e.target.closest('[data-sdx-dates]');
+    if (df && root && root.contains(df)) { e.preventDefault(); S.from = df.f.value; S.to = df.t.value; S.t = S.d = S.g = null; view(root, say); return; }
+    var kf = e.target.closest && e.target.closest('[data-sdx-kw]');
+    if (kf && root && root.contains(kf)) {
+      e.preventDefault();
+      DWData.rest('dw_site_keywords', { method:'POST', body: { site: SL, keyword: kf.k.value.trim().toLowerCase(), page: kf.p.value.trim() || null, volume: kf.v.value ? Number(kf.v.value) : null, sort: ((S.kw || []).length + 1) * 10 } })
+        .then(function () { S.g = null; S.kw = null; load(true); }).catch(function (err) { say(err.message, 'bad'); });
+      return;
+    }
+    var pf = e.target.closest && e.target.closest('[data-sdx-psi]');
+    if (pf && root && root.contains(pf)) {
+      e.preventDefault();
+      rpc('wb_set_psi_key', { p_key: pf.querySelector('input').value.trim() }).then(function () { say('PageSpeed key saved.', 'ok'); S.sp = null; paint(); load(true); }).catch(function (err) { say(err.message, 'bad'); });
+      return;
+    }
+    var f = e.target.closest && e.target.closest('[data-sdx-form]');
+    if (!f || !root || !root.contains(f)) return;
+    e.preventDefault();
+    var v = f.querySelector('textarea').value.trim(); if (!v) return;
+    rpc('wb_set_google', { p_json: v }).then(function (email) {
+      f.querySelector('textarea').value = '';
+      say('Saved. Now add ' + email + ' as a user in Search Console, then press Refresh.', 'ok');
+      S.gs = { email: email }; S.g = null; load(true);
+    }).catch(function (err) { say(err.message, 'bad'); });
+  });
+
+  w.DWSiteDash = { view: view };
+})(window);
