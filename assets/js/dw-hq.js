@@ -42,7 +42,7 @@
     var d = Math.round(h / 24); if (d < 14) return d + 'd ago';
     return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
   }
-  function money(n) { return n ? '£' + Number(n).toLocaleString('en-GB', { maximumFractionDigits:0 }) : ''; }
+  function money(n, zero) { return n ? '£' + Number(n).toLocaleString('en-GB', { maximumFractionDigits:0 }) : (zero ? '£0' : ''); }
   function rest(p, o) { return DWData.rest(p, o); }
   function post(table, body) { return rest(table, { method:'POST', body:body, headers:{ Prefer:'return=representation' } }).then(function (r) { return r[0]; }); }
   function patch(table, id, body) { return rest(table + '?id=eq.' + encodeURIComponent(id), { method:'PATCH', body:body, headers:{ Prefer:'return=representation' } }).then(function (r) { return r && r[0]; }); }
@@ -106,7 +106,20 @@
     if (document.getElementById('hq-css')) return;
     var s = document.createElement('style'); s.id = 'hq-css';
     s.textContent = [
-      '.hq{display:grid;grid-template-columns:190px minmax(0,1fr);gap:22px;align-items:start}',
+      'body.hq-on #main{max-width:none;padding-inline:clamp(14px,2.2vw,32px)}',
+      'body.hq-on .hd{margin-bottom:16px;padding-bottom:12px}body.hq-on .hd h1{font-size:22px}body.hq-on .hd .sub{display:none}',
+      '.hq,.hq *{box-sizing:border-box}',
+      '.hq{display:grid;grid-template-columns:168px minmax(0,1fr);gap:22px;align-items:start}',
+      '.hq-main select,.hq-main input,.hq-main textarea{max-width:100%}',
+      '.hq-drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:80}',
+      '.hq-drawer{position:fixed;top:0;right:0;bottom:0;width:min(480px,100vw);background:var(--ink);border-left:1px solid var(--line-2);z-index:81;overflow-y:auto;padding:20px 22px 40px;box-shadow:-20px 0 60px rgba(0,0,0,.35)}',
+      '.hq-drawer h3{font-family:var(--font-display);font-size:20px;margin:6px 0 12px;overflow-wrap:anywhere}',
+      '.hq-drawer label{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted-2);margin:12px 0 5px}',
+      '.hq-drawer select,.hq-drawer input,.hq-drawer textarea{width:100%;padding:9px 10px;border:1px solid var(--line-2);border-radius:var(--radius);background:var(--ink-2);color:var(--paper);font:inherit;font-size:14px}',
+      '.hq-drawer textarea{min-height:110px;resize:vertical}',
+      '.hq-drawer .hq-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}',
+      '.hq-drawer .hq-notes{margin-top:8px}',
+      '.hq-more{all:unset;cursor:pointer;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-2);padding:8px;text-align:center;border:1px dashed var(--line-2);border-radius:var(--radius)}',
       '.hq-nav{position:sticky;top:16px;display:grid;gap:2px}',
       '.hq-nav a{display:flex;justify-content:space-between;gap:8px;padding:9px 11px;border-radius:var(--radius);text-decoration:none;color:var(--muted);font-size:14.5px;border:1px solid transparent}',
       '.hq-nav a:hover{color:var(--paper);background:var(--ink-2)}',
@@ -133,9 +146,9 @@
       '.hq-pill.is-ok{border-color:rgba(79,208,138,.5);color:#4fd08a}',
       '.hq-feed-h{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-2);margin:14px 0 4px}',
       '.hq-feed-h:first-child{margin-top:0}',
-      '.hq-board{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}',
-      '.hq-pipe{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(210px,1fr);gap:10px;overflow-x:auto;padding-bottom:8px}',
-      '.hq-col{background:var(--ink-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px;min-height:120px;display:flex;flex-direction:column;gap:8px}',
+      '.hq-board{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px;align-items:start}',
+      '.hq-pipe{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:10px;overflow-x:auto;padding-bottom:8px;align-items:start}',
+      '.hq-col{background:var(--ink-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px;min-height:120px;max-height:calc(100vh - 250px);overflow-y:auto;display:flex;flex-direction:column;gap:8px}','.hq-col > header{position:sticky;top:-10px;background:var(--ink-2);z-index:1;margin:-10px -10px 0;padding:10px 13px 6px !important}',
       '.hq-col.is-over{border-color:var(--accent);background:var(--accent-dim)}',
       '.hq-col > header{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted-2);padding:2px 3px 4px}',
       '.hq-card{background:var(--ink);border:1px solid var(--line);border-radius:var(--radius);padding:10px 11px;cursor:grab;font-size:14px;min-width:0}',
@@ -143,7 +156,7 @@
       '.hq-card.is-drag{opacity:.4}',
       '.hq-card.is-open{border-color:var(--accent);cursor:default}',
       '.hq-card .hq-ct{overflow-wrap:anywhere;line-height:1.35}',
-      '.hq-card .hq-cm{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}',
+      '.hq-card .hq-cm{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.hq-card{cursor:pointer}.hq-card:active{cursor:grabbing}',
       '.hq-card .hq-cd{margin-top:9px;padding-top:9px;border-top:1px solid var(--line);display:grid;gap:8px}',
       '.hq-card .hq-add{flex-wrap:nowrap}.hq-card .hq-add > *{min-width:0}.hq-card .hq-add input{flex:1 1 auto;width:100%}',
       '.hq-card .hq-cd p{color:var(--muted);font-size:13.5px;margin:0;white-space:pre-wrap}',
@@ -154,7 +167,7 @@
       '.hq-main textarea{width:100%;resize:vertical}',
       '.hq-add{display:flex;flex-wrap:wrap;gap:6px}',
       '.hq-add > input[name=title]{flex:1 1 180px}',
-      '.hq-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}',
+      '.hq-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}',
       '.hq-tile{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-left:3px solid var(--hq-c,var(--accent));border-radius:var(--radius);background:var(--ink-2);padding:15px 16px}',
       '.hq-tile:hover{border-color:var(--accent-2);border-left-color:var(--hq-c,var(--accent))}',
       '.hq-tile b{font-family:var(--font-display);font-size:17px;display:block}',
@@ -197,7 +210,8 @@
       '.hq-mail .hq-t small{display:block;color:var(--muted);font-size:13px;margin-top:3px}',
       '.hq-chk{display:grid;gap:4px;max-height:200px;overflow:auto;border:1px solid var(--line);padding:8px;border-radius:var(--radius);background:var(--ink)}',
       '.hq-chk label{display:flex;gap:8px;align-items:center;font-size:13.5px;cursor:pointer}',
-      '@media (max-width:900px){.hq{grid-template-columns:minmax(0,1fr)}.hq-nav{position:static;grid-auto-flow:column;grid-auto-columns:max-content;overflow-x:auto}.hq-nav .hq-k{display:none}.hq-grid2,.hq-docs{grid-template-columns:minmax(0,1fr)}.hq-board{grid-template-columns:repeat(4,minmax(230px,80vw))}}'
+      '@media (max-width:1100px){.hq-grid2{grid-template-columns:minmax(0,1fr)}}',
+      '@media (max-width:900px){.hq{grid-template-columns:minmax(0,1fr)}.hq-nav{position:static;grid-auto-flow:column;grid-auto-columns:max-content;overflow-x:auto}.hq-nav .hq-k{display:none}.hq-grid2,.hq-docs{grid-template-columns:minmax(0,1fr)}.hq-board{grid-template-columns:repeat(4,minmax(240px,82vw))}.hq-col{max-height:70vh}}'
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -245,6 +259,7 @@
     var V = { '':home, board:board, projects:projects, pipeline:pipeline, docs:docs, calendar:calendar, inbox:inbox, repos:repos, assistant:assistant, people:people };
     var f = V[tab] && (ME.owner || !TABS.filter(function (t) { return t[0] === tab && t[2]; }).length) ? V[tab] : home;
     f(main, extra);
+    drawer();
   }
 
   /* ------------------------------------------------------------------ home */
@@ -256,8 +271,9 @@
   function home(el) {
     var t = today(), week = addDays(t, 7);
     var mine = D.tasks.filter(function (x) { return !x.done && (ME.owner ? (x.owner === 'me' || !x.owner) : x.owner === (ME.member && ME.member.task_owner)); });
-    var due = mine.filter(function (x) { return x.due_on && x.due_on <= week; }).sort(function (a, b) { return a.due_on.localeCompare(b.due_on); });
-    var late = due.filter(function (x) { return x.due_on < t; }).length;
+    var overdue = mine.filter(function (x) { return x.due_on && x.due_on < t; }).sort(function (a, b) { return b.due_on.localeCompare(a.due_on); });
+    var due = mine.filter(function (x) { return x.due_on && x.due_on >= t && x.due_on <= week; }).sort(function (a, b) { return a.due_on.localeCompare(b.due_on); });
+    var late = overdue.length;
     var chases = ME.owner ? D.projects.filter(function (p) { return p.next_action_on && p.next_action_on <= week && p.stage !== 'won' && p.stage !== 'lost'; })
       .sort(function (a, b) { return a.next_action_on.localeCompare(b.next_action_on); }) : [];
     var unread = D.inbox.filter(function (m) { return !m.is_read; });
@@ -270,11 +286,14 @@
       (ME.owner ? stat(chases.length, 'Chases due') + stat(unread.length, 'Unread email') : '') +
       stat(D.projects.filter(function (p) { return p.hq_group !== 'prospect'; }).length, 'Live projects') + '</div>';
 
-    html += '<div class="hq-grid2"><div class="hq-panel"><h4>Due in the next 7 days</h4>' +
-      (due.length ? '<ul class="hq-list">' + due.slice(0, 14).map(function (x) {
-        return '<li><input type="checkbox" data-hq="tick" data-id="' + x.id + '" aria-label="Done"><span class="hq-t">' + esc(x.title) + '</span>' +
-          '<a class="hq-pill" href="#/hq/projects/' + esc((proj(x.project_id) || {}).slug) + '">' + esc(pname(x.project_id)) + '</a>' +
-          '<span class="hq-pill ' + dueBucket(x.due_on) + '">' + esc(nice(x.due_on)) + '</span></li>'; }).join('') + '</ul>'
+    var jobLi = function (x) {
+      return '<li><input type="checkbox" data-hq="tick" data-id="' + x.id + '" aria-label="Done"><span class="hq-t" data-hq="open" data-id="' + x.id + '" style="cursor:pointer">' + esc(x.title) + '</span>' +
+        '<a class="hq-pill" href="#/hq/projects/' + esc((proj(x.project_id) || {}).slug) + '">' + esc(pname(x.project_id)) + '</a>' +
+        '<span class="hq-pill ' + dueBucket(x.due_on) + '">' + esc(nice(x.due_on)) + '</span></li>'; };
+    html += '<div class="hq-grid2"><div class="hq-panel">' +
+      (overdue.length ? '<h4>Overdue · ' + overdue.length + (overdue.length > 8 ? ' (latest 8, the rest are on the Board)' : '') + '</h4><ul class="hq-list">' + overdue.slice(0, 8).map(jobLi).join('') + '</ul>' : '') +
+      '<h4>Due in the next 7 days</h4>' +
+      (due.length ? '<ul class="hq-list">' + due.slice(0, 14).map(jobLi).join('') + '</ul>'
         : '<p class="note">Nothing with a date this week. Put due dates on jobs in the Board and they land here.</p>');
     if (ME.owner) {
       html += '<h4>People to chase</h4>' + (chases.length ? '<ul class="hq-list">' + chases.slice(0, 10).map(function (p) {
@@ -343,32 +362,49 @@
         var items = list.filter(function (t) { return col(t) === c[0]; })
           .sort(function (a, b) { return (a.due_on || '9999').localeCompare(b.due_on || '9999') || (a.sort_order || 0) - (b.sort_order || 0); });
         return '<section class="hq-col" data-col="' + c[0] + '"><header><span>' + c[1] + '</span><span>' + items.length + '</span></header>' +
-          items.slice(0, c[0] === 'done' ? 30 : 200).map(card).join('') + '</section>';
+          items.slice(0, S.colAll === c[0] ? 1000 : (c[0] === 'done' ? 25 : 40)).map(card).join('') +
+          (items.length > (c[0] === 'done' ? 25 : 40) && S.colAll !== c[0] ? '<button type="button" class="hq-more" data-hq="colall" data-col="' + c[0] + '">Show all ' + items.length + '</button>' : '') + '</section>';
       }).join('') + '</div>';
     dnd(el, '.hq-card[data-task]', '.hq-col', function (id, colName) { moveTask(id, colName); });
   }
 
   function card(t) {
-    var open = S.openTask === t.id, n = D.notes[t.id] || [];
-    var p = proj(t.project_id);
-    return '<article class="hq-card' + (open ? ' is-open' : '') + '" draggable="' + (open ? 'false' : 'true') + '" data-task="' + t.id + '">' +
-      '<div class="hq-ct" data-hq="open" data-id="' + t.id + '">' + (t.done ? '<s>' + esc(t.title) + '</s>' : esc(t.title)) + '</div>' +
+    var n = D.notes[t.id] || [], p = proj(t.project_id);
+    return '<article class="hq-card' + (S.openTask === t.id ? ' is-open' : '') + '" draggable="true" data-task="' + t.id + '" data-hq="open" data-id="' + t.id + '">' +
+      '<div class="hq-ct">' + (t.done ? '<s>' + esc(t.title) + '</s>' : esc(t.title)) + '</div>' +
       '<div class="hq-cm"><span class="hq-pill"' + (p && p.colour ? ' style="border-color:' + esc(p.colour) + '"' : '') + '>' + esc(pname(t.project_id)) + '</span>' +
       (t.owner && t.owner !== 'me' ? '<span class="hq-pill">' + esc(who(t.owner)) + '</span>' : '') +
       (t.due_on ? '<span class="hq-pill ' + (t.done ? '' : dueBucket(t.due_on)) + '">' + esc(nice(t.due_on)) + '</span>' : '') +
-      (n.length ? '<span class="hq-pill">' + n.length + ' note' + (n.length === 1 ? '' : 's') + '</span>' : '') + '</div>' +
-      (open ? '<div class="hq-cd">' +
-        (t.details ? '<p>' + esc(t.details) + '</p>' : '') +
-        '<div class="hq-add"><select data-hq="tcol" data-id="' + t.id + '">' + COLS.map(function (c) {
-          return '<option value="' + c[0] + '"' + (col(t) === c[0] ? ' selected' : '') + '>' + c[1] + '</option>'; }).join('') + '</select>' +
-        '<input type="date" data-hq="tdue" data-id="' + t.id + '" value="' + esc(t.due_on || '') + '"></div>' +
-        (n.length ? '<ul class="hq-notes">' + n.map(function (x) {
-          return '<li><b>' + esc(actor(x.author)) + '</b> ' + esc(ago(x.created_at)) + '<br>' + esc(x.body) + '</li>'; }).join('') + '</ul>' : '') +
-        '<form class="hq-add" data-hq="addnote" data-id="' + t.id + '"><input class="hq-in" name="body" placeholder="Add a note…" style="flex:1" required><button class="mini" type="submit">Post</button></form>' +
-        '<div class="row"><button class="mini" type="button" data-hq="open" data-id="' + t.id + '">Close</button>' +
-        (ME.owner ? '<button class="mini bad" type="button" data-hq="deltask" data-id="' + t.id + '">Delete</button>' : '') + '</div>' +
-      '</div>' : '') +
-    '</article>';
+      (n.length ? '<span class="hq-pill">' + n.length + ' note' + (n.length === 1 ? '' : 's') + '</span>' : '') + '</div></article>';
+  }
+
+  /* job detail in a side drawer, so nothing has to squeeze into a board column */
+  function drawer() {
+    var old = document.querySelector('.hq-drawer-wrap'); if (old) old.remove();
+    var t = S.openTask && D.tasks.filter(function (x) { return x.id === S.openTask; })[0];
+    if (!t) return;
+    var n = D.notes[t.id] || [], owners = {};
+    D.tasks.forEach(function (x) { owners[x.owner || 'me'] = 1; });
+    var wrap = document.createElement('div'); wrap.className = 'hq-drawer-wrap';
+    wrap.innerHTML = '<div class="hq-drawer-bg" data-hq="close"></div><aside class="hq-drawer" role="dialog" aria-label="Job">' +
+      '<div class="row" style="justify-content:space-between"><a class="hq-pill" href="#/hq/projects/' + esc((proj(t.project_id) || {}).slug) + '" data-hq="close">' + esc(pname(t.project_id)) + '</a>' +
+      '<button class="mini" type="button" data-hq="close">Close ✕</button></div>' +
+      '<form data-hq="taskform" data-id="' + t.id + '">' +
+      '<label>Job</label><input type="text" name="title" value="' + esc(t.title) + '">' +
+      '<div class="hq-two"><div><label>Column</label><select name="col">' + COLS.map(function (c) {
+        return '<option value="' + c[0] + '"' + (col(t) === c[0] ? ' selected' : '') + '>' + c[1] + '</option>'; }).join('') + '</select></div>' +
+      '<div><label>Due</label><input type="date" name="due" value="' + esc(t.due_on || '') + '"></div></div>' +
+      (ME.owner ? '<div class="hq-two"><div><label>Whose job</label><select name="owner">' + Object.keys(owners).sort().map(function (o) {
+        return '<option value="' + esc(o) + '"' + ((t.owner || 'me') === o ? ' selected' : '') + '>' + esc(who(o)) + '</option>'; }).join('') + '</select></div>' +
+        '<div><label>Project</label><select name="project">' + projectOptions(t.project_id) + '</select></div></div>' : '') +
+      '<label>Details</label><textarea name="details">' + esc(t.details || '') + '</textarea>' +
+      '<div class="row" style="margin-top:12px"><button class="mini go" type="submit">Save</button><span class="saved" data-saved></span>' +
+      (ME.owner ? '<button class="mini bad" type="button" data-hq="deltask" data-id="' + t.id + '" style="margin-left:auto">Delete</button>' : '') + '</div></form>' +
+      '<label style="margin-top:22px">Notes</label>' +
+      (n.length ? '<ul class="hq-notes">' + n.map(function (x) { return '<li><b>' + esc(actor(x.author)) + '</b> ' + esc(ago(x.created_at)) + '<br>' + esc(x.body) + '</li>'; }).join('') + '</ul>' : '<p class="note">No notes yet.</p>') +
+      '<form data-hq="addnote" data-id="' + t.id + '" style="margin-top:10px"><textarea name="body" placeholder="Add a note…" style="min-height:70px" required></textarea>' +
+      '<button class="mini" type="submit" style="margin-top:8px">Post note</button></form></aside>';
+    root.appendChild(wrap);
   }
 
   function moveTask(id, c) {
@@ -383,8 +419,8 @@
   function dnd(el, sel, tgt, done) {
     var dragId = null;
     el.querySelectorAll(sel).forEach(function (c) {
-      c.addEventListener('dragstart', function (e) { dragId = c.getAttribute('data-task') || c.getAttribute('data-proj'); c.classList.add('is-drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch (x) {} });
-      c.addEventListener('dragend', function () { c.classList.remove('is-drag'); });
+      c.addEventListener('dragstart', function (e) { S.dragging = true; dragId = c.getAttribute('data-task') || c.getAttribute('data-proj'); c.classList.add('is-drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch (x) {} });
+      c.addEventListener('dragend', function () { c.classList.remove('is-drag'); setTimeout(function () { S.dragging = false; }, 50); });
     });
     el.querySelectorAll(tgt).forEach(function (z) {
       z.addEventListener('dragover', function (e) { e.preventDefault(); z.classList.add('is-over'); });
@@ -441,7 +477,7 @@
       '<div class="hq-grid2"><div class="hq-panel"><h4>Jobs</h4>' +
       '<form class="hq-add" data-hq="addtask" style="margin-bottom:8px"><input class="hq-in" name="title" placeholder="New job…" required><input type="hidden" name="project" value="' + p.id + '"><input type="date" name="due"><button class="mini go" type="submit">Add</button></form>' +
       (open.length ? '<ul class="hq-list">' + open.map(function (t) {
-        return '<li><input type="checkbox" data-hq="tick" data-id="' + t.id + '" aria-label="Done"><span class="hq-t">' + esc(t.title) +
+        return '<li><input type="checkbox" data-hq="tick" data-id="' + t.id + '" aria-label="Done"><span class="hq-t" data-hq="open" data-id="' + t.id + '" style="cursor:pointer">' + esc(t.title) +
           (t.phase ? ' <span class="hq-m">' + esc(t.phase) + '</span>' : '') + '</span>' +
           (t.owner && t.owner !== 'me' ? '<span class="hq-pill">' + esc(who(t.owner)) + '</span>' : '') +
           '<span class="hq-pill">' + esc(COLS.filter(function (c) { return c[0] === col(t); })[0][1]) + '</span>' +
@@ -489,7 +525,7 @@
     var won = D.projects.filter(function (p) { return p.stage === 'won' && p.deal_value; }).reduce(function (n, p) { return n + Number(p.deal_value); }, 0);
     var live = D.projects.filter(function (p) { return ['replied','meeting','quoted'].indexOf(p.stage) !== -1; });
     el.innerHTML = '<h2 class="hq-h">Pipeline</h2><p class="hq-s">Clients and prospects by stage. Drag a card to move it; the console\'s outreach fields update with it.</p>' +
-      '<div class="stats"><div class="stat"><b>' + live.length + '</b><span>Warm</span></div><div class="stat"><b>' + money(live.reduce(function (n, p) { return n + Number(p.deal_value || 0); }, 0) || 0) + '</b><span>Warm value</span></div>' +
+      '<div class="stats"><div class="stat"><b>' + live.length + '</b><span>Warm</span></div><div class="stat"><b>' + money(live.reduce(function (n, p) { return n + Number(p.deal_value || 0); }, 0), true) + '</b><span>Warm value</span></div>' +
       '<div class="stat"><b>' + (money(won) || '£0') + '</b><span>Won value</span></div><div class="stat"><b>' + D.projects.filter(function (p) { return p.next_action_on && p.next_action_on <= t && p.stage !== 'won' && p.stage !== 'lost'; }).length + '</b><span>Chases due</span></div></div>' +
       '<div class="bar"><input type="search" data-hq="pq" placeholder="Filter by name, trade or contact" value="' + esc(S.pipeQ) + '">' +
       '<label class="note"><input type="checkbox" data-hq="pipehide"' + (S.pipeHide ? ' checked' : '') + '> Hide lost and parked</label></div>' +
@@ -756,14 +792,16 @@
       var b = e.target.closest('[data-hq]'); if (!b || b.tagName === 'FORM' || b.tagName === 'SELECT' || (b.tagName === 'INPUT' && b.type !== 'checkbox')) return;
       var a = b.getAttribute('data-hq'), id = b.getAttribute('data-id');
       if (a === 'search') return search();
-      if (a === 'open') { S.openTask = S.openTask === id ? null : id; return render(); }
+      if (a === 'open') { if (e.target.closest('a')) return; S.openTask = id; return drawer(); }
+      if (a === 'close') { S.openTask = null; var dw = document.querySelector('.hq-drawer-wrap'); if (dw) dw.remove(); return; }
+      if (a === 'colall') { S.colAll = b.getAttribute('data-col'); return render(); }
       if (a === 'tick') {
         var t = D.tasks.filter(function (x) { return x.id === id; })[0]; if (!t) return;
         t.done = true; t.done_at = new Date().toISOString();
         patch('dw_project_tasks', id, { done:true, done_at:t.done_at }).then(function () { logLocal(t.project_id, 'ticked off: ' + t.title); say('Ticked off: ' + t.title, 'ok'); render(); }).catch(err);
         return;
       }
-      if (a === 'deltask') { if (!confirmish(b)) return; del('dw_project_tasks', id).then(function () { D.tasks = D.tasks.filter(function (x) { return x.id !== id; }); render(); }).catch(err); return; }
+      if (a === 'deltask') { if (!confirmish(b)) return; del('dw_project_tasks', id).then(function () { D.tasks = D.tasks.filter(function (x) { return x.id !== id; }); S.openTask = null; render(); }).catch(err); return; }
       if (a === 'newdoc') return newDoc(b.getAttribute('data-pid') || null);
       if (a === 'pickdoc') { S.docMode = 'read'; return go('docs', id); }
       if (a === 'dmode') { S.docMode = b.getAttribute('data-m'); return render(); }
@@ -853,10 +891,19 @@
         var row = { project_id:pid, title:el.title.value.trim(), due_on: el.due.value || null, owner: ME.owner ? 'me' : ((ME.member && ME.member.task_owner) || 'client'), sort_order:100 };
         post('dw_project_tasks', row).then(function (t) { D.tasks.push(t); logLocal(pid, 'added job: ' + t.title); render(); }).catch(err);
       }
+      if (a === 'taskform') {
+        var tid0 = f.getAttribute('data-id'), tk = D.tasks.filter(function (x) { return x.id === tid0; })[0], c0 = el.col.value, mark0 = f.querySelector('[data-saved]');
+        var body0 = { title: el.title.value.trim() || tk.title, due_on: el.due.value || null, details: el.details.value.trim() || null };
+        if (el.owner) body0.owner = el.owner.value;
+        if (el.project) body0.project_id = el.project.value;
+        if (c0 === 'done') { body0.done = true; body0.done_at = tk.done_at || new Date().toISOString(); }
+        else { body0.done = false; body0.done_at = null; body0.hq_state = c0; body0.waits = c0 === 'waiting'; }
+        patch('dw_project_tasks', tid0, body0).then(function () { Object.assign(tk, body0); mark0.textContent = 'Saved'; var keep = S.openTask; render(); S.openTask = keep; }).catch(err);
+      }
       if (a === 'addnote') {
         var tid = f.getAttribute('data-id'), t = D.tasks.filter(function (x) { return x.id === tid; })[0];
         post('dw_task_notes', { task_id:tid, project_id:t.project_id, author: ME.owner ? 'me' : ME.email, body:el.body.value.trim() })
-          .then(function (n) { (D.notes[tid] = D.notes[tid] || []).push(n); render(); }).catch(err);
+          .then(function (n) { (D.notes[tid] = D.notes[tid] || []).push(n); drawer(); }).catch(err);
       }
       if (a === 'addcontact') {
         post('dw_contacts', { project_id:f.getAttribute('data-pid'), name:el.name.value.trim(), role:el.role.value.trim() || null, email:el.email.value.trim() || null, phone:el.phone.value.trim() || null })
@@ -891,6 +938,7 @@
     });
 
     document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && S.openTask && !document.querySelector('.hq-ov')) { S.openTask = null; var dw = document.querySelector('.hq-drawer-wrap'); if (dw) dw.remove(); }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k' && /^#\/hq/.test(location.hash)) { e.preventDefault(); search(); }
     });
   }
