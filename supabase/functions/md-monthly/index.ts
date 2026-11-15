@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
   let b: Row;
   try { b = await req.json(); } catch { return json({ error: "bad request" }, 400); }
   const from = keys.mail_from ?? Deno.env.get("NOTIFY_FROM") ?? "onboarding@resend.dev";
-  const resend = Deno.env.get("RESEND_API_KEY");
+  const resend = (Deno.env.get("MD_RESEND_API_KEY") || Deno.env.get("RESEND_API_KEY"));
 
   // everything the emails need for one month, loaded once
   const load = async (month: string) => {

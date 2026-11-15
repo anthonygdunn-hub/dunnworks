@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
   try { b = await req.json(); } catch { return json({ error: "bad request" }, 400); }
   const ids = (Array.isArray(b.ids) ? b.ids : []).map(String).slice(0, 200);
   if (!ids.length) return json({ error: "nothing to send" }, 400);
-  const key = Deno.env.get("RESEND_API_KEY");
+  const key = (Deno.env.get("MD_RESEND_API_KEY") || Deno.env.get("RESEND_API_KEY"));
   const from = (await db.from("md_private").select("v").eq("k", "mail_from").maybeSingle()).data?.v ?? Deno.env.get("NOTIFY_FROM") ?? "onboarding@resend.dev";
   const send = async (to: string, subject: string, html: string, text: string) => {
     if (!key) return false;

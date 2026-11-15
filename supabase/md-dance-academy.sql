@@ -36,7 +36,8 @@
 -- Writes from the public website go only through the md-public edge function (service role, rate limited,
 -- honeypot). Staff logins are created by principals through the md-staff edge function.
 -- Emails (md_private): notify_to lists who gets website booking emails (Dunnworks and MD), sent one by one;
---   mail_from is the sender, which must be on a domain verified in Resend before MD's copy can arrive.
+--   mail_from is the sender (mddance@dunnworks.io, verified in Resend). The MD functions send with the
+--   MD_RESEND_API_KEY secret (a sending-only Resend key limited to dunnworks.io), falling back to RESEND_API_KEY.
 -- Password reset (migration md_reset_and_reminders): md-reset edge function emails a one-hour link to the staff app
 --   (#reset=token); md_reset_tokens holds only a SHA-256 of each token, has no client access, 3 links per login per hour.
 -- 4pm reminders: cron job md-4pm-reminders calls md-push kind 'reminders' at 15:00 and 16:00 UTC; it only sends when

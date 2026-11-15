@@ -35,7 +35,7 @@ async function tooMany(table: string, ip: string) {
 }
 
 async function notify(subject: string, heading: string, lines: [string, unknown][], extra: string | null, replyTo: string | null) {
-  const key = Deno.env.get("RESEND_API_KEY");
+  const key = (Deno.env.get("MD_RESEND_API_KEY") || Deno.env.get("RESEND_API_KEY"));
   if (!key) return false;
   const cfg = Object.fromEntries(((await db.from("md_private").select("k,v").in("k", ["notify_to", "mail_from"])).data || []).map((r: { k: string; v: string }) => [r.k, r.v]));
   const to = (cfg.notify_to ?? Deno.env.get("MD_NOTIFY_TO") ?? "info@dunnworks.io").split(",").map((s: string) => s.trim()).filter(Boolean);
