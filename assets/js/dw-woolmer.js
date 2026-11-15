@@ -255,7 +255,11 @@
         (d.business || []).map(function (r) { return ['<a href="' + SITE + esc(r.path) + '" target="_blank" rel="noopener">' + esc(r.name || r.path) + '</a>', num(r.views), num(r.calls), num(r.website), num(r.directions), num(r.menu)]; }), { limit: 25, empty: 'No listing views yet.' })) +
       card('Mock-ups (Dunnworks leads)', 'A business opening its own mock-up more than once is a warm lead', table(['Mock-up', 'Views', 'Dunnworks clicks'],
         (d.mockups || []).map(function (r) { return ['<a href="' + SITE + esc(r.path) + '" target="_blank" rel="noopener">' + esc(r.name || r.path) + '</a>', num(r.views), num(r.clicks)]; }), { limit: 25, empty: 'No mock-up views yet.' })) +
-      card('Dunnworks clicks by page', '', table(['Page', 'Link', 'Clicks'], (d.dunnworks || []).map(function (r) { return [plink(r.path), esc(r.label || ''), num(r.n)]; }), { text: [1], empty: 'No Dunnworks clicks yet.' }));
+      card('Dunnworks clicks by page', '', table(['Page', 'Link', 'Clicks'], (d.dunnworks || []).map(function (r) { return [plink(r.path), esc(r.label || ''), num(r.n)]; }), { text: [1], empty: 'No Dunnworks clicks yet.' })) +
+      card('Site rebuilds', 'woolmer is rebuilt automatically within about 10 minutes of any change (new events, approvals, listings)',
+        S.bs && S.bs.token
+          ? '<p class="wbx-sub" style="margin:0">Automatic rebuilds are on. Last rebuild triggered: ' + (S.bs.last_kick ? esc(ago(S.bs.last_kick)) : 'not yet') + '.</p>'
+          : '<p class="wbx-sub">Paste the GitHub token (it starts <code>github_pat_</code>) so Supabase can rebuild woolmer when something changes. It\'s stored where only the server can use it.</p><form data-wbx-gh style="display:flex;gap:8px;flex-wrap:wrap"><input name="k" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" style="flex:1;min-width:240px;font:13px var(--font-mono);background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px"><button class="mini" type="submit">Save token</button></form>');
   }
 
   function paint() {
@@ -267,6 +271,7 @@
     say('');
     var R = range();
     if (S.tab === 'traffic') rpc('wb_traffic', { p_from: R.from, p_to: R.to }).then(function (t) { S.t = t; paint(); }).catch(function (e) { say(e.message, 'bad'); });
+    if (S.tab === 'business') rpc('wb_build_status').then(function (bs) { S.bs = bs; paint(); }).catch(function () {});
     if (S.tab === 'business') rpc('wb_stats', { p_from: R.from, p_to: R.to }).then(function (d) { S.d = d; paint(); }).catch(function (e) { say(e.message, 'bad'); });
     if (S.tab === 'google' || S.tab === 'keywords') {
       rpc('wb_google_status').then(function (gs) { S.gs = gs; }).catch(function () {});
@@ -299,6 +304,12 @@
     else load(true);
   });
   document.addEventListener('submit', function (e) {
+    var gh = e.target.closest && e.target.closest('[data-wbx-gh]');
+    if (gh && root && root.contains(gh)) {
+      e.preventDefault();
+      rpc('wb_set_gh_token', { p_token: gh.querySelector('input').value.trim() }).then(function () { say('Token saved. woolmer will rebuild itself after changes.', 'ok'); S.bs = { token: true }; paint(); }).catch(function (err) { say(err.message, 'bad'); });
+      return;
+    }
     var df = e.target.closest && e.target.closest('[data-wbx-dates]');
     if (df && root && root.contains(df)) { e.preventDefault(); S.from = df.f.value; S.to = df.t.value; S.t = S.d = S.g = null; view(root, say); return; }
     var pf = e.target.closest && e.target.closest('[data-wbx-psi]');
