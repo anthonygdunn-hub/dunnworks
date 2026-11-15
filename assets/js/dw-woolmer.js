@@ -207,7 +207,13 @@
 
   function viewSpeed(el) {
     var sp = S.sp; if (!sp) { el.innerHTML = '<p class="cg-empty">Running PageSpeed on woolmer.info… this takes up to a minute.</p>'; return; }
-    if (sp.error) { el.innerHTML = '<div class="cg-note" style="border-left-color:var(--bad)">' + esc(sp.error) + '</div>'; return; }
+    if (sp.error) {
+      el.innerHTML = '<div class="cg-note" style="border-left-color:var(--bad)">' + esc(sp.error) + '</div>' +
+        card('Add a free PageSpeed key', '', '<p class="wbx-sub">Without a key, PageSpeed shares Google\'s anonymous daily limit, which runs out. In the same Google Cloud project as the Search Console key: turn on the <a href="https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com" target="_blank" rel="noopener">PageSpeed Insights API</a>, then <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credentials → Create credentials → API key</a>, restrict it to the PageSpeed Insights API, and paste it here.</p>' +
+          '<form data-wbx-psi style="display:flex;gap:8px;flex-wrap:wrap"><input name="k" autocomplete="off" spellcheck="false" placeholder="AIza…" style="flex:1;min-width:240px;font:13px var(--font-mono);background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px"><button class="mini" type="submit">Save key</button></form>' +
+          (S.gs && S.gs.psi ? '<p class="cg-empty" style="margin-top:8px">A key is saved. Press Refresh to try again.</p>' : ''));
+      return;
+    }
     var sc = function (label, s) { var cls = s == null ? '' : s >= 90 ? 'ok' : s >= 50 ? 'mid' : 'bad'; return '<div class="' + cls + '"><b>' + (s == null ? '–' : s) + '</b><span>' + label + '</span></div>'; };
     var block = function (name, r) { return card(name, '', '<div class="wbx-score">' + sc('Performance', r.scores.performance) + sc('Accessibility', r.scores.accessibility) + sc('Best practice', r.scores.best) + sc('SEO', r.scores.seo) + '</div>' +
       '<p class="wbx-sub" style="margin:12px 0 0">Largest paint ' + esc(r.lcp || '–') + ' · Layout shift ' + esc(r.cls || '–') + ' · Blocking ' + esc(r.tbt || '–') + '</p>' +
@@ -247,6 +253,7 @@
       rpc('wb_google_status').then(function (gs) { S.gs = gs; }).catch(function () {});
       fn({ what: 'google', days: S.days, force: !!force }).then(function (g) { S.g = g; paint(); }).catch(function (e) { S.g = { error: e.message }; paint(); });
     }
+    if (S.tab === 'speed') rpc('wb_google_status').then(function (gs) { S.gs = gs; }).catch(function () {});
     if (S.tab === 'speed') fn({ what: 'speed', force: !!force }).then(function (sp) { S.sp = sp; paint(); }).catch(function (e) { S.sp = { error: e.message }; paint(); });
   }
   function view(el, sayFn) {
@@ -267,6 +274,12 @@
     else load(true);
   });
   document.addEventListener('submit', function (e) {
+    var pf = e.target.closest && e.target.closest('[data-wbx-psi]');
+    if (pf && root && root.contains(pf)) {
+      e.preventDefault();
+      rpc('wb_set_psi_key', { p_key: pf.querySelector('input').value.trim() }).then(function () { say('PageSpeed key saved.', 'ok'); S.sp = null; paint(); load(true); }).catch(function (err) { say(err.message, 'bad'); });
+      return;
+    }
     var f = e.target.closest && e.target.closest('[data-wbx-form]');
     if (!f || !root || !root.contains(f)) return;
     e.preventDefault();
