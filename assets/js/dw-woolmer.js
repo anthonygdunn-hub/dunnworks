@@ -11,7 +11,8 @@
   var SITE = 'https://woolmer.info';
   var S = { days: 30, tab: 'traffic', t: null, d: null, g: null, sp: null, gs: null, kwAll: false, qAll: false, cAll: false, lAll: false };
   var root = null, say = function () {};
-  var CH = [['Direct', '#B05785'], ['Organic Search', '#6ED3B0'], ['Organic Social', '#3A2733'], ['Referral', '#4E8A6E'], ['Organic Video', '#D9A0C2'], ['AI engines', '#9A9497']];
+  /* Dunnworks brand: violet #7000ff / #a97cff on ink, shades of the same family so channels stay distinguishable */
+  var CH = [['Direct', '#7000ff'], ['Organic Search', '#a97cff'], ['Organic Social', '#3b0a8f'], ['Referral', '#d4c2ff'], ['Organic Video', '#c046ff'], ['AI engines', '#757083']];
   var TABS = [['traffic', 'Traffic'], ['google', 'Google search'], ['keywords', 'Target keywords'], ['speed', 'Speed'], ['business', 'Businesses & leads']];
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
@@ -73,13 +74,13 @@
       '.cg-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}.cg-bar .sp{flex:1}',
       '.cg-note{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius);background:var(--ink-2);padding:12px 15px;font-size:14px;color:var(--muted);margin-bottom:16px}.cg-note b{color:var(--paper)}',
       '.cg-sec{border:1px solid var(--line);border-radius:var(--radius);background:var(--ink-2);padding:18px 19px;margin-bottom:14px;min-width:0}',
-      '.cg-sec > h2{font-size:15px;font-weight:500;margin-bottom:12px;color:var(--muted)}',
+      '.cg-sec > h2{font-family:var(--font-mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:400;margin-bottom:14px;color:var(--muted-2)}',
       '.cg-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 0 14px}',
-      '.cg-tile{border:1px solid var(--line);border-radius:var(--radius);background:var(--ink-2);padding:16px 18px;min-width:0}',
-      '.cg-tile > span{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}.cg-tile .wbx-i{display:inline}',
-      '.cg-tile b{display:block;font-family:var(--font-display);font-size:30px;line-height:1.05;color:var(--paper);font-weight:500}',
+      '.cg-tile{border:1px solid var(--line);border-top:2px solid var(--accent);border-radius:var(--radius);background:var(--ink-2);padding:16px 18px;min-width:0}',
+      '.cg-tile > span{display:block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin-bottom:9px}.cg-tile .wbx-i{display:inline}',
+      '.cg-tile b{display:block;font-family:var(--font-display);font-size:30px;line-height:1.05;color:var(--paper);font-weight:700;letter-spacing:-.01em}',
       '.cg-d{display:inline-block;margin-top:6px;font-size:11.5px;color:var(--muted-2)}.cg-d.up{color:var(--cg-good)}.cg-d.down{color:var(--bad)}',
-      ':root{--cg-good:#4fd08a}:root[data-theme=light]{--cg-good:#16794a}',
+      ':root{--cg-good:#a97cff}:root[data-theme=light]{--cg-good:#5600c2}',
       '.wbx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px}@media (max-width:620px){.wbx-grid{grid-template-columns:1fr}}',
       '.cg-empty{color:var(--muted-2);font-size:13.5px}',
       '.cg-chart{margin:8px 0 4px;padding:0 0 24px 40px}.cg-plot{position:relative;height:260px}',
@@ -88,7 +89,7 @@
       '.cg-cols{position:absolute;inset:0;display:flex;align-items:flex-end;gap:3px}',
       '.cg-col{position:relative;flex:1;height:100%;display:flex;align-items:flex-end;outline:none;min-width:0}',
       '.wbx-segs{width:100%;max-width:34px;margin:0 auto;height:100%;display:flex;flex-direction:column-reverse}',
-      '.wbx-segs em{display:block;width:100%}.wbx-segs em:last-child{border-radius:3px 3px 0 0}',
+      '.wbx-segs em{display:block;width:100%}.wbx-segs em:last-child{border-radius:var(--radius) var(--radius) 0 0}',
       '.cg-col:hover .wbx-segs,.cg-col:focus .wbx-segs{filter:brightness(1.12)}',
       '.cg-xl{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:7px;font-size:11px;color:var(--muted-2);white-space:nowrap}',
       '.cg-tip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);z-index:5;background:var(--ink-3);border:1px solid var(--line-2);border-radius:var(--radius);padding:8px 10px;font-size:12.5px;line-height:1.5;white-space:nowrap;color:var(--paper);pointer-events:none}',
@@ -98,7 +99,7 @@
       '.wbx-leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin-top:4px}',
       '.wbx-hb{display:grid;gap:12px}.wbx-hr{display:grid;grid-template-columns:minmax(110px,32%) 1fr 56px;gap:14px;align-items:center;font-size:14px}',
       '.wbx-hr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--paper)}.wbx-hr b{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}',
-      '.wbx-hr i{display:block;height:8px;background:var(--line);border-radius:4px;overflow:hidden}.wbx-hr em{display:block;height:100%;border-radius:4px}',
+      '.wbx-hr i{display:block;height:8px;background:var(--line);border-radius:var(--radius);overflow:hidden}.wbx-hr em{display:block;height:100%;border-radius:var(--radius)}',
       '.cg-table{width:100%;min-width:0;border-collapse:collapse;font-size:13.5px}.wbx-grid > *{min-width:0}.cg-table td{overflow-wrap:anywhere}',
       '.cg-table th,.cg-table td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}',
       '.cg-table th{font-size:12px;color:var(--muted);font-weight:500}.cg-table td a{color:var(--paper);text-decoration:none}.cg-table td a:hover{text-decoration:underline}',
@@ -108,7 +109,7 @@
       '.wbx-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px;border-bottom:1px solid var(--line);padding-bottom:10px}',
       '.wbx-range{font-size:14px;color:var(--paper);margin:0 0 6px}.wbx-sub{font-size:13.5px;color:var(--muted);margin:0 0 14px}',
       '.wbx-score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.wbx-score div{border:1px solid var(--line);border-radius:var(--radius);padding:12px;text-align:center}',
-      '.wbx-score b{display:block;font-family:var(--font-display);font-size:28px}.wbx-score .ok b{color:var(--cg-good)}.wbx-score .mid b{color:#d98a1b}.wbx-score .bad b{color:var(--bad)}',
+      '.wbx-score b{display:block;font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--paper)}.wbx-score .ok{border-top:2px solid var(--accent)}.wbx-score .ok b{color:var(--accent-2)}.wbx-score .mid{border-top:2px solid #ffb347}.wbx-score .mid b{color:#ffb347}.wbx-score .bad{border-top:2px solid var(--bad)}.wbx-score .bad b{color:var(--bad)}',
       '.wbx-score span{font-size:12px;color:var(--muted)}',
       '.wbx-form textarea{width:100%;min-height:120px;font:12px var(--font-mono);background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:10px}',
       '.wbx-steps{margin:8px 0 12px 18px;font-size:14px;color:var(--muted);line-height:1.7}.wbx-steps b,.wbx-steps code{color:var(--paper)}'
@@ -175,8 +176,8 @@
         tile('Average position', (c.position == null || !c.impressions) ? '–' : c.position, p.position ? '<span class="cg-d">' + p.position + ' the period before</span>' : '', 'Lower is better; 1 to 10 is page 1') +
         tile('Non-brand clicks', num(s.nonbrand_clicks), '', 'Clicks from searches that don\'t include "woolmer"') +
       '</div>' +
-      card('Impressions', 'Times woolmer appeared in Google per day', stacked(days.map(function (r) { return { label: dshort(r.d), tip: dlong(r.d), v: { Impressions: r.impressions } }; }), [['Impressions', '#B05785']], 'Impressions per day')) +
-      card('Clicks', 'Clicks from Google per day', stacked(days.map(function (r) { return { label: dshort(r.d), tip: dlong(r.d), v: { Clicks: r.clicks } }; }), [['Clicks', '#B05785']], 'Clicks per day')) +
+      card('Impressions', 'Times woolmer appeared in Google per day', stacked(days.map(function (r) { return { label: dshort(r.d), tip: dlong(r.d), v: { Impressions: r.impressions } }; }), [['Impressions', '#7000ff']], 'Impressions per day')) +
+      card('Clicks', 'Clicks from Google per day', stacked(days.map(function (r) { return { label: dshort(r.d), tip: dlong(r.d), v: { Clicks: r.clicks } }; }), [['Clicks', '#a97cff']], 'Clicks per day')) +
       '<div class="wbx-grid">' +
         card('Top searches', 'What people searched before seeing woolmer', table(['Search', 'Clicks', 'Impressions', 'Position'], (s.queries || []).map(function (r) { return [esc(r.k) + (/woolmer/i.test(r.k) ? ' <span class="cg-empty">(brand)</span>' : ''), num(r.clicks), num(r.impressions), r.position]; }), { more: 'q', all: S.qAll })) +
         card('Close to page 1', 'Searches where woolmer sits between 4th and 20th: the quickest wins', table(['Search', 'Impressions', 'Position'], (s.close || []).map(function (r) { return [esc(r.k), num(r.impressions), r.position]; }), { more: 'c', all: S.cAll, empty: 'Nothing close to page 1 yet.' })) +
