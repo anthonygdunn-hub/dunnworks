@@ -2,6 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
+<script>(function(){try{var t=localStorage.getItem("dw-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dunnworks</title>
 <meta name="robots" content="noindex, nofollow, noarchive">
@@ -35,6 +36,11 @@
   .ap-ic { all: unset; cursor: pointer; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; color: var(--muted); }
   .ap-ic:active { background: var(--ink-2); }
   .ap-ic svg { width: 21px; height: 21px; }
+  .ap-theme .sw { position: relative; width: 30px; height: 16px; border: 1px solid var(--line-2); border-radius: var(--radius); }
+  .ap-theme .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; background: var(--accent); transition: transform .25s var(--ease); }
+  :root[data-theme="light"] .ap-theme .sw::after { transform: translateX(14px); }
+  :root[data-theme="light"] .ap-sheet-bg { background: rgba(16,16,26,.35); }
+  :root[data-theme="light"] .ap-toast, :root[data-theme="light"] .ap-fab { box-shadow: 0 10px 30px rgba(16,16,26,.18); }
   .ap-ic.spin svg { animation: apspin .8s linear infinite; }
   @keyframes apspin { to { transform: rotate(360deg); } }
 
@@ -155,6 +161,7 @@
     <header class="ap-top">
       <img src="/hq/icon-192.png" alt="">
       <h1 id="title">Today</h1>
+      <button class="ap-ic ap-theme" id="theme" type="button" aria-label="Switch to the light theme" title="Switch to the light theme"><span class="sw" aria-hidden="true"></span></button>
       <button class="ap-ic" id="search" type="button" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
       <button class="ap-ic" id="refresh" type="button" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
     </header>
@@ -198,6 +205,20 @@
   function fn(b) { return DWData.fn('dw-hq', b); }
   var standalone = function () { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; };
   var isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  /* light and dark, shared with dunnworks.io (same "dw-theme" key) */
+  function theme() { return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
+  function applyTheme(t, save) {
+    if (t === 'light') document.documentElement.setAttribute('data-theme', 'light'); else document.documentElement.removeAttribute('data-theme');
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', t === 'light' ? '#ffffff' : '#101012');
+    var b = $('theme'), next = t === 'light' ? 'dark' : 'light';
+    b.setAttribute('aria-label', 'Switch to the ' + next + ' theme'); b.title = 'Switch to the ' + next + ' theme';
+    if (save) try { localStorage.setItem('dw-theme', t); } catch (e) {}
+    var lbl = $('themelbl'); if (lbl) lbl.textContent = t === 'light' ? 'Light' : 'Dark';
+  }
+  applyTheme(theme());
+  $('theme').addEventListener('click', function () { applyTheme(theme() === 'light' ? 'dark' : 'light', true); });
+  window.addEventListener('storage', function (e) { if (e.key === 'dw-theme') applyTheme(e.newValue === 'light' ? 'light' : 'dark'); });
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/hq/sw.js', { scope: '/hq/' }).catch(function () {});
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); INSTALL = e; if (/^#\/app/.test(location.hash) || !location.hash || location.hash === '#/hq') route(); });
@@ -289,10 +310,12 @@
       row('#/hq/calendar', 'Calendar', 'Launches, chases and due jobs', '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>') +
       row('#/hq/repos', 'Repos', 'GitHub, last commit and Pages', '<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 8v8M18 10c0 4-6 3-6 8"/>') +
       '</div><p class="ap-h">This phone</p><div class="ap-list">' +
+      '<button type="button" id="themerow">' + ic('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/>') + '<span>Theme<br><small id="themelbl">' + (theme() === 'light' ? 'Light' : 'Dark') + '</small></span></button>' +
       row('#/app/alerts', 'Alerts', 'New client email, enquiries, morning summary', '<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>') +
       (standalone() ? '' : '<button type="button" id="install">' + ic('<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>') + '<span>Add to home screen<br><small>' + (isIos ? 'Share, then Add to Home Screen' : 'Install it as an app') + '</small></span></button>') +
       '<a href="/console/" target="_blank" rel="noopener">' + ic('<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>') + '<span>Full console<br><small>Keys, packs, previews and the rest</small></span></a>' +
       '<button type="button" id="signout">' + ic('<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>') + '<span>Sign out</span></button></div>';
+    $('themerow').addEventListener('click', function () { applyTheme(theme() === 'light' ? 'dark' : 'light', true); });
     $('signout').addEventListener('click', function () { DWData.signOut().then(function () { location.hash = ''; location.reload(); }); });
     var ins = $('install'); if (ins) ins.addEventListener('click', install);
   }

@@ -1,6 +1,6 @@
 /* Dunnworks Workspace app: alerts and a small offline shell.
    Data always comes live from Supabase; only the app's own files are cached. */
-var V = 'dw-hq-1';
+var V = 'dw-hq-2';
 var SHELL = ['/hq/', '/hq/index.html', '/assets/css/styles.css', '/assets/css/console.css?v=20261115', '/hq/icon-192.png'];
 
 self.addEventListener('install', function (e) {
