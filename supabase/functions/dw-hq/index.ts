@@ -38,9 +38,18 @@ const domainOf = (s?: string | null) => {
   try { return new URL(s.startsWith("http") ? s : "https://" + s).hostname.replace(/^www\./, ""); } catch { return ""; }
 };
 
+// Settings live in Supabase secrets, or in dw_hq_private (service role only, no RLS policies) so the
+// console can be connected without anyone pasting keys into a dashboard.
+const CFG: Record<string, string> = {};
+async function loadCfg() {
+  const { data } = await admin.from("dw_hq_private").select("key,value");
+  (data ?? []).forEach((r: any) => { CFG[r.key] = r.value; });
+}
+const cfg = (env: string, key: string) => Deno.env.get(env) || CFG[key] || "";
+
 // ------------------------------------------------------------------ GitHub
 async function gh(path: string) {
-  const token = Deno.env.get("GITHUB_TOKEN");
+  const token = cfg("GITHUB_TOKEN", "github_token");
   const r = await fetch("https://api.github.com" + path, {
     headers: { Accept: "application/vnd.github+json", "User-Agent": "dunnworks-console", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
   });
@@ -51,7 +60,7 @@ async function gh(path: string) {
 async function repos(force: boolean) {
   const { data: cache } = await admin.from("dw_repo_cache").select("*").eq("id", 1).maybeSingle();
   if (!force && cache && Date.now() - Date.parse(cache.fetched_at) < 10 * 60 * 1000) return { repos: cache.data, fetched_at: cache.fetched_at, cached: true };
-  const token = !!Deno.env.get("GITHUB_TOKEN");
+  const token = !!cfg("GITHUB_TOKEN", "github_token");
   const list = token
     ? await gh(`/user/repos?per_page=100&sort=pushed&affiliation=owner`)
     : await gh(`/users/${GH_USER}/repos?per_page=100&sort=pushed`);
@@ -79,18 +88,15 @@ async function repos(force: boolean) {
 // The refresh token comes from the one-click Connect Gmail flow (stored in dw_hq_private, service role only)
 // or, failing that, a GMAIL_REFRESH_TOKEN secret.
 const REDIRECT = "https://dunnworks.io/console/";
-const gmailClient = () => !!(Deno.env.get("GMAIL_CLIENT_ID") && Deno.env.get("GMAIL_CLIENT_SECRET"));
-async function refreshToken() {
-  const env = Deno.env.get("GMAIL_REFRESH_TOKEN");
-  if (env) return env;
-  const { data } = await admin.from("dw_hq_private").select("value").eq("key", "gmail_refresh").maybeSingle();
-  return data?.value ?? "";
-}
+const CID = () => cfg("GMAIL_CLIENT_ID", "gmail_client_id");
+const CSECRET = () => cfg("GMAIL_CLIENT_SECRET", "gmail_client_secret");
+const gmailClient = () => !!(CID() && CSECRET());
+async function refreshToken() { return cfg("GMAIL_REFRESH_TOKEN", "gmail_refresh"); }
 async function gmailReadyAsync() { return gmailClient() && !!(await refreshToken()); }
 function gmailAuthUrl() {
   if (!gmailClient()) throw new Error("GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET are not set in Supabase yet");
   return "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
-    client_id: Deno.env.get("GMAIL_CLIENT_ID")!, redirect_uri: REDIRECT, response_type: "code",
+    client_id: CID(), redirect_uri: REDIRECT, response_type: "code",
     scope: "https://www.googleapis.com/auth/gmail.readonly", access_type: "offline", prompt: "consent",
     state: "gmail", login_hint: OWNER, include_granted_scopes: "true",
   });
@@ -98,7 +104,7 @@ function gmailAuthUrl() {
 async function gmailExchange(code: string) {
   const r = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ code, client_id: Deno.env.get("GMAIL_CLIENT_ID")!, client_secret: Deno.env.get("GMAIL_CLIENT_SECRET")!,
+    body: new URLSearchParams({ code, client_id: CID(), client_secret: CSECRET(),
       redirect_uri: REDIRECT, grant_type: "authorization_code" }),
   });
   const j = await r.json();
@@ -107,6 +113,7 @@ async function gmailExchange(code: string) {
   const p = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/profile", { headers: { Authorization: `Bearer ${j.access_token}` } }).then((x) => x.json());
   await admin.from("dw_hq_private").upsert({ key: "gmail_refresh", value: j.refresh_token, updated_at: new Date().toISOString() });
   await admin.from("dw_hq_private").upsert({ key: "gmail_address", value: p.emailAddress ?? "", updated_at: new Date().toISOString() });
+  CFG.gmail_refresh = j.refresh_token;
   return { ok: true, address: p.emailAddress };
 }
 
@@ -115,7 +122,7 @@ async function gmailToken() {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      client_id: Deno.env.get("GMAIL_CLIENT_ID")!, client_secret: Deno.env.get("GMAIL_CLIENT_SECRET")!,
+      client_id: CID(), client_secret: CSECRET(),
       refresh_token: await refreshToken(), grant_type: "refresh_token",
     }),
   });
@@ -263,6 +270,7 @@ Deno.serve(async (req) => {
   try { b = await req.json(); } catch { /* empty */ }
 
   try {
+    await loadCfg();
     if (b.action === "me") {
       if (isOwner) return json({ email, owner: true });
       const { data: m } = await admin.from("dw_members").select("name,role,task_owner,project_ids,active").eq("email", email).maybeSingle();
@@ -273,8 +281,7 @@ Deno.serve(async (req) => {
       case "repos": return json(await repos(!!b.force));
       case "mail_status": {
         const { data: last } = await admin.from("dw_inbox").select("created_at").order("created_at", { ascending: false }).limit(1);
-        const { data: addr } = await admin.from("dw_hq_private").select("value").eq("key", "gmail_address").maybeSingle();
-        return json({ connected: await gmailReadyAsync(), client: gmailClient(), address: addr?.value ?? null, last: last?.[0]?.created_at ?? null });
+        return json({ connected: await gmailReadyAsync(), client: gmailClient(), address: CFG.gmail_address || null, last: last?.[0]?.created_at ?? null });
       }
       case "mail_sync": return json(await mailSync());
       case "gmail_auth_url": return json({ url: gmailAuthUrl() });

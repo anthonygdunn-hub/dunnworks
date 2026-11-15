@@ -115,8 +115,11 @@ The first tile in the console. A Macro-style hub over the same data:
 - Ctrl/⌘ K searches everything
 
 Set up: `supabase/dunnworks-hq.sql`, then `supabase/dunnworks-hq-seed.sql`. Edge function `dw-hq`.
-Secrets: `ANTHROPIC_API_KEY` (shared with cv-ai), optional `GITHUB_TOKEN` (read-only, adds private repos),
-`GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN` for the inbox.
+Keys: `ANTHROPIC_API_KEY` (Supabase secret, shared with cv-ai). The GitHub token (read-only, expires 14 Nov 2027)
+and the Google OAuth client (project woolmer, "Dunnworks Console") live in `dw_hq_private`, which has RLS on
+and no policies, so only the edge function can read it. Supabase secrets of the same names
+(`GITHUB_TOKEN`, `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`) override it. Gmail itself is connected from
+Workspace → Inbox → Connect Gmail, which stores the refresh token in the same table.
 
 ## Reissuing a preview passphrase
 
