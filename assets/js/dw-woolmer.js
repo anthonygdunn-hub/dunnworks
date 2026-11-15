@@ -9,7 +9,7 @@
 (function (w) {
   'use strict';
   var SITE = 'https://woolmer.info';
-  var S = { days: 30, tab: 'traffic', t: null, d: null, g: null, sp: null, gs: null, kwAll: false, qAll: false, cAll: false, lAll: false };
+  var S = { days: 30, preset: '30', from: null, to: null, tab: 'traffic', t: null, d: null, g: null, sp: null, gs: null, kwAll: false, qAll: false, cAll: false, lAll: false };
   var root = null, say = function () {};
   /* Dunnworks brand: violet #7000ff / #a97cff on ink, shades of the same family so channels stay distinguishable */
   var CH = [['Direct', '#7000ff'], ['Organic Search', '#a97cff'], ['Organic Social', '#3b0a8f'], ['Referral', '#d4c2ff'], ['Organic Video', '#c046ff'], ['AI engines', '#757083']];
@@ -27,8 +27,19 @@
     if (!prev) return '<span class="cg-d up">new</span>';
     var diff = Math.round(100 * (cur - prev) / prev); if (!diff) return '<span class="cg-d">no change</span>';
     var good = lowerBetter ? diff < 0 : diff > 0;
-    return '<span class="cg-d ' + (good ? 'up' : 'down') + '">' + (diff > 0 ? '▲ ' : '▼ ') + Math.abs(diff) + '% on the period before</span>';
+    return '<span class="cg-d ' + (good ? 'up' : 'down') + '">' + (diff > 0 ? '▲ ' : '▼ ') + Math.abs(diff) + (single() ? '% on the day before' : '% on the period before') + '</span>';
   }
+  function lToday() { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date()).slice(0, 10); }
+  function addDays(d, n) { var x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
+  var PRESETS = [['today', 'Today'], ['yesterday', 'Yesterday'], ['7', '7 days'], ['30', '30 days'], ['90', '90 days'], ['custom', 'Choose dates']];
+  function range() {
+    var t = lToday();
+    if (S.preset === 'today') return { from: t, to: t };
+    if (S.preset === 'yesterday') return { from: addDays(t, -1), to: addDays(t, -1) };
+    if (S.preset === 'custom' && S.from && S.to) return { from: S.from <= S.to ? S.from : S.to, to: S.from <= S.to ? S.to : S.from };
+    var n = +S.preset || 30; return { from: addDays(t, -(n - 1)), to: t, days: n };
+  }
+  function single() { var r = range(); return r.from === r.to; }
   function info(t) { return ' <span class="wbx-i" title="' + esc(t) + '" tabindex="0">ⓘ</span>'; }
   function tile(label, value, extra, hint) { return '<div class="cg-tile"><span>' + esc(label) + (hint ? info(hint) : '') + '</span><b>' + value + '</b>' + (extra || '') + '</div>'; }
   function card(title, hint, inner, cls) { return '<section class="cg-sec ' + (cls || '') + '"><h2>' + esc(title) + (hint ? info(hint) : '') + '</h2>' + inner + '</section>'; }
@@ -106,6 +117,7 @@
       '.cg-table td.n,.cg-table th.n{text-align:right;font-variant-numeric:tabular-nums}.cg-wrapx{overflow-x:auto}',
       '.wbx-more{margin-top:10px;background:none;border:0;padding:0;color:var(--accent-2);font:inherit;font-size:13px;cursor:pointer}',
       '.wbx-i{color:var(--muted-2);font-size:12px;cursor:help}',
+      '.wbx-dates{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:-4px 0 14px;font-size:13px;color:var(--muted)}.wbx-dates input{font:13px var(--font-mono);background:var(--ink);color:var(--paper);border:1px solid var(--line-2);border-radius:var(--radius);padding:6px 8px;margin-left:6px;color-scheme:light dark}',
       '.wbx-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px;border-bottom:1px solid var(--line);padding-bottom:10px}',
       '.wbx-range{font-size:14px;color:var(--paper);margin:0 0 6px}.wbx-sub{font-size:13.5px;color:var(--muted);margin:0 0 14px}',
       '.wbx-score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.wbx-score div{border:1px solid var(--line);border-radius:var(--radius);padding:12px;text-align:center}',
@@ -125,7 +137,11 @@
       .then(function (r) { return r.json(); });
   }
 
-  function rangeLine(from, to) { return '<p class="wbx-range">Last ' + S.days + ' days: ' + dfull(from) + ' to ' + dfull(to) + '</p>'; }
+  function dday(d) { return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' }); }
+  function rangeLine(from, to) {
+    var lab = { today: 'Today', yesterday: 'Yesterday', '7': 'Last 7 days', '30': 'Last 30 days', '90': 'Last 90 days', custom: 'Chosen dates' }[S.preset] || '';
+    return '<p class="wbx-range">' + lab + ': ' + (from === to ? dday(from) : dfull(from) + ' to ' + dfull(to)) + '</p>';
+  }
 
   function viewTraffic(el) {
     var t = S.t; if (!t) { el.innerHTML = '<p class="cg-empty">Loading…</p>'; return; }
@@ -147,6 +163,7 @@
         card('Channels', 'Where visits came from over the period', hbars((t.channels || []).map(function (c) { return { k: c.k, n: c.n, c: colour[c.k] }; }))) +
         card('Top landing pages', 'The first page people saw when they arrived', table(['Page', 'Visits'], (t.landing || []).map(function (r) { return [plink(r.k), num(r.n)]; }), { more: 'landing', all: S.lAll, limit: 8 })) +
       '</div>' +
+      card('Most read pages', 'Every page view in the period, including moving around the site', table(['Page', 'Views'], (t.pages || []).map(function (r) { return [plink(r.k), num(r.n)]; }), { limit: 10 })) +
       card('Referring sites', 'Sites that sent visitors, excluding typed-in and direct', table(['Site', 'Channel', 'Visits'], (t.refs || []).map(function (r) { return [esc(r.k), esc(r.ch), num(r.n)]; }), { text: [1], empty: 'No referring sites yet.' }));
   }
 
@@ -248,11 +265,12 @@
   }
   function load(force) {
     say('');
-    if (S.tab === 'traffic') rpc('wb_traffic', { p_days: S.days }).then(function (t) { S.t = t; paint(); }).catch(function (e) { say(e.message, 'bad'); });
-    if (S.tab === 'business') rpc('wb_stats', { p_days: S.days }).then(function (d) { S.d = d; paint(); }).catch(function (e) { say(e.message, 'bad'); });
+    var R = range();
+    if (S.tab === 'traffic') rpc('wb_traffic', { p_from: R.from, p_to: R.to }).then(function (t) { S.t = t; paint(); }).catch(function (e) { say(e.message, 'bad'); });
+    if (S.tab === 'business') rpc('wb_stats', { p_from: R.from, p_to: R.to }).then(function (d) { S.d = d; paint(); }).catch(function (e) { say(e.message, 'bad'); });
     if (S.tab === 'google' || S.tab === 'keywords') {
       rpc('wb_google_status').then(function (gs) { S.gs = gs; }).catch(function () {});
-      fn({ what: 'google', days: S.days, force: !!force }).then(function (g) { S.g = g; paint(); }).catch(function (e) { S.g = { error: e.message }; paint(); });
+      fn(R.days ? { what: 'google', days: R.days, force: !!force } : { what: 'google', from: R.from, to: R.to, force: !!force }).then(function (g) { S.g = g; paint(); }).catch(function (e) { S.g = { error: e.message }; paint(); });
     }
     if (S.tab === 'speed') rpc('wb_google_status').then(function (gs) { S.gs = gs; }).catch(function () {});
     if (S.tab === 'speed') fn({ what: 'speed', force: !!force }).then(function (sp) { S.sp = sp; paint(); }).catch(function (e) { S.sp = { error: e.message }; paint(); });
@@ -260,8 +278,10 @@
   function view(el, sayFn) {
     root = el; say = sayFn || say; css();
     el.innerHTML = '<div class="wbx-tabs">' + TABS.map(function (t) { return '<button type="button" class="chip' + (S.tab === t[0] ? ' is-on' : '') + '" data-wbx-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>' +
-      '<div class="cg-bar">' + (S.tab === 'speed' ? '' : [7, 30, 90].map(function (n) { return '<button type="button" class="chip' + (n === S.days ? ' is-on' : '') + '" data-wbx-days="' + n + '">' + n + ' days</button>'; }).join('')) +
+      '<div class="cg-bar">' + (S.tab === 'speed' ? '' : PRESETS.map(function (p) { return '<button type="button" class="chip' + (p[0] === S.preset ? ' is-on' : '') + '" data-wbx-days="' + p[0] + '">' + p[1] + '</button>'; }).join('')) +
       '<span class="sp"></span><a class="mini" href="' + SITE + '/" target="_blank" rel="noopener">Open woolmer.info</a><button type="button" class="mini" data-wbx-refresh>Refresh</button></div>' +
+      (S.tab !== 'speed' && S.preset === 'custom' ? '<form class="wbx-dates" data-wbx-dates><label>From <input type="date" name="f" value="' + (S.from || addDays(lToday(), -6)) + '" max="' + lToday() + '" min="2026-11-13"></label><label>To <input type="date" name="t" value="' + (S.to || lToday()) + '" max="' + lToday() + '" min="2026-11-13"></label><button class="mini" type="submit">Show</button><span class="cg-empty">Pick one day by choosing the same date twice.</span></form>' : '') +
+      ((S.tab === 'google' || S.tab === 'keywords') && (S.preset === 'today' || S.preset === 'yesterday') ? '<p class="cg-note">Google Search Console runs 2 to 3 days behind, so today and yesterday will read low or empty here. The Traffic tab is live.</p>' : '') +
       '<div data-wbx><p class="cg-empty">Loading…</p></div>';
     paint(); load();
   }
@@ -270,11 +290,17 @@
     var b = e.target.closest && e.target.closest('[data-wbx-days],[data-wbx-refresh],[data-wbx-tab],[data-wbx-more]');
     if (!b || !root.contains(b)) return;
     if (b.hasAttribute('data-wbx-tab')) { S.tab = b.getAttribute('data-wbx-tab'); view(root, say); }
-    else if (b.hasAttribute('data-wbx-days')) { S.days = +b.getAttribute('data-wbx-days'); S.t = S.d = S.g = null; view(root, say); }
+    else if (b.hasAttribute('data-wbx-days')) {
+      S.preset = b.getAttribute('data-wbx-days');
+      if (S.preset === 'custom' && !S.from) { S.from = addDays(lToday(), -6); S.to = lToday(); }
+      S.t = S.d = S.g = null; view(root, say);
+    }
     else if (b.hasAttribute('data-wbx-more')) { var k = b.getAttribute('data-wbx-more'); if (k === 'kw') S.kwAll = !S.kwAll; if (k === 'q') S.qAll = !S.qAll; if (k === 'c') S.cAll = !S.cAll; if (k === 'landing') S.lAll = !S.lAll; paint(); }
     else load(true);
   });
   document.addEventListener('submit', function (e) {
+    var df = e.target.closest && e.target.closest('[data-wbx-dates]');
+    if (df && root && root.contains(df)) { e.preventDefault(); S.from = df.f.value; S.to = df.t.value; S.t = S.d = S.g = null; view(root, say); return; }
     var pf = e.target.closest && e.target.closest('[data-wbx-psi]');
     if (pf && root && root.contains(pf)) {
       e.preventDefault();
