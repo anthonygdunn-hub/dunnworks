@@ -1,0 +1,21 @@
+{
+  "name": "Dunnworks Workspace",
+  "short_name": "Dunnworks",
+  "description": "Jobs, projects, pipeline, site dashboards, inbox and the assistant",
+  "id": "/hq/",
+  "start_url": "/hq/#/hq",
+  "scope": "/hq/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101012",
+  "theme_color": "#101012",
+  "icons": [
+    { "src": "/hq/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/hq/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Board", "url": "/hq/#/hq/board" },
+    { "name": "Inbox", "url": "/hq/#/hq/inbox" },
+    { "name": "Sites", "url": "/hq/#/hq/dashboards" }
+  ]
+}

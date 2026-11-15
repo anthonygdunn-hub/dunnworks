@@ -13,6 +13,7 @@
 //          GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET (for the inbox; the refresh token comes from Connect Gmail in the Inbox)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import webpush from "npm:web-push@3.6.7";
 
 const OWNER = "info@dunnworks.io";
 const GH_USER = "anthonygdunn-hub";
@@ -157,7 +158,7 @@ async function mailSync() {
     [p.contact_email, p.website, p.live_url].forEach((v) => { const d = domainOf(v); if (d && !FREEMAIL.has(d)) byDomain.set(d, p.id); });
   });
   (contacts ?? []).forEach((c: any) => { if (c.email) byEmail.set(c.email.toLowerCase(), c.project_id); });
-  let added = 0;
+  let added = 0; const rows: any[] = [];
   for (const id of fresh) {
     const m = await g(`messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`);
     const h = (n: string) => (m.payload?.headers ?? []).find((x: any) => x.name.toLowerCase() === n.toLowerCase())?.value ?? "";
@@ -170,11 +171,96 @@ async function mailSync() {
       snippet: String(m.snippet ?? "").slice(0, 300), received_at: new Date(Number(m.internalDate)).toISOString(),
       project_id, is_read: !(m.labelIds ?? []).includes("UNREAD"),
     };
-    await admin.from("dw_inbox").upsert(row);
+    await admin.from("dw_inbox").upsert(row); rows.push(row);
     if (project_id) await admin.from("dw_activity").insert({ actor: email, project_id, kind: "email", ref_id: id, summary: `email from ${name}: ${row.subject}`.slice(0, 200) });
     added++;
   }
-  return { connected: true, added };
+  return { connected: true, added, rows };
+}
+
+// ------------------------------------------------------------------- push
+// Phone alerts for the Workspace app (dunnworks.io/hq). Subscriptions in dw_push_subs, VAPID keys and
+// the cron key in dw_hq_private. pg_cron calls { action: "tick" } every 10 minutes with x-cron.
+const clip = (v: unknown, n: number) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, n);
+async function push(kind: string, title: string, body: string, url: string, only?: string) {
+  if (!CFG.vapid_public || !CFG.vapid_private) return { sent: 0 };
+  webpush.setVapidDetails("mailto:info@dunnworks.io", CFG.vapid_public, CFG.vapid_private);
+  let q = admin.from("dw_push_subs").select("id,endpoint,p256dh,auth,prefs");
+  if (only) q = q.eq("endpoint", only);
+  const { data: subs } = await q;
+  const msg = JSON.stringify({ title: clip(title, 60), body: clip(body, 180), url, tag: kind + "-" + Date.now() });
+  let sent = 0;
+  for (const s of subs ?? []) {
+    if (!only && s.prefs && s.prefs[kind] === false) continue;
+    try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, msg, { TTL: 12 * 3600 }); sent++;
+      await admin.from("dw_push_subs").update({ last_ok: new Date().toISOString() }).eq("id", s.id); }
+    catch (e) { const c = (e as { statusCode?: number }).statusCode; if (c === 404 || c === 410) await admin.from("dw_push_subs").delete().eq("id", s.id); else console.error("push", c); }
+  }
+  return { sent };
+}
+const londonNow = () => { const p = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hour12: false }).formatToParts(new Date());
+  const g = (t: string) => p.find((x) => x.type === t)?.value ?? ""; return { day: `${g("year")}-${g("month")}-${g("day")}`, hour: Number(g("hour")) }; };
+
+async function tick() {
+  const st: any = (() => { try { return JSON.parse(CFG.push_state || "null"); } catch { return null; } })() || {};
+  const first = !st.started; const now = londonNow(); const out: Record<string, unknown> = {};
+  const save = async () => { st.started = true; await admin.from("dw_hq_private").upsert({ key: "push_state", value: JSON.stringify(st), updated_at: new Date().toISOString() }); };
+  const A = "/hq/#/hq";
+  // 1. new client email (Gmail sync, matched to a project)
+  try {
+    const m: any = await mailSync();
+    const hits = (m.rows || []).filter((r: any) => r.project_id);
+    out.mail = { added: m.added, matched: hits.length };
+    if (!first && hits.length) {
+      const { data: ps } = await admin.from("dw_projects").select("id,name").in("id", hits.map((h: any) => h.project_id));
+      const nm = new Map((ps ?? []).map((p: any) => [p.id, p.name]));
+      if (hits.length <= 3) for (const h of hits) await push("email", `${nm.get(h.project_id) ?? "Client"}: ${h.from_name}`, h.subject, A + "/inbox");
+      else await push("email", `${hits.length} new client emails`, hits.slice(0, 3).map((h: any) => nm.get(h.project_id)).join(", "), A + "/inbox");
+    }
+  } catch (e) { out.mail = String((e as Error).message); }
+  // 2. enquiries and bookings: form sends counted by t.js, plus the sites' own tables
+  const { data: ev } = await admin.from("dw_site_events").select("site,kind,n").eq("day", now.day).in("kind", ["form", "booking"]);
+  const tot: Record<string, number> = {}; (ev ?? []).forEach((r: any) => { const k = r.site + "|" + r.kind; tot[k] = (tot[k] || 0) + r.n; });
+  if (st.evday !== now.day) { st.evday = now.day; st.ev = {}; }
+  for (const k of Object.keys(tot)) {
+    const was = st.ev[k] || 0;
+    if (!first && tot[k] > was) { const [site, kind] = k.split("|"); await push("enquiry", kind === "booking" ? "New booking" : "New enquiry", `${tot[k] - was} on ${site.replace(/-/g, " ")}`, A + "/dashboards/" + site); }
+    st.ev[k] = tot[k];
+  }
+  const since = st.forms_at || new Date().toISOString();
+  const forms: [string, string, string, string][] = [["cgc_bookings", "Coastal Golf Co booking", "service", "coastal-golf-co"], ["tcooper_enquiries", "T Cooper enquiry", "service", "tcooper-interiors"], ["hh_testers", "Honest Handicap tester application", "course", "honest-handicap"]];
+  for (const [t, label, col, site] of forms) {
+    const { data } = await admin.from(t).select(`created_at,name,${col}`).gt("created_at", since).order("created_at");
+    if (!first) for (const r of (data ?? []).slice(0, 3)) await push("enquiry", label, `${r.name ?? "Someone"}${(r as any)[col] ? ": " + (r as any)[col] : ""}`, A + "/dashboards/" + site);
+  }
+  st.forms_at = new Date().toISOString();
+  // 3. collaborator and client activity
+  const { data: acts } = await admin.from("dw_activity").select("id,actor,summary,project_id").gt("id", st.act_id || 0).order("id").limit(50);
+  const mine = (a: string) => !a || a === OWNER || a === "me" || a === "system";
+  const theirs = (acts ?? []).filter((a: any) => !mine(a.actor) && !String(a.summary).startsWith("email from"));
+  if (!first && theirs.length) {
+    const { data: ms } = await admin.from("dw_members").select("email,name");
+    const who = (a: string) => a === "client" ? "Client" : (ms ?? []).find((m: any) => m.email === a)?.name ?? a.split("@")[0];
+    if (theirs.length <= 3) for (const a of theirs) await push("activity", who(a.actor), a.summary, A);
+    else await push("activity", `${theirs.length} updates from collaborators`, theirs.slice(0, 2).map((a: any) => who(a.actor) + " " + a.summary).join("; "), A);
+  }
+  if (acts?.length) st.act_id = acts[acts.length - 1].id;
+  // 4. morning summary, once a day from 7am
+  if (now.hour >= 7 && st.summary_day !== now.day) {
+    st.summary_day = now.day;
+    if (!first) {
+      const [{ data: due }, { data: chase }, { count: unread }] = await Promise.all([
+        admin.from("dw_project_tasks").select("due_on").eq("done", false).or("owner.eq.me,owner.is.null").lte("due_on", now.day),
+        admin.from("dw_projects").select("name").lte("next_action_on", now.day).not("stage", "in", "(won,lost,parked)"),
+        admin.from("dw_inbox").select("id", { count: "exact", head: true }).eq("is_read", false).eq("archived", false),
+      ]);
+      const today = (due ?? []).filter((d: any) => d.due_on === now.day).length, late = (due ?? []).length - today;
+      const bits = [today ? `${today} due today` : "", late ? `${late} overdue` : "", chase?.length ? `${chase.length} to chase` : "", unread ? `${unread} unread email${unread === 1 ? "" : "s"}` : ""].filter(Boolean);
+      await push("summary", "Good morning", bits.length ? bits.join(" · ") : "Nothing due today. Enjoy it.", A);
+    }
+  }
+  await save();
+  return { ok: true, first, ...out };
 }
 
 // --------------------------------------------------------------------- AI
@@ -261,6 +347,12 @@ async function invite(b: Record<string, any>) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
+  const cron = req.headers.get("x-cron");
+  if (cron) {
+    await loadCfg();
+    if (!CFG.cron_key || cron !== CFG.cron_key) return json({ error: "no" }, 403);
+    try { return json(await tick()); } catch (e) { return json({ error: String((e as Error).message) }, 500); }
+  }
   const sb = createClient(URL_, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } });
   const { data: u } = await sb.auth.getUser();
   const email = (u?.user?.email ?? "").toLowerCase();
@@ -287,6 +379,19 @@ Deno.serve(async (req) => {
       case "gmail_auth_url": return json({ url: gmailAuthUrl() });
       case "gmail_exchange": return json(await gmailExchange(String(b.code ?? "")));
       case "ai": return json(await ai(b));
+      case "push_key": return json({ key: CFG.vapid_public ?? null });
+      case "push_subscribe": {
+        const sub = b.sub ?? {};
+        if (!sub.endpoint || !sub.keys?.p256dh || !sub.keys?.auth) throw new Error("No subscription");
+        const row: any = { endpoint: sub.endpoint, p256dh: sub.keys.p256dh, auth: sub.keys.auth, device: clip(b.device, 80) };
+        if (b.prefs) row.prefs = b.prefs;
+        await admin.from("dw_push_subs").upsert(row, { onConflict: "endpoint" });
+        return json({ ok: true });
+      }
+      case "push_prefs": { await admin.from("dw_push_subs").update({ prefs: b.prefs }).eq("endpoint", String(b.endpoint ?? "")); return json({ ok: true }); }
+      case "push_get": { const { data } = await admin.from("dw_push_subs").select("prefs,created_at,last_ok").eq("endpoint", String(b.endpoint ?? "")).maybeSingle(); return json({ sub: data }); }
+      case "push_unsubscribe": { await admin.from("dw_push_subs").delete().eq("endpoint", String(b.endpoint ?? "")); return json({ ok: true }); }
+      case "push_test": return json(await push("test", "Dunnworks", "Alerts are working. This is your phone talking.", "/hq/#/hq", String(b.endpoint ?? "")));
       case "invite": return json(await invite(b));
       default: return json({ error: "Unknown action" }, 400);
     }
