@@ -90,12 +90,12 @@ begin
   if not public.dw_is_owner() then raise exception 'not allowed'; end if;
   if since > upto then since := upto; end if;
   len := upto - since + 1; pupto := since - 1; psince := since - len;
-  with v as (select day, path, ref, n, public.wb_channel(ref) ch from dw_site_views where site = p_site and day between psince and upto),
+  with v as (select day, path, ref, n, public.wb_channel(ref) ch from dw_site_views_all where site = p_site and day between psince and upto),
        c as (select * from v where day between since and upto),
        p as (select * from v where day between psince and pupto)
   select jsonb_build_object(
     'from', since, 'to', upto, 'days', len,
-    'first', (select min(day) from dw_site_views where site = p_site),
+    'first', (select min(day) from dw_site_views_all where site = p_site),
     'visits', (select coalesce(sum(n),0) from c where ch is not null),
     'visits_prev', (select coalesce(sum(n),0) from p where ch is not null),
     'views', (select coalesce(sum(n),0) from c),
@@ -162,11 +162,11 @@ begin
   if not public.dw_is_owner() then raise exception 'not allowed'; end if;
   return (select coalesce(jsonb_agg(jsonb_build_object(
       'slug', s.slug,
-      'visits', (select coalesce(sum(n),0) from dw_site_views v where v.site = s.slug and v.day > today - p_days and public.wb_channel(v.ref) is not null),
-      'visits_prev', (select coalesce(sum(n),0) from dw_site_views v where v.site = s.slug and v.day <= today - p_days and v.day > today - 2 * p_days and public.wb_channel(v.ref) is not null),
+      'visits', (select coalesce(sum(n),0) from dw_site_views_all v where v.site = s.slug and v.day > today - p_days and public.wb_channel(v.ref) is not null),
+      'visits_prev', (select coalesce(sum(n),0) from dw_site_views_all v where v.site = s.slug and v.day <= today - p_days and v.day > today - 2 * p_days and public.wb_channel(v.ref) is not null),
       'clicks', (select coalesce(sum(n),0) from dw_site_events e where e.site = s.slug and e.day > today - p_days),
-      'last', (select max(day) from dw_site_views v where v.site = s.slug),
-      'spark', (select coalesce(jsonb_agg(x.n order by x.d), '[]') from (select g::date d, coalesce((select sum(n) from dw_site_views v where v.site = s.slug and v.day = g::date and public.wb_channel(v.ref) is not null), 0) n
+      'last', (select max(day) from dw_site_views_all v where v.site = s.slug),
+      'spark', (select coalesce(jsonb_agg(x.n order by x.d), '[]') from (select g::date d, coalesce((select sum(n) from dw_site_views_all v where v.site = s.slug and v.day = g::date and public.wb_channel(v.ref) is not null), 0) n
                  from generate_series(today - 13, today, '1 day') g) x)
     )), '[]') from dw_sites s where s.active);
 end $$;
@@ -195,3 +195,33 @@ from (values
   ('aeroinspectors', 'AeroInspectors', 'https://aeroinspectors.io/', 'aeroinspectors.io', 'aeroinspectors', null, null, 110)
 ) as x(slug, name, url, host, pslug, repo, legacy, sort)
 on conflict (slug) do nothing;
+-- One source for every site's traffic: the shared t.js counter plus the three older counters
+-- (woolmer's wb_views, Coastal Golf Co's cgc_pageviews, dunnworks.io's dw_pageviews), mapped into the same shape.
+create or replace function public.dw_refhost(r text) returns text language sql immutable as $$
+  select case
+    when r is null or r = '' then ''
+    when lower(r) = 'google' then 'google.com' when lower(r) = 'facebook' then 'facebook.com'
+    when lower(r) = 'instagram' then 'instagram.com' when lower(r) = 'linkedin' then 'linkedin.com'
+    when lower(r) = 'bing' then 'bing.com' when lower(r) = 'whatsapp' then 'whatsapp.com'
+    when r ~ '^https?://' then regexp_replace(lower(substring(r from '^https?://([^/:?#]+)')), '^www\.', '')
+    else lower(left(r, 80)) end
+$$;
+
+create or replace view public.dw_site_views_all as
+  select site, day, path, ref, n from public.dw_site_views
+   where not (site = 'dunnworks' and day < date '2026-11-16')
+  union all
+  select 'woolmer', day, path, ref, n from public.wb_views
+  union all
+  select 'coastal-golf-co', d, left(path, 160), r, count(*)::int from (
+    select (at at time zone 'Europe/London')::date d, path,
+           case when row_number() over (partition by visitor, (at at time zone 'Europe/London')::date order by at) = 1
+                then public.dw_refhost(ref) else '(internal)' end r
+    from public.cgc_pageviews) x group by 1, 2, 3, 4
+  union all
+  select 'dunnworks', d, left(path, 160), r, count(*)::int from (
+    select (at at time zone 'Europe/London')::date d, path,
+           case when row_number() over (partition by visitor, (at at time zone 'Europe/London')::date order by at) = 1
+                then public.dw_refhost(ref) else '(internal)' end r
+    from public.dw_pageviews where at < timestamp with time zone '2026-11-16 00:00:00+00') y group by 1, 2, 3, 4;
+revoke all on public.dw_site_views_all from anon, authenticated;
