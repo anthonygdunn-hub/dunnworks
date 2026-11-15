@@ -259,7 +259,7 @@
       card('Site rebuilds', 'woolmer is rebuilt automatically within about 10 minutes of any change (new events, approvals, listings)',
         S.bs && S.bs.token
           ? '<p class="wbx-sub" style="margin:0">Automatic rebuilds are on. Last rebuild triggered: ' + (S.bs.last_kick ? esc(ago(S.bs.last_kick)) : 'not yet') + '.</p>'
-          : '<p class="wbx-sub">Paste the GitHub token (it starts <code>github_pat_</code>) so Supabase can rebuild woolmer when something changes. It\'s stored where only the server can use it.</p><form data-wbx-gh style="display:flex;gap:8px;flex-wrap:wrap"><input name="k" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" style="flex:1;min-width:240px;font:13px var(--font-mono);background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px"><button class="mini" type="submit">Save token</button></form>');
+          : '<p class="wbx-sub">Paste the GitHub token (it starts <code>github_pat_</code>) so Supabase can rebuild woolmer when something changes. It\'s stored where only the server can use it.</p><form data-wbx-gh style="display:flex;gap:8px;flex-wrap:wrap"><input name="k" type="password" autocomplete="new-password" data-1p-ignore data-lpignore="true" spellcheck="false" placeholder="github_pat_…" style="flex:1;min-width:240px;font:13px var(--font-mono);background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px"><button class="mini" type="submit">Save token</button></form>');
   }
 
   function paint() {
