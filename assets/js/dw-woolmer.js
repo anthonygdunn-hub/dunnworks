@@ -45,7 +45,7 @@
       var segs = series.map(function (s) { var v = r.v[s[0]] || 0; return v ? '<em style="height:' + (100 * v / top) + '%;background:' + s[1] + '"></em>' : ''; }).join('');
       var tip = '<b>' + esc(r.tip) + '</b>' + series.filter(function (s) { return r.v[s[0]]; }).map(function (s) { return '<br><i style="background:' + s[1] + '"></i>' + esc(s[0]) + ': ' + num(r.v[s[0]]); }).join('') + (series.length > 1 ? '<br>Total: ' + num(totals[i]) : '');
       return '<div class="cg-col" tabindex="0"><div class="wbx-segs">' + segs + '</div>' +
-        ((i % every === 0 || i === rows.length - 1) ? '<span class="cg-xl">' + esc(r.label) + '</span>' : '') + '<div class="cg-tip">' + tip + '</div></div>';
+        ((i % every === 0 ? (rows.length - 1 - i >= Math.ceil(every / 2) || i === rows.length - 1) : i === rows.length - 1) ? '<span class="cg-xl">' + esc(r.label) + '</span>' : '') + '<div class="cg-tip">' + tip + '</div></div>';
     }).join('');
     var legend = series.length > 1 ? '<div class="wbx-leg">' + series.map(function (s) { return '<span><i style="background:' + s[1] + '"></i>' + esc(s[0]) + '</span>'; }).join('') + '</div>' : '';
     return '<div class="cg-chart" role="img" aria-label="' + esc(label) + '"><div class="cg-plot">' + grid + '<div class="cg-cols">' + cols + '</div></div></div>' + legend;
