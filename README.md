@@ -98,6 +98,26 @@ Passphrases live in `dw_project_secrets`, and jobs in `dw_project_tasks`. No
 anonymous policy touches either, so the anon key on the public page cannot
 reach them.
 
+## Workspace (#/hq)
+
+The first tile in the console. A Macro-style hub over the same data:
+
+- **Home**: jobs due this week, people to chase, unread email, what's coming up, and an activity feed grouped by recency
+- **Board**: every job across your products and clients in To do / Doing / Waiting / Done, drag to move, notes on each card
+- **Projects**: own products, clients (and prospects if ticked), each with jobs, docs, contacts, matched email, dates, activity and an AI summary
+- **Pipeline**: clients and prospects by stage, drag to move, with deal values
+- **Docs**: plans and briefs per project, plain text with `#` headings, `-` lists and `[[Project name]]` links, saved as you type
+- **Calendar**: launches, chases, due jobs and your own events
+- **Inbox**: info@dunnworks.io via Gmail, matched to projects by contact email or business domain; make a job or draft a reply from any email
+- **Repos**: GitHub repos with last commit and Pages status
+- **Assistant**: Claude reading the console (ask, summarise, draft an email, break into jobs)
+- **People**: collaborators. They sign in at /console/ with an emailed link and only ever see the Workspace for the projects you tick
+- Ctrl/⌘ K searches everything
+
+Set up: `supabase/dunnworks-hq.sql`, then `supabase/dunnworks-hq-seed.sql`. Edge function `dw-hq`.
+Secrets: `ANTHROPIC_API_KEY` (shared with cv-ai), optional `GITHUB_TOKEN` (read-only, adds private repos),
+`GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN` for the inbox.
+
 ## Reissuing a preview passphrase
 
 A locked preview is encrypted with one AES key that never changes. The

@@ -1,0 +1,254 @@
+// dw-hq: the server side of the console Workspace (#/hq).
+//
+// actions
+//   me          who is signed in, owner or collaborator, and which projects they can see
+//   repos       GitHub repos for anthonygdunn-hub with last commit and Pages status (cached 10 min)
+//   mail_status whether Gmail is connected
+//   mail_sync   pull the last 30 days of info@dunnworks.io into dw_inbox and match each to a project
+//   ai          ask / draft / summary / tasks, grounded in the project's jobs, docs, contacts and email
+//   invite      add or update a collaborator and send them a sign-in invite
+//
+// Secrets: ANTHROPIC_API_KEY (already set for cv-ai), HQ_AI_MODEL (optional),
+//          GITHUB_TOKEN (optional, read-only fine-grained token; without it public repos only, 60 calls an hour),
+//          GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN (for the inbox)
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
+
+const OWNER = "info@dunnworks.io";
+const GH_USER = "anthonygdunn-hub";
+const MODEL = Deno.env.get("HQ_AI_MODEL") ?? "claude-sonnet-5-5";
+const URL_ = Deno.env.get("SUPABASE_URL")!;
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
+
+const admin = createClient(URL_, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
+
+const FREEMAIL = new Set(["gmail.com", "googlemail.com", "hotmail.com", "hotmail.co.uk", "outlook.com", "live.co.uk",
+  "yahoo.com", "yahoo.co.uk", "icloud.com", "me.com", "btinternet.com", "aol.com", "sky.com", "dunnworks.io"]);
+const domainOf = (s?: string | null) => {
+  if (!s) return "";
+  const m = String(s).toLowerCase().match(/@([^>\s]+)/);
+  if (m) return m[1];
+  try { return new URL(s.startsWith("http") ? s : "https://" + s).hostname.replace(/^www\./, ""); } catch { return ""; }
+};
+
+// ------------------------------------------------------------------ GitHub
+async function gh(path: string) {
+  const token = Deno.env.get("GITHUB_TOKEN");
+  const r = await fetch("https://api.github.com" + path, {
+    headers: { Accept: "application/vnd.github+json", "User-Agent": "dunnworks-console", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!r.ok) throw new Error(`GitHub ${r.status} on ${path}`);
+  return r.json();
+}
+
+async function repos(force: boolean) {
+  const { data: cache } = await admin.from("dw_repo_cache").select("*").eq("id", 1).maybeSingle();
+  if (!force && cache && Date.now() - Date.parse(cache.fetched_at) < 10 * 60 * 1000) return { repos: cache.data, fetched_at: cache.fetched_at, cached: true };
+  const token = !!Deno.env.get("GITHUB_TOKEN");
+  const list = token
+    ? await gh(`/user/repos?per_page=100&sort=pushed&affiliation=owner`)
+    : await gh(`/users/${GH_USER}/repos?per_page=100&sort=pushed`);
+  const top = (list as any[]).slice(0, 25);
+  const out = await Promise.all(top.map(async (r) => {
+    const row: Record<string, unknown> = {
+      full_name: r.full_name, name: r.name, private: r.private, url: r.html_url, homepage: r.homepage,
+      pushed_at: r.pushed_at, default_branch: r.default_branch, open_issues: r.open_issues_count, has_pages: r.has_pages,
+    };
+    try {
+      const c = await gh(`/repos/${r.full_name}/commits?per_page=1`);
+      if (c[0]) row.last_commit = { msg: String(c[0].commit.message).split("\n")[0].slice(0, 140), at: c[0].commit.author?.date, sha: c[0].sha.slice(0, 7), url: c[0].html_url };
+    } catch { /* empty repo */ }
+    if (r.has_pages) {
+      try { const b = await gh(`/repos/${r.full_name}/pages/builds/latest`); row.pages = { status: b.status, at: b.updated_at }; } catch { /* needs token */ }
+    }
+    return row;
+  }));
+  const fetched_at = new Date().toISOString();
+  await admin.from("dw_repo_cache").upsert({ id: 1, data: out, fetched_at });
+  return { repos: out, fetched_at, cached: false, authed: token };
+}
+
+// ------------------------------------------------------------------- Gmail
+const gmailReady = () => !!(Deno.env.get("GMAIL_CLIENT_ID") && Deno.env.get("GMAIL_CLIENT_SECRET") && Deno.env.get("GMAIL_REFRESH_TOKEN"));
+
+async function gmailToken() {
+  const r = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: Deno.env.get("GMAIL_CLIENT_ID")!, client_secret: Deno.env.get("GMAIL_CLIENT_SECRET")!,
+      refresh_token: Deno.env.get("GMAIL_REFRESH_TOKEN")!, grant_type: "refresh_token",
+    }),
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error("Gmail sign-in failed: " + (j.error_description || j.error || r.status));
+  return j.access_token as string;
+}
+
+async function mailSync() {
+  if (!gmailReady()) return { connected: false, added: 0 };
+  const tok = await gmailToken();
+  const g = async (p: string) => {
+    const r = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/" + p, { headers: { Authorization: `Bearer ${tok}` } });
+    if (!r.ok) throw new Error(`Gmail ${r.status}`);
+    return r.json();
+  };
+  const list = await g("messages?maxResults=60&q=" + encodeURIComponent("in:inbox newer_than:30d -category:promotions -category:social"));
+  const ids: string[] = (list.messages ?? []).map((m: any) => m.id);
+  if (!ids.length) return { connected: true, added: 0 };
+  const { data: have } = await admin.from("dw_inbox").select("id").in("id", ids);
+  const known = new Set((have ?? []).map((h: any) => h.id));
+  const fresh = ids.filter((i) => !known.has(i));
+
+  // project matching: exact contact email, then business domain
+  const [{ data: projects }, { data: contacts }] = await Promise.all([
+    admin.from("dw_projects").select("id,name,contact_email,website,live_url"),
+    admin.from("dw_contacts").select("project_id,email"),
+  ]);
+  const byEmail = new Map<string, string>(), byDomain = new Map<string, string>();
+  (projects ?? []).forEach((p: any) => {
+    if (p.contact_email) byEmail.set(p.contact_email.toLowerCase(), p.id);
+    [p.contact_email, p.website, p.live_url].forEach((v) => { const d = domainOf(v); if (d && !FREEMAIL.has(d)) byDomain.set(d, p.id); });
+  });
+  (contacts ?? []).forEach((c: any) => { if (c.email) byEmail.set(c.email.toLowerCase(), c.project_id); });
+  let added = 0;
+  for (const id of fresh) {
+    const m = await g(`messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`);
+    const h = (n: string) => (m.payload?.headers ?? []).find((x: any) => x.name.toLowerCase() === n.toLowerCase())?.value ?? "";
+    const from = h("From");
+    const email = (from.match(/<([^>]+)>/)?.[1] ?? from).trim().toLowerCase();
+    const name = from.replace(/<[^>]+>/, "").replace(/"/g, "").trim() || email;
+    const project_id = byEmail.get(email) ?? byDomain.get(domainOf(email)) ?? null;
+    const row = {
+      id, thread_id: m.threadId, from_email: email, from_name: name, subject: h("Subject") || "(no subject)",
+      snippet: String(m.snippet ?? "").slice(0, 300), received_at: new Date(Number(m.internalDate)).toISOString(),
+      project_id, is_read: !(m.labelIds ?? []).includes("UNREAD"),
+    };
+    await admin.from("dw_inbox").upsert(row);
+    if (project_id) await admin.from("dw_activity").insert({ actor: email, project_id, kind: "email", ref_id: id, summary: `email from ${name}: ${row.subject}`.slice(0, 200) });
+    added++;
+  }
+  return { connected: true, added };
+}
+
+// --------------------------------------------------------------------- AI
+async function claude(system: string, user: string, maxTokens = 2500) {
+  const key = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!key) throw new Error("ANTHROPIC_API_KEY is not set in Supabase (Edge Functions > Secrets)");
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: "user", content: user }] }),
+  });
+  if (!r.ok) throw new Error(`Anthropic ${r.status}: ${(await r.text()).slice(0, 300)}`);
+  const d = await r.json();
+  return (d.content ?? []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("");
+}
+
+const SAFE_COLS = "id,slug,name,sector,blurb,status,stage,hq_group,is_live,live_url,website,go_live_on,contact_name,contact_email,contact_phone,last_contact_on,next_action,next_action_on,outreach_notes,deal_value";
+
+async function context(projectId: string | null) {
+  if (projectId) {
+    const [{ data: p }, { data: t }, { data: d }, { data: c }, { data: m }] = await Promise.all([
+      admin.from("dw_projects").select(SAFE_COLS).eq("id", projectId).maybeSingle(),
+      admin.from("dw_project_tasks").select("title,details,owner,phase,due_on,done,hq_state").eq("project_id", projectId).order("sort_order"),
+      admin.from("dw_docs").select("title,body").eq("project_id", projectId),
+      admin.from("dw_contacts").select("name,role,email,phone,notes").eq("project_id", projectId),
+      admin.from("dw_inbox").select("from_name,subject,snippet,received_at").eq("project_id", projectId).order("received_at", { ascending: false }).limit(10),
+    ]);
+    return `PROJECT\n${JSON.stringify(p)}\n\nJOBS\n${JSON.stringify(t)}\n\nDOCS\n${(d ?? []).map((x: any) => `# ${x.title}\n${x.body}`).join("\n\n").slice(0, 20000)}\n\nCONTACTS\n${JSON.stringify(c)}\n\nRECENT EMAIL\n${JSON.stringify(m)}`;
+  }
+  const [{ data: ps }, { data: t }, { data: d }] = await Promise.all([
+    admin.from("dw_projects").select("id,name,status,stage,hq_group,go_live_on,next_action,next_action_on").neq("hq_group", "prospect"),
+    admin.from("dw_project_tasks").select("project_id,title,owner,due_on,done,hq_state").eq("done", false),
+    admin.from("dw_docs").select("title,body").is("project_id", null),
+  ]);
+  const name = new Map((ps ?? []).map((p: any) => [p.id, p.name]));
+  const open = (t ?? []).filter((x: any) => name.has(x.project_id)).map((x: any) => ({ ...x, project: name.get(x.project_id), project_id: undefined }));
+  return `PROJECTS (own products and clients)\n${JSON.stringify(ps)}\n\nOPEN JOBS\n${JSON.stringify(open).slice(0, 30000)}\n\nGENERAL DOCS\n${(d ?? []).map((x: any) => `# ${x.title}\n${x.body}`).join("\n\n")}`;
+}
+
+const SYSTEM = `You are the assistant inside the Dunnworks console. Dunnworks is Tony Dunn's one-person web design business in Bordon, Hampshire: hand-coded sites for small businesses, no monthly licence, the client owns the files. He also runs his own products (woolmer.info, Honest Handicap, Awayday, Funworks, Trip Log).
+House style: UK English spelling. Bullet points never end with a full stop. Professional, plain and direct. Never invent facts, prices, dates or promises that are not in the context; say what is missing instead. Emails are written in first person singular, signed Tony.`;
+
+async function ai(b: Record<string, any>) {
+  const mode = String(b.mode ?? "ask");
+  const ctx = await context(b.project_id ? String(b.project_id) : null);
+  const ask = String(b.prompt ?? "").slice(0, 4000);
+  const brief: Record<string, string> = {
+    ask: "Answer the question using the context.",
+    draft: "Draft the email or message described. Give a subject line first as 'Subject: ...', then the body. Keep it short.",
+    summary: "Summarise where this stands in under 150 words: what's done, what's next, what's blocking, and anything overdue.",
+    tasks: "Break the request into concrete jobs. Return ONLY JSON: {\"tasks\":[{\"title\":string,\"details\":string|null,\"owner\":\"me\"|\"client\",\"due_on\":\"YYYY-MM-DD\"|null}]}. Max 12, no duplicates of existing jobs.",
+  };
+  const today = new Date().toISOString().slice(0, 10);
+  const text = await claude(SYSTEM + `\nToday is ${today}.\n` + (brief[mode] ?? brief.ask), `CONTEXT\n${ctx}\n\nREQUEST\n${ask || "(none)"}`);
+  if (mode === "tasks") {
+    const a = text.indexOf("{"), z = text.lastIndexOf("}");
+    try { return { tasks: JSON.parse(text.slice(a, z + 1)).tasks ?? [] }; } catch { return { text }; }
+  }
+  return { text };
+}
+
+// ------------------------------------------------------------------ invite
+async function invite(b: Record<string, any>) {
+  const email = String(b.email ?? "").trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error("That email address doesn't look right");
+  if (email === OWNER) throw new Error("That's you");
+  const row = {
+    email, name: String(b.name ?? email), role: b.role === "client" ? "client" : "collaborator",
+    task_owner: b.task_owner ? String(b.task_owner).toLowerCase() : null,
+    project_ids: Array.isArray(b.project_ids) ? b.project_ids : [], active: b.active !== false, invited_at: new Date().toISOString(),
+  };
+  const { error } = await admin.from("dw_members").upsert(row);
+  if (error) throw error;
+  let sent = false, note = "";
+  if (b.send !== false && row.active) {
+    const { error: e } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: "https://dunnworks.io/console/#/hq" });
+    if (e) note = /already/i.test(e.message) ? "Already has a login: they can use Email me a link on the console sign-in." : e.message;
+    else sent = true;
+  }
+  return { ok: true, sent, note };
+}
+
+// ------------------------------------------------------------------- serve
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method !== "POST") return json({ error: "POST only" }, 405);
+  const sb = createClient(URL_, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } });
+  const { data: u } = await sb.auth.getUser();
+  const email = (u?.user?.email ?? "").toLowerCase();
+  if (!email) return json({ error: "Sign in first" }, 401);
+  const isOwner = email === OWNER;
+  let b: Record<string, any> = {};
+  try { b = await req.json(); } catch { /* empty */ }
+
+  try {
+    if (b.action === "me") {
+      if (isOwner) return json({ email, owner: true });
+      const { data: m } = await admin.from("dw_members").select("name,role,task_owner,project_ids,active").eq("email", email).maybeSingle();
+      return json({ email, owner: false, member: m && m.active ? m : null });
+    }
+    if (!isOwner) return json({ error: "Only Tony can do that" }, 403);
+    switch (b.action) {
+      case "repos": return json(await repos(!!b.force));
+      case "mail_status": {
+        const { data: last } = await admin.from("dw_inbox").select("created_at").order("created_at", { ascending: false }).limit(1);
+        return json({ connected: gmailReady(), last: last?.[0]?.created_at ?? null });
+      }
+      case "mail_sync": return json(await mailSync());
+      case "ai": return json(await ai(b));
+      case "invite": return json(await invite(b));
+      default: return json({ error: "Unknown action" }, 400);
+    }
+  } catch (e) {
+    return json({ error: String((e as Error).message ?? e).slice(0, 500) }, 500);
+  }
+});

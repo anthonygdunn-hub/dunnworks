@@ -255,6 +255,7 @@
 <script src="../assets/js/dw-traffic.js"></script>
 <script src="../assets/js/dw-seo.js"></script>
 <script src="../assets/js/dw-hh.js"></script>
+<script src="../assets/js/dw-hq.js"></script>
 <script>
 (function () {
   'use strict';
@@ -379,6 +380,7 @@
 
   /* ---- router ---- */
   var AREAS = [
+    { id:'hq',        name:'Workspace',        blurb:'Home feed, board, projects, pipeline, docs, calendar, inbox, repos and the assistant in one place' },
     { id:'wip',       name:'Work in progress', blurb:'Live jobs and anyone who has come back to you' },
     { id:'previews',  name:'Previews',         blurb:'Every concept site and report, with its passphrase' },
     { id:'targets',   name:'People to target', blurb:'The prospect list, who to chase and when' },
@@ -390,7 +392,8 @@
     { id:'cgc',       name:'Coastal Golf Co stats', blurb:'Visitors, bookings, Google search and site health for coastalgolfco.co.uk' },
     { id:'hh',        name:'Honest Handicap',  blurb:'Tester applications, review cards to check, and live reviews on honesthandicap.golf' }
   ];
-  var VIEWS = { wip:viewWip, previews:viewPreviews, targets:viewTargets, jobs:viewJobs, enquiries:viewEnquiries,
+  var VIEWS = { hq:function () { DWHq.view(viewEl, function (t, cls) { say(appMsg, t, cls); }, ME); },
+                wip:viewWip, previews:viewPreviews, targets:viewTargets, jobs:viewJobs, enquiries:viewEnquiries,
                 traffic:function () { DWTraffic.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); },
                 seo:function () { DWSEO.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); },
                 woolmer:function () { DWWoolmer.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); },
@@ -410,13 +413,15 @@
       cgc: D.cgc ? D.cgc.cur.visits : '–',
       woolmer: D.woolmer ? (D.woolmer.totals || {}).view || 0 : '–',
       hh: D.hh ? D.hh.live : '–',
+      hq: Object.keys(D.tasks).reduce(function (n, k) { return n + D.tasks[k].filter(function (t) { return !t.done; }).length; }, 0),
       due: due,
       todo: Object.keys(D.tasks).reduce(function (n, k) { return n + D.tasks[k].filter(function (t) { return !t.done; }).length; }, 0)
     };
   }
 
   function route() {
-    var id = (location.hash || '').replace(/^#\/?/, '');
+    var id = (location.hash || '').replace(/^#\/?/, '').split('/')[0];
+    if (!ME.owner) id = 'hq';
     if (!VIEWS[id]) {
       crumbEl.innerHTML = 'Dunnworks admin';
       titleEl.textContent = 'Admin';
@@ -426,7 +431,7 @@
       return;
     }
     var a = AREAS.filter(function (x) { return x.id === id; })[0];
-    crumbEl.innerHTML = '<a href="#/">Dunnworks admin</a> / ' + esc(a.name);
+    crumbEl.innerHTML = ME.owner ? '<a href="#/">Dunnworks admin</a> / ' + esc(a.name) : 'Dunnworks';
     titleEl.textContent = a.name;
     subEl.textContent = a.blurb;
     ui.q = '';
@@ -441,6 +446,7 @@
     viewEl.innerHTML = '<div class="menu">' + AREAS.map(function (a) {
       var extra = a.id === 'targets' && c.due
         ? '<span class="flag warn">' + c.due + ' to chase</span>' : '';
+      if (a.id === 'hq') extra = '<span class="flag live">New · Ctrl/⌘ K to search</span>';
       if (a.id === 'wip' && c.todo) extra = '<span class="flag warn">' + c.todo + ' jobs to do</span>';
       if (a.id === 'cgc' && D.cgc) {
         var up = (D.cgc.uptime || {}).last;
@@ -1298,7 +1304,20 @@
   });
 
   /* ---- boot ---- */
-  function start() { gateAuth.hidden = true; app.hidden = false; load(); }
+  /* Collaborators (dw_members) sign in here too, and only ever get the Workspace. */
+  var ME = { owner: true, email: '', member: null };
+  function start() {
+    gateAuth.hidden = true; app.hidden = false;
+    DWData.fn('dw-hq', { action: 'me' }).catch(function () { return { owner: true }; }).then(function (me) {
+      ME = { owner: me.owner !== false, email: me.email || '', member: me.member || null };
+      if (ME.owner) return load();
+      document.getElementById('addproj').hidden = true;
+      document.querySelector('.hd a[href="#/"]').hidden = true;
+      if (!ME.member) { titleEl.textContent = 'No access yet'; subEl.textContent = 'This login is not linked to any Dunnworks projects. Ask Tony to add you.'; return; }
+      if (!/^#\/hq/.test(location.hash)) history.replaceState(null, '', '#/hq');
+      route();
+    });
+  }
 
   DWData.whoami().then(function (user) {
     if (user && user.email) start(); else gateAuth.hidden = false;
