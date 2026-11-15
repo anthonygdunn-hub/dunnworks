@@ -621,9 +621,11 @@
       var st = el.querySelector('#hq-mailstat');
       if (!st) return;
       if (!s.connected) {
-        st.innerHTML = '<div class="hq-panel"><h4>Gmail is not connected yet</h4><p class="note">The inbox needs three secrets in Supabase (GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN), made from a Google Cloud OAuth client with read-only Gmail access for info@dunnworks.io. Ask Claude to set it up: it needs you only to sign in to Google and approve access.</p></div>';
+        st.innerHTML = '<div class="hq-panel"><h4>Gmail is not connected yet</h4>' + (s.client
+          ? '<p class="note" style="margin-bottom:10px">Sign in as info@dunnworks.io and allow read-only access. Google will warn the app is unverified: it\'s your own, so carry on.</p><button class="mini go" type="button" data-hq="gconnect">Connect Gmail</button>'
+          : '<p class="note">The Google OAuth client (GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET) isn\'t set in Supabase yet.</p>') + '</div>';
       } else {
-        st.innerHTML = '<div class="bar"><button class="mini go" type="button" data-hq="sync">Sync now</button><span class="note">' + (s.last ? 'Last new email pulled ' + esc(ago(s.last)) : 'Not synced yet') + '</span></div>';
+        st.innerHTML = '<div class="bar"><button class="mini go" type="button" data-hq="sync">Sync now</button><span class="note">' + esc(s.address || 'Gmail') + ' connected. ' + (s.last ? 'Last new email pulled ' + esc(ago(s.last)) : 'Not synced yet') + '</span><button class="mini" type="button" data-hq="gconnect">Reconnect</button></div>';
       }
       mailList(el.querySelector('#hq-mail'));
     }).catch(function (e) { el.querySelector('#hq-mailstat').textContent = e.message; mailList(el.querySelector('#hq-mail')); });
@@ -773,6 +775,7 @@
       }
       if (a === 'delevent') { del('dw_events', id).then(function () { D.events = D.events.filter(function (x) { return x.id !== id; }); render(); }).catch(err); return; }
       if (a === 'delcontact') { if (!confirmish(b)) return; del('dw_contacts', id).then(function () { D.contacts = D.contacts.filter(function (x) { return x.id !== id; }); render(); }).catch(err); return; }
+      if (a === 'gconnect') { fn({ action:'gmail_auth_url' }).then(function (r) { location.href = r.url; }).catch(err); return; }
       if (a === 'reporef') return repos(root.querySelector('#hq-main'), true);
       if (a === 'sync') {
         b.disabled = true; b.textContent = 'Syncing…';

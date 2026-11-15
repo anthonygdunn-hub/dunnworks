@@ -10,7 +10,7 @@
 //
 // Secrets: ANTHROPIC_API_KEY (already set for cv-ai), HQ_AI_MODEL (optional),
 //          GITHUB_TOKEN (optional, read-only fine-grained token; without it public repos only, 60 calls an hour),
-//          GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN (for the inbox)
+//          GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET (for the inbox; the refresh token comes from Connect Gmail in the Inbox)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -76,7 +76,39 @@ async function repos(force: boolean) {
 }
 
 // ------------------------------------------------------------------- Gmail
-const gmailReady = () => !!(Deno.env.get("GMAIL_CLIENT_ID") && Deno.env.get("GMAIL_CLIENT_SECRET") && Deno.env.get("GMAIL_REFRESH_TOKEN"));
+// The refresh token comes from the one-click Connect Gmail flow (stored in dw_hq_private, service role only)
+// or, failing that, a GMAIL_REFRESH_TOKEN secret.
+const REDIRECT = "https://dunnworks.io/console/";
+const gmailClient = () => !!(Deno.env.get("GMAIL_CLIENT_ID") && Deno.env.get("GMAIL_CLIENT_SECRET"));
+async function refreshToken() {
+  const env = Deno.env.get("GMAIL_REFRESH_TOKEN");
+  if (env) return env;
+  const { data } = await admin.from("dw_hq_private").select("value").eq("key", "gmail_refresh").maybeSingle();
+  return data?.value ?? "";
+}
+async function gmailReadyAsync() { return gmailClient() && !!(await refreshToken()); }
+function gmailAuthUrl() {
+  if (!gmailClient()) throw new Error("GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET are not set in Supabase yet");
+  return "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
+    client_id: Deno.env.get("GMAIL_CLIENT_ID")!, redirect_uri: REDIRECT, response_type: "code",
+    scope: "https://www.googleapis.com/auth/gmail.readonly", access_type: "offline", prompt: "consent",
+    state: "gmail", login_hint: OWNER, include_granted_scopes: "true",
+  });
+}
+async function gmailExchange(code: string) {
+  const r = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ code, client_id: Deno.env.get("GMAIL_CLIENT_ID")!, client_secret: Deno.env.get("GMAIL_CLIENT_SECRET")!,
+      redirect_uri: REDIRECT, grant_type: "authorization_code" }),
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error("Google said: " + (j.error_description || j.error || r.status));
+  if (!j.refresh_token) throw new Error("Google didn't return a refresh token. Remove the app's access at myaccount.google.com/permissions and connect again");
+  const p = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/profile", { headers: { Authorization: `Bearer ${j.access_token}` } }).then((x) => x.json());
+  await admin.from("dw_hq_private").upsert({ key: "gmail_refresh", value: j.refresh_token, updated_at: new Date().toISOString() });
+  await admin.from("dw_hq_private").upsert({ key: "gmail_address", value: p.emailAddress ?? "", updated_at: new Date().toISOString() });
+  return { ok: true, address: p.emailAddress };
+}
 
 async function gmailToken() {
   const r = await fetch("https://oauth2.googleapis.com/token", {
@@ -84,7 +116,7 @@ async function gmailToken() {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       client_id: Deno.env.get("GMAIL_CLIENT_ID")!, client_secret: Deno.env.get("GMAIL_CLIENT_SECRET")!,
-      refresh_token: Deno.env.get("GMAIL_REFRESH_TOKEN")!, grant_type: "refresh_token",
+      refresh_token: await refreshToken(), grant_type: "refresh_token",
     }),
   });
   const j = await r.json();
@@ -93,7 +125,7 @@ async function gmailToken() {
 }
 
 async function mailSync() {
-  if (!gmailReady()) return { connected: false, added: 0 };
+  if (!(await gmailReadyAsync())) return { connected: false, added: 0 };
   const tok = await gmailToken();
   const g = async (p: string) => {
     const r = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/" + p, { headers: { Authorization: `Bearer ${tok}` } });
@@ -241,9 +273,12 @@ Deno.serve(async (req) => {
       case "repos": return json(await repos(!!b.force));
       case "mail_status": {
         const { data: last } = await admin.from("dw_inbox").select("created_at").order("created_at", { ascending: false }).limit(1);
-        return json({ connected: gmailReady(), last: last?.[0]?.created_at ?? null });
+        const { data: addr } = await admin.from("dw_hq_private").select("value").eq("key", "gmail_address").maybeSingle();
+        return json({ connected: await gmailReadyAsync(), client: gmailClient(), address: addr?.value ?? null, last: last?.[0]?.created_at ?? null });
       }
       case "mail_sync": return json(await mailSync());
+      case "gmail_auth_url": return json({ url: gmailAuthUrl() });
+      case "gmail_exchange": return json(await gmailExchange(String(b.code ?? "")));
       case "ai": return json(await ai(b));
       case "invite": return json(await invite(b));
       default: return json({ error: "Unknown action" }, 400);

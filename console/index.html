@@ -1310,7 +1310,18 @@
     gateAuth.hidden = true; app.hidden = false;
     DWData.fn('dw-hq', { action: 'me' }).catch(function () { return { owner: true }; }).then(function (me) {
       ME = { owner: me.owner !== false, email: me.email || '', member: me.member || null };
-      if (ME.owner) return load();
+      if (ME.owner) {
+        /* back from Google's Connect Gmail screen: swap the code for a refresh token, then open the inbox */
+        var q = new URLSearchParams(location.search);
+        if (q.get('state') === 'gmail' && (q.get('code') || q.get('error'))) {
+          history.replaceState(null, '', location.pathname + '#/hq/inbox');
+          if (q.get('error')) say(appMsg, 'Gmail not connected: ' + q.get('error'), 'bad');
+          else return DWData.fn('dw-hq', { action: 'gmail_exchange', code: q.get('code') })
+            .then(function (r) { say(appMsg, 'Gmail connected (' + (r.address || 'ok') + '). Hit Sync now.', 'ok'); })
+            .catch(function (e) { say(appMsg, e.message, 'bad'); }).then(load);
+        }
+        return load();
+      }
       document.getElementById('addproj').hidden = true;
       document.querySelector('.hd a[href="#/"]').hidden = true;
       if (!ME.member) { titleEl.textContent = 'No access yet'; subEl.textContent = 'This login is not linked to any Dunnworks projects. Ask Tony to add you.'; return; }
