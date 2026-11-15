@@ -172,7 +172,7 @@
         tile('Clicks', num(c.clicks), delta(c.clicks, p.clicks), 'People who clicked through to woolmer from Google') +
         tile('Impressions', num(c.impressions), delta(c.impressions, p.impressions), 'Times woolmer appeared in Google results') +
         tile('Click rate', (c.ctr || 0) + '%', '', 'Clicks divided by impressions') +
-        tile('Average position', c.position == null ? '–' : c.position, p.position ? '<span class="cg-d">' + p.position + ' the period before</span>' : '', 'Lower is better; 1 to 10 is page 1') +
+        tile('Average position', (c.position == null || !c.impressions) ? '–' : c.position, p.position ? '<span class="cg-d">' + p.position + ' the period before</span>' : '', 'Lower is better; 1 to 10 is page 1') +
         tile('Non-brand clicks', num(s.nonbrand_clicks), '', 'Clicks from searches that don\'t include "woolmer"') +
       '</div>' +
       card('Impressions', 'Times woolmer appeared in Google per day', stacked(days.map(function (r) { return { label: dshort(r.d), tip: dlong(r.d), v: { Impressions: r.impressions } }; }), [['Impressions', '#B05785']], 'Impressions per day')) +
