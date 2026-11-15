@@ -116,11 +116,11 @@
     root.querySelector('[data-wbx]').innerHTML =
       '<section class="cg-sec"><h2>Visitors <small>last ' + S.days + ' days</small>' + (d.live ? ' <span class="wbx-live">' + d.live + ' page view' + (d.live === 1 ? '' : 's') + ' in the last 5 min</span>' : '') + '</h2>' +
       '<div class="cg-tiles">' +
-        tile('Page views', num(t.view), delta(t.view, p.view)) +
+        tile('Page views', num(t.view || 0), delta(t.view, p.view)) +
         tile('Today', num(d.today)) +
         tile('Calls, websites, directions', num(clicks), delta(clicks, pclicks), 'Clicks to phone, website, directions or menu from listings') +
         tile('Mock-up views', num((d.mockups || []).reduce(function (a, r) { return a + (r.views || 0); }, 0))) +
-        tile('Dunnworks clicks', num(t.dunnworks), delta(t.dunnworks, p.dunnworks)) +
+        tile('Dunnworks clicks', num(t.dunnworks || 0), delta(t.dunnworks, p.dunnworks)) +
         tile('On phones', d.mobile == null ? '–' : d.mobile + '%') +
       '</div>' + columns(d.days || []) + '</section>' +
       '<section class="cg-sec"><h2>What people read</h2><div class="cg-grid">' +
