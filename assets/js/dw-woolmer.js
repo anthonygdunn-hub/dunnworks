@@ -121,7 +121,7 @@
         tile('Calls, websites, directions', num(clicks), delta(clicks, pclicks), 'Clicks to phone, website, directions or menu from listings') +
         tile('Mock-up views', num((d.mockups || []).reduce(function (a, r) { return a + (r.views || 0); }, 0))) +
         tile('Dunnworks clicks', num(t.dunnworks || 0), delta(t.dunnworks, p.dunnworks)) +
-        tile('On phones', d.mobile == null ? '–' : d.mobile + '%') +
+        tile('Yesterday', num(d.yesterday)) +
       '</div>' + columns(d.days || []) + '</section>' +
       '<section class="cg-sec"><h2>What people read</h2><div class="cg-grid">' +
         '<div><p class="cg-h">Top pages</p>' + bars((d.pages || []).map(function (r) { return { k: nicePath(r.path), n: r.n, href: SITE + r.path }; })) + '</div>' +
@@ -144,7 +144,7 @@
     el.innerHTML = '<div class="cg-bar">' +
       [7, 30, 90].map(function (n) { return '<button type="button" class="chip' + (n === S.days ? ' is-on' : '') + '" data-wbx-days="' + n + '">' + n + ' days</button>'; }).join('') +
       '<span class="sp"></span><a class="mini" href="' + SITE + '/" target="_blank" rel="noopener">Open the site</a><button type="button" class="mini" data-wbx-refresh>Refresh</button></div>' +
-      '<p class="cg-note"><b>Cookie-free counter.</b> woolmer counts page views and clicks without cookies or personal data, so there\'s no consent banner. It shows views, not unique people. Counting started on 15 Nov 2026.</p>' +
+      '<p class="cg-note"><b>Cookie-free counter.</b> woolmer counts page views and clicks without cookies or personal data, so there\'s no consent banner. It shows views, not unique people. Page views since 13 Nov 2026, clicks and mock-up views since 15 Nov. A summary is emailed to hello@woolmer.info every day at 7pm.</p>' +
       '<div data-wbx><p class="cg-empty">Loading…</p></div>';
     load();
   }
