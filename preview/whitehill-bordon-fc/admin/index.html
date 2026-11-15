@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#121110">
+<title>Whitehill & Bordon FC — website admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--k:#121110;--k2:#1d1a16;--g:#bc9c6c;--g2:#d2b685;--gd:#7a6342;--p:#f5f2ec;--i:#15130f;--m:#6b645a;--l:#e6e0d6;--ok:#16a34a;--bad:#dc2626;
+ --h:'Barlow Condensed',Impact,sans-serif;--f:'Inter',-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+*{box-sizing:border-box}body{margin:0;font-family:var(--f);background:var(--p);color:var(--i);line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--h);text-transform:uppercase;margin:0;line-height:1}
+.top{background:var(--k);color:#fff;border-bottom:3px solid var(--g);position:sticky;top:0;z-index:20}
+.top .w{display:flex;align-items:center;gap:12px;padding:12px 16px;max-width:1100px;margin:0 auto}
+.top b{font-family:var(--h);font-size:1.2rem;text-transform:uppercase}.top small{display:block;color:var(--g);font-size:.7rem;font-weight:700;letter-spacing:.1em}
+.top .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
+.crest{width:40px;height:40px;border-radius:50%;background:var(--g);display:grid;place-items:center;font-family:var(--h);color:var(--k);font-weight:800}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tabs button{border:1px solid var(--l);background:#fff;color:var(--i);padding:9px 14px;border-radius:999px;font:inherit;font-weight:600;font-size:.86rem;cursor:pointer;min-height:40px}
+.tabs button.on{background:var(--k);color:#fff;border-color:var(--k)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:999px;padding:10px 16px;font:inherit;font-weight:700;font-size:.88rem;cursor:pointer;min-height:42px;text-decoration:none}
+.btn.g{background:var(--g);color:var(--k)}.btn.k{background:var(--k);color:#fff}.btn.o{background:#fff;color:var(--i);border:1px solid var(--l)}.btn.r{background:#fff;color:var(--bad);border:1px solid #f3c4c4}
+.btn.s{padding:6px 12px;min-height:34px;font-size:.8rem}.btn:disabled{opacity:.5}
+.card{background:#fff;border:1px solid var(--l);border-radius:14px;padding:16px;margin-bottom:12px}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.item{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--l);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.item img,.item .ph{width:54px;height:54px;border-radius:8px;object-fit:cover;flex:none;background:var(--l)}
+.item .t{flex:1;min-width:0}.item .t b{display:block;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item .t span{font-size:.76rem;color:var(--m)}
+.item .a{display:flex;gap:6px;flex:none}
+.ib{width:36px;height:36px;border-radius:50%;border:1px solid var(--l);background:#fff;cursor:pointer;font-size:.9rem}
+label.f{display:block;font-size:.8rem;font-weight:700;margin:10px 0 4px}
+input.f,select.f,textarea.f{width:100%;padding:11px 12px;border:1px solid var(--l);border-radius:10px;font:inherit;font-size:16px;background:#fff;color:var(--i)}
+textarea.f{min-height:90px}textarea.f.big{min-height:220px}
+.hint{font-size:.76rem;color:var(--m);margin-top:4px}
+.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px;margin-top:6px}
+.imgs div{position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:var(--l)}
+.imgs img{width:100%;height:100%;object-fit:cover}
+.imgs button{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer}
+.save{position:sticky;bottom:0;background:linear-gradient(transparent,var(--p) 30%);padding:18px 0 calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.msg{font-size:.86rem;font-weight:600}.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.login{max-width:420px;margin:8vh auto;padding:0 16px}
+.stat{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+@media(min-width:700px){.stat{grid-template-columns:repeat(4,1fr)}}
+.stat div{background:var(--k);color:#fff;border-radius:12px;padding:14px}.stat b{font-family:var(--h);font-size:2rem;display:block;color:var(--g)}.stat span{font-size:.78rem}
+table.g{width:100%;border-collapse:collapse;font-size:.85rem}table.g th,table.g td{padding:4px;border-bottom:1px solid var(--l)}table.g input{width:100%;padding:7px;border:1px solid var(--l);border-radius:6px;font:inherit;font-size:16px;text-align:center}table.g td:nth-child(2) input{text-align:left;min-width:150px}
+.pill{display:inline-block;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--p);border:1px solid var(--l)}
+.chk{display:flex;gap:8px;align-items:center;margin-top:10px;font-weight:600;font-size:.88rem}
+.chk input{width:20px;height:20px}
+dialog{border:0;border-radius:16px;padding:0;width:min(640px,94vw);max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog .hd{background:var(--k);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1}
+dialog .bd{padding:4px 16px 16px}
+dialog .ft{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--l);position:sticky;bottom:0;background:#fff}
+.log{font-size:.82rem}.log div{padding:8px 0;border-bottom:1px solid var(--l)}.log span{color:var(--m)}
+</style>
+</head>
+<body>
+<header class="top"><div class="w"><div class="crest">W&amp;B</div><div><b>Website admin</b><small>Whitehill &amp; Bordon FC</small></div>
+  <div class="sp" id="who"></div></div></header>
+
+<div class="login" id="login" hidden>
+  <div class="card">
+    <h2 style="font-size:1.8rem;margin-bottom:6px">Sign in</h2>
+    <p style="color:var(--m);margin:0 0 6px;font-size:.9rem">For club committee, managers and coaches. Ask the club admin for a login.</p>
+    <form id="lf"><label class="f">Email</label><input class="f" type="email" id="le" autocomplete="username" required>
+    <label class="f">Password</label><input class="f" type="password" id="lp" autocomplete="current-password" required>
+    <p style="margin:14px 0 0"><button class="btn k" style="width:100%">Sign in</button></p><p class="msg" id="lm"></p></form>
+  </div>
+</div>
+
+<main class="wrap" id="app" hidden>
+  <div class="tabs" id="tabs"></div>
+  <div id="view"></div>
+</main>
+
+<dialog id="dlg"><div class="hd"><b id="dt"></b><button class="ib" style="background:transparent;color:#fff;border-color:#555" onclick="dlg.close()">×</button></div><div class="bd" id="db"></div><div class="ft"><button class="btn o" onclick="dlg.close()">Cancel</button><button class="btn k" id="dok">Done</button></div></dialog>
+
+<script src="/triplog/vendor/supabase.js"></script>
+<script src="/assets/js/dw-config.js"></script>
+<script>
+const sb=supabase.createClient(DW.url,DW.anonKey,{auth:{storageKey:'wbfc-admin'}});
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const SITE='/preview/whitehill-bordon-fc/';
+let ROLE=null,ME=null,D=null,cur='home',draft=null,dirty=false;
+
+/* ---------- what each section looks like ---------- */
+const T={tag:['Match report','Club news','Youth','Players','Photos','Matchday'],ha:['H','A','N'],r:['','W','D','L'],grp:['GK','DEF','MID','FWD'],season:['2026/27','2025/26','2024/25']};
+const S={
+ news:{label:'News',fields:[['t','Headline'],['d','Date','date'],['tag','Category','sel',T.tag],['img','Main photo','img'],['x','Summary (one or two sentences)','area'],['body','Full story','big']],
+   title:n=>n.t,sub:n=>n.d+' · '+n.tag,thumb:n=>n.img,blank:()=>({id:'n'+Date.now(),d:today(),t:'',x:'',img:'',tag:'Match report',url:'',src:'own',body:''}),top:true},
+ fixtures:{label:'Fixtures',fields:[['opp','Opponent'],['ha','Home or away','sel',T.ha],['d','Date and kick-off','dt'],['comp','Competition'],['ko','Kick-off note (e.g. 3pm, KO TBC)']],
+   title:f=>(f.ha==='A'?'Away':'Home')+' v '+f.opp,sub:f=>(f.d||'Date TBC')+' · '+f.comp,blank:()=>({d:'',opp:'',ha:'H',comp:'Senior Division',ko:'3:00pm'})},
+ results:{label:'Results',fields:[['opp','Opponent'],['ha','Home or away','sel',T.ha],['dt','Date (e.g. Sat 21 Nov)'],['s','Score, Stags first (e.g. 2–1)'],['r','Result','sel',T.r],['comp','Competition'],['sc','Scorers or note']],
+   title:r=>(r.r||'–')+' '+r.s+' v '+r.opp,sub:r=>r.dt+' · '+r.comp,blank:()=>({dt:'',opp:'',ha:'H',s:'',r:'',comp:'Senior Division',sc:''}),top:true},
+ squad:{label:'Squad',arr:['grp','name','pos','sponsor','spot','photo'],fields:[['name','Name'],['grp','Group','sel',T.grp],['pos','Position'],['sponsor','Sponsored by (leave blank if available)'],['spot','Player Spotlight','bool'],['photo','Photo','img']],
+   title:p=>p.name,sub:p=>p.pos+(p.sponsor?' · '+p.sponsor:''),thumb:p=>p.photo,blank:()=>({grp:'MID',name:'',pos:'Midfield',sponsor:'',spot:0,photo:''})},
+ videos:{label:'Videos',fields:[['t','Title'],['d','Date','date'],['yt','YouTube link (paste it here)','yt'],['file','…or upload a video file (up to 50MB)','vid']],
+   title:v=>v.t,sub:v=>v.d+(v.yt?' · YouTube':v.file?' · uploaded':''),blank:()=>({t:'',d:today(),url:'',yt:'',file:''}),top:true},
+ albums:{label:'Photo galleries',fields:[['t','Album title'],['season','Season','sel',T.season],['cover','Cover photo','img'],['photos','Photos','imgs']],
+   title:a=>a.t,sub:a=>a.season+' · '+(a.photos||[]).length+' photos here'+(a.count?' (of '+a.count+')':''),thumb:a=>a.cover||(a.photos||[])[0],blank:()=>({season:'2026/27',t:'',url:'',cover:'',count:0,photos:[]}),top:true},
+ sponsors:{label:'Sponsors',fields:[['name','Business name'],['label','Sponsorship (e.g. Shirt sponsor)'],['logo','Logo','img'],['web','Website address'],['main','Headline sponsor','bool']],
+   title:s=>s.name,sub:s=>s.label,thumb:s=>s.logo,blank:()=>({name:'',label:'',logo:'',web:'',main:0})},
+ youth:{label:'Youth teams',fields:[['name','Team name'],['blurb','About the team','area'],['staffTxt','Coaches (one per line: Name – Role)','area'],['spons','Sponsors'],['photos','Team photos','imgs']],
+   title:t=>t.name,sub:t=>t.staff.length+' coaches · '+t.photos.length+' photos',thumb:t=>t.photos[0],blank:()=>({name:'',blurb:'',staff:[],spons:'',photos:[]})},
+ committee:{label:'Committee',arr:['name','role','email'],fields:[['name','Name'],['role','Role'],['email','Email']],title:c=>c.name,sub:c=>c.role,blank:()=>({name:'',role:'',email:''})},
+ history:{label:'Archive & honours',arr:['year','text'],fields:[['year','Season'],['text','What happened','area']],title:h=>h.year,sub:h=>h.text,blank:()=>({year:'',text:''}),top:true},
+ badges:{label:'Opponent badges',fields:[['team','Club name (as it appears in fixtures)'],['logo','Club badge','img']],title:b=>b.team,sub:()=>'',thumb:b=>b.logo,blank:()=>({team:'',logo:''})},
+ sponsorpacks:{key:'packs',label:'Sponsorship packages',arr:['name','text'],fields:[['name','Package'],['text','What’s included','area']],title:p=>p.name,sub:p=>p.text,blank:()=>({name:'',text:''})}
+};
+const COACH=['youth','albums'];
+const today=()=>new Date().toISOString().slice(0,10);
+const keyOf=k=>S[k]&&S[k].key||k;
+const toObj=(k,a)=>k==='badges'?Object.entries(a||{}).map(([team,logo])=>({team,logo})):S[k].arr?a.map(r=>Object.fromEntries(S[k].arr.map((f,i)=>[f,r[i]??'']))):a.map(x=>({...x}));
+const toRaw=(k,a)=>k==='badges'?Object.fromEntries(a.filter(b=>b.team).map(b=>[b.team,b.logo])):S[k].arr?a.map(o=>{const r=S[k].arr.map(f=>o[f]??'');if(k==='squad'){r[4]=o.spot?1:0;if(!o.photo)r.length=5}return r}):a;
+
+/* ---------- sign in ---------- */
+async function start(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){$('#login').hidden=false;$('#app').hidden=true;$('#who').innerHTML='';return}
+  ME=session.user;const {data:r}=await sb.rpc('wbfc_role');ROLE=r;
+  if(!ROLE){$('#login').hidden=false;$('#lm').className='msg bad';$('#lm').textContent='This login isn’t set up for the club website. Ask the club admin.';await sb.auth.signOut();return}
+  $('#login').hidden=true;$('#app').hidden=false;
+  $('#who').innerHTML=`<span class="pill" style="background:var(--g);border:0">${ROLE}</span><a class="btn o s" href="${SITE}" target="_blank">View site</a><button class="btn o s" id="so">Sign out</button>`;
+  $('#so').onclick=async()=>{await sb.auth.signOut();location.reload()};
+  await load();go('home');
+}
+$('#lf').onsubmit=async e=>{e.preventDefault();$('#lm').className='msg';$('#lm').textContent='Signing in…';
+  const {error}=await sb.auth.signInWithPassword({email:$('#le').value.trim(),password:$('#lp').value});
+  if(error){$('#lm').className='msg bad';$('#lm').textContent='That email and password don’t match.';return}start()};
+async function load(){const {data,error}=await sb.from('wbfc_content').select('data,updated_at,updated_by').eq('id','site').single();if(error)throw error;D=data.data;D._at=data.updated_at;D._by=data.updated_by}
+
+/* ---------- navigation ---------- */
+function allowed(k){return ROLE!=='coach'||COACH.includes(k)||k==='home'}
+function go(k){
+  if(dirty&&!confirm('You have unsaved changes. Leave without saving?'))return;dirty=false;cur=k;
+  const tabs=[['home','Home'],['news','News'],['fixtures','Fixtures'],['results','Results'],['table','League table'],['squad','Squad'],['videos','Videos'],['albums','Galleries'],['sponsors','Sponsors'],['badges','Opponent badges'],['look','Colours'],['youth','Youth'],['committee','Committee'],['history','Archive'],['sponsorpacks','Sponsorship'],['logins','Logins'],['import','Import'],['log','Edit history']]
+    .filter(([k])=>allowed(k)&&(!['logins','import'].includes(k)||ROLE==='admin'));
+  $('#tabs').innerHTML=tabs.map(([k2,l])=>`<button class="${k2===k?'on':''}" data-k="${k2}">${l}</button>`).join('');
+  $('#tabs').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.k)};
+  ({home,table:tableView,logins,log:logView,look:lookView,import:importView}[k]||listView)(k);window.scrollTo(0,0)
+}
+
+/* ---------- home ---------- */
+function home(){
+  const nm=(D.fixtures||[]).find(f=>f.d);
+  $('#view').innerHTML=`<div class="stat"><div><b>${D.news.length}</b><span>news stories</span></div><div><b>${D.results.filter(r=>r.r).length}</b><span>results this season</span></div><div><b>${D.videos.length}</b><span>videos</span></div><div><b>${D.albums.reduce((a,b)=>a+(b.photos||[]).length,0)}</b><span>photos</span></div></div>
+  <div class="card"><h3 style="font-size:1.4rem;margin-bottom:8px">Quick jobs</h3><div class="row" style="justify-content:flex-start">
+   ${allowed('results')?'<button class="btn g" data-q="results">+ Add a result</button><button class="btn o" data-q="news">+ Write news</button><button class="btn o" data-q="fixtures">+ Add a fixture</button>':''}
+   <button class="btn o" data-q="albums">+ New photo album</button>${allowed('videos')?'<button class="btn o" data-q="videos">+ Add a video</button>':''}</div></div>
+  <div class="card"><b>Next match on the website:</b> ${nm?esc((nm.ha==='A'?nm.opp+' v Stags':'Stags v '+nm.opp)+', '+new Date(nm.d).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'none set'}<br>
+   <span class="hint">Last change ${new Date(D._at).toLocaleString('en-GB')} by ${esc(D._by)}. Changes go live as soon as you press Save.</span></div>
+  <div class="card"><b>Good to know</b><ul style="margin:6px 0 0;padding-left:18px;font-size:.88rem;color:var(--m)"><li>Every change is live on the website straight away, on every phone.</li><li>Photos from your phone are shrunk automatically before upload.</li><li>League tables, results and new posts are also checked every morning automatically.</li>${ROLE==='coach'?'<li>As a coach you can edit youth teams and photo galleries.</li>':''}</ul></div>`;
+  $('#view').onclick=e=>{const b=e.target.closest('[data-q]');if(b){go(b.dataset.q);setTimeout(()=>editItem(-1),50)}};
+}
+
+/* ---------- generic list editor ---------- */
+function listView(k){
+  const sec=S[k];draft=toObj(k,D[keyOf(k)]||(k==='badges'?{}:[]));
+  if(k==='youth')draft.forEach(t=>t.staffTxt=(t.staff||[]).map(s=>s.join(' – ')).join('\n'));
+  render();
+  function render(){
+    $('#view').innerHTML=`<div class="row" style="margin-bottom:12px"><h2 style="font-size:1.9rem">${sec.label}</h2><button class="btn g" id="add">+ Add new</button></div>
+     <div id="items">${draft.map((it,i)=>`<div class="item">${sec.thumb?(sec.thumb(it)?`<img src="${esc(sz(sec.thumb(it)))}" alt="">`:'<div class="ph"></div>'):''}<div class="t"><b>${esc(sec.title(it)||'(untitled)')}</b><span>${esc(sec.sub(it)||'')}</span></div>
+      <div class="a"><button class="ib" data-up="${i}" title="Move up">↑</button><button class="ib" data-ed="${i}" title="Edit">✎</button><button class="ib" data-del="${i}" title="Delete" style="color:var(--bad)">🗑</button></div></div>`).join('')||'<p class="hint">Nothing here yet.</p>'}</div>
+     <div class="save"><button class="btn k" id="sv" ${dirty?'':'disabled'}>Save and publish</button><span class="msg" id="sm">${dirty?'Unsaved changes':''}</span></div>`;
+    $('#add').onclick=()=>editItem(-1);
+    $('#items').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+      if(b.dataset.ed)editItem(+b.dataset.ed);
+      if(b.dataset.del&&confirm('Delete “'+(sec.title(draft[+b.dataset.del])||'this')+'”?')){draft.splice(+b.dataset.del,1);mark()}
+      if(b.dataset.up&&+b.dataset.up>0){const i=+b.dataset.up;[draft[i-1],draft[i]]=[draft[i],draft[i-1]];mark()}};
+    $('#sv').onclick=()=>save(k);
+  }
+  function mark(){dirty=true;render()}
+  window.editItem=i=>{
+    const it=i<0?sec.blank():JSON.parse(JSON.stringify(draft[i]));
+    $('#dt').textContent=(i<0?'Add ':'Edit ')+sec.label.toLowerCase().replace(/s$/,'');
+    $('#db').innerHTML=sec.fields.map(([f,l,type,opts])=>fieldHTML(f,l,type,opts,it[f])).join('');
+    wireFields(k,it);
+    $('#dok').onclick=()=>{readFields(sec,it);
+      if(k==='youth')it.staff=(it.staffTxt||'').split('\n').map(x=>x.split(/\s+[–-]\s+/)).filter(x=>x[0]&&x[0].trim()).map(x=>[x[0].trim(),(x[1]||'').trim()]);
+      if(k==='news'&&!it.id)it.id='n'+Date.now();
+      if(k==='albums'&&!it.cover&&it.photos.length)it.cover=it.photos[0];
+      if(i<0){sec.top?draft.unshift(it):draft.push(it)}else draft[i]=it;
+      if(k==='news')draft.sort((a,b)=>b.d.localeCompare(a.d));
+      dlg.close();mark()};
+    dlg.showModal();
+  };
+}
+function fieldHTML(f,l,type,opts,v){
+  const id='fld-'+f;
+  if(type==='sel')return `<label class="f">${l}</label><select class="f" id="${id}">${opts.map(o=>`<option ${o===v?'selected':''} value="${o}">${o||'(not played / postponed)'}</option>`).join('')}</select>`;
+  if(type==='bool')return `<label class="chk"><input type="checkbox" id="${id}" ${v?'checked':''}>${l}</label>`;
+  if(type==='area'||type==='big')return `<label class="f">${l}</label><textarea class="f ${type==='big'?'big':''}" id="${id}">${esc(v)}</textarea>`;
+  if(type==='date')return `<label class="f">${l}</label><input class="f" type="date" id="${id}" value="${esc(v)}">`;
+  if(type==='dt')return `<label class="f">${l}</label><input class="f" type="datetime-local" id="${id}" value="${esc((v||'').slice(0,16))}"><div class="hint">Leave blank if the date isn’t known yet.</div>`;
+  if(type==='yt')return `<label class="f">${l}</label><input class="f" id="${id}" value="${v?'https://youtu.be/'+esc(v):''}" placeholder="https://youtu.be/…">`;
+  if(type==='img')return `<label class="f">${l}</label><div class="imgs" id="${id}-p">${v?`<div><img src="${esc(sz(v))}"><button data-clear="${f}">×</button></div>`:''}</div><input type="hidden" id="${id}" value="${esc(v)}"><p style="margin:8px 0 0"><label class="btn o s">Choose photo<input type="file" accept="image/*" data-up1="${f}" hidden></label> <span class="hint" id="${id}-m"></span></p>`;
+  if(type==='imgs')return `<label class="f">${l}</label><div class="imgs" id="${id}-p"></div><p style="margin:8px 0 0"><label class="btn g s">+ Add photos<input type="file" accept="image/*" multiple data-upn="${f}" hidden></label> <span class="hint" id="${id}-m"></span></p>`;
+  if(type==='vid')return `<label class="f">${l}</label><div id="${id}-p" class="hint">${v?'Video uploaded ✓':''}</div><input type="hidden" id="${id}" value="${esc(v)}"><p style="margin:8px 0 0"><label class="btn o s">Choose video<input type="file" accept="video/mp4,video/quicktime" data-upv="${f}" hidden></label> <span class="hint" id="${id}-m"></span></p>`;
+  return `<label class="f">${l}</label><input class="f" id="${id}" value="${esc(v)}">`;
+}
+function wireFields(k,it){
+  const drawMulti=f=>{const p=$('#fld-'+f+'-p');if(p)p.innerHTML=(it[f]||[]).map((u,j)=>`<div><img src="${esc(sz(u))}" loading="lazy"><button data-rm="${f}:${j}">×</button></div>`).join('')};
+  Object.keys(it).forEach(f=>Array.isArray(it[f])&&typeof it[f][0]!=='object'&&drawMulti(f));
+  $('#db').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.rm){const [f,j]=b.dataset.rm.split(':');it[f].splice(+j,1);drawMulti(f)}
+    if(b.dataset.clear){$('#fld-'+b.dataset.clear).value='';$('#fld-'+b.dataset.clear+'-p').innerHTML=''}};
+  $('#db').onchange=async e=>{const inp=e.target;
+    if(inp.dataset.up1){const f=inp.dataset.up1,m=$('#fld-'+f+'-m');m.textContent='Uploading…';try{const u=await upload(inp.files[0],k);$('#fld-'+f).value=u;$('#fld-'+f+'-p').innerHTML=`<div><img src="${u}"></div>`;m.textContent='Uploaded ✓'}catch(er){m.textContent='Upload failed: '+er.message}}
+    if(inp.dataset.upn){const f=inp.dataset.upn,m=$('#fld-'+f+'-m');it[f]=it[f]||[];const files=[...inp.files];let n=0;
+      for(const file of files){m.textContent=`Uploading ${++n} of ${files.length}…`;try{it[f].push(await upload(file,k));drawMulti(f)}catch(er){m.textContent='One upload failed: '+er.message}}m.textContent=files.length+' uploaded ✓'}
+    if(inp.dataset.upv){const f=inp.dataset.upv,m=$('#fld-'+f+'-m');m.textContent='Uploading video, keep this page open…';try{const u=await upload(inp.files[0],'videos');$('#fld-'+f).value=u;$('#fld-'+f+'-p').textContent='Video uploaded ✓';m.textContent=''}catch(er){m.textContent='Upload failed: '+er.message+' (videos must be under 50MB; for longer ones use YouTube)'}}};
+}
+function readFields(sec,it){sec.fields.forEach(([f,,type])=>{const el=$('#fld-'+f);if(!el)return;
+  if(type==='bool')it[f]=el.checked?1:0;else if(type==='imgs'){}else if(type==='yt'){const v=el.value.trim();const m=v.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);it[f]=m?m[1]:(/^[\w-]{11}$/.test(v)?v:'')}
+  else if(type==='dt')it[f]=el.value?el.value+':00':'';else it[f]=el.value})}
+
+/* ---------- uploads: phone photos are shrunk to 2000px first ---------- */
+async function shrink(file){if(!file.type.startsWith('image/')||file.type==='image/gif')return file;
+  try{const bmp=await createImageBitmap(file);const s=Math.min(1,2000/Math.max(bmp.width,bmp.height));if(s===1&&file.size<1.5e6)return file;
+   const c=document.createElement('canvas');c.width=Math.round(bmp.width*s);c.height=Math.round(bmp.height*s);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+   return await new Promise(r=>c.toBlob(b=>r(new File([b],file.name.replace(/\.\w+$/,'')+'.jpg',{type:'image/jpeg'})),'image/jpeg',.85))}catch(e){return file}}
+async function upload(file,folder){if(!file)throw new Error('no file');const f=await shrink(file);
+  const path=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}-${f.name.replace(/[^\w.-]+/g,'-').slice(-60)}`;
+  const {error}=await sb.storage.from('wbfc-media').upload(path,f,{contentType:f.type,upsert:false});if(error)throw error;
+  return sb.storage.from('wbfc-media').getPublicUrl(path).data.publicUrl}
+const sz=u=>u&&u.includes('squarespace-cdn')?u+'?format=300w':u;
+
+/* ---------- save ---------- */
+async function save(k,value){
+  const key=keyOf(k);let v=value;
+  if(v===undefined){let d=draft;if(k==='youth')d=d.map(({staffTxt,...t})=>t);v=toRaw(k,d)}
+  const b=$('#sv');if(b)b.disabled=true;$('#sm').className='msg';$('#sm').textContent='Saving…';
+  const {error}=await sb.rpc('wbfc_save',{p_section:key,p_value:v,p_summary:`Updated ${S[k]?S[k].label:key}`});
+  if(error){$('#sm').className='msg bad';$('#sm').textContent='Not saved: '+error.message;if(b)b.disabled=false;return false}
+  D[key]=v;dirty=false;$('#sm').className='msg ok';$('#sm').textContent='Saved. It’s live on the website now.';return true}
+
+/* ---------- league table ---------- */
+function tableView(){
+  const rows=JSON.parse(JSON.stringify(D.table));
+  const draw=()=>{$('#view').innerHTML=`<h2 style="font-size:1.9rem;margin-bottom:10px">League table</h2>
+   <div class="card" style="overflow-x:auto"><table class="g"><thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th><th></th></tr></thead><tbody>
+   ${rows.map((r,i)=>`<tr><td>${i+1}</td>${r.map((c,j)=>`<td><input data-r="${i}" data-c="${j}" value="${esc(c)}" ${j?'inputmode="numeric"':''}></td>`).join('')}<td><button class="ib" data-del="${i}">🗑</button></td></tr>`).join('')}</tbody></table>
+   <p style="margin:10px 0 0"><button class="btn o s" id="addr">+ Add team</button> <button class="btn o s" id="sort">Sort by points</button></p></div>
+   <label class="f">Note under the table</label><input class="f" id="tn" value="${esc(D.tableNote)}">
+   <div class="save"><button class="btn k" id="sv">Save and publish</button><span class="msg" id="sm"></span></div>`;
+   $('#view').oninput=e=>{const t=e.target;if(t.dataset.r){const v=t.value;rows[+t.dataset.r][+t.dataset.c]=+t.dataset.c?(v===''?0:+v||0):v;dirty=true}else dirty=true};
+   $('#view').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.del){rows.splice(+b.dataset.del,1);draw()}if(b.id==='addr'){rows.push(['New team',0,0,0,0,0,0]);draw()}
+     if(b.id==='sort'){rows.sort((a,b)=>b[6]-a[6]||b[5]-a[5]);draw()}};
+   $('#sv').onclick=async()=>{if(await save('table',rows)){await sb.rpc('wbfc_save',{p_section:'tableNote',p_value:$('#tn').value,p_summary:'Table note'});D.tableNote=$('#tn').value}}};
+  draw();
+}
+
+/* ---------- colours ---------- */
+function lookView(){const SCH={crest:['Club crest','Gold and black, from the badge',['#121110','#bc9c6c','#f5f2ec']],home:['Home kit','Navy and yellow',['#0b1d3a','#f5c400','#f3f5f9']],away:['Away kit','Turquoise and white',['#06302f','#2ec4b6','#f1f8f7']],stags:['Home & away','Navy with turquoise',['#0b1d3a','#2ec4b6','#f2f6f9']]};
+  let cur=D.look||'crest';const draw=()=>{$('#view').innerHTML=`<h2 style="font-size:1.9rem;margin-bottom:6px">Website colours</h2><p class="hint" style="margin:0 0 12px">Pick the colours everyone sees. Visitors can still try others with the Colours button, but this is the default.</p>
+   ${Object.entries(SCH).map(([k,v])=>`<button class="item" style="width:100%;cursor:pointer;font:inherit;text-align:left;${k===cur?'border:2px solid var(--k)':''}" data-s="${k}"><span style="display:flex">${v[2].map(c=>`<i style="width:28px;height:28px;border-radius:50%;background:${c};margin-right:-6px;border:2px solid #fff;box-shadow:0 0 0 1px #ddd;display:block"></i>`).join('')}</span><span class="t" style="margin-left:10px"><b>${v[0]}${k===(D.look||'crest')?' · live now':''}</b><span>${v[1]}</span></span></button>`).join('')}
+   <div class="save"><button class="btn k" id="sv">Save and publish</button><span class="msg" id="sm"></span></div>`;
+   $('#view').onclick=e=>{const b=e.target.closest('[data-s]');if(b){cur=b.dataset.s;dirty=true;draw()}};$('#sv').onclick=()=>save('look',cur).then(()=>draw())};draw()}
+S.look={label:'Colours'};
+
+/* ---------- logins (admins) ---------- */
+async function logins(){
+  const {data:ms}=await sb.from('wbfc_members').select('*').order('name');
+  $('#view').innerHTML=`<div class="row" style="margin-bottom:12px"><h2 style="font-size:1.9rem">Logins</h2><button class="btn g" id="nl">+ Add a login</button></div>
+   <div class="card" style="font-size:.86rem;color:var(--m)"><b style="color:var(--i)">Admin</b>: everything, including logins. <b style="color:var(--i)">Editor</b>: all website content. <b style="color:var(--i)">Coach</b>: youth teams and photo galleries.</div>
+   ${(ms||[]).map(m=>`<div class="item"><div class="t"><b>${esc(m.name)}${m.active?'':' (switched off)'}</b><span>${esc(m.email)}</span></div><div class="a" style="flex-wrap:wrap">
+    <select class="f" style="width:auto;padding:6px" data-role="${m.user_id}">${['admin','editor','coach'].map(r=>`<option ${r===m.role?'selected':''}>${r}</option>`).join('')}</select>
+    <button class="btn o s" data-act="${m.user_id}" data-on="${m.active?0:1}">${m.active?'Switch off':'Switch on'}</button><button class="btn o s" data-pw="${m.user_id}">New password</button><button class="btn r s" data-rm="${m.user_id}">Remove</button></div></div>`).join('')||'<p class="hint">No club logins yet.</p>'}
+   <p class="msg" id="sm"></p>`;
+  const call=async b=>{const {data:{session}}=await sb.auth.getSession();const r=await fetch(DW.url+'/functions/v1/wbfc-logins',{method:'POST',headers:{'Content-Type':'application/json',apikey:DW.anonKey,Authorization:'Bearer '+session.access_token},body:JSON.stringify(b)});const j=await r.json();if(!r.ok)throw new Error(j.error||'failed');return j};
+  const pw=()=>Array.from(crypto.getRandomValues(new Uint8Array(9)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('').replace(/(.{3})(?=.)/g,'$1-');
+  $('#nl').onclick=()=>{const p=pw();$('#dt').textContent='Add a login';
+    $('#db').innerHTML=`<label class="f">Name</label><input class="f" id="nn"><label class="f">Email</label><input class="f" id="ne" type="email"><label class="f">Role</label><select class="f" id="nr"><option value="editor">Editor (committee, manager)</option><option value="coach">Coach (youth and photos)</option><option value="admin">Admin (everything)</option></select><label class="f">Password</label><input class="f" id="np" value="${p}"><p class="hint">Give them this password. They sign in at this page.</p><p class="msg" id="nm"></p>`;
+    $('#dok').onclick=async()=>{$('#nm').textContent='Creating…';try{await call({action:'create',name:$('#nn').value,email:$('#ne').value,role:$('#nr').value,password:$('#np').value});dlg.close();logins()}catch(e){$('#nm').className='msg bad';$('#nm').textContent=e.message}};dlg.showModal()};
+  $('#view').onchange=async e=>{const s=e.target;if(s.dataset.role){const m=ms.find(x=>x.user_id===s.dataset.role);const {error}=await sb.rpc('wbfc_set_member',{p_user:m.user_id,p_role:s.value,p_active:m.active});$('#sm').className='msg '+(error?'bad':'ok');$('#sm').textContent=error?error.message:'Role changed.'}};
+  $('#view').onclick=async e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.act){const m=ms.find(x=>x.user_id===b.dataset.act);await sb.rpc('wbfc_set_member',{p_user:m.user_id,p_role:m.role,p_active:b.dataset.on==='1'});logins()}
+    if(b.dataset.pw){const p=pw();if(!confirm('Set a new password: '+p+'\n\nWrite it down and pass it on.'))return;try{await call({action:'password',user_id:b.dataset.pw,password:p});$('#sm').className='msg ok';$('#sm').textContent='New password set: '+p}catch(er){$('#sm').className='msg bad';$('#sm').textContent=er.message}}
+    if(b.dataset.rm&&confirm('Remove this login for good?')){try{await call({action:'remove',user_id:b.dataset.rm});logins()}catch(er){$('#sm').className='msg bad';$('#sm').textContent=er.message}}};
+}
+
+/* ---------- import every news story in full from the old site (Squarespace export) ---------- */
+function importView(){
+  $('#view').innerHTML=`<h2 style="font-size:1.9rem;margin-bottom:8px">Import from the old website</h2>
+  <div class="card"><ol style="margin:0;padding-left:18px;font-size:.9rem"><li>On the old Squarespace site go to <b>Settings › Import &amp; export › Export</b> and choose <b>WordPress</b>.</li><li>Squarespace emails a <b>.xml</b> file. Choose it below.</li><li>Every news story comes across in full, with its photo and date. Stories already here get their full text added; new ones are added.</li></ol>
+  <p style="margin:12px 0 0"><label class="btn g">Choose the .xml export<input type="file" accept=".xml,text/xml" id="xf" hidden></label></p><p class="msg" id="xm"></p></div>`;
+  $('#xf').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#xm').className='msg';$('#xm').textContent='Reading…';
+    try{const x=new DOMParser().parseFromString(await f.text(),'text/xml');const items=[...x.getElementsByTagName('item')];
+      const tx=(el,t)=>{const n=el.getElementsByTagName(t)[0];return n?n.textContent:''};
+      const news=JSON.parse(JSON.stringify(D.news));let upd=0,add=0;
+      for(const it of items){if(tx(it,'wp:post_type')&&tx(it,'wp:post_type')!=='post')continue;
+        const html=tx(it,'content:encoded');if(!html)continue;const doc=new DOMParser().parseFromString(html,'text/html');
+        const im=doc.querySelector('img');const img=im?(im.getAttribute('data-src')||im.getAttribute('src')||''):'';
+        const body=[...doc.querySelectorAll('p,h2,h3,li')].map(n=>n.textContent.trim()).filter(Boolean).join('\n\n');
+        const slug=tx(it,'wp:post_name'),title=tx(it,'title'),d=new Date(tx(it,'pubDate')||tx(it,'wp:post_date'));
+        const hit=news.find(n=>(n.url&&slug&&n.url.endsWith('/'+slug))||n.t===title);
+        if(hit){hit.body=body;if(!hit.img&&img)hit.img=img.split('?')[0];upd++}
+        else{news.push({id:'sq-'+(slug||Date.now()),d:isNaN(d)?today():d.toISOString().slice(0,10),t:title,x:body.split('\n\n')[0].slice(0,220),body,img:img.split('?')[0],tag:'Club news',url:'',src:'club'});add++}}
+      news.sort((a,b)=>b.d.localeCompare(a.d));$('#xm').textContent='Saving…';
+      const {error}=await sb.rpc('wbfc_save',{p_section:'news',p_value:news,p_summary:`Imported from old site: ${upd} stories completed, ${add} added`});
+      if(error)throw error;D.news=news;$('#xm').className='msg ok';$('#xm').textContent=`Done: ${upd} stories now have their full write-up, ${add} new stories added. All live now.`}
+    catch(er){$('#xm').className='msg bad';$('#xm').textContent='Could not import: '+er.message}};
+}
+
+/* ---------- edit history ---------- */
+async function logView(){const {data}=await sb.from('wbfc_log').select('*').order('at',{ascending:false}).limit(100);
+  $('#view').innerHTML=`<h2 style="font-size:1.9rem;margin-bottom:10px">Edit history</h2><div class="card log">${(data||[]).map(l=>`<div><b>${esc(l.summary)}</b><br><span>${new Date(l.at).toLocaleString('en-GB')} · ${esc(l.user_email||'automatic update')}</span></div>`).join('')||'<p class="hint">No edits yet.</p>'}</div>`}
+
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+start();
+</script>
+</body>
+</html>
