@@ -90,6 +90,8 @@
   .set-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:4px; }
   .mini.go { border-color:var(--accent); color:var(--accent-2); }
   .mini.bad { color:var(--bad); }
+  .mini:disabled { opacity:.45; cursor:not-allowed; }
+  .dw-outreach select[data-stage] { padding:5px 8px; border:1px solid var(--line-2); border-radius:var(--radius); background:var(--ink); color:var(--paper); font:inherit; font-size:13px; }
   .note { font-size:13px; color:var(--muted); }
   .note.ok { color:#4fd08a; } .note.bad { color:var(--bad); }
   .flag.live { border-color:rgba(79,208,138,.5); color:#4fd08a; }

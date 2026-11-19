@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
 <script>(function(){try{var t=localStorage.getItem("dw-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
-<link rel="stylesheet" href="../assets/css/console.css?v=20261115">
+<link rel="stylesheet" href="../assets/css/console.css?v=20261119">
 </head>
 <body>
 
@@ -65,6 +65,7 @@
 <script src="../assets/js/dw-pack.js"></script>
 <script src="../assets/js/dw-cgc.js"></script>
 <script src="../assets/js/dw-woolmer.js?v=20261115d"></script>
+<script src="../assets/js/dw-outreach.js?v=20261119a"></script>
 <script src="../assets/js/dw-traffic.js"></script>
 <script src="../assets/js/dw-seo.js"></script>
 <script src="../assets/js/dw-hh.js"></script>
@@ -106,7 +107,7 @@
   function isDue(r) { return r.next_action_on && r.next_action_on <= today() && r.stage !== 'won' && r.stage !== 'lost'; }
   function isClient(r) { return r.kind === 'case-study' || r.status === 'live'; }
   function isWip(r) { return !isClient(r) && (r.status === 'ready' || WARM.indexOf(r.stage) !== -1); }
-  function isTarget(r) { return !isClient(r) && !isWip(r); }
+  function isTarget(r) { return !isClient(r) && !isWip(r) && !r.wb_place_id; }   /* woolmer leads live in Outreach */
 
   /* ---- sign in ---- */
   document.getElementById('signin').addEventListener('submit', function (e) {
@@ -198,6 +199,7 @@
     { id:'wip',       name:'Work in progress', blurb:'Live jobs and anyone who has come back to you' },
     { id:'previews',  name:'Previews',         blurb:'Every concept site and report, with its passphrase' },
     { id:'targets',   name:'People to target', blurb:'The prospect list, who to chase and when' },
+    { id:'outreach',  name:'Outreach',         blurb:'woolmer leads: drafts to approve, hot leads who opened their mock-up, and what has been sent' },
     { id:'jobs',      name:'Job search',       blurb:'Customer success and field sales roles, scored' },
     { id:'enquiries', name:'Enquiries',        blurb:'Messages from the T Cooper Interiors form' },
     { id:'traffic',   name:'Traffic',          blurb:'Who is reaching dunnworks.io, where from, and which pages they read' },
@@ -211,6 +213,7 @@
                 traffic:function () { DWTraffic.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); },
                 seo:function () { DWSEO.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); },
                 woolmer:function () { DWWoolmer.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); },
+                outreach:function () { DWOutreach.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); },
                 cgc:function () { DWCgc.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); },
                 hh:function () { DWHh.view(viewEl, function (t, cls) { say(appMsg, t, cls); }); } };
 
@@ -225,6 +228,7 @@
       traffic: D.traffic ? D.traffic.cur.visits : '–',
       seo: D.seo ? D.seo.pages : '–',
       cgc: D.cgc ? D.cgc.cur.visits : '–',
+      outreach: D.projects.filter(function (p) { return p.wb_place_id && !isWip(p) && !isClient(p); }).length,
       woolmer: D.woolmer ? (D.woolmer.totals || {}).view || 0 : '–',
       hh: D.hh ? D.hh.live : '–',
       hq: Object.keys(D.tasks).reduce(function (n, k) { return n + D.tasks[k].filter(function (t) { return !t.done; }).length; }, 0),
