@@ -20,7 +20,7 @@
     session: null, user: null, member: null, loaded: false, authView: 'signin', authMsg: '', authErr: '',
     d: Object.fromEntries(TABLES.map((t) => [t, []])),
     tab: lsGet('fam-tab') || 'today', sub: null, foodSeg: 'shop', kid: 'stanley', kidsWeek: 0, mealWeek: 0,
-    filter: [], calDays: 42, gcal: null, syncing: false,
+    filter: [], calDays: 42, calView: lsGet('fam-calview') || 'list', calAnchor: new Date(), gcal: null, syncing: false,
     me: lsGet('fam-me')
   };
 
@@ -281,30 +281,82 @@
   }
 
   // ------------------------------------------------------------------ CALENDAR
-  function vCal() {
-    const t = todayD(), to = addDays(t, S.calDays);
-    const occs = occurrences(t, to).filter((o) => matchesFilter(o.e));
-    const cl = clashes(occs);
+  // views: list (agenda), day, week, month. S.calAnchor is the date the view is centred on.
+  function dayItems(d, occs, cl, compact) {
+    const ds = iso(d), t = todayD();
     const showSchool = !S.filter.length || S.filter.some((f) => ['stanley', 'shyla', 'family'].includes(f));
-    let html = '';
-    for (let d = new Date(t); d <= to; d = addDays(d, 1)) {
-      const ds = iso(d);
-      const list = occs.filter((o) => o.day === ds);
-      const sch = showSchool ? schoolOn(ds).filter((s) => s.kind !== 'holiday' || s.starts_on === ds || ds === iso(t)) : [];
-      const bd = birthdaysOn(ds);
-      if (!list.length && !sch.length && !bd.length) continue;
-      html += `<div class="day"><div class="day-h${ds === iso(t) ? ' today' : ''}"><strong>${dayLabel(d)}</strong><span class="faint small">${daysBetween(t, d) > 1 ? '' : fmtD(d)}</span></div>
-        ${sch.map((s) => `<button class="ev school" data-school="${s.id}"><span class="time">School</span><span class="body"><span class="title">${esc(s.title)}</span><span class="meta">${(s.people || []).map((p) => dot(p, true) + esc(personName(p))).join(' ')}${s.notes ? ' · ' + esc(s.notes) : ''}</span></span></button>`).join('')}
-        ${bd.map((b) => `<div class="ev bday"><span class="time">🎂</span><span class="body"><span class="title">${esc(b.name)}'s birthday${b.year ? ' (' + (d.getFullYear() - b.year) + ')' : ''}</span></span></div>`).join('')}
-        ${list.map((o) => evRow(o, cl)).join('')}</div>`;
-    }
+    const list = occs.filter((o) => o.day === ds);
+    const sch = showSchool ? schoolOn(ds).filter((s) => s.kind !== 'holiday' || s.starts_on === ds || ds === iso(t) || compact === 'day') : [];
+    const bd = birthdaysOn(ds);
+    return {
+      n: list.length + sch.length + bd.length,
+      html: sch.map((s) => `<button class="ev school" data-school="${s.id}"><span class="time">School</span><span class="body"><span class="title">${esc(s.title)}</span><span class="meta">${(s.people || []).map((p) => dot(p, true) + esc(personName(p))).join(' ')}${s.notes ? ' · ' + esc(s.notes) : ''}</span></span></button>`).join('') +
+        bd.map((b) => `<div class="ev bday"><span class="time">🎂</span><span class="body"><span class="title">${esc(b.name)}'s birthday${b.year ? ' (' + (d.getFullYear() - b.year) + ')' : ''}</span></span></div>`).join('') +
+        list.map((o) => evRow(o, cl)).join('')
+    };
+  }
+  function calRange() {
+    const a = new Date(S.calAnchor); a.setHours(0, 0, 0, 0);
+    if (S.calView === 'day') return [a, a];
+    if (S.calView === 'week') { const s = weekStart(a); return [s, addDays(s, 6)]; }
+    if (S.calView === 'month') { const f = new Date(a.getFullYear(), a.getMonth(), 1), l = new Date(a.getFullYear(), a.getMonth() + 1, 0); return [weekStart(f), addDays(weekStart(l), 6)]; }
+    return [todayD(), addDays(todayD(), S.calDays)];
+  }
+  function calLabel() {
+    const a = new Date(S.calAnchor);
+    if (S.calView === 'day') return dayLabel(a) === fmtD(a) ? fmtLong(a) : dayLabel(a) + ' · ' + fmtD(a);
+    if (S.calView === 'week') { const s = weekStart(a), e = addDays(s, 6); return s.getMonth() === e.getMonth() ? s.getDate() + '–' + e.getDate() + ' ' + MON[s.getMonth()] : s.getDate() + ' ' + MON[s.getMonth()] + ' – ' + e.getDate() + ' ' + MON[e.getMonth()]; }
+    return MON_LONG[a.getMonth()] + ' ' + a.getFullYear();
+  }
+  function calMove(n) {
+    const a = new Date(S.calAnchor);
+    if (S.calView === 'day') a.setDate(a.getDate() + n);
+    else if (S.calView === 'week') a.setDate(a.getDate() + 7 * n);
+    else { a.setDate(1); a.setMonth(a.getMonth() + n); }
+    S.calAnchor = a; render();
+  }
+  function vCal() {
+    const [from, to] = calRange();
+    const occs = occurrences(from, to).filter((o) => matchesFilter(o.e));
+    const cl = clashes(occs);
+    const view = S.calView;
+    const seg = `<div class="seg">${[['list', 'List'], ['day', 'Day'], ['week', 'Week'], ['month', 'Month']].map(([k, l]) => `<button data-calview="${k}" aria-pressed="${view === k}">${l}</button>`).join('')}</div>`;
+    const nav = view === 'list' ? '' : `<div class="weeknav calnav"><button class="icon-btn" data-calmove="-1" aria-label="Previous">${ICON.left}</button>
+      <strong>${calLabel()}</strong><span style="display:flex;gap:4px;align-items:center"><button class="btn sm ghost" data-act="calToday">Today</button><button class="icon-btn" data-calmove="1" aria-label="Next">${ICON.right}</button></span></div>`;
     const st = setting('gcal_last_sync', null);
     const gnote = !st || !st.ok ? `<div class="alert info" style="margin-top:4px"><span class="ic">🔗</span><span><b>Google Calendar not linked yet</b>Everything you add is kept here and goes up to the joint calendar as soon as the link is switched on.</span></div>` : '';
     const chip = (id, label, col) => `<button class="pick" data-filter="${id}" aria-pressed="${id === '' ? !S.filter.length : S.filter.includes(id)}">${col ? `<span class="dot sm" style="background:${col}"></span>` : ''}${esc(label)}</button>`;
-    return `<div class="top"><div><h1>Calendar</h1><div class="date">Next ${Math.round(S.calDays / 7)} weeks</div></div><button class="icon-btn" data-act="sync" aria-label="Sync with Google">${ICON.sync}</button></div>
-      <div class="chips">${chip('', 'Everyone')}${S.d.people.filter((p) => p.active).map((p) => chip(p.id, p.name, p.colour)).join('')}</div>${gnote}
-      ${html || '<div class="empty">Nothing coming up for this filter.</div>'}
-      <button class="btn ghost block" data-act="moreCal">Show more</button>
+    let body = '';
+    if (view === 'list') {
+      for (let d = new Date(from); d <= to; d = addDays(d, 1)) {
+        const it = dayItems(d, occs, cl); if (!it.n) continue;
+        body += `<div class="day"><div class="day-h${iso(d) === todayS() ? ' today' : ''}"><strong>${dayLabel(d)}</strong><span class="faint small">${daysBetween(todayD(), d) > 1 ? '' : fmtD(d)}</span></div>${it.html}</div>`;
+      }
+      body = (body || '<div class="empty">Nothing coming up for this filter.</div>') + `<button class="btn ghost block" data-act="moreCal">Show more</button>`;
+    } else if (view === 'day') {
+      const it = dayItems(from, occs, cl, 'day');
+      body = `<div class="day">${it.n ? it.html : '<div class="empty">Nothing on. Tap + to add something.</div>'}</div>`;
+    } else if (view === 'week') {
+      for (let i = 0; i < 7; i++) {
+        const d = addDays(from, i), it = dayItems(d, occs, cl);
+        body += `<div class="day"><button class="day-h link-h${iso(d) === todayS() ? ' today' : ''}" data-calday="${iso(d)}"><strong>${DAYS_LONG[d.getDay()]}</strong><span class="faint small">${d.getDate()} ${MON[d.getMonth()]}</span></button>${it.n ? it.html : '<div class="empty small" style="padding:2px 4px 6px">Nothing on</div>'}</div>`;
+      }
+    } else {
+      const a = new Date(S.calAnchor), month = a.getMonth(), sel = iso(a);
+      let cells = '';
+      for (let d = new Date(from); d <= to; d = addDays(d, 1)) {
+        const ds = iso(d), evs = occs.filter((o) => o.day === ds), sch = schoolOn(ds).length && (!S.filter.length || S.filter.some((f) => ['stanley', 'shyla', 'family'].includes(f))), bd = birthdaysOn(ds).length;
+        const lines = evs.slice(0, 3).map((o) => `<i style="background:${esc(person((o.e.people || ['family'])[0]).colour)}">${esc(o.e.title)}</i>`).join('');
+        cells += `<button class="mcell${d.getMonth() !== month ? ' out' : ''}${ds === todayS() ? ' today' : ''}${ds === sel ? ' sel' : ''}" data-mday="${ds}">
+          <span class="mnum">${d.getDate()}</span>${sch ? '<span class="mflag">🏫</span>' : ''}${bd ? '<span class="mflag">🎂</span>' : ''}${lines}${evs.length > 3 ? `<em>+${evs.length - 3}</em>` : ''}</button>`;
+      }
+      const it = dayItems(a, occs, cl, 'day');
+      body = `<div class="month"><div class="mhead">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((x) => `<span>${x}</span>`).join('')}</div><div class="mgrid">${cells}</div></div>
+        <div class="day"><div class="day-h${sel === todayS() ? ' today' : ''}"><strong>${dayLabel(a)}</strong><span class="faint small">${fmtD(a)}</span></div>${it.n ? it.html : '<div class="empty">Nothing on this day.</div>'}</div>`;
+    }
+    return `<div class="top"><div><h1>Calendar</h1>${view === 'list' ? `<div class="date">Next ${Math.round(S.calDays / 7)} weeks</div>` : ''}</div><button class="icon-btn" data-act="sync" aria-label="Sync with Google">${ICON.sync}</button></div>
+      ${seg}<div class="chips">${chip('', 'Everyone')}${S.d.people.filter((p) => p.active).map((p) => chip(p.id, p.name, p.colour)).join('')}</div>${gnote}${nav}
+      <div id="calBody">${body}</div>
       <button class="fab" data-act="newEvent" aria-label="Add to calendar">+</button>`;
   }
 
@@ -714,6 +766,10 @@
     if (d.food) { S.foodSeg = d.food; if (d.food === 'shop') await loadShopHistory(); render(); return; }
     if (d.kidsel) { S.kid = d.kidsel; render(); return; }
     if (d.kid && !d.single) { S.tab = 'kids'; S.kid = d.kid; render(); window.scrollTo(0, 0); return; }
+    if (d.calview) { S.calView = d.calview; lsSet('fam-calview', d.calview); S.calAnchor = new Date(); render(); return; }
+    if (d.calmove) { calMove(Number(d.calmove)); return; }
+    if (d.calday) { S.calView = 'day'; lsSet('fam-calview', 'day'); S.calAnchor = parse(d.calday); render(); window.scrollTo(0, 0); return; }
+    if (d.mday) { const nd = parse(d.mday); if (nd.getMonth() !== new Date(S.calAnchor).getMonth()) { S.calAnchor = nd; render(); return; } if (iso(nd) === iso(new Date(S.calAnchor))) { S.calView = 'day'; lsSet('fam-calview', 'day'); } S.calAnchor = nd; render(); return; }
     if (d.kweek) { S.kidsWeek = Math.min(0, S.kidsWeek + Number(d.kweek)); render(); return; }
     if (d.mweek) { S.mealWeek += Number(d.mweek); render(); return; }
 
@@ -771,7 +827,8 @@
     switch (d.act) {
       case 'who': return renderWhoSheet();
       case 'signout': await sb.auth.signOut(); location.reload(); return;
-      case 'newEvent': return eventSheet(null);
+      case 'newEvent': return eventSheet(null, S.tab === 'cal' && S.calView !== 'list' ? iso(new Date(S.calAnchor)) : undefined);
+      case 'calToday': S.calAnchor = new Date(); render(); return;
       case 'moreCal': S.calDays += 42; render(); return;
       case 'sync': t.disabled = true; await syncCal(false); await refreshGcal(); return;
       case 'delEvent': {
@@ -816,6 +873,14 @@
       <div class="who-grid">${S.d.people.filter((p) => p.kind === 'adult' && p.active).map((p) => `<button data-me="${p.id}">${dot(p.id)}${esc(p.name)}</button>`).join('')}</div>`);
   }
   async function refreshGcal() { try { S.gcal = await cal({ action: 'status' }); } catch (e) { S.gcal = { connected: false, configured: false, error: e.message }; } if (S.tab === 'home' && S.sub === 'settings') render(); }
+
+  // swipe left / right on the calendar to move a day, week or month
+  let swipe = null;
+  document.addEventListener('touchstart', (e) => { if (S.tab !== 'cal' || S.calView === 'list' || !$sheet.hidden || !e.target.closest('#calBody')) return; const t = e.touches[0]; swipe = { x: t.clientX, y: t.clientY, at: Date.now() }; }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (!swipe) return; const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, quick = Date.now() - swipe.at < 600; swipe = null;
+    if (quick && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) calMove(dx < 0 ? 1 : -1);
+  }, { passive: true });
 
   // ------------------------------------------------------------------ events: forms
   document.addEventListener('submit', async (ev) => {
