@@ -1,6 +1,6 @@
 /* Dunn Hub offline shell: keeps the app on the phone so it opens instantly.
  * Family data always comes live from Supabase and is never cached here. Bump VERSION on every release. */
-const VERSION = 'fam-v3';
+const VERSION = 'fam-v4';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'config.js', 'manifest.webmanifest', 'vendor/supabase.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });

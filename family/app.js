@@ -57,7 +57,7 @@
   const kids = () => S.d.people.filter((p) => p.kind === 'child' && p.active);
   const setting = (k, dflt) => { const r = S.d.settings.find((s) => s.key === k); return r ? r.value : dflt; };
   const meName = () => (S.me ? personName(S.me) : (S.user && S.user.email) || '');
-  const dot = (id, sm) => { const p = person(id); return `<span class="dot${sm ? ' sm' : ''}" style="background:${esc(p.colour)}">${sm ? '' : esc(p.name[0])}</span>`; };
+  const dot = (id, sm) => { const p = person(id); return `<span class="dot${sm ? ' sm' : ''}" style="background:${esc(p.colour)}">${sm ? '' : p.kind === 'pet' ? '🐾' : esc(p.name[0])}</span>`; };
 
   const I = (p) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
   const ICON = {
@@ -730,7 +730,7 @@
         <div class="row"><div class="grow"><div class="title">Theme</div></div><select id="themeSel" style="width:auto">${[['', 'Match phone'], ['light', 'Light'], ['dark', 'Dark']].map(([v, l]) => `<option value="${v}" ${(lsGet('fam-theme') || '') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>
       <div class="card"><h2>Google Calendar</h2>${gText}<button class="btn block ghost" data-act="sync">Sync now</button></div>
       <div class="card"><h2>Pocket money</h2><div class="row"><div class="grow"><div class="title">Each week, if every job is done</div></div><span>£</span><input id="pmAmt" type="number" min="0" step="0.5" value="${Number(setting('pocket_money', 5))}" style="width:90px"></div></div>
-      <div class="card"><div class="card-h"><h2>People</h2></div>${S.d.people.map((p) => `<button class="row btnrow" data-person="${p.id}">${dot(p.id)}<div class="grow"><div class="title">${esc(p.name)}</div><div class="faint small">${p.kind === 'child' ? 'Child' : p.kind === 'group' ? 'Whole family' : 'Adult'}${p.drives ? ' · does lifts' : ''}</div></div></button>`).join('')}<button class="btn block ghost" style="margin-top:8px" data-person="">Add a person</button></div>
+      <div class="card"><div class="card-h"><h2>People</h2></div>${S.d.people.map((p) => `<button class="row btnrow" data-person="${p.id}">${dot(p.id)}<div class="grow"><div class="title">${esc(p.name)}</div><div class="faint small">${p.kind === 'child' ? 'Child' : p.kind === 'group' ? 'Whole family' : p.kind === 'pet' ? 'Pet' : 'Adult'}${p.drives ? ' · does lifts' : ''}</div></div></button>`).join('')}<button class="btn block ghost" style="margin-top:8px" data-person="">Add a person</button></div>
       <div class="card"><h2>Who can log in</h2>${S.d.members.map((m) => `<div class="row"><div class="grow"><div class="title">${esc(m.name)}</div><div class="faint small">${esc(m.email)}${m.role === 'admin' ? ' · can manage logins' : ''}</div></div>${admin && m.email !== S.user.email ? `<button class="icon-btn" data-delmember="${esc(m.email)}" aria-label="Remove">${ICON.trash}</button>` : ''}</div>`).join('')}
         ${admin ? `<form id="memberAdd" style="margin-top:12px"><label class="f"><span>Add a login (e.g. Nana)</span><input type="text" name="name" placeholder="Name" required></label><label class="f"><input type="email" name="email" placeholder="Their email" required></label><button class="btn block" type="submit">Add login</button></form><p class="muted small">They then open dunnworks.io/family, tap "Create the login" and use that email.</p>` : ''}</div>
       <button class="btn block ghost" data-act="signout">Sign out</button>`;
@@ -741,7 +741,7 @@
     openSheet(`<form id="personForm" data-id="${esc(id || '')}"><div class="sheet-head"><h2>${p.id ? esc(p.name) : 'New person'}</h2><button type="button" class="icon-btn" data-close>${ICON.x}</button></div>
       <label class="f"><span>Name</span><input type="text" name="name" required value="${esc(p.name || '')}"></label>
       <div class="f-l">Colour</div><div class="picks" style="margin-bottom:14px">${cols.map((c) => `<button type="button" class="pick" data-single="colour" data-v="${c}" aria-pressed="${p.colour === c}"><span class="dot sm" style="background:${c}"></span></button>`).join('')}</div><input type="hidden" name="colour" value="${esc(p.colour)}">
-      ${p.id === 'family' ? '' : `<label class="f"><span>Type</span><select name="kind"><option value="adult" ${p.kind === 'adult' ? 'selected' : ''}>Adult</option><option value="child" ${p.kind === 'child' ? 'selected' : ''}>Child (gets chores and stars)</option></select></label>
+      ${p.id === 'family' ? '' : `<label class="f"><span>Type</span><select name="kind"><option value="adult" ${p.kind === 'adult' ? 'selected' : ''}>Adult</option><option value="child" ${p.kind === 'child' ? 'selected' : ''}>Child (gets chores and stars)</option><option value="pet" ${p.kind === 'pet' ? 'selected' : ''}>Pet</option></select></label>
       <label class="switch">Can do lifts<input type="checkbox" name="drives" ${p.drives ? 'checked' : ''}></label>`}
       <div class="sheet-actions"><button class="btn" type="submit">Save</button></div></form>`);
   }
