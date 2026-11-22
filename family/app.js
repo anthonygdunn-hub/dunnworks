@@ -874,13 +874,9 @@
   }
   async function refreshGcal() { try { S.gcal = await cal({ action: 'status' }); } catch (e) { S.gcal = { connected: false, configured: false, error: e.message }; } if (S.tab === 'home' && S.sub === 'settings') render(); }
 
-  // swipe left / right on the calendar to move a day, week or month
-  let swipe = null;
-  document.addEventListener('touchstart', (e) => { if (S.tab !== 'cal' || S.calView === 'list' || !$sheet.hidden || !e.target.closest('#calBody')) return; const t = e.touches[0]; swipe = { x: t.clientX, y: t.clientY, at: Date.now() }; }, { passive: true });
-  document.addEventListener('touchend', (e) => {
-    if (!swipe) return; const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, quick = Date.now() - swipe.at < 600; swipe = null;
-    if (quick && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) calMove(dx < 0 ? 1 : -1);
-  }, { passive: true });
+  // keep the app still: no pinch zoom (iOS ignores the viewport setting on its own); CSS touch-action stops double-tap zoom
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach((t) => document.addEventListener(t, (e) => e.preventDefault(), { passive: false }));
+  document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
   // ------------------------------------------------------------------ events: forms
   document.addEventListener('submit', async (ev) => {
