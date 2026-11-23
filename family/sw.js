@@ -2,9 +2,9 @@
  * The app's own files are fetched fresh whenever there's signal (so updates show straight away)
  * and only fall back to the saved copy when offline. Family data always comes live from Supabase
  * and is never cached here. Bump VERSION on every release. */
-const VERSION = 'fam-v7';
+const VERSION = 'fam-v8';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'config.js', 'manifest.webmanifest', 'vendor/supabase.js',
-  'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
+  'icons/icon-192-v2.png', 'icons/icon-512-v2.png', 'icons/apple-touch-icon-v2.png'];
 self.addEventListener('install', (e) => {
   // cache: 'reload' skips the browser's HTTP cache, so a new version never stores old files
   e.waitUntil(caches.open(VERSION).then((c) => Promise.all(SHELL.map((u) => fetch(u, { cache: 'reload' }).then((r) => r.ok && c.put(u, r)))))

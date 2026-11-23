@@ -171,7 +171,7 @@
   // ------------------------------------------------------------------ render shell
   function render() {
     if (!S.session) return renderAuth();
-    if (!S.loaded) { $app.innerHTML = '<div class="boot"><img src="icons/icon-192.png" alt="" width="72" height="72"><p>Loading Dunn Hub</p></div>'; return; }
+    if (!S.loaded) { $app.innerHTML = '<div class="boot"><img src="icons/icon-192-v2.png" alt="" width="72" height="72"><p>Loading Dunn Hub</p></div>'; return; }
     if (!S.member) return renderNotMember();
     if (!S.me) return renderWho();
     const views = { today: vToday, cal: vCal, food: vFood, kids: vKids, home: vHome };
@@ -191,7 +191,7 @@
   // ------------------------------------------------------------------ auth screens
   function renderAuth() {
     const up = S.authView === 'signup', reset = S.authView === 'reset';
-    $app.innerHTML = `<div class="auth"><img class="logo" src="icons/icon-192.png" alt="">
+    $app.innerHTML = `<div class="auth"><img class="logo" src="icons/icon-192-v2.png" alt="">
       <h1>Dunn Hub</h1><p class="lead">${reset ? 'Set a new password' : up ? 'Create the family login' : 'The family calendar, lists and home bits'}</p>
       <form id="authForm" class="card">
         ${reset ? '' : `<label class="f"><span>Email</span><input type="email" name="email" autocomplete="email" required value="${esc(lsGet('fam-last-email') || '')}"></label>`}
@@ -204,13 +204,13 @@
     </div>`;
   }
   function renderNotMember() {
-    $app.innerHTML = `<div class="auth"><img class="logo" src="icons/icon-192.png" alt=""><h1>Not on the list</h1>
+    $app.innerHTML = `<div class="auth"><img class="logo" src="icons/icon-192-v2.png" alt=""><h1>Not on the list</h1>
       <p class="lead">${esc(S.user.email)} isn't on the Dunn family list. Ask Anthony or Zoe to add it in Home, then Settings.</p>
       <button class="btn block ghost" data-act="signout">Sign out</button></div>`;
   }
   function renderWho() {
     const ppl = S.d.people.filter((p) => p.kind === 'adult' && p.active);
-    $app.innerHTML = `<div class="auth"><img class="logo" src="icons/icon-192.png" alt=""><h1>Who's this?</h1>
+    $app.innerHTML = `<div class="auth"><img class="logo" src="icons/icon-192-v2.png" alt=""><h1>Who's this?</h1>
       <p class="lead">So the app knows whose phone this is. You can change it any time.</p>
       <div class="who-grid">${ppl.map((p) => `<button data-me="${p.id}">${dot(p.id)}${esc(p.name)}</button>`).join('')}</div></div>`;
   }
