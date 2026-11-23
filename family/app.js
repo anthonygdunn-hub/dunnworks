@@ -154,14 +154,19 @@
   function birthdaysOn(dayS) { const d = parse(dayS); return S.d.birthdays.filter((b) => b.month === d.getMonth() + 1 && b.day === d.getDate()); }
   function nextBin(b) { let d = parse(b.next_on); const t = todayD(); while (d < t) d = addDays(d, 7 * b.every_weeks); return d; }
   function clashes(occs) {
-    const bad = new Set();
-    const timed = occs.filter((o) => !o.allDay && o.e.needs_lift && o.e.driver);
-    for (let i = 0; i < timed.length; i++) for (let j = i + 1; j < timed.length; j++) {
-      const a = timed[i], b = timed[j];
-      if (a.e.driver === b.e.driver && a.start < b.end && b.start < a.end) { bad.add(a); bad.add(b); }
+    // a clash is one person down for two different runs (drop-off at the start, pick-up at the end) within 20 minutes
+    const bad = new Set(), legs = [];
+    occs.filter((o) => !o.allDay && o.e.needs_lift).forEach((o) => {
+      if (o.e.driver) legs.push({ o, who: o.e.driver, at: o.start });
+      if (o.e.pickup) legs.push({ o, who: o.e.pickup, at: o.end });
+    });
+    for (let i = 0; i < legs.length; i++) for (let j = i + 1; j < legs.length; j++) {
+      const x = legs[i], y = legs[j];
+      if (x.o !== y.o && x.who === y.who && Math.abs(x.at - y.at) < 20 * 60e3) { bad.add(x.o); bad.add(y.o); x.o.clashWho = x.who; y.o.clashWho = y.who; }
     }
     return bad;
   }
+
 
   // ------------------------------------------------------------------ render shell
   function render() {
@@ -231,10 +236,10 @@
     else if (binsT.length) alerts.push(`<div class="alert info"><span class="ic">🗑️</span><span><b>Bins out tonight</b>${binsT.map((b) => esc(b.label)).join(', ')}</span></div>`);
     if (binsD.length) alerts.push(`<div class="alert info"><span class="ic">🗑️</span><span><b>Bin day today</b>${binsD.map((b) => esc(b.label)).join(', ')}</span></div>`);
     // lifts with nobody, next 7 days
-    const noLift = occs.filter((o) => o.e.needs_lift && !o.e.driver && o.start < addDays(t, 7));
-    if (noLift.length) alerts.push(`<button class="alert bad" data-tab="cal"><span class="ic">🚗</span><span><b>${noLift.length} lift${noLift.length > 1 ? 's' : ''} with no driver this week</b>${noLift.slice(0, 3).map((o) => esc(o.e.title) + ' ' + dayLabel(o.start).toLowerCase()).join(' · ')}</span></button>`);
+    const noLift = occs.filter((o) => o.e.needs_lift && (!o.e.driver || !o.e.pickup) && o.start < addDays(t, 7));
+    if (noLift.length) alerts.push(`<button class="alert bad" data-tab="cal"><span class="ic">🚗</span><span><b>${noLift.length} lift${noLift.length > 1 ? 's' : ''} not sorted this week</b>${noLift.slice(0, 3).map((o) => esc(o.e.title) + ' ' + dayLabel(o.start).toLowerCase()).join(' · ')}</span></button>`);
     const cl = clashes(occs.filter((o) => o.start < addDays(t, 7)));
-    if (cl.size) { const f = [...cl][0]; alerts.push(`<button class="alert warn" data-tab="cal"><span class="ic">⚠️</span><span><b>Lift clash</b>${esc(personName(f.e.driver))} is down for two runs at once, ${dayLabel(f.start).toLowerCase()}</span></button>`); }
+    if (cl.size) { const f = [...cl][0]; alerts.push(`<button class="alert warn" data-tab="cal"><span class="ic">⚠️</span><span><b>Lift clash</b>${esc(personName(f.clashWho || f.e.driver))} is down for two runs at once, ${dayLabel(f.start).toLowerCase()}</span></button>`); }
     // reminders due
     for (const r of S.d.reminders) {
       const n = daysBetween(t, parse(r.due_on));
@@ -272,7 +277,12 @@
     let time;
     if (o.allDay) time = `All day${o.span > 1 ? '<small>' + o.span + ' days</small>' : ''}`;
     else time = fmtT(o.start) + `<small>${fmtT(o.end)}</small>`;
-    const lift = e.needs_lift ? (e.driver ? `<span class="chip lift">🚗 ${esc(personName(e.driver))}</span>` : `<span class="chip nolift">🚗 Who's driving?</span>`) : '';
+    let lift = '';
+    if (e.needs_lift) {
+      if (e.driver && e.pickup && e.driver === e.pickup) lift = `<span class="chip lift">🚗 ${esc(personName(e.driver))} both ways</span>`;
+      else lift = (e.driver ? `<span class="chip lift">⬆️ Drop ${esc(personName(e.driver))}</span>` : `<span class="chip nolift">⬆️ Drop-off?</span>`) +
+        (e.pickup ? `<span class="chip lift">⬇️ Pick up ${esc(personName(e.pickup))}</span>` : `<span class="chip nolift">⬇️ Pick-up?</span>`);
+    }
     const clash = cl && cl.has(o) ? '<span class="chip clash">⚠️ clash</span>' : '';
     return `<button class="ev${e.sync_status !== 'synced' ? ' local' : ''}" data-ev="${esc(e.id)}" data-day="${o.day}">
       <span class="bar">${bars}</span><span class="time">${time}</span>
@@ -370,7 +380,7 @@
     } else { const d = dayS ? parse(dayS) : new Date(); start = new Date(d); start.setHours(Math.min(new Date().getHours() + 1, 20), 0, 0, 0); end = new Date(start.getTime() + 3600e3); }
     const series = !!(e.series_id || e.recurrence);
     const pPick = S.d.people.filter((p) => p.active).map((p) => `<button type="button" class="pick" data-multi="people" data-v="${p.id}" aria-pressed="${(e.people || []).includes(p.id)}"><span class="dot sm" style="background:${esc(p.colour)}"></span>${esc(p.name)}</button>`).join('');
-    const dPick = [{ id: '', name: 'Not sorted' }].concat(drivers()).map((p) => `<button type="button" class="pick" data-single="driver" data-v="${p.id}" aria-pressed="${(e.driver || '') === p.id}">${esc(p.name)}</button>`).join('');
+    const legPick = (field) => [{ id: '', name: 'Not sorted' }].concat(drivers()).map((p) => `<button type="button" class="pick" data-single="${field}" data-v="${p.id}" aria-pressed="${(e[field] || '') === p.id}">${esc(p.name)}</button>`).join('');
     openSheet(`<form id="evForm" data-id="${esc(e.id || '')}" data-series="${series ? 1 : ''}">
       <div class="sheet-head"><h2>${isNew ? 'Add to calendar' : 'Edit'}</h2><button type="button" class="icon-btn" data-close>${ICON.x}</button></div>
       <label class="f"><span>What</span><input type="text" name="title" required maxlength="200" value="${esc(e.title || '')}" placeholder="e.g. Shyla dance show"></label>
@@ -381,7 +391,8 @@
       <div class="f-row timed-only" ${e.all_day ? 'hidden' : ''}><label class="f"><span>Starts</span><input type="time" name="start" value="${fmtT(start)}"></label><label class="f"><span>Ends</span><input type="time" name="end" value="${fmtT(end || start)}"></label></div>
       ${isNew || e.id.startsWith('l:') ? `<label class="f"><span>Repeats</span><select name="recurrence">${[['', 'Does not repeat'], ['weekly', 'Every week'], ['fortnightly', 'Every 2 weeks'], ['monthly', 'Every month'], ['yearly', 'Every year']].map(([v, l]) => `<option value="${v}" ${(e.recurrence || '') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>` : (series ? '<p class="muted small">This one repeats. When you save you can change just this date or every one.</p>' : '')}
       <label class="switch">Needs a lift<input type="checkbox" name="needs_lift" ${e.needs_lift ? 'checked' : ''}></label>
-      <div class="lift-only" ${e.needs_lift ? '' : 'hidden'}><div class="f-l">Who's driving</div><div class="picks" style="margin-bottom:14px">${dPick}</div><input type="hidden" name="driver" value="${esc(e.driver || '')}"></div>
+      <div class="lift-only" ${e.needs_lift ? '' : 'hidden'}><div class="f-l">⬆️ Who's dropping off</div><div class="picks" style="margin-bottom:14px">${legPick('driver')}</div><input type="hidden" name="driver" value="${esc(e.driver || '')}">
+        <div class="f-l">⬇️ Who's picking up</div><div class="picks" style="margin-bottom:14px">${legPick('pickup')}</div><input type="hidden" name="pickup" value="${esc(e.pickup || '')}"></div>
       <label class="f"><span>Where</span><input type="text" name="location" value="${esc(e.location || '')}" placeholder="optional"></label>
       <label class="f"><span>Notes</span><textarea name="notes" placeholder="Kit, money, what to bring">${esc(e.notes || '')}</textarea></label>
       <p class="err" id="evErr" hidden></p>
@@ -396,7 +407,7 @@
   }
   function readEvent(f) {
     const ev = { id: f.dataset.id || undefined, title: f.elements.title.value.trim(), all_day: f.all_day.checked, location: f.location.value.trim(), notes: f.notes.value.trim(),
-      people: f.people.value ? f.people.value.split(',') : ['family'], needs_lift: f.needs_lift.checked, driver: f.needs_lift.checked ? (f.driver.value || null) : null,
+      people: f.people.value ? f.people.value.split(',') : ['family'], needs_lift: f.needs_lift.checked, driver: f.needs_lift.checked ? (f.driver.value || null) : null, pickup: f.needs_lift.checked ? (f.pickup.value || null) : null,
       recurrence: f.recurrence ? (f.recurrence.value || null) : undefined };
     if (ev.all_day) { ev.start_date = f.date.value; ev.end_date = iso(addDays(parse(f.date_end.value || f.date.value), 1)); }
     else {
@@ -426,10 +437,12 @@
     box.scrollIntoView({ behavior: 'smooth', block: 'end' }); void html;
   }
   function liftSheet(e) {
-    openSheet(`<div class="sheet-head"><h2>Who's driving?</h2><button type="button" class="icon-btn" data-close>${ICON.x}</button></div>
-      <p class="muted">${esc(e.title)}</p><div class="who-grid">${drivers().map((p) => `<button data-lift="${p.id}">${dot(p.id)}${esc(p.name)}</button>`).join('')}
-      <button data-lift="">Not sorted yet</button></div><p class="err" id="liftErr" hidden></p>`);
-    $sheetCard.dataset.ev = e.id;
+    const leg = (field) => [{ id: '', name: 'Not sorted' }].concat(drivers()).map((p) => `<button type="button" class="pick" data-single="${field}" data-v="${p.id}" aria-pressed="${(e[field] || '') === p.id}">${p.id ? dot(p.id, true) : ''}${esc(p.name)}</button>`).join('');
+    openSheet(`<form id="liftForm" data-ev="${esc(e.id)}"><div class="sheet-head"><h2>Lifts</h2><button type="button" class="icon-btn" data-close>${ICON.x}</button></div>
+      <p class="muted">${esc(e.title)}</p>
+      <div class="f-l">⬆️ Who's dropping off</div><div class="picks" style="margin-bottom:16px">${leg('driver')}</div><input type="hidden" name="driver" value="${esc(e.driver || '')}">
+      <div class="f-l">⬇️ Who's picking up</div><div class="picks" style="margin-bottom:8px">${leg('pickup')}</div><input type="hidden" name="pickup" value="${esc(e.pickup || '')}">
+      <p class="err" id="liftErr" hidden></p><div class="sheet-actions"><button class="btn" type="submit">Save</button></div></form>`);
   }
 
   // ------------------------------------------------------------------ FOOD
@@ -779,13 +792,6 @@
       if (ev.target.closest('.chip.nolift, .chip.lift')) return liftSheet(e);
       return eventSheet(e, d.day);
     }
-    if (d.lift !== undefined) {
-      const e = S.d.events.find((x) => x.id === $sheetCard.dataset.ev); if (!e) return;
-      $sheetCard.querySelectorAll('button').forEach((b) => { b.disabled = true; });
-      try { await cal({ action: 'save', scope: 'one', ev: Object.assign({}, e, { driver: d.lift || null, needs_lift: true }) }); await load(['events']); closeSheet(); toast(d.lift ? personName(d.lift) + " is driving" : 'Driver cleared'); }
-      catch (er) { const x = $sheetCard.querySelector('#liftErr'); x.textContent = er.message; x.hidden = false; $sheetCard.querySelectorAll('button').forEach((b) => { b.disabled = false; }); }
-      return;
-    }
     if (d.school !== undefined) return schoolSheet(d.school);
     if (d.meal) return mealSheet(d.meal);
     if (d.recipe) { const r = S.d.recipes.find((x) => x.id === d.recipe); const f = t.closest('form'); f.elements.title.value = r.title; f.ingredients.value = (r.ingredients || []).join('\n'); f.save.checked = false; return; }
@@ -890,6 +896,16 @@
           const sid = f.dataset.id;
           if (f.dataset.series && sid && sid.startsWith('g:')) { if (sub) sub.disabled = false; return askScope('Change just this one, or every one?', (scope) => saveEvent(f, scope)); }
           return await saveEvent(f, 'one');
+        }
+        case 'liftForm': {
+          const e = S.d.events.find((x) => x.id === f.dataset.ev); if (!e) return;
+          const driver = v('driver') || null, pickup = v('pickup') || null;
+          try {
+            await cal({ action: 'save', scope: 'one', ev: Object.assign({}, e, { driver, pickup, needs_lift: true }) });
+            await load(['events']); closeSheet();
+            toast(driver && pickup ? (driver === pickup ? personName(driver) + ' both ways' : personName(driver) + ' drops, ' + personName(pickup) + ' collects') : 'Lifts saved');
+          } catch (er) { const x = f.querySelector('#liftErr'); x.textContent = er.message; x.hidden = false; if (sub) sub.disabled = false; }
+          return;
         }
         case 'shopAdd': { const val = v('item'); if (val) { for (const part of val.split(/,|\n/)) await addShop(part); f.item.value = ''; await load(['shopping']); render(); setTimeout(() => { const i = document.querySelector('#shopAdd input'); if (i) i.focus(); }, 0); } return; }
         case 'mealForm': {

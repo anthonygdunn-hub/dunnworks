@@ -8,7 +8,7 @@
 // Google: a service account key in the FAM_GOOGLE_SA secret (JSON). Share the calendar named in
 // fam_settings.gcal_id with the service account's email, with "Make changes to events".
 // Until that is done everything still works in the app, and events wait as sync_status = 'local'.
-// Who an event is for, the driver and "needs a lift" travel in the Google event's private
+// Who an event is for, who drops off / picks up and "needs a lift" travel in the Google event's private
 // extended properties, so they survive edits made in Google Calendar itself.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { importPKCS8, SignJWT } from "npm:jose@5";
@@ -26,7 +26,7 @@ const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { sta
 type Row = Record<string, unknown> & { id: string };
 type Ev = {
   id?: string; title: string; all_day?: boolean; starts_at?: string; ends_at?: string; start_date?: string; end_date?: string;
-  location?: string; notes?: string; people?: string[]; driver?: string | null; needs_lift?: boolean;
+  location?: string; notes?: string; people?: string[]; driver?: string | null; pickup?: string | null; needs_lift?: boolean;
   recurrence?: string | null; until_date?: string | null;
 };
 
@@ -88,14 +88,15 @@ function infer(text: string, ppl: { id: string; name: string }[]) {
 function toGoogle(ev: Ev, ppl: { id: string; name: string; gcal_colour: string | null }[], withRecurrence: boolean) {
   const who = (ev.people?.length ? ev.people : ["family"]);
   const names = who.map((id) => ppl.find((p) => p.id === id)?.name ?? id);
-  const driver = ev.driver ? (ppl.find((p) => p.id === ev.driver)?.name ?? ev.driver) : "";
-  const foot = `${FOOT} ${names.join(", ")}${ev.needs_lift ? " · Lift: " + (driver || "not sorted yet") : ""}`;
+  const nm = (id?: string | null) => id ? (ppl.find((p) => p.id === id)?.name ?? id) : "not sorted yet";
+  const lifts = !ev.needs_lift ? "" : ev.driver && ev.driver === ev.pickup ? ` · Lift: ${nm(ev.driver)} both ways` : ` · Drop-off: ${nm(ev.driver)} · Pick-up: ${nm(ev.pickup)}`;
+  const foot = `${FOOT} ${names.join(", ")}${lifts}`;
   const notes = stripFoot(ev.notes);
   const body: Record<string, unknown> = {
     summary: ev.title,
     location: ev.location ?? "",
     description: (notes ? notes + "\n\n" : "") + foot,
-    extendedProperties: { private: { fam_people: who.join(","), fam_driver: ev.driver ?? "", fam_lift: ev.needs_lift ? "1" : "0" } },
+    extendedProperties: { private: { fam_people: who.join(","), fam_driver: ev.driver ?? "", fam_pickup: ev.pickup ?? "", fam_lift: ev.needs_lift ? "1" : "0" } },
   };
   const colour = who.length === 1 ? ppl.find((p) => p.id === who[0])?.gcal_colour : null;
   if (colour) body.colorId = colour;
@@ -120,7 +121,7 @@ function fromGoogle(e: any, ppl: { id: string; name: string }[]): Row {
     start_date: e.start?.date ?? null, end_date: e.end?.date ?? null,
     location: e.location ?? null, notes: stripFoot(e.description) || null,
     people: tagged ? p.fam_people.split(",") : infer(`${e.summary ?? ""} ${e.description ?? ""}`, ppl),
-    driver: p.fam_driver || null, needs_lift: p.fam_lift === "1",
+    driver: p.fam_driver || null, pickup: (p.fam_pickup === undefined ? p.fam_driver : p.fam_pickup) || null, needs_lift: p.fam_lift === "1",
     recurrence: null, until_date: null,
     source: tagged ? "app" : "google", sync_status: "synced", sync_error: null, updated_at: new Date().toISOString(),
   };
@@ -191,7 +192,7 @@ function clean(ev: Ev, by: string): Row {
     starts_at: ev.all_day ? null : ev.starts_at ?? null, ends_at: ev.all_day ? null : ev.ends_at ?? null,
     start_date: ev.all_day ? ev.start_date ?? null : null, end_date: ev.all_day ? ev.end_date ?? null : null,
     location: ev.location || null, notes: ev.notes || null,
-    people: ev.people?.length ? ev.people : ["family"], driver: ev.driver || null, needs_lift: !!ev.needs_lift,
+    people: ev.people?.length ? ev.people : ["family"], driver: ev.driver || null, pickup: ev.pickup || null, needs_lift: !!ev.needs_lift,
     recurrence: ev.recurrence && RRULE[ev.recurrence] ? ev.recurrence : null, until_date: ev.until_date || null,
     source: "app", sync_status: "local", sync_error: null, created_by: by, updated_at: new Date().toISOString(),
   };
