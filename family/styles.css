@@ -215,3 +215,16 @@ input[type=date], input[type=time] { min-width: 0; max-width: 100%; display: blo
 .mcell { position: relative; }
 .mcell .mflag { top: 3px; right: 2px; }
 .mcell .mflag + .mflag { right: 13px; }
+
+/* meal planner */
+.meal-card { padding: 12px 14px; }
+.meal-card.today { border-color: var(--teal); }
+.meal-date { margin-bottom: 4px; font-family: 'Bricolage Grotesque', Inter, sans-serif; font-size: 17px; }
+.meal-card.today .meal-date b { color: var(--teal-ink); }
+.slot { padding: 6px 0; border-top: 1px solid var(--line); }
+.meal-date + .slot, .meal-card > .slot:first-child { border-top: 0; }
+.slot-h { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--soft); }
+.dish { display: flex; width: 100%; text-align: left; border: 0; background: var(--bg); border-radius: 12px; padding: 9px 12px; margin: 4px 0; }
+.dish b { display: block; font-weight: 600; }
+.dish .small { display: block; }
+.empty-dish { background: transparent; border: 1.5px dashed var(--line); padding: 7px 12px; }

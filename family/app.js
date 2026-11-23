@@ -252,7 +252,6 @@
       const ds = iso(d), list = occs.filter((o) => o.day === ds);
       return `<div class="section-title">${label}</div>${list.length ? list.map((o) => evRow(o, cl)).join('') : `<div class="empty">Nothing in the calendar.</div>`}`;
     };
-    const meal = S.d.meals.find((m) => m.day === ts && m.slot === 'tea');
     const pinned = S.d.notices.filter((n) => n.pinned).slice(0, 3);
     const cds = S.d.countdowns.map((c) => ({ c, n: daysBetween(t, parse(c.on_date)) })).filter((x) => x.n >= 0).sort((a, b) => a.n - b.n).slice(0, 3);
     const kidCards = kids().map((k) => { const w = weekStatus(k.id, weekStart(t)); const due = choresToday(k.id); return `<button class="stat" data-kid="${k.id}" style="text-align:left">${dot(k.id)}<b style="margin-top:6px">${starBalance(k.id)} ⭐</b><span>${esc(k.name)} · ${due.done}/${due.total} jobs today${w.total ? '' : ''}</span></button>`; }).join('');
@@ -261,8 +260,8 @@
     return header(hello() + (S.me ? ', ' + esc(meName().split(' ')[0]) : ''), fmtLong(t)) +
       alerts.join('') +
       dayBlock(t, 'Today') + dayBlock(tm, 'Tomorrow') +
-      `<div class="section-title">Tea tonight</div>
-       <button class="card" style="width:100%;text-align:left;display:flex;align-items:center;gap:12px" data-meal="${ts}"><span style="font-size:28px">🍽️</span><span class="grow"><b>${meal ? esc(meal.title) : 'Not planned yet'}</b><br><span class="muted small">${meal ? (meal.cook ? 'Cook: ' + esc(personName(meal.cook)) : 'Tap to change') : 'Tap to pick something'}</span></span></button>
+      `<div class="section-title">Food today</div>
+       <div class="card meal-card">${slotRows(ts, true)}</div>
        <div class="grid2">${kidCards}</div>
        <div class="grid2" style="margin-top:10px">
          <button class="stat" data-tab="food" style="text-align:left"><b>${shopN}</b><span>on the Tesco list</span></button>
@@ -482,32 +481,50 @@
       <div class="card">${groups.length ? groups.map(([a, l]) => `<div class="aisle">${esc(a)}</div>${l.map(row).join('')}`).join('') : '<div class="empty">The list is empty. Add things above and they get sorted into Tesco aisles.</div>'}</div>
       ${got.length ? `<div class="card-h"><h2>In the trolley (${got.length})</h2><button class="btn sm ghost" data-act="clearShop">Clear</button></div><div class="card">${got.map(row).join('')}</div>` : ''}`;
   }
+  const SLOTS = [['breakfast', 'Breakfast', '🥣'], ['lunch', 'Lunch', '🥪'], ['tea', 'Tea', '🍽️']];
+  const mealPeople = () => { const ids = setting('meal_people', ['anthony', 'zoe', 'stanley', 'shyla']); return ids.map(person).filter((p) => p && p.name); };
+  const mealsFor = (ds, slot) => S.d.meals.filter((m) => m.day === ds && m.slot === slot).sort((a, b) => (a.people || []).length - (b.people || []).length);
+  function whoText(m) { return !m.people || !m.people.length ? 'Everyone' : m.people.map(personName).join(', '); }
+  function slotRows(ds, compact) {
+    return SLOTS.map(([slot, label, em]) => {
+      const list = mealsFor(ds, slot);
+      if (compact && !list.length && slot !== 'tea') return '';
+      const covered = new Set(list.some((m) => !m.people || !m.people.length) ? mealPeople().map((p) => p.id) : list.flatMap((m) => m.people || []));
+      const missing = list.length ? mealPeople().filter((p) => !covered.has(p.id)) : [];
+      return `<div class="slot"><div class="slot-h"><span>${em} ${label}</span><button class="link" data-mealadd="${ds}|${slot}">＋ Add</button></div>
+        ${list.length ? list.map((m) => `<button class="dish" data-mealedit="${m.id}"><span class="grow"><b>${esc(m.title)}</b><span class="faint small">${esc(whoText(m))}${m.cook ? ' · Cook: ' + esc(personName(m.cook)) : ''}</span></span></button>`).join('') : `<button class="dish empty-dish" data-mealadd="${ds}|${slot}"><span class="faint">Nothing planned</span></button>`}
+        ${missing.length ? `<button class="dish empty-dish" data-mealadd="${ds}|${slot}|${missing.map((p) => p.id).join(',')}"><span class="faint small">Nothing yet for ${esc(missing.map((p) => p.name).join(', '))}</span></button>` : ''}</div>`;
+    }).join('');
+  }
   function vMeals() {
     const ws = addDays(weekStart(new Date()), 7 * S.mealWeek);
-    let rows = '';
+    let days = '';
     for (let i = 0; i < 7; i++) {
-      const d = addDays(ws, i), ds = iso(d), m = S.d.meals.find((x) => x.day === ds && x.slot === 'tea');
-      rows += `<button class="meal-day${ds === todayS() ? ' today' : ''}" data-meal="${ds}"><span class="d"><span>${DAYS[d.getDay()]}</span><b>${d.getDate()}</b></span>
-        <span class="grow"><span class="title" style="font-weight:600">${m ? esc(m.title) : '<span class="faint">Nothing planned</span>'}</span>${m && m.cook ? `<br><span class="faint small">Cook: ${esc(personName(m.cook))}</span>` : ''}</span></button>`;
+      const d = addDays(ws, i), ds = iso(d);
+      days += `<div class="card meal-card${ds === todayS() ? ' today' : ''}"><div class="meal-date"><b>${DAYS_LONG[d.getDay()]}</b> <span class="faint">${d.getDate()} ${MON[d.getMonth()]}</span></div>${slotRows(ds)}</div>`;
     }
     const planned = S.d.meals.filter((m) => m.day >= iso(ws) && m.day <= iso(addDays(ws, 6)));
     return `<div class="weeknav"><button class="icon-btn" data-mweek="-1">${ICON.left}</button><strong>${S.mealWeek === 0 ? 'This week' : S.mealWeek === 1 ? 'Next week' : 'w/c ' + fmtD(ws)}</strong><button class="icon-btn" data-mweek="1">${ICON.right}</button></div>
-      <div class="card">${rows}</div>
-      ${planned.some((m) => m.ingredients && m.ingredients.length) ? `<button class="btn block" data-act="weekToShop" data-ws="${iso(ws)}">Add this week's ingredients to the Tesco list</button>` : ''}`;
+      ${planned.some((m) => m.ingredients && m.ingredients.length) ? `<button class="btn block" style="margin-bottom:14px" data-act="weekToShop" data-ws="${iso(ws)}">Add this week's ingredients to the Tesco list</button>` : ''}
+      ${days}`;
   }
-  function mealSheet(ds) {
-    const m = S.d.meals.find((x) => x.day === ds && x.slot === 'tea') || {};
-    const rec = S.d.recipes;
-    openSheet(`<form id="mealForm" data-day="${ds}">
-      <div class="sheet-head"><h2>Tea · ${fmtD(parse(ds))}</h2><button type="button" class="icon-btn" data-close>${ICON.x}</button></div>
+  function mealSheet(ds, slot, id, forWho) {
+    const m = (id && S.d.meals.find((x) => x.id === id)) || { day: ds, slot: slot || 'tea', people: forWho || [] };
+    const rec = S.d.recipes, ppl = mealPeople(), who = m.people || [];
+    openSheet(`<form id="mealForm" data-id="${esc(m.id || '')}">
+      <div class="sheet-head"><h2>${m.id ? 'Edit meal' : 'Add a meal'}</h2><button type="button" class="icon-btn" data-close>${ICON.x}</button></div>
+      <div class="f-row"><label class="f"><span>Day</span><input type="date" name="day" required value="${esc(m.day)}"></label>
+        <label class="f"><span>Meal</span><select name="slot">${SLOTS.map(([k, l]) => `<option value="${k}" ${m.slot === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+      <div class="f-l">Who's it for</div><div class="picks" style="margin-bottom:14px"><button type="button" class="pick" data-everyone="people" aria-pressed="${!who.length}">Everyone</button>${ppl.map((p) => `<button type="button" class="pick" data-multi="people" data-v="${p.id}" aria-pressed="${who.includes(p.id)}"><span class="dot sm" style="background:${esc(p.colour)}"></span>${esc(p.name)}</button>`).join('')}</div>
+      <input type="hidden" name="people" value="${esc(who.join(','))}">
       ${rec.length ? `<div class="f-l">Pick a saved meal</div><div class="chips">${rec.map((r) => `<button type="button" class="pick" data-recipe="${r.id}">${esc(r.title)}</button>`).join('')}</div>` : ''}
-      <label class="f"><span>What's for tea</span><input type="text" name="title" required value="${esc(m.title || '')}" placeholder="e.g. Spag bol"></label>
+      <label class="f"><span>What are they having</span><input type="text" name="title" required value="${esc(m.title || '')}" placeholder="e.g. Spag bol, fish fingers"></label>
       <label class="f"><span>Ingredients, one per line</span><textarea name="ingredients" placeholder="Mince&#10;Spaghetti&#10;Chopped tomatoes">${esc((m.ingredients || []).join('\n'))}</textarea></label>
-      <div class="f-l">Who's cooking</div><div class="picks" style="margin-bottom:14px">${[{ id: '', name: 'Not decided' }].concat(S.d.people.filter((p) => p.kind === 'adult')).map((p) => `<button type="button" class="pick" data-single="cook" data-v="${p.id}" aria-pressed="${(m.cook || '') === p.id}">${esc(p.name)}</button>`).join('')}</div>
+      <div class="f-l">Who's making it</div><div class="picks" style="margin-bottom:14px">${[{ id: '', name: 'Not decided' }].concat(S.d.people.filter((p) => p.kind === 'adult')).map((p) => `<button type="button" class="pick" data-single="cook" data-v="${p.id}" aria-pressed="${(m.cook || '') === p.id}">${esc(p.name)}</button>`).join('')}</div>
       <input type="hidden" name="cook" value="${esc(m.cook || '')}">
       <label class="switch">Save to my meals for next time<input type="checkbox" name="save" ${m.id ? '' : 'checked'}></label>
       <label class="switch">Add ingredients to the Tesco list<input type="checkbox" name="toShop"></label>
-      <div class="sheet-actions">${m.id ? `<button type="button" class="btn danger" data-act="delMeal" data-id="${m.id}">Clear</button>` : ''}<button class="btn" type="submit">Save</button></div></form>`);
+      <div class="sheet-actions">${m.id ? `<button type="button" class="btn danger" data-act="delMeal" data-id="${m.id}">Remove</button>` : ''}<button class="btn" type="submit">Save</button></div></form>`);
   }
   function vRecipes() {
     return `<div class="card">${S.d.recipes.length ? S.d.recipes.map((r) => `<button class="row btnrow" data-editrecipe="${r.id}"><div class="grow"><div class="title">${esc(r.title)}</div><div class="faint small">${(r.ingredients || []).length} ingredients</div></div>${ICON.right.replace('<svg', '<svg width="20" height="20"')}</button>`).join('') : '<div class="empty">Meals you plan get saved here, so next time it\'s one tap.</div>'}</div>
@@ -769,7 +786,7 @@
     const d = t.dataset;
     if (d.close !== undefined && t.closest('#sheet')) { closeSheet(); return; }
     // pickers inside forms
-    if (d.multi) { t.setAttribute('aria-pressed', t.getAttribute('aria-pressed') !== 'true'); const form = t.closest('form'); form.elements[d.multi].value = [...form.querySelectorAll(`[data-multi="${d.multi}"][aria-pressed="true"]`)].map((b) => b.dataset.v).join(','); return; }
+    if (d.multi) { t.setAttribute('aria-pressed', t.getAttribute('aria-pressed') !== 'true'); const form = t.closest('form'); form.elements[d.multi].value = [...form.querySelectorAll(`[data-multi="${d.multi}"][aria-pressed="true"]`)].map((b) => b.dataset.v).join(','); const all = form.querySelector(`[data-everyone="${d.multi}"]`); if (all) all.setAttribute('aria-pressed', String(!form.elements[d.multi].value)); return; }
     if (d.single) { const form = t.closest('form'); form.querySelectorAll(`[data-single="${d.single}"]`).forEach((b) => b.setAttribute('aria-pressed', b === t)); form.elements[d.single].value = d.v; return; }
     if (d.tab) { S.tab = d.tab; S.sub = null; lsSet('fam-tab', d.tab); render(); window.scrollTo(0, 0); return; }
     if (d.auth) { if (d.auth === 'forgot') return forgot(); S.authView = d.auth; S.authErr = S.authMsg = ''; renderAuth(); return; }
@@ -793,7 +810,10 @@
       return eventSheet(e, d.day);
     }
     if (d.school !== undefined) return schoolSheet(d.school);
-    if (d.meal) return mealSheet(d.meal);
+    if (d.meal) return mealSheet(d.meal, 'tea');
+    if (d.mealadd) { const [ds, slot, who] = d.mealadd.split('|'); return mealSheet(ds, slot, null, who ? who.split(',') : []); }
+    if (d.mealedit) return mealSheet(null, null, d.mealedit);
+    if (d.everyone) { const form = t.closest('form'); form.querySelectorAll(`[data-multi="${d.everyone}"]`).forEach((b) => b.setAttribute('aria-pressed', 'false')); t.setAttribute('aria-pressed', 'true'); form.elements[d.everyone].value = ''; return; }
     if (d.recipe) { const r = S.d.recipes.find((x) => x.id === d.recipe); const f = t.closest('form'); f.elements.title.value = r.title; f.ingredients.value = (r.ingredients || []).join('\n'); f.save.checked = false; return; }
     if (d.editrecipe !== undefined) return recipeSheet(d.editrecipe);
     if (d.rem !== undefined) return remSheet(d.rem);
@@ -910,11 +930,14 @@
         case 'shopAdd': { const val = v('item'); if (val) { for (const part of val.split(/,|\n/)) await addShop(part); f.item.value = ''; await load(['shopping']); render(); setTimeout(() => { const i = document.querySelector('#shopAdd input'); if (i) i.focus(); }, 0); } return; }
         case 'mealForm': {
           const ings = v('ingredients').split('\n').map((s) => s.trim()).filter(Boolean);
-          const { error } = await sb.from('fam_meals').upsert({ day: f.dataset.day, slot: 'tea', title: v('title'), ingredients: ings, cook: v('cook') || null, updated_at: new Date().toISOString() }, { onConflict: 'day,slot' });
-          if (error) throw error;
+          let who = v('people') ? v('people').split(',') : [];
+          if (who.length && mealPeople().every((p) => who.includes(p.id))) who = [];
+          const row = { day: v('day'), slot: v('slot'), title: v('title'), people: who, ingredients: ings, cook: v('cook') || null, updated_at: new Date().toISOString() };
+          const { error } = f.dataset.id ? await sb.from('fam_meals').update(row).eq('id', f.dataset.id) : await sb.from('fam_meals').insert(row);
+          if (error) { toast('Could not save: ' + error.message); throw error; }
           if (f.save.checked) await sb.from('fam_recipes').upsert({ title: v('title'), ingredients: ings, updated_at: new Date().toISOString() }, { onConflict: 'title' });
-          if (f.toShop.checked) for (const i of ings) await addShop(i, { meal_day: f.dataset.day });
-          await load(['meals', 'recipes', 'shopping']); closeSheet(); toast('Tea sorted'); return;
+          if (f.toShop.checked) for (const i of ings) await addShop(i, { meal_day: v('day') });
+          await load(['meals', 'recipes', 'shopping']); closeSheet(); toast(SLOTS.find((x) => x[0] === v('slot'))[1] + ' sorted'); return;
         }
         case 'recipeForm': {
           const row = { title: v('title'), ingredients: v('ingredients').split('\n').map((s) => s.trim()).filter(Boolean), url: v('url') || null, updated_at: new Date().toISOString() };
