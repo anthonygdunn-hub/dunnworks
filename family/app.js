@@ -1007,5 +1007,14 @@
   });
   setInterval(() => { if (document.visibilityState === 'visible' && S.member && $sheet.hidden) syncCal(true); }, 10 * 60e3);
   (async () => { const { data } = await sb.auth.getSession(); if (!data.session) { S.session = null; render(); } })();
-  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  if ('serviceWorker' in navigator) {
+    // when a new version takes over, reload once so the phone shows it straight away
+    let reloaded = false;
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !reloaded && $sheet.hidden) { reloaded = true; location.reload(); } });
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => {
+      r.update().catch(() => {});
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') r.update().catch(() => {}); });
+    }).catch(() => {}));
+  }
 })();

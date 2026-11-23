@@ -1,9 +1,15 @@
-/* Dunn Hub offline shell: keeps the app on the phone so it opens instantly.
- * Family data always comes live from Supabase and is never cached here. Bump VERSION on every release. */
-const VERSION = 'fam-v5';
+/* Dunn Hub offline shell.
+ * The app's own files are fetched fresh whenever there's signal (so updates show straight away)
+ * and only fall back to the saved copy when offline. Family data always comes live from Supabase
+ * and is never cached here. Bump VERSION on every release. */
+const VERSION = 'fam-v6';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'config.js', 'manifest.webmanifest', 'vendor/supabase.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
-self.addEventListener('install', (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
+self.addEventListener('install', (e) => {
+  // cache: 'reload' skips the browser's HTTP cache, so a new version never stores old files
+  e.waitUntil(caches.open(VERSION).then((c) => Promise.all(SHELL.map((u) => fetch(u, { cache: 'reload' }).then((r) => r.ok && c.put(u, r)))))
+    .then(() => self.skipWaiting()));
+});
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith('fam-') && k !== VERSION).map((k) => caches.delete(k))))
     .then(() => self.clients.claim()));
@@ -17,13 +23,9 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   if (url.origin !== location.origin || !url.pathname.startsWith('/family/')) return;
-  if (e.request.mode === 'navigate') {
-    e.respondWith(fetch(e.request).then((res) => { const copy = res.clone(); caches.open(VERSION).then((c) => c.put('index.html', copy)); return res; })
-      .catch(() => caches.match('index.html')));
-    return;
-  }
-  e.respondWith(caches.match(e.request).then((hit) => {
-    const net = fetch(e.request).then((res) => { if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(e.request, copy)); } return res; }).catch(() => hit);
-    return hit || net;
-  }));
+  // network first, saved copy when offline
+  e.respondWith(fetch(e.request, { cache: 'no-cache' }).then((res) => {
+    if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(e.request.mode === 'navigate' ? 'index.html' : e.request, copy)); }
+    return res;
+  }).catch(() => caches.match(e.request.mode === 'navigate' ? 'index.html' : e.request)));
 });
