@@ -105,6 +105,27 @@
     });
   }
 
+  // Changing a password is a PUT to the user endpoint with whatever session
+  // we are holding. A magic-link session counts, which is the whole point:
+  // before this there was no way to change the password from the console at
+  // all, so "forgotten it, email me a link" got you in and left the old one
+  // in place for ever.
+  function setPassword(password) {
+    return session().then(function (t) {
+      if (!t) throw new Error('Sign in first.');
+      return fetch(C.url + '/auth/v1/user', {
+        method: 'PUT',
+        headers: headers(true),
+        body: JSON.stringify({ password: password })
+      });
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) throw new Error(j.msg || j.error_description || j.message || ('HTTP ' + r.status));
+        return j;
+      });
+    });
+  }
+
   function signOut() {
     var t = store.get();
     store.set(null);
@@ -218,6 +239,7 @@
     signInWithPassword: signInWithPassword,
     sendMagicLink: sendMagicLink,
     captureFromHash: captureFromHash,
+    setPassword: setPassword,
     whoami: whoami,
     signOut: signOut
   };
