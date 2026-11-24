@@ -158,6 +158,7 @@
       <p class="msg" id="auth-msg" role="status" aria-live="polite"></p>
       <p style="color:var(--muted-2); font-size:13.5px; margin-top:4px">
         Forgotten it? <button type="button" class="mini" id="magic">Email me a link</button>
+        &mdash; the link signs you in, then set a new one under More.
       </p>
     </form>
   </section>
@@ -185,7 +186,7 @@
 </main>
 
 <script src="/assets/js/dw-config.js"></script>
-<script src="/assets/js/dw-data.js"></script>
+<script src="/assets/js/dw-data.js?v=20261124pw"></script>
 <script src="/assets/js/dw-woolmer.js?v=20261115b"></script>
 <script src="/assets/js/dw-sitedash.js?v=20261115d"></script>
 <script src="/assets/js/dw-hq.js?v=20261115e"></script>
@@ -321,9 +322,11 @@
       row('#/app/alerts', 'Alerts', 'New client email, enquiries, morning summary', '<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>') +
       (standalone() ? '' : '<button type="button" id="install">' + ic('<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>') + '<span>Add to home screen<br><small>' + (isIos ? 'Share, then Add to Home Screen' : 'Install it as an app') + '</small></span></button>') +
       '<a href="/console/" target="_blank" rel="noopener">' + ic('<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>') + '<span>Full console<br><small>Keys, packs, previews and the rest</small></span></a>' +
+      '<button type="button" id="pwrow">' + ic('<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>') + '<span>Change password<br><small>The one you sign in with</small></span></button>' +
       '<button type="button" id="signout">' + ic('<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>') + '<span>Sign out</span></button></div>';
     $('themerow').addEventListener('click', function () { applyTheme(theme() === 'light' ? 'dark' : 'light', true); });
     $('signout').addEventListener('click', function () { DWData.signOut().then(function () { location.hash = ''; location.reload(); }); });
+    $('pwrow').addEventListener('click', changePassword);
     var ins = $('install'); if (ins) ins.addEventListener('click', install);
   }
   function install() {
@@ -404,6 +407,33 @@
         .then(function (sub) { say('Alerts on', 'ok'); alerts();
           return fn({ action: 'push_test', endpoint: sub.endpoint }); });
     }).catch(function (e) { say(e.message, 'bad'); });
+  }
+
+  /* ---- change the sign-in password ----
+     The only other way in is a magic link, which signs you in and leaves the
+     old password alone. That session is enough to set a new one. */
+  function changePassword() {
+    var bg = document.createElement('div'); bg.className = 'ap-sheet-bg';
+    var sh = document.createElement('form'); sh.className = 'ap-sheet';
+    sh.noValidate = true;
+    sh.innerHTML = '<h2>Change password</h2>' +
+      '<label for="pw-a">New password</label><input id="pw-a" name="a" type="password" autocomplete="new-password">' +
+      '<label for="pw-b">Type it again</label><input id="pw-b" name="b" type="password" autocomplete="new-password">' +
+      '<button class="btn" type="submit">Save new password</button>';
+    var close = function () { bg.remove(); sh.remove(); };
+    bg.addEventListener('click', close);
+    sh.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var f = sh.elements;
+      if (f.a.value.length < 8) { say('Eight characters or more, please', 'bad'); return; }
+      if (f.a.value !== f.b.value) { say('Those two are not the same', 'bad'); return; }
+      sh.querySelector('button').disabled = true;
+      DWData.setPassword(f.a.value)
+        .then(function () { close(); say('Done. That is your password from now on', 'ok'); })
+        .catch(function (err) { sh.querySelector('button').disabled = false; say(err.message || 'Could not save it', 'bad'); });
+    });
+    document.body.appendChild(bg); document.body.appendChild(sh);
+    $('pw-a').focus();
   }
 
   /* ---- quick add a job ---- */
