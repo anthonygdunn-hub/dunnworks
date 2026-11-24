@@ -35,6 +35,7 @@
       <p class="msg" id="auth-msg" role="status" aria-live="polite"></p>
       <p style="color:var(--muted-2); font-size:13.5px; margin-top:4px">
         Forgotten it? <button type="button" class="mini" id="magic">Email me a link</button>
+        &mdash; the link signs you in, then use <em>Change password</em> at the top to set a new one.
       </p>
     </form>
   </section>
@@ -49,9 +50,24 @@
       <div class="row">
         <a class="mini" href="#/">All areas</a>
         <button class="mini" id="addproj" type="button">Add a project</button>
+        <button class="mini" id="setpw" type="button">Change password</button>
         <button class="mini" id="signout" type="button">Sign out</button>
       </div>
     </div>
+
+    <form id="pwform" class="card" novalidate hidden style="max-width:420px; margin-bottom:28px">
+      <div class="field">
+        <label for="pw1">New password</label>
+        <input id="pw1" type="password" autocomplete="new-password" minlength="8">
+      </div>
+      <div class="field">
+        <label for="pw2">Type it again</label>
+        <input id="pw2" type="password" autocomplete="new-password" minlength="8">
+      </div>
+      <button class="btn" type="submit">Save new password</button>
+      <button class="mini" id="pwcancel" type="button" style="margin-left:10px">Cancel</button>
+      <p class="msg" id="pw-msg" role="status" aria-live="polite"></p>
+    </form>
 
     <div id="view"></div>
     <p class="msg" id="app-msg" role="status" aria-live="polite"></p>
@@ -60,7 +76,7 @@
 </main>
 
 <script src="../assets/js/dw-config.js"></script>
-<script src="../assets/js/dw-data.js"></script>
+<script src="../assets/js/dw-data.js?v=20261124pw"></script>
 <script src="../assets/js/dw-keys.js"></script>
 <script src="../assets/js/dw-pack.js"></script>
 <script src="../assets/js/dw-cgc.js"></script>
@@ -130,6 +146,36 @@
 
   document.getElementById('signout').addEventListener('click', function () {
     DWData.signOut().then(function () { location.hash = ''; location.reload(); });
+  });
+
+  /* ---- change password ----
+     There was no way to do this from here at all. The only route in besides
+     the password was a magic link, which signs you in but leaves the old
+     password untouched, so a forgotten password stayed forgotten. A
+     magic-link session is enough to set a new one. */
+  var pwform = document.getElementById('pwform');
+  var pwmsg = document.getElementById('pw-msg');
+
+  document.getElementById('setpw').addEventListener('click', function () {
+    pwform.hidden = !pwform.hidden;
+    say(pwmsg, '');
+    if (!pwform.hidden) document.getElementById('pw1').focus();
+  });
+
+  document.getElementById('pwcancel').addEventListener('click', function () {
+    pwform.hidden = true; pwform.reset(); say(pwmsg, '');
+  });
+
+  pwform.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var a = document.getElementById('pw1').value;
+    var b = document.getElementById('pw2').value;
+    if (a.length < 8) { say(pwmsg, 'Eight characters or more, please.', 'bad'); return; }
+    if (a !== b) { say(pwmsg, 'Those two are not the same.', 'bad'); return; }
+    say(pwmsg, 'Saving...');
+    DWData.setPassword(a)
+      .then(function () { pwform.reset(); say(pwmsg, 'Done. That is your password from now on.', 'ok'); })
+      .catch(function (err) { say(pwmsg, err.message || 'Could not save it.', 'bad'); });
   });
 
   /* ---- data ---- */
