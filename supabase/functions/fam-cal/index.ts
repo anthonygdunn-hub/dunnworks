@@ -3,6 +3,7 @@
 //   { action: "sync" }                         push app-only events up, then pull the window down
 //   { action: "save", ev, scope: "one"|"all" } create or edit an event (Google first when connected)
 //   { action: "delete", id, scope }            delete one occurrence or the whole series
+//   { action: "save_many", evs }              create several new events (a shift rota), then pull once
 // Callers: a family member's JWT (email listed in fam_members, or info@dunnworks.io),
 // or pg_cron with the x-cron header matching fam_private.cron.
 // Google: a service account key in the FAM_GOOGLE_SA secret (JSON). Share the calendar named in
@@ -236,6 +237,24 @@ async function save(ev: Ev, scope: string, by: string) {
   await setStatus(true, null);
   return { ok: true };
 }
+async function saveMany(evs: Ev[], by: string) {
+  const list = (evs ?? []).slice(0, 62);
+  if (!list.length) return { ok: true, saved: 0 };
+  if (!sa() || !(await canReachGoogle())) {
+    const { error } = await db.from("fam_events").upsert(list.map((e) => clean({ ...e, id: undefined }, by)));
+    if (error) throw new Error(error.message);
+    return { ok: true, saved: list.length, local: true };
+  }
+  const ppl = await people();
+  let saved = 0; const failed: string[] = [];
+  for (const ev of list) {
+    try { await g("POST", "/events", toGoogle({ ...ev, recurrence: null }, ppl, false)); saved++; }
+    catch (e) { failed.push(`${ev.starts_at ?? ev.start_date}: ${(e as Error).message}`); }
+  }
+  await pull(ppl);
+  await setStatus(true, null);
+  return { ok: failed.length === 0, saved, failed };
+}
 let reach: boolean | null = null;
 async function canReachGoogle() {
   if (reach !== null) return reach;
@@ -291,6 +310,7 @@ Deno.serve(async (req) => {
       case "sync": return json(await fullSync());
       case "save": return json(await save(b.ev as Ev, String(b.scope ?? "one"), by));
       case "delete": return json(await remove(String(b.id), String(b.scope ?? "one")));
+      case "save_many": return json(await saveMany(b.evs as Ev[], by));
       default: return json({ error: "Unknown action" }, 400);
     }
   } catch (e) {

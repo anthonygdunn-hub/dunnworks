@@ -15,11 +15,12 @@
   const $toast = document.getElementById('toast');
 
   const TABLES = ['people', 'members', 'events', 'school', 'shopping', 'recipes', 'meals', 'chores', 'chore_done', 'pocket',
-    'stars', 'rewards', 'reminders', 'birthdays', 'countdowns', 'bins', 'notices', 'contacts', 'settings'];
+    'stars', 'rewards', 'reminders', 'birthdays', 'countdowns', 'bins', 'notices', 'contacts', 'settings', 'shift_types'];
   const S = {
     session: null, user: null, member: null, loaded: false, authView: 'signin', authMsg: '', authErr: '',
     d: Object.fromEntries(TABLES.map((t) => [t, []])),
     tab: lsGet('fam-tab') || 'today', sub: null, foodSeg: 'shop', kid: 'stanley', kidsWeek: 0, mealWeek: 0,
+    shiftWho: null, shiftMonth: new Date(), shiftType: null, shiftSel: [], shiftSaving: false,
     filter: [], calDays: 42, calView: lsGet('fam-calview') || 'list', calAnchor: new Date(), gcal: null, syncing: false,
     me: lsGet('fam-me')
   };
@@ -74,7 +75,7 @@
 
   // ------------------------------------------------------------------ data
   async function load(tables) {
-    const order = { events: 'starts_at', school: 'starts_on', shopping: 'created_at', meals: 'day', chores: 'sort', reminders: 'due_on', countdowns: 'on_date', bins: 'sort', notices: 'created_at', contacts: 'sort', people: 'sort', recipes: 'title', stars: 'created_at' };
+    const order = { shift_types: 'sort', events: 'starts_at', school: 'starts_on', shopping: 'created_at', meals: 'day', chores: 'sort', reminders: 'due_on', countdowns: 'on_date', bins: 'sort', notices: 'created_at', contacts: 'sort', people: 'sort', recipes: 'title', stars: 'created_at' };
     await Promise.all((tables || TABLES).map(async (t) => {
       let q = sb.from('fam_' + t).select('*').limit(5000);
       if (order[t]) q = q.order(order[t], { ascending: !['notices', 'stars'].includes(t), nullsFirst: true });
@@ -636,7 +637,75 @@
   }
 
   // ------------------------------------------------------------------ HOME
+  // ------------------------------------------------------------------ WORK SHIFTS
+  // A shift is an ordinary calendar event for one person titled "<Name> working" (plus the shift name),
+  // so it lands in the joint Google calendar and existing "Zoe working" entries show up here too.
+  const shiftPeople = () => S.d.people.filter((p) => p.kind === 'adult' && p.active);
+  const hm = (t) => String(t || '').slice(0, 5);
+  function isShift(e, pid) { return !e.all_day && (e.people || []).includes(pid) && String(e.title || '').toLowerCase().startsWith(personName(pid).toLowerCase() + ' working'); }
+  function shiftWho() { if (!S.shiftWho) S.shiftWho = shiftPeople().some((p) => p.id === S.me) ? S.me : 'zoe'; return S.shiftWho; }
+  function shiftEv(pid, ds, start, end, label, notes) {
+    const s0 = new Date(ds + 'T' + start); let e0 = new Date(ds + 'T' + end);
+    if (e0 <= s0) e0 = addDays(e0, 1); // overnight shift
+    return { title: personName(pid) + ' working' + (label ? ' · ' + label : ''), people: [pid], starts_at: s0.toISOString(), ends_at: e0.toISOString(), all_day: false, notes: notes || '' };
+  }
+  function vShifts() {
+    const who = shiftWho(), p = person(who);
+    const types = S.d.shift_types.filter((t) => t.person === who);
+    const sel = types.find((t) => t.id === S.shiftType);
+    const a = new Date(S.shiftMonth), month = a.getMonth();
+    const from = weekStart(new Date(a.getFullYear(), month, 1)), to = addDays(weekStart(new Date(a.getFullYear(), month + 1, 0)), 6);
+    const occs = occurrences(from, to).filter((o) => isShift(o.e, who));
+    let cells = '';
+    for (let d = new Date(from); d <= to; d = addDays(d, 1)) {
+      const ds = iso(d), on = occs.filter((o) => o.day === ds), picked = S.shiftSel.includes(ds);
+      cells += `<button class="mcell${d.getMonth() !== month ? ' out' : ''}${ds === todayS() ? ' today' : ''}${picked ? ' picked' : ''}" data-shiftday="${ds}">
+        <span class="mnum">${d.getDate()}</span>${on.map((o) => `<i style="background:${esc(p.colour)}">${fmtT(o.start)}</i>`).join('')}${picked && sel ? `<i class="pend">${esc(hm(sel.starts))}</i>` : ''}</button>`;
+    }
+    const upcoming = occurrences(todayD(), addDays(todayD(), 60)).filter((o) => isShift(o.e, who)).slice(0, 8);
+    const hint = sel ? `Tap each day ${esc(p.name)} is on <b>${esc(sel.name)}</b> (${hm(sel.starts)}–${hm(sel.ends)}), then tap Add.` : types.length ? 'Pick a shift type, then tap the days. Or tap an empty day for a one-off.' : `Add ${esc(p.name)}'s shift types first, like "Late 17:00–23:55".`;
+    return `<h1 style="margin-bottom:14px">Work shifts</h1>
+      <div class="seg">${shiftPeople().map((x) => `<button data-shiftwho="${x.id}" aria-pressed="${x.id === who}">${esc(x.name)}</button>`).join('')}</div>
+      <div class="card"><div class="card-h"><h2>Shift types</h2><button class="link" data-stypeedit="">＋ New</button></div>
+        ${types.length ? `<div class="picks">${types.map((t) => `<button class="pick" data-stype="${t.id}" aria-pressed="${t.id === S.shiftType}">${esc(t.name)} <span class="faint small">${hm(t.starts)}–${hm(t.ends)}</span></button>`).join('')}</div>
+        <p class="muted small" style="margin:10px 0 0">${hint}</p>${types.length ? `<p style="margin:6px 0 0"><button class="link" data-act="editTypes">Edit shift types</button></p>` : ''}` : `<p class="muted small" style="margin:0">${hint}</p>`}</div>
+      <div class="weeknav calnav"><button class="icon-btn" data-shiftmove="-1" aria-label="Previous month">${ICON.left}</button><strong>${MON_LONG[month]} ${a.getFullYear()}</strong><button class="icon-btn" data-shiftmove="1" aria-label="Next month">${ICON.right}</button></div>
+      <div class="month"><div class="mhead">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((x) => `<span>${x}</span>`).join('')}</div><div class="mgrid">${cells}</div></div>
+      ${S.shiftSel.length && sel ? `<div class="shift-bar"><button class="btn ghost" data-act="clearShiftSel">Clear</button><button class="btn pink" data-act="saveShifts" ${S.shiftSaving ? 'disabled' : ''}>${S.shiftSaving ? 'Adding…' : `Add ${S.shiftSel.length} ${esc(sel.name)} shift${S.shiftSel.length > 1 ? 's' : ''}`}</button></div>` : ''}
+      <button class="btn block ghost" data-act="oneShift">＋ One-off shift</button>
+      <div class="section-title">Coming up for ${esc(p.name)}</div>
+      <div class="card">${upcoming.length ? upcoming.map((o) => `<button class="row btnrow" data-ev="${esc(o.e.id)}" data-day="${o.day}"><div class="grow"><div class="title">${dayLabel(o.start)} · ${fmtT(o.start)}–${fmtT(o.end)}</div><div class="faint small">${esc(o.e.title)}</div></div></button>`).join('') : '<div class="empty">No shifts in the next two months.</div>'}</div>`;
+  }
+  function shiftTypeSheet(id) {
+    const t = S.d.shift_types.find((x) => x.id === id) || { person: shiftWho(), starts: '09:00', ends: '17:00' };
+    openSheet(`<form id="stypeForm" data-id="${esc(id || '')}"><div class="sheet-head"><h2>${t.id ? 'Edit shift type' : 'New shift type'}</h2><button type="button" class="icon-btn" data-close>${ICON.x}</button></div>
+      <p class="muted">For ${esc(personName(t.person))}</p>
+      <label class="f"><span>Name</span><input type="text" name="name" required maxlength="30" value="${esc(t.name || '')}" placeholder="e.g. Late, Early, Long day, Night"></label>
+      <div class="f-row"><label class="f"><span>Starts</span><input type="time" name="starts" required value="${hm(t.starts)}"></label><label class="f"><span>Ends</span><input type="time" name="ends" required value="${hm(t.ends)}"></label></div>
+      <p class="muted small">If it ends after midnight, just put the finish time. The app knows it runs into the next day.</p>
+      <div class="sheet-actions">${t.id ? `<button type="button" class="btn danger" data-act="delSType" data-id="${t.id}">Delete</button>` : ''}<button class="btn" type="submit">Save</button></div></form>`);
+  }
+  function editTypesSheet() {
+    const types = S.d.shift_types.filter((t) => t.person === shiftWho());
+    openSheet(`<div class="sheet-head"><h2>${esc(personName(shiftWho()))}'s shift types</h2><button type="button" class="icon-btn" data-close>${ICON.x}</button></div>
+      <div class="card">${types.map((t) => `<button class="row btnrow" data-stypeedit="${t.id}"><div class="grow"><div class="title">${esc(t.name)}</div><div class="faint small">${hm(t.starts)}–${hm(t.ends)}</div></div></button>`).join('')}</div>
+      <button class="btn block ghost" data-stypeedit="">＋ New shift type</button>`);
+  }
+  function oneShiftSheet(ds) {
+    const who = shiftWho(), types = S.d.shift_types.filter((t) => t.person === who);
+    openSheet(`<form id="oneShiftForm"><div class="sheet-head"><h2>One-off shift</h2><button type="button" class="icon-btn" data-close>${ICON.x}</button></div>
+      <div class="f-l">Whose shift</div><div class="picks" style="margin-bottom:14px">${shiftPeople().map((x) => `<button type="button" class="pick" data-single="who" data-v="${x.id}" aria-pressed="${x.id === who}">${esc(x.name)}</button>`).join('')}</div><input type="hidden" name="who" value="${esc(who)}">
+      <label class="f"><span>Date</span><input type="date" name="date" required value="${esc(ds || todayS())}"></label>
+      ${types.length ? `<div class="f-l">Fill in from a shift type</div><div class="picks" style="margin-bottom:14px">${types.map((t) => `<button type="button" class="pick" data-filltype="${t.id}">${esc(t.name)}</button>`).join('')}</div>` : ''}
+      <input type="hidden" name="label" value="">
+      <div class="f-row"><label class="f"><span>Starts</span><input type="time" name="start" required value="09:00"></label><label class="f"><span>Ends</span><input type="time" name="end" required value="17:00"></label></div>
+      <label class="f"><span>Notes</span><input type="text" name="notes" placeholder="optional, e.g. covering for someone"></label>
+      <p class="err" id="shiftErr" hidden></p>
+      <div class="sheet-actions"><button class="btn" type="submit">Add shift</button></div></form>`);
+  }
+
   const HOME = [
+    ['shifts', '💼', 'Work shifts', () => { const o = occurrences(todayD(), addDays(todayD(), 30)).find((x) => shiftPeople().some((p) => isShift(x.e, p.id))); return o ? o.e.title.split(' working')[0] + ' ' + dayLabel(o.start).toLowerCase() + ' ' + fmtT(o.start) : 'Add the rota'; }],
     ['notices', '📌', 'Noticeboard', () => { const n = S.d.notices.length; return n ? n + ' note' + (n > 1 ? 's' : '') : 'Leave a note'; }],
     ['school', '🏫', 'School', () => { const n = S.d.school.filter((s) => (s.ends_on || s.starts_on) >= todayS()).length; return n + ' coming up'; }],
     ['bins', '🗑️', 'Bins', () => { const b = S.d.bins.map((x) => ({ x, d: nextBin(x) })).sort((a, c) => a.d - c.d)[0]; return b ? b.x.label + ' ' + dayLabel(b.d).toLowerCase() : 'Set up bin days'; }],
@@ -647,7 +716,7 @@
     ['settings', '⚙️', 'Settings', () => 'People, logins, Google']
   ];
   function vHome() {
-    if (S.sub) return `<button class="back" data-home="">${ICON.left.replace('<svg', '<svg width="20" height="20"')}Home</button>` + ({ notices: vNotices, school: vSchool, bins: vBins, reminders: vReminders, birthdays: vBirthdays, countdowns: vCountdowns, contacts: vContacts, settings: vSettings }[S.sub] || (() => ''))();
+    if (S.sub) return `<button class="back" data-home="">${ICON.left.replace('<svg', '<svg width="20" height="20"')}Home</button>` + ({ shifts: vShifts, notices: vNotices, school: vSchool, bins: vBins, reminders: vReminders, birthdays: vBirthdays, countdowns: vCountdowns, contacts: vContacts, settings: vSettings }[S.sub] || (() => ''))();
     return header('Home') + `<div class="tiles">${HOME.map(([k, em, l, sub]) => `<button class="tile" data-home="${k}"><span class="em">${em}</span><span><b>${l}</b><small>${esc(sub())}</small></span></button>`).join('')}</div>`;
   }
   function listCard(title, addAttr, items, emptyMsg) {
@@ -847,6 +916,19 @@
     // home
     if (d.pin) { const n = S.d.notices.find((x) => x.id === d.pin); await upd('notices', { id: n.id }, { pinned: !n.pinned }); return; }
     if (d.delnotice) { if (!confirmInline(t, 'Delete?')) return; await del('notices', { id: d.delnotice }); return; }
+    if (d.shiftwho) { S.shiftWho = d.shiftwho; S.shiftType = null; S.shiftSel = []; render(); return; }
+    if (d.stype) { S.shiftType = S.shiftType === d.stype ? null : d.stype; if (!S.shiftType) S.shiftSel = []; render(); return; }
+    if (d.shiftmove) { const m = new Date(S.shiftMonth); m.setDate(1); m.setMonth(m.getMonth() + Number(d.shiftmove)); S.shiftMonth = m; render(); return; }
+    if (d.stypeedit !== undefined) return shiftTypeSheet(d.stypeedit);
+    if (d.filltype) { const ty = S.d.shift_types.find((x) => x.id === d.filltype); const f = t.closest('form'); f.elements.start.value = hm(ty.starts); f.elements.end.value = hm(ty.ends); f.elements.label.value = ty.name; f.querySelectorAll('[data-filltype]').forEach((b) => b.setAttribute('aria-pressed', b === t)); return; }
+    if (d.shiftday) {
+      const who = shiftWho(), ds = d.shiftday;
+      const existing = occurrences(parse(ds), parse(ds)).find((o) => o.day === ds && isShift(o.e, who));
+      if (S.shiftType && S.shiftSel.includes(ds)) { S.shiftSel = S.shiftSel.filter((x) => x !== ds); render(); return; }
+      if (existing) return eventSheet(existing.e, ds);
+      if (S.shiftType) { S.shiftSel = S.shiftSel.concat(ds).sort(); render(); return; }
+      return oneShiftSheet(ds);
+    }
     if (d.delmember) { if (!confirmInline(t, 'Remove?')) return; await del('members', { email: d.delmember }); return; }
 
     // actions
@@ -855,6 +937,21 @@
       case 'signout': await sb.auth.signOut(); location.reload(); return;
       case 'newEvent': return eventSheet(null, S.tab === 'cal' && S.calView !== 'list' ? iso(new Date(S.calAnchor)) : undefined);
       case 'calToday': S.calAnchor = new Date(); render(); return;
+      case 'oneShift': return oneShiftSheet(todayS());
+      case 'editTypes': return editTypesSheet();
+      case 'clearShiftSel': S.shiftSel = []; render(); return;
+      case 'delSType': if (!confirmInline(t, 'Sure?')) return; await del('shift_types', { id: d.id }); if (S.shiftType === d.id) { S.shiftType = null; S.shiftSel = []; } closeSheet(); return;
+      case 'saveShifts': {
+        const ty = S.d.shift_types.find((x) => x.id === S.shiftType); if (!ty || !S.shiftSel.length) return;
+        const who = shiftWho(), evs = S.shiftSel.map((ds) => shiftEv(who, ds, hm(ty.starts), hm(ty.ends), ty.name));
+        S.shiftSaving = true; render();
+        try {
+          const r = await cal({ action: 'save_many', evs });
+          await load(['events']); S.shiftSel = [];
+          toast(r.failed && r.failed.length ? r.saved + ' added, ' + r.failed.length + " didn't save. Try those again" : (r.saved + ' shift' + (r.saved === 1 ? '' : 's') + ' added' + (r.local ? '' : ' to the calendar')));
+        } catch (e) { toast(e.message); }
+        S.shiftSaving = false; render(); return;
+      }
       case 'moreCal': S.calDays += 42; render(); return;
       case 'sync': t.disabled = true; await syncCal(false); await refreshGcal(); return;
       case 'delEvent': {
@@ -916,6 +1013,20 @@
           const sid = f.dataset.id;
           if (f.dataset.series && sid && sid.startsWith('g:')) { if (sub) sub.disabled = false; return askScope('Change just this one, or every one?', (scope) => saveEvent(f, scope)); }
           return await saveEvent(f, 'one');
+        }
+        case 'stypeForm': {
+          const row = { name: v('name'), starts: v('starts'), ends: v('ends') };
+          if (f.dataset.id) await upd('shift_types', { id: f.dataset.id }, row);
+          else { await ins('shift_types', Object.assign({ person: shiftWho(), sort: S.d.shift_types.length }, row)); const nt = S.d.shift_types[S.d.shift_types.length - 1]; if (nt) S.shiftType = nt.id; }
+          closeSheet(); return;
+        }
+        case 'oneShiftForm': {
+          const who = v('who') || shiftWho();
+          try {
+            await cal({ action: 'save', scope: 'one', ev: shiftEv(who, v('date'), v('start'), v('end'), v('label'), v('notes')) });
+            await load(['events']); S.shiftWho = who; closeSheet(); toast('Shift added');
+          } catch (er) { const x = f.querySelector('#shiftErr'); x.textContent = er.message; x.hidden = false; if (sub) sub.disabled = false; }
+          return;
         }
         case 'liftForm': {
           const e = S.d.events.find((x) => x.id === f.dataset.ev); if (!e) return;
