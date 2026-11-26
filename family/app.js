@@ -130,7 +130,16 @@
         if (!e.starts_at) continue;
         const s = new Date(e.starts_at), en = e.ends_at ? new Date(e.ends_at) : s;
         const len = en - s;
-        const push = (d) => { if (d >= from && d <= addDays(to, 1)) out.push({ e, day: iso(d), allDay: false, start: d, end: new Date(d.getTime() + len) }); };
+        const push = (d) => {
+          const endD = new Date(d.getTime() + len), last = new Date(endD.getTime() - 1); // ending at midnight doesn't count as the next day
+          const days = Math.max(0, daysBetween(d, last));
+          if (!days) { if (d >= from && d <= addDays(to, 1)) out.push({ e, day: iso(d), allDay: false, start: d, end: endD }); return; }
+          for (let i = 0; i <= days; i++) {
+            const day = parse(iso(addDays(d, i)));
+            if (day < parse(iso(from)) || day > to) continue;
+            out.push({ e, day: iso(day), allDay: i > 0 && i < days, start: i === 0 ? d : day, end: endD, part: i === 0 ? 'start' : i === days ? 'end' : 'mid', idx: i, cont: i > 0, span: days + 1 });
+          }
+        };
         if (e.recurrence && STEP[e.recurrence]) stepRecur(e, s, addDays(to, 1), push); else push(s);
       }
     }
@@ -157,7 +166,7 @@
   function clashes(occs) {
     // a clash is one person down for two different runs (drop-off at the start, pick-up at the end) within 20 minutes
     const bad = new Set(), legs = [];
-    occs.filter((o) => !o.allDay && o.e.needs_lift).forEach((o) => {
+    occs.filter((o) => !o.allDay && !o.cont && o.e.needs_lift).forEach((o) => {
       if (o.e.driver) legs.push({ o, who: o.e.driver, at: o.start });
       if (o.e.pickup) legs.push({ o, who: o.e.pickup, at: o.end });
     });
@@ -237,7 +246,7 @@
     else if (binsT.length) alerts.push(`<div class="alert info"><span class="ic">🗑️</span><span><b>Bins out tonight</b>${binsT.map((b) => esc(b.label)).join(', ')}</span></div>`);
     if (binsD.length) alerts.push(`<div class="alert info"><span class="ic">🗑️</span><span><b>Bin day today</b>${binsD.map((b) => esc(b.label)).join(', ')}</span></div>`);
     // lifts with nobody, next 7 days
-    const noLift = occs.filter((o) => o.e.needs_lift && (!o.e.driver || !o.e.pickup) && o.start < addDays(t, 7));
+    const noLift = occs.filter((o) => !o.cont && o.e.needs_lift && (!o.e.driver || !o.e.pickup) && o.start < addDays(t, 7));
     if (noLift.length) alerts.push(`<button class="alert bad" data-tab="cal"><span class="ic">🚗</span><span><b>${noLift.length} lift${noLift.length > 1 ? 's' : ''} not sorted this week</b>${noLift.slice(0, 3).map((o) => esc(o.e.title) + ' ' + dayLabel(o.start).toLowerCase()).join(' · ')}</span></button>`);
     const cl = clashes(occs.filter((o) => o.start < addDays(t, 7)));
     if (cl.size) { const f = [...cl][0]; alerts.push(`<button class="alert warn" data-tab="cal"><span class="ic">⚠️</span><span><b>Lift clash</b>${esc(personName(f.clashWho || f.e.driver))} is down for two runs at once, ${dayLabel(f.start).toLowerCase()}</span></button>`); }
@@ -275,7 +284,10 @@
     const e = o.e, ppl = e.people && e.people.length ? e.people : ['family'];
     const bars = ppl.map((p) => `<i style="background:${esc(person(p).colour)}"></i>`).join('');
     let time;
-    if (o.allDay) time = `All day${o.span > 1 ? '<small>' + o.span + ' days</small>' : ''}`;
+    if (o.part === 'mid') time = 'All day<small>day ' + (o.idx + 1) + ' of ' + o.span + '</small>';
+    else if (o.part === 'end') time = 'Until<small>' + fmtT(o.end) + '</small>';
+    else if (o.part === 'start') time = fmtT(o.start) + '<small>→ ' + DAYS[o.end.getDay()] + ' ' + o.end.getDate() + '</small>';
+    else if (o.allDay) time = `All day${o.span > 1 ? '<small>' + o.span + ' days</small>' : ''}`;
     else time = fmtT(o.start) + `<small>${fmtT(o.end)}</small>`;
     let lift = '';
     if (e.needs_lift) {
@@ -386,9 +398,10 @@
       <label class="f"><span>What</span><input type="text" name="title" required maxlength="200" value="${esc(e.title || '')}" placeholder="e.g. Shyla dance show"></label>
       <div class="f-l">Who's it for</div><div class="picks" style="margin-bottom:14px">${pPick}</div><input type="hidden" name="people" value="${esc((e.people || []).join(','))}">
       <label class="switch">All day<input type="checkbox" name="all_day" ${e.all_day ? 'checked' : ''}></label>
-      <div class="f-row"><label class="f"><span>Date</span><input type="date" name="date" required value="${iso(start)}"></label>
-        <label class="f allday-only" ${e.all_day ? '' : 'hidden'}><span>Until</span><input type="date" name="date_end" value="${iso(end || start)}"></label></div>
-      <div class="f-row timed-only" ${e.all_day ? 'hidden' : ''}><label class="f"><span>Starts</span><input type="time" name="start" value="${fmtT(start)}"></label><label class="f"><span>Ends</span><input type="time" name="end" value="${fmtT(end || start)}"></label></div>
+      <div class="f-row"><label class="f"><span>From</span><input type="date" name="date" required value="${iso(start)}"></label>
+        <label class="f timed-only" ${e.all_day ? 'hidden' : ''}><span>Starts</span><input type="time" name="start" value="${fmtT(start)}"></label></div>
+      <div class="f-row"><label class="f"><span>To</span><input type="date" name="date_end" required value="${iso(end || start)}"></label>
+        <label class="f timed-only" ${e.all_day ? 'hidden' : ''}><span>Ends</span><input type="time" name="end" value="${fmtT(end || start)}"></label></div>
       ${isNew || e.id.startsWith('l:') ? `<label class="f"><span>Repeats</span><select name="recurrence">${[['', 'Does not repeat'], ['weekly', 'Every week'], ['fortnightly', 'Every 2 weeks'], ['monthly', 'Every month'], ['yearly', 'Every year']].map(([v, l]) => `<option value="${v}" ${(e.recurrence || '') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>` : (series ? '<p class="muted small">This one repeats. When you save you can change just this date or every one.</p>' : '')}
       <label class="switch">Needs a lift<input type="checkbox" name="needs_lift" ${e.needs_lift ? 'checked' : ''}></label>
       <div class="lift-only" ${e.needs_lift ? '' : 'hidden'}><div class="f-l">⬆️ Who's dropping off</div><div class="picks" style="margin-bottom:14px">${legPick('driver')}</div><input type="hidden" name="driver" value="${esc(e.driver || '')}">
@@ -400,10 +413,11 @@
     </form>`);
     const f = $sheetCard.querySelector('#evForm');
     f.dataset.day = dayS || '';
-    f.all_day.addEventListener('change', () => { f.querySelector('.timed-only').hidden = f.all_day.checked; f.querySelector('.allday-only').hidden = !f.all_day.checked; });
+    f.all_day.addEventListener('change', () => { f.querySelectorAll('.timed-only').forEach((x) => { x.hidden = f.all_day.checked; }); });
     f.needs_lift.addEventListener('change', () => { f.querySelector('.lift-only').hidden = !f.needs_lift.checked; });
-    f.date.addEventListener('change', () => { if (f.date_end.value < f.date.value) f.date_end.value = f.date.value; });
-    f.start.addEventListener('change', () => { if (f.end.value <= f.start.value) { const [h, m] = f.start.value.split(':').map(Number); f.end.value = pad(Math.min(h + 1, 23)) + ':' + pad(m); } });
+    let lastFrom = f.date.value;
+    f.date.addEventListener('change', () => { if (f.date_end.value === lastFrom || f.date_end.value < f.date.value) f.date_end.value = f.date.value; lastFrom = f.date.value; });
+    f.start.addEventListener('change', () => { if (f.date_end.value === f.date.value && f.end.value <= f.start.value) { const [h, m] = f.start.value.split(':').map(Number); f.end.value = pad(Math.min(h + 1, 23)) + ':' + pad(m); } });
   }
   function readEvent(f) {
     const ev = { id: f.dataset.id || undefined, title: f.elements.title.value.trim(), all_day: f.all_day.checked, location: f.location.value.trim(), notes: f.notes.value.trim(),
@@ -411,7 +425,7 @@
       recurrence: f.recurrence ? (f.recurrence.value || null) : undefined };
     if (ev.all_day) { ev.start_date = f.date.value; ev.end_date = iso(addDays(parse(f.date_end.value || f.date.value), 1)); }
     else {
-      const s = new Date(f.date.value + 'T' + (f.start.value || '09:00')); let en = new Date(f.date.value + 'T' + (f.end.value || f.start.value || '10:00'));
+      const s = new Date(f.date.value + 'T' + (f.start.value || '09:00')); let en = new Date((f.date_end.value || f.date.value) + 'T' + (f.end.value || f.start.value || '10:00'));
       if (en <= s) en = new Date(s.getTime() + 3600e3);
       ev.starts_at = s.toISOString(); ev.ends_at = en.toISOString();
     }
