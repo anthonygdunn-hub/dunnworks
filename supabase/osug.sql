@@ -1,6 +1,6 @@
 -- OneStream User Group preview (26 Nov 2026). ALREADY APPLIED to project acdpgarasgfhvupzsbxf. Kept as the record.
 insert into public.dw_project_keys (slug, doc, file_salt, file_iter) values
-  ('osug','site','s09n0RZOwcikhXoG/lfRjQ==',600000);
+  ('osug','site','xSjlj7baKIsoL4ym3zEZPQ==',600000);
 insert into public.dw_projects (slug,name,sector,blurb,kind,status,is_live,has_preview,has_report,pages,sort_order,published)
 values ('osug','OneStream User Group','Professional community / user group','Independent, member-run global user group for OneStream customers.','preview','build',false,true,false,14,257,false);
 -- Passphrase is in dw_project_secrets (not in this file).
@@ -10,3 +10,4 @@ values ('osug','OneStream User Group','Professional community / user group','Ind
 -- v5 (26 Nov 2026): What's new hub, Customer stories, Been there clinics; groups and library aligned to OneStream solution areas; positioned alongside OneStream's own user groups, Community and IdeaStream. 17 pages.
 -- v6 (26 Nov 2026): UKOUG-style 'Join your way' card in hero, Individual tier £250, roll-up moved to its own section.
 -- v7 (26 Nov 2026): Campfire-style restyle in OSUG colours: Geist type, pill buttons, portal monitor hero, word ticker, rounded cards, quote panel, alternating rows, story carousel.
+-- v8 (26 Nov 2026): 50/50 blend of Campfire and Abacum: centred hero with fanned cards and glow, problem line-art, dark feature section with typed word, bento grid, carousel dots.
