@@ -1,6 +1,6 @@
 -- OneStream User Group preview (26 Nov 2026). ALREADY APPLIED to project acdpgarasgfhvupzsbxf. Kept as the record.
 insert into public.dw_project_keys (slug, doc, file_salt, file_iter) values
-  ('osug','site','BdZY3DfW6f9hE0q6a55v4w==',600000);
+  ('osug','site','h/SH4VxcCkAPxhlRKQlRNg==',600000);
 insert into public.dw_projects (slug,name,sector,blurb,kind,status,is_live,has_preview,has_report,pages,sort_order,published)
 values ('osug','OneStream User Group','Professional community / user group','Independent, member-run global user group for OneStream customers.','preview','build',false,true,false,14,257,false);
 -- Passphrase is in dw_project_secrets (not in this file).
@@ -12,3 +12,4 @@ values ('osug','OneStream User Group','Professional community / user group','Ind
 -- v7 (26 Nov 2026): Campfire-style restyle in OSUG colours: Geist type, pill buttons, portal monitor hero, word ticker, rounded cards, quote panel, alternating rows, story carousel.
 -- v8 (26 Nov 2026): 50/50 blend of Campfire and Abacum: centred hero with fanned cards and glow, problem line-art, dark feature section with typed word, bento grid, carousel dots.
 -- v9 (26 Nov 2026): Gainsight (floating nav, globe, accordion, journey tabs), Workato (stat tiles, comparison, FAQ) and Perk (palette black/cream/lime, value calculator) blended in.
+-- v10 (26 Nov 2026): Huddle chosen as the logo; logo switcher removed.
